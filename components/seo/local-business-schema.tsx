@@ -1,4 +1,4 @@
-'use client'
+import Script from 'next/script'
 
 export default function LocalBusinessSchema() {
   const localBusinessSchema = {
@@ -220,11 +220,12 @@ export default function LocalBusinessSchema() {
   }
 
   return (
-    <script
-      type='application/ld+json'
-      dangerouslySetInnerHTML={{
-        __html: JSON.stringify(localBusinessSchema),
-      }}
-    />
+    <Script
+      id="local-business-schema"
+      type="application/ld+json"
+      strategy="beforeInteractive"
+    >
+      {JSON.stringify(localBusinessSchema)}
+    </Script>
   )
 }

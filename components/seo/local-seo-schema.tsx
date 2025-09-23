@@ -1,4 +1,4 @@
-'use client'
+import Script from 'next/script'
 
 export default function LocalSEOSchema() {
   const localBusinessSchema = {
@@ -254,11 +254,12 @@ export default function LocalSEOSchema() {
   }
 
   return (
-    <script
-      type='application/ld+json'
-      dangerouslySetInnerHTML={{
-        __html: JSON.stringify(localBusinessSchema),
-      }}
-    />
+    <Script
+      id="local-seo-schema"
+      type="application/ld+json"
+      strategy="beforeInteractive"
+    >
+      {JSON.stringify(localBusinessSchema)}
+    </Script>
   )
 }

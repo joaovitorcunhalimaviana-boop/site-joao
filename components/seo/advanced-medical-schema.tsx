@@ -113,12 +113,12 @@ export default function AdvancedMedicalSchema({
 
   return (
     <Script
-      id={`medical-schema-${type}`}
-      type='application/ld+json'
-      dangerouslySetInnerHTML={{
-        __html: JSON.stringify(getStructuredData()),
-      }}
-    />
+      id={`advanced-medical-schema-${type}`}
+      type="application/ld+json"
+      strategy="beforeInteractive"
+    >
+      {JSON.stringify(getStructuredData())}
+    </Script>
   )
 }
 

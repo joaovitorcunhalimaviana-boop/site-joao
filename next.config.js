@@ -12,7 +12,7 @@ const nextConfig = {
     // !! WARN !!
     ignoreBuildErrors: true,
   },
-  output: 'standalone',
+  // output: 'export', // Temporariamente desabilitado para resolver erro de Html
   trailingSlash: false,
   experimental: {
     serverComponentsExternalPackages: ['@prisma/client', 'prisma']

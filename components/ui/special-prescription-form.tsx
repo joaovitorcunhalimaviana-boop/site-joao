@@ -134,7 +134,6 @@ export default function SpecialPrescriptionForm({
   const generatePrintContent = (prescription: any) => {
     return `
       <!DOCTYPE html>
-      <html>
       <head>
         <title>Receituário de Controle Especial</title>
         <style>
@@ -219,7 +218,6 @@ export default function SpecialPrescriptionForm({
           </div>
         </div>
       </body>
-      </html>
     `
   }
 

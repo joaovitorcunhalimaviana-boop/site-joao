@@ -1,4 +1,4 @@
-'use client'
+import Script from 'next/script'
 
 export default function FAQSchema() {
   const faqSchema = {
@@ -105,11 +105,12 @@ export default function FAQSchema() {
   }
 
   return (
-    <script
-      type='application/ld+json'
-      dangerouslySetInnerHTML={{
-        __html: JSON.stringify(faqSchema),
-      }}
-    />
+    <Script
+      id="faq-schema"
+      type="application/ld+json"
+      strategy="beforeInteractive"
+    >
+      {JSON.stringify(faqSchema)}
+    </Script>
   )
 }

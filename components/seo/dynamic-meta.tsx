@@ -1,6 +1,7 @@
 'use client'
 
 import { usePathname } from 'next/navigation'
+import Script from 'next/script'
 import Head from 'next/head'
 
 interface PageMeta {
@@ -116,23 +117,25 @@ export default function DynamicMeta() {
       <link rel="dns-prefetch" href="https://www.google-analytics.com" />
       
       {/* Structured Data for Current Page */}
-      <script
+      <Script
+        id="dynamic-meta-schema"
         type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "WebPage",
-            "name": meta.title,
-            "description": meta.description,
-            "url": canonical,
-            "inLanguage": "pt-BR",
-            "isPartOf": {
-              "@type": "WebSite",
-              "name": "Dr. João Vítor Viana - Proctologista",
-              "url": baseUrl
-            },
-            "about": {
-              "@type": "MedicalSpecialty",
+        strategy="beforeInteractive"
+      >
+        {JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          "name": meta.title,
+          "description": meta.description,
+          "url": canonical,
+          "inLanguage": "pt-BR",
+          "isPartOf": {
+            "@type": "WebSite",
+            "name": "Dr. João Vítor Viana - Proctologista",
+            "url": baseUrl
+          },
+          "about": {
+            "@type": "MedicalSpecialty",
               "name": "Proctologia"
             },
             "provider": {
@@ -140,9 +143,8 @@ export default function DynamicMeta() {
               "name": "Dr. João Vítor Viana",
               "medicalSpecialty": "Proctologia"
             }
-          })
-        }}
-      />
+          })}
+      </Script>
     </Head>
   )
 }

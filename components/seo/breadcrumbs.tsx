@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Script from 'next/script'
 import { ChevronRightIcon, HomeIcon } from '@heroicons/react/24/outline'
 import { usePathname } from 'next/navigation'
 
@@ -120,9 +121,12 @@ export function BreadcrumbStructuredData({ items }: { items: BreadcrumbItem[] })
   }
 
   return (
-    <script
-      type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
-    />
+    <Script
+          id="breadcrumb-schema"
+          type="application/ld+json"
+          strategy="beforeInteractive"
+        >
+          {JSON.stringify(structuredData)}
+        </Script>
   )
 }

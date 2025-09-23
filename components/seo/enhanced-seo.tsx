@@ -1,5 +1,6 @@
 'use client'
 
+import Script from 'next/script'
 import Head from 'next/head'
 import { BreadcrumbStructuredData } from './breadcrumbs'
 
@@ -97,10 +98,13 @@ export default function EnhancedSEO({
 
       {/* Structured Data */}
       {structuredData && (
-        <script
-          type='application/ld+json'
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
-        />
+        <Script
+        id="enhanced-seo-schema"
+        type="application/ld+json"
+        strategy="beforeInteractive"
+      >
+        {JSON.stringify(structuredData)}
+      </Script>
       )}
 
       {/* Breadcrumb Structured Data */}

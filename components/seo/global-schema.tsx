@@ -219,17 +219,17 @@ export default function GlobalSchema() {
       <Script
         id='organization-schema'
         type='application/ld+json'
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify(organizationSchema),
-        }}
-      />
+        strategy='beforeInteractive'
+      >
+        {JSON.stringify(organizationSchema)}
+      </Script>
       <Script
         id='website-schema'
         type='application/ld+json'
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify(websiteSchema),
-        }}
-      />
+        strategy='beforeInteractive'
+      >
+        {JSON.stringify(websiteSchema)}
+      </Script>
     </>
   )
 }

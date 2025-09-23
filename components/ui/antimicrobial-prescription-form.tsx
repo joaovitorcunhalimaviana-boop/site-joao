@@ -89,7 +89,6 @@ export default function AntimicrobialPrescriptionForm({
   const generatePrintContent = () => {
     return `
       <!DOCTYPE html>
-      <html>
       <head>
         <title>Receituário de Antimicrobianos</title>
         <style>
@@ -206,7 +205,6 @@ export default function AntimicrobialPrescriptionForm({
           <p>Válido por 10 dias a partir da data de emissão</p>
         </div>
       </body>
-      </html>
     `
   }
 

@@ -81,7 +81,6 @@ export default function MedicalCertificateForm({
   const generatePrintContent = (certificate: any) => {
     return `
       <!DOCTYPE html>
-      <html>
       <head>
         <title>Atestado Médico</title>
         <style>
@@ -182,7 +181,6 @@ export default function MedicalCertificateForm({
           </div>
         </div>
       </body>
-      </html>
     `
   }
 

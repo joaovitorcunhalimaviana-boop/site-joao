@@ -106,7 +106,6 @@ export default function PrescriptionForm({
   const generatePrintContent = (prescription: any) => {
     return `
       <!DOCTYPE html>
-      <html>
       <head>
         <title>Receituário Médico</title>
         <style>
@@ -171,7 +170,6 @@ export default function PrescriptionForm({
           <div>CRM: 12831-CRMPB</div>
         </div>
       </body>
-      </html>
     `
   }
 

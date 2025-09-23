@@ -150,7 +150,6 @@ export default function MedicalDeclarationForm({
 
     const printContent = `
       <!DOCTYPE html>
-      <html>
       <head>
         <title>Declaração Médica</title>
         <style>
@@ -283,7 +282,6 @@ export default function MedicalDeclarationForm({
           </div>
         </div>
       </body>
-      </html>
     `
 
     printWindow.document.write(printContent)

@@ -1,6 +1,7 @@
 'use client'
 
 import { usePathname } from 'next/navigation'
+import Script from 'next/script'
 
 interface BreadcrumbItem {
   name: string
@@ -65,12 +66,13 @@ export default function BreadcrumbSchema() {
   return (
     <>
       {/* Schema Markup */}
-      <script
+      <Script
+        id="breadcrumb-schema"
         type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify(breadcrumbSchema)
-        }}
-      />
+        strategy="beforeInteractive"
+      >
+        {JSON.stringify(breadcrumbSchema)}
+      </Script>
     </>
   )
 }

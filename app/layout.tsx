@@ -86,45 +86,29 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="pt-BR" suppressHydrationWarning>
-      <head>
-        <GlobalSchema />
-        <LocalBusinessSchema />
-        <LocalSEOSchema />
-        <FAQSchema />
-        
-        {/* Performance optimizations */}
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link rel="dns-prefetch" href="https://api.telegram.org" />
-        <link rel="dns-prefetch" href="https://wa.me" />
-        
-        {/* Favicon */}
-        <link rel="icon" href="/favicon.ico" sizes="any" />
-        <link rel="icon" href="/icon.svg" type="image/svg+xml" />
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-        <link rel="manifest" href="/manifest.json" />
-      </head>
-      <body className={cn(inter.className, "min-h-screen bg-background font-sans antialiased")}>
-        <GoogleAnalytics />
-        <ErrorBoundary>
-            <ThemeProvider
-              attribute="class"
-              defaultTheme="system"
-              enableSystem
-              disableTransitionOnChange
-            >
-                <BirthdayInitializer />
-                <FAQSchema />
-                <BreadcrumbSchema />
-                {/* <WebVitals /> */}
-                  <main id="main-content">
-                    {children}
-                  </main>
-                  <Toaster />
-            </ThemeProvider>
-        </ErrorBoundary>
-      </body>
-    </html>
+    <>
+      <GoogleAnalytics />
+      <ErrorBoundary>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+          suppressHydrationWarning
+        >
+          <BirthdayInitializer />
+          <GlobalSchema />
+          <LocalBusinessSchema />
+          <LocalSEOSchema />
+          <FAQSchema />
+          <BreadcrumbSchema />
+          {/* <WebVitals /> */}
+          <main id="main-content" className={cn(inter.className, "min-h-screen bg-background font-sans antialiased")}>
+            {children}
+          </main>
+          <Toaster />
+        </ThemeProvider>
+      </ErrorBoundary>
+    </>
   )
 }
