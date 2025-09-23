@@ -81,7 +81,7 @@ const HeroSection = () => {
                     </svg>
                   </div>
                   <h3 className="text-lg font-semibold text-white mb-2">Visita Domiciliar</h3>
-                  <p className="text-gray-300 text-sm mb-4">Atendimento em casa ou hospital</p>
+                  <p className="text-gray-300 text-sm mb-4">Atendimento no conforto de casa ou em hospital</p>
                   <a
                     href="/visitas-domiciliares"
                     className="inline-block w-full py-2 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"

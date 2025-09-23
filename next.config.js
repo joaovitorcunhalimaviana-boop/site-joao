@@ -12,6 +12,8 @@ const nextConfig = {
     // !! WARN !!
     ignoreBuildErrors: true,
   },
+  output: 'standalone',
+  trailingSlash: false,
   experimental: {
     serverComponentsExternalPackages: ['@prisma/client', 'prisma']
   },

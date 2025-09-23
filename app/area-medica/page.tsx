@@ -90,16 +90,6 @@ export default function AreaMedicaPage() {
       loadDashboardData()
     }
     
-    window.addEventListener('focus', handleFocus)
-    
-    // Cleanup
-    return () => {
-      window.removeEventListener('focus', handleFocus)
-    }
-  }, [selectedDate])
-      loadDashboardData()
-    }
-    
     const handleVisibilityChange = () => {
       if (!document.hidden) {
         console.log('Página ficou visível, recarregando dados...')
@@ -137,7 +127,7 @@ export default function AreaMedicaPage() {
       clearInterval(autoReloadInterval)
       clearInterval(midnightInterval)
     }
-  }, [])
+  }, [selectedDate])
 
   const checkAuth = async () => {
     // Sistema simplificado - verificar apenas se há dados do usuário

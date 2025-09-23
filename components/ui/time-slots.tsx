@@ -26,10 +26,10 @@ const TimeSlots: React.FC<TimeSlotsProps> = ({
     // Define specific times for each day
     if (dayOfWeek === 1) {
       // Monday
-      availableTimes = ['14:00']
+      availableTimes = ['15:00']
     } else if (dayOfWeek === 4) {
       // Thursday
-      availableTimes = ['15:00']
+      availableTimes = ['14:00']
     }
 
     // Create slots - all available times are set as available
