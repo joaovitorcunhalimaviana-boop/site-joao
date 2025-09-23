@@ -1,0 +1,651 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+// ================================
+// MODELOS DE USUÁRIOS E AUTENTICAÇÃO
+// ================================
+
+model User {
+  id          String   @id @default(cuid())
+  username    String   @unique
+  email       String   @unique
+  password    String   // Hash bcrypt
+  role        UserRole @default(DOCTOR)
+  name        String
+  crm         String?
+  specialties String?  // JSON string array
+  isActive    Boolean  @default(true)
+  
+  // Configurações de segurança
+  twoFactorEnabled     Boolean   @default(false)
+  twoFactorSecret      String?
+  twoFactorBackupCodes String?   // JSON string array
+  twoFactorLastUsed    DateTime?
+  lastLogin            DateTime?
+  loginAttempts        Int       @default(0)
+  lockedUntil          DateTime?
+  
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relacionamentos
+  consultations       Consultation[]
+  medicalRecords      MedicalRecord[]
+  auditLogs           AuditLog[]
+  refreshTokens       RefreshToken[]
+  twoFactorSetup      TwoFactorSetup?
+  scheduleBlocks      ScheduleBlock[]
+  duplicateResolutions DuplicateDetection[]
+  
+  @@map("users")
+}
+
+model RefreshToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("refresh_tokens")
+}
+
+model TwoFactorSetup {
+  id           String   @id @default(cuid())
+  userId       String   @unique
+  secret       String
+  backupCodes  String   // JSON string array
+  isVerified   Boolean  @default(false)
+  expiresAt    DateTime
+  createdAt    DateTime @default(now())
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("two_factor_setups")
+}
+
+enum UserRole {
+  DOCTOR
+  SECRETARY
+  ADMIN
+}
+
+// ================================
+// MODELOS DE PACIENTES
+// ================================
+
+model Patient {
+  id        String   @id @default(cuid())
+  name      String
+  cpf       String?  @unique
+  email     String?
+  phone     String
+  whatsapp  String
+  birthDate DateTime?
+  
+  // Dados do convênio
+  insuranceType String? // 'unimed', 'particular', 'outro'
+  insurancePlan String?
+  
+  // Endereço
+  address    String?
+  city       String?
+  state      String?
+  zipCode    String?
+  
+  // Dados médicos básicos
+  allergies    String?  // JSON string array
+  medications  String?  // JSON string array
+  conditions   String?  // JSON string array
+  notes        String?
+  
+  // Configurações de privacidade (LGPD)
+  consentGiven      Boolean   @default(false)
+  consentDate       DateTime?
+  dataRetentionDate DateTime? // Data limite para retenção dos dados
+  
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relacionamentos
+  appointments         Appointment[]
+  consultations        Consultation[]
+  medicalRecords       MedicalRecord[]
+  medicalAttachments   MedicalAttachment[]
+  calculatorResults    CalculatorResult[]
+  duplicateDetections  DuplicateDetection[] @relation("OriginalPatient")
+  duplicateOf          DuplicateDetection[] @relation("DuplicatePatient")
+  
+  @@map("patients")
+  @@index([cpf])
+  @@index([name])
+  @@index([birthDate])
+}
+
+// ================================
+// MODELOS DE AGENDAMENTO
+// ================================
+
+model Appointment {
+  id          String            @id @default(cuid())
+  patientId   String
+  date        DateTime
+  time        String
+  duration    Int               @default(30) // minutos
+  type        AppointmentType   @default(CONSULTATION)
+  status      AppointmentStatus @default(SCHEDULED)
+  
+  // Detalhes do agendamento
+  reason      String?
+  notes       String?
+  
+  // Configurações de notificação
+  reminderSent     Boolean @default(false)
+  confirmationSent Boolean @default(false)
+  
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relacionamentos
+  patient      Patient       @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  consultation Consultation?
+  
+  @@map("appointments")
+  @@index([date])
+  @@index([patientId])
+  @@index([status])
+}
+
+enum AppointmentType {
+  CONSULTATION
+  FOLLOW_UP
+  PROCEDURE
+  TELEMEDICINE
+  EMERGENCY
+}
+
+enum AppointmentStatus {
+  SCHEDULED
+  CONFIRMED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+}
+
+// ================================
+// MODELOS DE CONSULTAS E PRONTUÁRIOS
+// ================================
+
+model Consultation {
+  id            String   @id @default(cuid())
+  appointmentId String?  @unique
+  patientId     String
+  doctorId      String
+  
+  // Dados da consulta
+  chiefComplaint String? // Queixa principal
+  history        String? // História da doença atual
+  physicalExam   String? // Exame físico
+  diagnosis      String? // Diagnóstico
+  treatment      String? // Tratamento
+  observations   String? // Observações
+  
+  // Sinais vitais
+  weight          Float?
+  height          Float?
+  bloodPressure   String? // "120/80"
+  heartRate       Int?
+  temperature     Float?
+  
+  // Status da consulta
+  status ConsultationStatus @default(IN_PROGRESS)
+  
+  // Timestamps
+  startTime DateTime @default(now())
+  endTime   DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relacionamentos
+  appointment       Appointment?        @relation(fields: [appointmentId], references: [id])
+  patient          Patient             @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  doctor           User                @relation(fields: [doctorId], references: [id])
+  medicalRecord    MedicalRecord?
+  prescriptions    Prescription[]
+  medicalAttachments MedicalAttachment[]
+  
+  @@map("consultations")
+  @@index([patientId])
+  @@index([doctorId])
+  @@index([startTime])
+}
+
+enum ConsultationStatus {
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+model MedicalRecord {
+  id             String @id @default(cuid())
+  consultationId String @unique
+  patientId      String
+  doctorId       String
+  
+  // Conteúdo do prontuário
+  content     String
+  summary     String?
+  
+  // Classificação
+  category    String? // "Consulta", "Exame", "Cirurgia", etc.
+  tags        String? // JSON string array
+  
+  // Assinatura digital
+  digitalSignature String?
+  signedAt         DateTime?
+  
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relacionamentos
+  consultation Consultation @relation(fields: [consultationId], references: [id], onDelete: Cascade)
+  patient      Patient      @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  doctor       User         @relation(fields: [doctorId], references: [id])
+  
+  @@map("medical_records")
+  @@index([patientId])
+  @@index([doctorId])
+  @@index([createdAt])
+}
+
+// ================================
+// MODELOS DE ANEXOS MÉDICOS
+// ================================
+
+model MedicalAttachment {
+  id             String  @id @default(cuid())
+  patientId      String
+  consultationId String?
+  
+  // Dados do arquivo
+  filename     String
+  originalName String
+  mimeType     String
+  size         Int
+  path         String
+  
+  // Metadados
+  category    AttachmentCategory
+  description String?
+  tags        String? // JSON string array
+  
+  // Segurança
+  checksum String // Hash do arquivo para integridade
+  encrypted Boolean @default(false)
+  
+  // Timestamps
+  uploadedAt DateTime @default(now())
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  
+  // Relacionamentos
+  patient      Patient       @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  consultation Consultation? @relation(fields: [consultationId], references: [id])
+  
+  @@map("medical_attachments")
+  @@index([patientId])
+  @@index([consultationId])
+  @@index([category])
+}
+
+enum AttachmentCategory {
+  EXAM_RESULT
+  PRESCRIPTION
+  MEDICAL_REPORT
+  IMAGE
+  DOCUMENT
+  OTHER
+}
+
+// ================================
+// MODELOS DE PRESCRIÇÕES
+// ================================
+
+model Prescription {
+  id             String @id @default(cuid())
+  consultationId String
+  
+  // Dados da prescrição
+  medications String // JSON com lista de medicamentos
+  instructions String?
+  
+  // Validade
+  validUntil DateTime?
+  
+  // Assinatura digital
+  digitalSignature String?
+  signedAt         DateTime?
+  
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relacionamentos
+  consultation Consultation @relation(fields: [consultationId], references: [id], onDelete: Cascade)
+  
+  @@map("prescriptions")
+  @@index([consultationId])
+}
+
+// ================================
+// MODELOS DE CALCULADORAS MÉDICAS
+// ================================
+
+model CalculatorResult {
+  id          String @id @default(cuid())
+  patientId   String
+  
+  // Dados da calculadora
+  calculatorType String // 'cdai', 'mayo', 'wexner', etc.
+  inputData      String // JSON com dados de entrada
+  results        String // JSON com resultados
+  
+  // Metadados
+  notes String?
+  
+  // Timestamps
+  calculatedAt DateTime @default(now())
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  
+  // Relacionamentos
+  patient Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  
+  @@map("calculator_results")
+  @@index([patientId])
+  @@index([calculatorType])
+  @@index([calculatedAt])
+}
+
+// ================================
+// MODELOS DE AUDITORIA E LOGS
+// ================================
+
+model AuditLog {
+  id       String @id @default(cuid())
+  userId   String?
+  
+  // Dados da ação
+  action      String // 'CREATE', 'UPDATE', 'DELETE', 'LOGIN', etc.
+  resource    String // 'Patient', 'Consultation', 'User', etc.
+  resourceId  String?
+  
+  // Detalhes
+  details     String? // JSON com detalhes da ação
+  ipAddress   String?
+  userAgent   String?
+  
+  // Classificação de segurança
+  severity    LogSeverity @default(LOW)
+  
+  // Timestamps
+  createdAt DateTime @default(now())
+  
+  // Relacionamentos
+  user User? @relation(fields: [userId], references: [id])
+  
+  @@map("audit_logs")
+  @@index([userId])
+  @@index([action])
+  @@index([resource])
+  @@index([createdAt])
+  @@index([severity])
+}
+
+enum LogSeverity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+// ================================
+// MODELOS DE NEWSLETTER E COMUNICAÇÃO
+// ================================
+
+model NewsletterSubscriber {
+  id           String  @id @default(cuid())
+  email        String  @unique
+  name         String
+  subscribed   Boolean @default(true)
+  
+  // Preferências
+  healthTips   Boolean @default(true)
+  appointments Boolean @default(true)
+  promotions   Boolean @default(false)
+  
+  // Timestamps
+  subscribedAt   DateTime  @default(now())
+  unsubscribedAt DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  
+  @@map("newsletter_subscribers")
+  @@index([email])
+  @@index([subscribed])
+}
+
+// ================================
+// MODELOS DE AVALIAÇÕES
+// ================================
+
+model Review {
+  id          String @id @default(cuid())
+  patientName String
+  rating      Int    // 1-5
+  comment     String
+  category    String // 'Atendimento', 'Pontualidade', etc.
+  
+  // Status
+  verified  Boolean @default(false)
+  published Boolean @default(false)
+  
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@map("reviews")
+  @@index([rating])
+  @@index([published])
+  @@index([createdAt])
+}
+
+// ================================
+// MODELOS DE CONFIGURAÇÃO DO SISTEMA
+// ================================
+
+model SystemConfig {
+  id    String @id @default(cuid())
+  key   String @unique
+  value String
+  
+  // Metadados
+  description String?
+  category    String? // 'security', 'backup', 'notification', etc.
+  
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@map("system_config")
+  @@index([category])
+}
+
+// ================================
+// MODELOS DE BACKUP
+// ================================
+
+model BackupLog {
+  id       String      @id @default(cuid())
+  type     BackupType
+  status   BackupStatus @default(PENDING)
+  
+  // Detalhes do backup
+  filename String?
+  size     Int?
+  checksum String?
+  
+  // Timestamps
+  startedAt   DateTime  @default(now())
+  completedAt DateTime?
+  
+  // Erro (se houver)
+  errorMessage String?
+  
+  @@map("backup_logs")
+  @@index([type])
+  @@index([status])
+  @@index([startedAt])
+}
+
+enum BackupType {
+  FULL
+  INCREMENTAL
+  DIFFERENTIAL
+}
+
+enum BackupStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  FAILED
+}
+
+// ================================
+// BLOQUEIO DE HORÁRIOS
+// ================================
+
+model ScheduleBlock {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  
+  // Período do bloqueio
+  startDate   DateTime
+  endDate     DateTime
+  
+  // Tipo e configurações
+  blockType   BlockType
+  isAllDay    Boolean   @default(true)
+  startTime   String?   // HH:MM format
+  endTime     String?   // HH:MM format
+  
+  // Recorrência
+  isRecurring       Boolean           @default(false)
+  recurringPattern  RecurringPattern?
+  recurringEndDate  DateTime?
+  parentBlockId     String?           // Para bloqueios recorrentes
+  
+  // Metadados
+  createdBy String
+  isActive  Boolean @default(true)
+  
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relacionamentos
+  creator User @relation(fields: [createdBy], references: [id], onDelete: Cascade)
+  
+  @@map("schedule_blocks")
+  @@index([createdBy])
+  @@index([startDate])
+  @@index([endDate])
+  @@index([blockType])
+  @@index([isActive])
+}
+
+enum BlockType {
+  VACATION
+  CONFERENCE
+  EMERGENCY
+  PERSONAL
+  MAINTENANCE
+  OTHER
+}
+
+enum RecurringPattern {
+  DAILY
+  WEEKLY
+  MONTHLY
+  YEARLY
+}
+
+// ================================
+// DETECÇÃO DE DUPLICATAS
+// ================================
+
+model DuplicateDetection {
+  id        String   @id @default(cuid())
+  
+  // Pacientes envolvidos
+  patientId         String
+  duplicatePatientId String?
+  
+  // Detalhes da detecção
+  detectionMethod   DetectionMethod
+  confidence        Int             // 0-100%
+  matchedFields     String?         // JSON string array - Campos que coincidiram
+  
+  // Status
+  status       DuplicateStatus @default(PENDING)
+  resolvedBy   String?
+  resolvedAt   DateTime?
+  mergedInto   String?         // ID do paciente final após merge
+  
+  // Timestamps
+  detectedAt DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  
+  // Relacionamentos
+  patient          Patient  @relation("OriginalPatient", fields: [patientId], references: [id], onDelete: Cascade)
+  duplicatePatient Patient? @relation("DuplicatePatient", fields: [duplicatePatientId], references: [id], onDelete: SetNull)
+  resolver         User?    @relation(fields: [resolvedBy], references: [id], onDelete: SetNull)
+  
+  @@map("duplicate_detections")
+  @@index([patientId])
+  @@index([duplicatePatientId])
+  @@index([status])
+  @@index([detectedAt])
+}
+
+enum DetectionMethod {
+  CPF
+  EXACT_MATCH
+  SIMILAR_DATA
+  MANUAL
+}
+
+enum DuplicateStatus {
+  PENDING
+  CONFIRMED
+  MERGED
+  DISMISSED
+  FALSE_POSITIVE
+}

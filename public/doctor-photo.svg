@@ -1,0 +1,74 @@
+<svg width="400" height="400" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background with professional gradient -->
+  <defs>
+    <radialGradient id="bgGradient" cx="50%" cy="30%" r="70%">
+      <stop offset="0%" style="stop-color:#f8fafc;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#e2e8f0;stop-opacity:1" />
+    </radialGradient>
+    <linearGradient id="suitGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#1e293b;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0f172a;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="tieGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1d4ed8;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="400" height="400" fill="url(#bgGradient)"/>
+  
+  <!-- Professional lighting effect -->
+  <ellipse cx="200" cy="150" rx="180" ry="120" fill="rgba(255,255,255,0.1)"/>
+  
+  <!-- Head/Face -->
+  <ellipse cx="200" cy="180" rx="65" ry="75" fill="#fbbf77" stroke="none"/>
+  
+  <!-- Hair -->
+  <path d="M135 140 Q200 110 265 140 Q270 160 260 180 Q200 120 140 180 Z" fill="#2d1810"/>
+  
+  <!-- Eyes -->
+  <ellipse cx="185" cy="170" rx="8" ry="6" fill="white"/>
+  <ellipse cx="215" cy="170" rx="8" ry="6" fill="white"/>
+  <circle cx="185" cy="170" r="4" fill="#2563eb"/>
+  <circle cx="215" cy="170" r="4" fill="#2563eb"/>
+  <circle cx="186" cy="168" r="1.5" fill="white"/>
+  <circle cx="216" cy="168" r="1.5" fill="white"/>
+  
+  <!-- Eyebrows -->
+  <path d="M175 160 Q185 155 195 160" stroke="#2d1810" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <path d="M205 160 Q215 155 225 160" stroke="#2d1810" stroke-width="3" fill="none" stroke-linecap="round"/>
+  
+  <!-- Nose -->
+  <path d="M200 180 L195 195 Q200 200 205 195 Z" fill="#e6a968"/>
+  
+  <!-- Mouth -->
+  <path d="M190 210 Q200 220 210 210" stroke="#c4704f" stroke-width="2" fill="none" stroke-linecap="round"/>
+  
+  <!-- Neck -->
+  <rect x="180" y="250" width="40" height="30" fill="#fbbf77"/>
+  
+  <!-- Shirt collar -->
+  <path d="M160 280 L200 260 L240 280 L240 320 L160 320 Z" fill="white"/>
+  
+  <!-- Tie -->
+  <path d="M190 280 L200 260 L210 280 L205 340 L195 340 Z" fill="url(#tieGradient)"/>
+  
+  <!-- Suit jacket -->
+  <path d="M140 300 Q200 280 260 300 L270 400 L130 400 Z" fill="url(#suitGradient)"/>
+  
+  <!-- Suit lapels -->
+  <path d="M140 300 L180 320 L200 300 L180 280 Z" fill="url(#suitGradient)" opacity="0.8"/>
+  <path d="M260 300 L220 320 L200 300 L220 280 Z" fill="url(#suitGradient)" opacity="0.8"/>
+  
+  <!-- Professional badge/pin -->
+  <circle cx="170" cy="330" r="8" fill="#3b82f6"/>
+  <path d="M166 330 L169 333 L174 326" stroke="white" stroke-width="2" fill="none" stroke-linecap="round"/>
+  
+  <!-- Subtle shadow for depth -->
+  <ellipse cx="200" cy="390" rx="80" ry="10" fill="rgba(0,0,0,0.1)"/>
+  
+  <!-- Professional text overlay -->
+  <text x="200" y="50" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#1e293b">Dr. João Vítor</text>
+  <text x="200" y="75" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#64748b">Médico Especialista</text>
+</svg>

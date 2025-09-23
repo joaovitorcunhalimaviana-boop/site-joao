@@ -1,0 +1,607 @@
+'use client'
+
+import { useState, useEffect } from 'react'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import { Checkbox } from '@/components/ui/checkbox'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Loader2, Mail, Eye, Send, Save, RefreshCw } from 'lucide-react'
+
+interface NewsletterEditorProps {
+  onSend?: (data: {
+    subject: string
+    content: string
+    clinicNews: string
+    htmlContent: string
+  }) => void
+  onSave?: (data: {
+    subject: string
+    content: string
+    clinicNews: string
+    htmlContent: string
+  }) => void
+  initialData?: {
+    subject: string
+    content: string
+    clinicNews: string
+    htmlContent: string
+  }
+  className?: string
+}
+
+interface Patient {
+  id: string
+  name: string
+  email: string
+}
+
+export default function NewsletterEditor({
+  onSend,
+  onSave,
+  initialData,
+  className = '',
+}: NewsletterEditorProps) {
+  const [formData, setFormData] = useState({
+    subject: initialData?.subject || 'Newsletter - Dicas de Saúde da Semana',
+    content: initialData?.content || '',
+    clinicNews: initialData?.clinicNews || '',
+    htmlContent: initialData?.htmlContent || '',
+  })
+
+  const [sectionEnabled, setSectionEnabled] = useState({
+    healthTips: true,
+    clinicNews: false,
+  })
+
+  const [patients, setPatients] = useState<Patient[]>([])
+  const [selectedPatients, setSelectedPatients] = useState<string[]>([])
+  const [isLoading, setIsLoading] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
+  const [message, setMessage] = useState<{
+    type: 'success' | 'error'
+    text: string
+  } | null>(null)
+  const [activeTab, setActiveTab] = useState('edit')
+  const [previewContent, setPreviewContent] = useState('')
+
+  // Template padrão para newsletter
+  const defaultTemplate = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff; color: #000000;">
+      <div style="background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); padding: 30px; text-align: center;">
+        <h1 style="color: white; margin: 0; font-size: 28px;">📧 Newsletter Semanal</h1>
+      </div>
+      
+      <div style="padding: 30px;">
+        <h2 style="color: #1e3a8a; margin-bottom: 20px;">Olá, {{PATIENT_NAME}}!</h2>
+        
+        <p style="line-height: 1.6; margin-bottom: 20px; color: #1f2937; text-align: justify;">Esperamos que você esteja bem! Esta semana preparamos algumas dicas importantes para sua saúde e bem-estar.</p>
+        
+        {{HEALTH_TIP_SECTION}}
+        
+        {{CLINIC_NEWS_SECTION}}
+        
+        <div style="background-color: #1e3a8a; color: white; padding: 20px; border-radius: 8px; margin: 30px 0; text-align: center;">
+          <h3 style="margin-top: 0;">Entre em Contato</h3>
+          <p style="margin-bottom: 20px;">Fale conosco através dos nossos canais de atendimento</p>
+          
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+            <div style="text-align: center;">
+              <p style="margin: 5px 0; font-weight: bold;">📞 Telefone</p>
+              <p style="margin: 0; font-size: 14px;">(83) 3225-1747</p>
+            </div>
+            <div style="text-align: center;">
+              <p style="margin: 5px 0; font-weight: bold;">💬 WhatsApp</p>
+              <p style="margin: 0; font-size: 14px;">(83) 9 9122-1599</p>
+            </div>
+            <div style="text-align: center;">
+              <p style="margin: 5px 0; font-weight: bold;">✉️ E-mail</p>
+              <p style="margin: 0; font-size: 12px;">joaovitorvianacoloprocto@gmail.com</p>
+            </div>
+            <div style="text-align: center;">
+              <p style="margin: 5px 0; font-weight: bold;">📱 Instagram</p>
+              <p style="margin: 0; font-size: 14px;">@drjoaovitorviana</p>
+            </div>
+          </div>
+          
+          <div style="border-top: 1px solid rgba(255,255,255,0.3); padding-top: 15px; margin-top: 15px;">
+            <p style="margin: 5px 0; font-weight: bold; font-size: 14px;">📍 Localização do Consultório</p>
+            <p style="margin: 0; font-size: 13px; line-height: 1.4;">Avenida Rui Barbosa, 484<br>Edifício Arcádia, Sala 101 - Torre<br>João Pessoa - PB</p>
+          </div>
+        </div>
+        
+        <p style="text-align: center; color: #4b5563; font-size: 14px; margin-top: 30px;">Obrigado por acompanhar nossas novidades!</p>
+      </div>
+    </div>
+  `
+
+  useEffect(() => {
+    loadPatients()
+    if (!formData.htmlContent) {
+      setFormData(prev => ({ ...prev, htmlContent: defaultTemplate }))
+    }
+  }, [])
+
+  const loadPatients = async () => {
+    try {
+      const response = await fetch('/api/patients')
+      if (response.ok) {
+        const data = await response.json()
+        // A API retorna um objeto com {patients: array, total: number}
+        const patientsList = data.patients || data // Fallback para compatibilidade
+        const patientsWithEmail = patientsList.filter(
+          (patient: any) => patient.email
+        )
+        setPatients(patientsWithEmail)
+        // Selecionar todos os pacientes por padrão
+        setSelectedPatients(patientsWithEmail.map((p: any) => p.id))
+      }
+    } catch (error) {
+      console.error('Erro ao carregar pacientes:', error)
+    }
+  }
+
+  const handleInputChange = (field: string, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }))
+    setMessage(null)
+  }
+
+  const generatePreview = () => {
+    let content = formData.htmlContent
+    content = content.replace(/{{PATIENT_NAME}}/g, 'João da Silva (Exemplo)')
+
+    // Construir seção de dicas de saúde condicionalmente
+    const healthTipSection = sectionEnabled.healthTips
+      ? `
+      <div style="background-color: #f8fafc; padding: 20px; border-radius: 8px; margin: 20px 0; border: 1px solid #1e3a8a;">
+        <h3 style="color: #1e3a8a; margin-top: 0;">💡 Dica da Semana</h3>
+        <div style="margin: 0; line-height: 1.6; color: #1f2937; text-align: justify;">
+          ${formData.content || 'Adicione suas dicas de saúde aqui...'}
+        </div>
+      </div>
+    `
+      : ''
+
+    // Construir seção de novidades da clínica condicionalmente
+    const clinicNewsSection = sectionEnabled.clinicNews
+      ? `
+      <div style="background-color: #f0f9ff; padding: 20px; border-radius: 8px; margin: 20px 0; border: 1px solid #3b82f6;">
+        <h3 style="color: #1e3a8a; margin-top: 0;">🆕 Novidades da Clínica</h3>
+        <div style="margin: 0; line-height: 1.6; color: #1f2937; text-align: justify;">
+          ${formData.clinicNews || 'Adicione as novidades da clínica aqui...'}
+        </div>
+      </div>
+    `
+      : ''
+
+    content = content.replace(/{{HEALTH_TIP_SECTION}}/g, healthTipSection)
+    content = content.replace(/{{CLINIC_NEWS_SECTION}}/g, clinicNewsSection)
+
+    setPreviewContent(content)
+  }
+
+  const handleSave = async () => {
+    setIsSaving(true)
+    setMessage(null)
+
+    try {
+      if (onSave) {
+        await onSave(formData)
+        setMessage({ type: 'success', text: 'Newsletter salva com sucesso!' })
+      }
+    } catch (error) {
+      setMessage({
+        type: 'error',
+        text: 'Erro ao salvar newsletter. Tente novamente.',
+      })
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  const handleSend = async () => {
+    if (!formData.subject.trim()) {
+      setMessage({ type: 'error', text: 'Assunto é obrigatório.' })
+      return
+    }
+
+    // Verificar se pelo menos uma seção está habilitada e tem conteúdo
+    const hasHealthTips = sectionEnabled.healthTips && formData.content.trim()
+    const hasClinicNews =
+      sectionEnabled.clinicNews && formData.clinicNews.trim()
+
+    if (!hasHealthTips && !hasClinicNews) {
+      setMessage({
+        type: 'error',
+        text: 'Selecione pelo menos uma seção e adicione conteúdo.',
+      })
+      return
+    }
+
+    if (selectedPatients.length === 0) {
+      setMessage({ type: 'error', text: 'Selecione pelo menos um paciente.' })
+      return
+    }
+
+    setIsLoading(true)
+    setMessage(null)
+
+    try {
+      // Preparar conteúdo HTML com as substituições
+      let htmlContent = formData.htmlContent
+
+      // Construir seções condicionalmente
+      const healthTipSection = sectionEnabled.healthTips
+        ? `
+        <div style="background-color: #f8fafc; padding: 20px; border-radius: 8px; margin: 20px 0; border: 1px solid #1e3a8a;">
+          <h3 style="color: #1e3a8a; margin-top: 0;">💡 Dica da Semana</h3>
+          <div style="margin: 0; line-height: 1.6; color: #1f2937; text-align: justify;">
+            ${formData.content}
+          </div>
+        </div>
+      `
+        : ''
+
+      const clinicNewsSection = sectionEnabled.clinicNews
+        ? `
+        <div style="background-color: #f0f9ff; padding: 20px; border-radius: 8px; margin: 20px 0; border: 1px solid #3b82f6;">
+          <h3 style="color: #1e3a8a; margin-top: 0;">🆕 Novidades da Clínica</h3>
+          <div style="margin: 0; line-height: 1.6; color: #1f2937; text-align: justify;">
+            ${formData.clinicNews}
+          </div>
+        </div>
+      `
+        : ''
+
+      htmlContent = htmlContent.replace(
+        /{{HEALTH_TIP_SECTION}}/g,
+        healthTipSection
+      )
+      htmlContent = htmlContent.replace(
+        /{{CLINIC_NEWS_SECTION}}/g,
+        clinicNewsSection
+      )
+
+      // Enviar newsletter
+      const selectedPatientsData = patients.filter(p =>
+        selectedPatients.includes(p.id)
+      )
+      const recipients = selectedPatientsData.map(p => p.email)
+
+      // Criar um conteúdo personalizado para cada paciente
+      const emailPromises = selectedPatientsData.map(async (patient) => {
+        // Substituir o nome do paciente no template
+        let personalizedContent = htmlContent.replace(/{{PATIENT_NAME}}/g, patient.name)
+        
+        return fetch('/api/send-email', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            type: 'newsletter',
+            recipients: [patient.email],
+            subject: formData.subject,
+            content: personalizedContent,
+          }),
+        })
+      })
+
+      // Aguardar todos os envios
+      const responses = await Promise.all(emailPromises)
+      const results = await Promise.all(responses.map(r => r.json()))
+      
+      // Verificar se todos foram enviados com sucesso
+      const allSuccessful = results.every(result => result.success)
+
+      if (allSuccessful) {
+        setMessage({
+          type: 'success',
+          text: `Newsletter enviada com sucesso para ${selectedPatientsData.length} paciente(s)!`,
+        })
+        if (onSend) {
+          await onSend({ ...formData, htmlContent })
+        }
+      } else {
+        const failedResults = results.filter(result => !result.success)
+        throw new Error(`Erro ao enviar newsletter para ${failedResults.length} paciente(s)`)
+      }
+    } catch (error) {
+      console.error('Erro ao enviar newsletter:', error)
+      setMessage({
+        type: 'error',
+        text: 'Erro ao enviar newsletter. Tente novamente.',
+      })
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handlePatientToggle = (patientId: string) => {
+    setSelectedPatients(prev =>
+      prev.includes(patientId)
+        ? prev.filter(id => id !== patientId)
+        : [...prev, patientId]
+    )
+  }
+
+  const handleSelectAll = () => {
+    setSelectedPatients(patients.map(p => p.id))
+  }
+
+  const handleDeselectAll = () => {
+    setSelectedPatients([])
+  }
+
+  return (
+    <div className={`w-full max-w-4xl mx-auto ${className}`}>
+      <Card className='bg-gray-900/50 border-gray-700'>
+        <CardHeader>
+          <CardTitle className='flex items-center text-white'>
+            <Mail className='h-5 w-5 mr-2 text-blue-400' />
+            Editor de Newsletter
+          </CardTitle>
+          <CardDescription className='text-gray-400'>
+            Crie e personalize sua newsletter semanal antes de enviar para os
+            pacientes.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
+            <TabsList className='grid w-full grid-cols-3 bg-gray-800 border-gray-600'>
+              <TabsTrigger
+                value='edit'
+                className='data-[state=active]:bg-gray-700 data-[state=active]:text-white text-gray-300'
+              >
+                Editar
+              </TabsTrigger>
+              <TabsTrigger
+                value='preview'
+                onClick={generatePreview}
+                className='data-[state=active]:bg-gray-700 data-[state=active]:text-white text-gray-300'
+              >
+                Preview
+              </TabsTrigger>
+              <TabsTrigger
+                value='recipients'
+                className='data-[state=active]:bg-gray-700 data-[state=active]:text-white text-gray-300'
+              >
+                Destinatários
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value='edit' className='space-y-4'>
+              <div className='space-y-2'>
+                <Label htmlFor='subject' className='text-white'>
+                  Assunto do E-mail
+                </Label>
+                <Input
+                  id='subject'
+                  value={formData.subject}
+                  onChange={e => handleInputChange('subject', e.target.value)}
+                  placeholder='Digite o assunto da newsletter'
+                  className='bg-gray-800 border-gray-600 text-white placeholder:text-gray-400'
+                />
+              </div>
+
+              <div className='space-y-4'>
+                <div className='flex items-center space-x-2'>
+                  <Checkbox
+                    id='healthTips'
+                    checked={sectionEnabled.healthTips}
+                    onCheckedChange={checked =>
+                      setSectionEnabled(prev => ({
+                        ...prev,
+                        healthTips: !!checked,
+                      }))
+                    }
+                    className='border-gray-600 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600'
+                  />
+                  <Label
+                    htmlFor='healthTips'
+                    className='text-white cursor-pointer'
+                  >
+                    Incluir Dicas de Saúde da Semana
+                  </Label>
+                </div>
+
+                {sectionEnabled.healthTips && (
+                  <div className='space-y-2 ml-6'>
+                    <Textarea
+                      id='content'
+                      value={formData.content}
+                      onChange={e =>
+                        handleInputChange('content', e.target.value)
+                      }
+                      placeholder='Digite as dicas de saúde e novidades da semana...'
+                      rows={6}
+                      className='min-h-[150px] bg-gray-800 border-gray-600 text-white placeholder:text-gray-400'
+                    />
+                    <p className='text-sm text-gray-400'>
+                      Este conteúdo será inserido na seção "Dica da Semana" do
+                      template.
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              <div className='space-y-4'>
+                <div className='flex items-center space-x-2'>
+                  <Checkbox
+                    id='clinicNews'
+                    checked={sectionEnabled.clinicNews}
+                    onCheckedChange={checked =>
+                      setSectionEnabled(prev => ({
+                        ...prev,
+                        clinicNews: !!checked,
+                      }))
+                    }
+                    className='border-gray-600 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600'
+                  />
+                  <Label
+                    htmlFor='clinicNews'
+                    className='text-white cursor-pointer'
+                  >
+                    Incluir Novidades da Clínica
+                  </Label>
+                </div>
+
+                {sectionEnabled.clinicNews && (
+                  <div className='space-y-2 ml-6'>
+                    <Textarea
+                      id='clinicNewsContent'
+                      value={formData.clinicNews}
+                      onChange={e =>
+                        handleInputChange('clinicNews', e.target.value)
+                      }
+                      placeholder='Digite as novidades e informações da clínica...'
+                      rows={6}
+                      className='min-h-[150px] bg-gray-800 border-gray-600 text-white placeholder:text-gray-400'
+                    />
+                    <p className='text-sm text-gray-400'>
+                      Este conteúdo será inserido na seção "Novidades da
+                      Clínica" do template.
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              <div className='flex gap-2'>
+                <Button
+                  onClick={handleSave}
+                  disabled={isSaving}
+                  variant='outline'
+                  className='border-gray-600 text-white hover:bg-gray-700'
+                >
+                  {isSaving ? (
+                    <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+                  ) : (
+                    <Save className='mr-2 h-4 w-4' />
+                  )}
+                  Salvar Rascunho
+                </Button>
+
+                <Button
+                  onClick={() => {
+                    setFormData(prev => ({
+                      ...prev,
+                      htmlContent: defaultTemplate,
+                    }))
+                    setMessage({
+                      type: 'success',
+                      text: 'Template restaurado!',
+                    })
+                  }}
+                  variant='outline'
+                  className='border-gray-600 text-white hover:bg-gray-700'
+                >
+                  <RefreshCw className='mr-2 h-4 w-4' />
+                  Restaurar Template
+                </Button>
+              </div>
+            </TabsContent>
+
+            <TabsContent value='preview'>
+              <div className='border border-gray-600 rounded-lg p-4 bg-gray-800 max-h-96 overflow-y-auto'>
+                <div dangerouslySetInnerHTML={{ __html: previewContent }} />
+              </div>
+            </TabsContent>
+
+            <TabsContent value='recipients' className='space-y-4'>
+              <div className='flex justify-between items-center'>
+                <h3 className='text-lg font-semibold text-white'>
+                  Selecionar Destinatários
+                </h3>
+                <div className='space-x-2'>
+                  <Button
+                    onClick={handleSelectAll}
+                    variant='outline'
+                    size='sm'
+                    className='border-gray-600 text-white hover:bg-gray-700'
+                  >
+                    Selecionar Todos
+                  </Button>
+                  <Button
+                    onClick={handleDeselectAll}
+                    variant='outline'
+                    size='sm'
+                    className='border-gray-600 text-white hover:bg-gray-700'
+                  >
+                    Desmarcar Todos
+                  </Button>
+                </div>
+              </div>
+
+              <div className='text-sm text-gray-400 mb-4'>
+                {selectedPatients.length} de {patients.length} pacientes
+                selecionados
+              </div>
+
+              <div className='max-h-64 overflow-y-auto border border-gray-600 rounded-lg p-4 space-y-2 bg-gray-800'>
+                {patients.map(patient => (
+                  <label
+                    key={patient.id}
+                    className='flex items-center space-x-3 cursor-pointer hover:bg-gray-700 p-2 rounded'
+                  >
+                    <input
+                      type='checkbox'
+                      checked={selectedPatients.includes(patient.id)}
+                      onChange={() => handlePatientToggle(patient.id)}
+                      className='rounded bg-gray-700 border-gray-600 text-blue-500'
+                    />
+                    <div>
+                      <div className='font-medium text-white'>
+                        {patient.name}
+                      </div>
+                      <div className='text-sm text-gray-400'>
+                        {patient.email}
+                      </div>
+                    </div>
+                  </label>
+                ))}
+              </div>
+            </TabsContent>
+          </Tabs>
+
+          {message && (
+            <Alert
+              className={`mt-4 ${message.type === 'success' ? 'border-green-600 bg-green-900/20' : 'border-red-600 bg-red-900/20'}`}
+            >
+              <AlertDescription
+                className={
+                  message.type === 'success' ? 'text-green-400' : 'text-red-400'
+                }
+              >
+                {message.text}
+              </AlertDescription>
+            </Alert>
+          )}
+
+          <div className='flex justify-end space-x-2 mt-6'>
+            <Button
+              onClick={handleSend}
+              disabled={isLoading || selectedPatients.length === 0}
+              className='bg-blue-600 hover:bg-blue-700 text-white'
+            >
+              {isLoading ? (
+                <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+              ) : (
+                <Send className='mr-2 h-4 w-4' />
+              )}
+              Enviar Newsletter ({selectedPatients.length})
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  )
+}

@@ -1,0 +1,455 @@
+import { NextRequest, NextResponse } from 'next/server'
+import {
+  getAllAppointments,
+  getAppointmentsByDate,
+  getDailyAgenda,
+  updateAppointmentStatus,
+  updateAppointment,
+  createAppointment,
+  getAllPatients,
+  getPatientById,
+  createOrUpdatePatient,
+  getSystemStats,
+} from '../../../lib/unified-appointment-system'
+
+// GET - Obter agendamentos, agenda diária ou estatísticas
+export async function GET(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url)
+    const action = searchParams.get('action')
+    const date = searchParams.get('date')
+    const patientId = searchParams.get('patientId')
+
+    switch (action) {
+      case 'all-appointments':
+        const allAppointments = await getAllAppointments()
+        return NextResponse.json({
+          success: true,
+          appointments: allAppointments,
+        })
+
+      case 'appointments-by-date':
+        if (!date) {
+          return NextResponse.json(
+            { success: false, error: 'Data é obrigatória' },
+            { status: 400 }
+          )
+        }
+        const appointmentsByDate = await getAppointmentsByDate(date)
+        return NextResponse.json({
+          success: true,
+          appointments: appointmentsByDate,
+        })
+
+      case 'daily-agenda':
+        if (!date) {
+          return NextResponse.json(
+            { success: false, error: 'Data é obrigatória' },
+            { status: 400 }
+          )
+        }
+        const dailyAgenda = await getDailyAgenda(date)
+        return NextResponse.json({ success: true, agenda: dailyAgenda })
+
+      case 'all-patients':
+        const allPatients = await getAllPatients()
+        return NextResponse.json({ success: true, patients: allPatients })
+
+      case 'appointment-by-id':
+        const appointmentId = searchParams.get('appointmentId')
+        if (!appointmentId) {
+          return NextResponse.json(
+            { success: false, error: 'ID do agendamento é obrigatório' },
+            { status: 400 }
+          )
+        }
+        const allAppointmentsForId = await getAllAppointments()
+        const appointment = allAppointmentsForId.find(
+          apt => apt.id === appointmentId
+        )
+        if (!appointment) {
+          return NextResponse.json(
+            { success: false, error: 'Agendamento não encontrado' },
+            { status: 404 }
+          )
+        }
+        return NextResponse.json({ success: true, appointment })
+
+      case 'patient-by-id':
+        if (!patientId) {
+          return NextResponse.json(
+            { success: false, error: 'ID do paciente é obrigatório' },
+            { status: 400 }
+          )
+        }
+        const patient = await getPatientById(patientId)
+        if (!patient) {
+          return NextResponse.json(
+            { success: false, error: 'Paciente não encontrado' },
+            { status: 404 }
+          )
+        }
+        return NextResponse.json({ success: true, patient })
+
+      case 'stats':
+        const stats = await getSystemStats()
+        return NextResponse.json({ success: true, stats })
+
+      case 'get-patient':
+        const getPatientId = searchParams.get('patientId')
+        if (!getPatientId) {
+          return NextResponse.json(
+            { success: false, error: 'ID do paciente é obrigatório' },
+            { status: 400 }
+          )
+        }
+
+        const getPatient = await getPatientById(getPatientId)
+        if (!getPatient) {
+          return NextResponse.json(
+            { success: false, error: 'Paciente não encontrado' },
+            { status: 404 }
+          )
+        }
+
+        return NextResponse.json({ success: true, patient: getPatient })
+
+      default:
+        return NextResponse.json(
+          { success: false, error: 'Ação não reconhecida' },
+          { status: 400 }
+        )
+    }
+  } catch (error) {
+    console.error('❌ Erro na API GET:', error)
+    return NextResponse.json(
+      {
+        success: false,
+        error:
+          error instanceof Error ? error.message : 'Erro interno do servidor',
+      },
+      { status: 500 }
+    )
+  }
+}
+
+// DELETE - Remover consultas canceladas ou excluir agendamento específico
+export async function DELETE(request: NextRequest) {
+  try {
+    const body = await request.json()
+    const { action, appointmentId } = body
+
+    switch (action) {
+      case 'delete-appointment':
+        if (!appointmentId) {
+          return NextResponse.json(
+            { success: false, error: 'ID do agendamento é obrigatório' },
+            { status: 400 }
+          )
+        }
+
+        const allAppointments = await getAllAppointments()
+        const appointmentExists = allAppointments.find(
+          apt => apt.id === appointmentId
+        )
+
+        if (!appointmentExists) {
+          return NextResponse.json(
+            { success: false, error: 'Agendamento não encontrado' },
+            { status: 404 }
+          )
+        }
+
+        const filteredAppointments = allAppointments.filter(
+          apt => apt.id !== appointmentId
+        )
+
+        // Salvar os agendamentos sem o excluído
+        const fs = require('fs').promises
+        const path = require('path')
+        const appointmentsPath = path.join(
+          process.cwd(),
+          'data',
+          'unified-appointments.json'
+        )
+
+        await fs.writeFile(
+          appointmentsPath,
+          JSON.stringify(filteredAppointments, null, 2)
+        )
+
+        console.log(`🗑️ Agendamento ${appointmentId} foi excluído`)
+
+        return NextResponse.json({
+          success: true,
+          message: 'Agendamento excluído com sucesso',
+        })
+
+      case 'remove-cancelled-appointments':
+        const allAppointments2 = await getAllAppointments()
+        const cancelledAppointments = allAppointments2.filter(
+          apt => apt.status === 'cancelada'
+        )
+        const activeAppointments = allAppointments2.filter(
+          apt => apt.status !== 'cancelada'
+        )
+
+        // Salvar apenas os agendamentos não cancelados
+        const fs2 = require('fs').promises
+        const path2 = require('path')
+        const appointmentsPath2 = path2.join(
+          process.cwd(),
+          'data',
+          'unified-appointments.json'
+        )
+
+        await fs2.writeFile(
+          appointmentsPath2,
+          JSON.stringify(activeAppointments, null, 2)
+        )
+
+        console.log(
+          `🗑️ ${cancelledAppointments.length} consultas canceladas foram removidas`
+        )
+
+        return NextResponse.json({
+          success: true,
+          removedCount: cancelledAppointments.length,
+          message: `${cancelledAppointments.length} consultas canceladas foram removidas com sucesso`,
+        })
+
+      default:
+        return NextResponse.json(
+          { success: false, error: 'Ação não reconhecida' },
+          { status: 400 }
+        )
+    }
+  } catch (error) {
+    console.error('❌ Erro na API DELETE:', error)
+    return NextResponse.json(
+      {
+        success: false,
+        error:
+          error instanceof Error ? error.message : 'Erro interno do servidor',
+      },
+      { status: 500 }
+    )
+  }
+}
+
+// POST - Criar agendamento, paciente ou atualizar status
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json()
+    const { action } = body
+
+    switch (action) {
+      case 'create-appointment':
+        const {
+          patientId,
+          patientName,
+          patientPhone,
+          patientWhatsapp,
+          patientEmail,
+          patientBirthDate,
+          insuranceType,
+          insurancePlan,
+          appointmentDate,
+          appointmentTime,
+          appointmentType,
+          source,
+          notes,
+          createdBy,
+        } = body
+
+        if (
+          !patientId ||
+          !patientName ||
+          !patientPhone ||
+          !appointmentDate ||
+          !appointmentTime
+        ) {
+          return NextResponse.json(
+            {
+              success: false,
+              error:
+                'Campos obrigatórios: patientId, patientName, patientPhone, appointmentDate, appointmentTime',
+            },
+            { status: 400 }
+          )
+        }
+
+        const appointmentResult = await createAppointment({
+          patientId,
+          patientName,
+          patientCpf: '',
+          patientMedicalRecordNumber: 0,
+          patientPhone,
+          patientWhatsapp: patientWhatsapp || patientPhone,
+          patientEmail,
+          patientBirthDate,
+          insuranceType: insuranceType || 'particular',
+          insurancePlan,
+          appointmentDate,
+          appointmentTime,
+          appointmentType: appointmentType || 'consulta',
+          status: 'agendada',
+          source: source || 'doctor_area',
+          notes,
+          createdBy,
+        })
+
+        return NextResponse.json(appointmentResult)
+
+      case 'create_patient':
+      case 'create-patient':
+        const { patientData } = body
+        const {
+          name,
+          phone,
+          whatsapp,
+          email,
+          birthDate,
+          cpf,
+          insurance,
+          medicalRecord,
+        } = patientData || body
+
+        if (!name || !phone) {
+          return NextResponse.json(
+            { success: false, error: 'Nome e telefone são obrigatórios' },
+            { status: 400 }
+          )
+        }
+
+        const patientResult = await createOrUpdatePatient({
+          name,
+          phone,
+          whatsapp: whatsapp || phone,
+          email,
+          birthDate,
+          cpf: cpf || '',
+          medicalRecordNumber: 0,
+          insurance: insurance || { type: 'particular' },
+          medicalRecord,
+        })
+
+        return NextResponse.json(patientResult)
+
+      case 'update-status':
+        const { appointmentId, status, statusNotes } = body
+
+        if (!appointmentId || !status) {
+          return NextResponse.json(
+            {
+              success: false,
+              error: 'ID do agendamento e status são obrigatórios',
+            },
+            { status: 400 }
+          )
+        }
+
+        const updateResult = await updateAppointmentStatus(
+          appointmentId,
+          status,
+          statusNotes
+        )
+        return NextResponse.json(updateResult)
+
+      default:
+        return NextResponse.json(
+          { success: false, error: 'Ação não reconhecida' },
+          { status: 400 }
+        )
+    }
+  } catch (error) {
+    console.error('❌ Erro na API POST:', error)
+    return NextResponse.json(
+      {
+        success: false,
+        error:
+          error instanceof Error ? error.message : 'Erro interno do servidor',
+      },
+      { status: 500 }
+    )
+  }
+}
+
+// PUT - Atualizar agendamento ou paciente
+export async function PUT(request: NextRequest) {
+  try {
+    const body = await request.json()
+    const { action } = body
+
+    switch (action) {
+      case 'update-appointment-status':
+        const { appointmentId, status, notes } = body
+
+        if (!appointmentId || !status) {
+          return NextResponse.json(
+            {
+              success: false,
+              error: 'ID do agendamento e status são obrigatórios',
+            },
+            { status: 400 }
+          )
+        }
+
+        const result = await updateAppointmentStatus(
+          appointmentId,
+          status,
+          notes
+        )
+        return NextResponse.json(result)
+
+      case 'update-appointment':
+        const {
+          appointmentId: updateId,
+          appointmentDate,
+          appointmentTime,
+          appointmentType,
+          notes: updateNotes,
+        } = body
+
+        if (
+          !updateId ||
+          !appointmentDate ||
+          !appointmentTime ||
+          !appointmentType
+        ) {
+          return NextResponse.json(
+            {
+              success: false,
+              error:
+                'Todos os campos são obrigatórios para atualizar o agendamento',
+            },
+            { status: 400 }
+          )
+        }
+
+        const updateResult = await updateAppointment(updateId, {
+          date: appointmentDate,
+          time: appointmentTime,
+          type: appointmentType,
+          notes: updateNotes,
+        })
+        return NextResponse.json(updateResult)
+
+      default:
+        return NextResponse.json(
+          { success: false, error: 'Ação não reconhecida' },
+          { status: 400 }
+        )
+    }
+  } catch (error) {
+    console.error('❌ Erro na API PUT:', error)
+    return NextResponse.json(
+      {
+        success: false,
+        error:
+          error instanceof Error ? error.message : 'Erro interno do servidor',
+      },
+      { status: 500 }
+    )
+  }
+}
