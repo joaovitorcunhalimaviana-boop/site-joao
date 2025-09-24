@@ -108,9 +108,10 @@ export default function FAQSchema() {
     <Script
       id="faq-schema"
       type="application/ld+json"
-      strategy="beforeInteractive"
-    >
-      {JSON.stringify(faqSchema)}
-    </Script>
+      strategy="afterInteractive"
+      dangerouslySetInnerHTML={{
+        __html: JSON.stringify(faqSchema)
+      }}
+    />
   )
 }

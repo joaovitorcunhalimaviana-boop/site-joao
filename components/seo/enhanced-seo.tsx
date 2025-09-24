@@ -101,10 +101,11 @@ export default function EnhancedSEO({
         <Script
         id="enhanced-seo-schema"
         type="application/ld+json"
-        strategy="beforeInteractive"
-      >
-        {JSON.stringify(structuredData)}
-      </Script>
+        strategy="afterInteractive"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(structuredData)
+        }}
+      />
       )}
 
       {/* Breadcrumb Structured Data */}

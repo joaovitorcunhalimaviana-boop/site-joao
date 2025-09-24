@@ -122,11 +122,12 @@ export function BreadcrumbStructuredData({ items }: { items: BreadcrumbItem[] })
 
   return (
     <Script
-          id="breadcrumb-schema"
-          type="application/ld+json"
-          strategy="beforeInteractive"
-        >
-          {JSON.stringify(structuredData)}
-        </Script>
+      id="breadcrumb-schema"
+      type="application/ld+json"
+      strategy="afterInteractive"
+      dangerouslySetInnerHTML={{
+        __html: JSON.stringify(structuredData)
+      }}
+    />
   )
 }

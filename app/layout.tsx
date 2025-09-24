@@ -86,29 +86,31 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <>
-      <GoogleAnalytics />
-      <ErrorBoundary>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-          suppressHydrationWarning
-        >
-          <BirthdayInitializer />
-          <GlobalSchema />
-          <LocalBusinessSchema />
-          <LocalSEOSchema />
-          <FAQSchema />
-          <BreadcrumbSchema />
-          {/* <WebVitals /> */}
-          <main id="main-content" className={cn(inter.className, "min-h-screen bg-background font-sans antialiased")}>
-            {children}
-          </main>
-          <Toaster />
-        </ThemeProvider>
-      </ErrorBoundary>
-    </>
+    <html lang="pt-BR" suppressHydrationWarning>
+      <head />
+      <body className={cn(inter.className, "min-h-screen bg-background font-sans antialiased")}>
+        <GoogleAnalytics />
+        <ErrorBoundary>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <BirthdayInitializer />
+            <GlobalSchema />
+            <LocalBusinessSchema />
+            <LocalSEOSchema />
+            <FAQSchema />
+            <BreadcrumbSchema />
+            {/* <WebVitals /> */}
+            <main id="main-content">
+              {children}
+            </main>
+            <Toaster />
+          </ThemeProvider>
+        </ErrorBoundary>
+      </body>
+    </html>
   )
 }

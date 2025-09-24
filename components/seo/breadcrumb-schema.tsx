@@ -69,10 +69,11 @@ export default function BreadcrumbSchema() {
       <Script
         id="breadcrumb-schema"
         type="application/ld+json"
-        strategy="beforeInteractive"
-      >
-        {JSON.stringify(breadcrumbSchema)}
-      </Script>
+        strategy="afterInteractive"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(breadcrumbSchema)
+        }}
+      />
     </>
   )
 }

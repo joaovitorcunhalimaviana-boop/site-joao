@@ -53,10 +53,11 @@ export function MedicalCalculatorSchema({
     <Script
       id={`medical-calculator-${name.toLowerCase().replace(/\s+/g, '-')}`}
       type="application/ld+json"
-      strategy="beforeInteractive"
-    >
-      {JSON.stringify(structuredData)}
-    </Script>
+      strategy="afterInteractive"
+      dangerouslySetInnerHTML={{
+        __html: JSON.stringify(structuredData)
+      }}
+    />
   )
 }
 
@@ -329,9 +330,10 @@ export default function StructuredData({ type, data }: StructuredDataProps) {
     <Script
       id={`structured-data-${type}`}
       type="application/ld+json"
-      strategy="beforeInteractive"
-    >
-      {JSON.stringify(structuredData)}
-    </Script>
+      strategy="afterInteractive"
+      dangerouslySetInnerHTML={{
+        __html: JSON.stringify(structuredData)
+      }}
+    />
   )
 }

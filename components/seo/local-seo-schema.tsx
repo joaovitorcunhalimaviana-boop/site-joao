@@ -257,9 +257,10 @@ export default function LocalSEOSchema() {
     <Script
       id="local-seo-schema"
       type="application/ld+json"
-      strategy="beforeInteractive"
-    >
-      {JSON.stringify(localBusinessSchema)}
-    </Script>
+      strategy="afterInteractive"
+      dangerouslySetInnerHTML={{
+        __html: JSON.stringify(localBusinessSchema)
+      }}
+    />
   )
 }
