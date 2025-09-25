@@ -15,10 +15,11 @@ const HeroSection = () => {
             aria-hidden='true'
           >
             <div
-              className='relative left-[calc(50%-11rem)] aspect-[1155/678] w-[36.125rem] -translate-x-1/2 rotate-[30deg] bg-gradient-to-tr from-blue-600 to-blue-400 opacity-20 sm:left-[calc(50%-30rem)] sm:w-[72.1875rem]'
+              className='relative left-[calc(50%-11rem)] aspect-[1155/678] w-[36.125rem] -translate-x-1/2 rotate-[30deg] bg-gradient-to-tr from-blue-600 to-blue-400 opacity-20 sm:left-[calc(50%-30rem)] sm:w-[72.1875rem] animate-pulse'
               style={{
                 clipPath:
                   'polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)',
+                animation: 'float 6s ease-in-out infinite, glow 4s ease-in-out infinite alternate',
               }}
             />
           </div>
@@ -204,10 +205,11 @@ const HeroSection = () => {
             aria-hidden='true'
           >
             <div
-              className='relative left-[calc(50%+3rem)] aspect-[1155/678] w-[36.125rem] -translate-x-1/2 bg-gradient-to-tr from-blue-600 to-blue-400 opacity-20 sm:left-[calc(50%+36rem)] sm:w-[72.1875rem]'
+              className='relative left-[calc(50%+3rem)] aspect-[1155/678] w-[36.125rem] -translate-x-1/2 bg-gradient-to-tr from-blue-600 to-blue-400 opacity-20 sm:left-[calc(50%+36rem)] sm:w-[72.1875rem] animate-pulse'
               style={{
                 clipPath:
                   'polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)',
+                animation: 'float 8s ease-in-out infinite reverse, glow 5s ease-in-out infinite alternate-reverse',
               }}
             />
           </div>
@@ -294,20 +296,13 @@ const HeroSection = () => {
                 {/* Efeito de brilho que passa pela imagem */}
                 <div className='absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000'></div>
 
-                <Image
-                  src='https://www.instagram.com/p/DOMcWLHEm7C/media/?size=l'
+                <img
+                  src='/FOTO1.JPG'
                   alt='Dr. João Vítor - Cirurgião Coloproctologista'
-                  width={400}
-                  height={400}
-                  className='w-full h-full object-cover transition-transform duration-500 hover:scale-110'
-                  priority
-                  onError={e => {
-                    // Fallback para foto local se não carregar
-                    e.currentTarget.src = '/doctor-photo.jpg'
-                    e.currentTarget.onerror = () => {
-                      // Último fallback para SVG
-                      e.currentTarget.src = '/doctor-photo.svg'
-                    }
+                  className='w-full h-full object-cover'
+                  style={{
+                    transform: 'scale(1.1)',
+                    objectPosition: 'center 45%',
                   }}
                 />
               </div>

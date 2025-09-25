@@ -15,10 +15,6 @@ const nextConfig = {
   // output: 'export', // Temporariamente desabilitado para resolver erro de Html
   trailingSlash: false,
 
-  images: {
-    domains: ['localhost'],
-    unoptimized: true
-  },
   // Configurações para otimização
   compress: true,
   poweredByHeader: false,
@@ -31,8 +27,20 @@ const nextConfig = {
     minimumCacheTTL: 60,
     dangerouslyAllowSVG: true,
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
-    domains: ['www.instagram.com', 'instagram.com', 'scontent.cdninstagram.com'],
+    unoptimized: true,
     remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'localhost',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+        port: '',
+        pathname: '/**',
+      },
       {
         protocol: 'https',
         hostname: 'www.instagram.com',
@@ -41,13 +49,7 @@ const nextConfig = {
       },
       {
         protocol: 'https',
-        hostname: 'instagram.com',
-        port: '',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'scontent.cdninstagram.com',
+        hostname: 'instagram.fjpa6-1.fna.fbcdn.net',
         port: '',
         pathname: '/**',
       }
@@ -140,7 +142,6 @@ const nextConfig = {
   experimental: {
     optimizeCss: true,
     optimizePackageImports: ['lucide-react', '@radix-ui/react-icons', '@heroicons/react'],
-    serverComponentsExternalPackages: ['@prisma/client', 'prisma'],
   },
   
   // Redirects for SEO

@@ -56,6 +56,33 @@
   animation: gradientPulse 3s ease-in-out infinite;
 }
 
+/* Animações para os detalhes azuis do fundo */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px) translateX(0px) rotate(0deg);
+  }
+  25% {
+    transform: translateY(-10px) translateX(5px) rotate(1deg);
+  }
+  50% {
+    transform: translateY(-5px) translateX(-3px) rotate(-0.5deg);
+  }
+  75% {
+    transform: translateY(-15px) translateX(8px) rotate(1.5deg);
+  }
+}
+
+@keyframes glow {
+  0% {
+    opacity: 0.15;
+    filter: blur(3px);
+  }
+  100% {
+    opacity: 0.25;
+    filter: blur(2px);
+  }
+}
+
 /* Forçar formato 24h para inputs de time */
 input[type='time'] {
   -webkit-appearance: none;
