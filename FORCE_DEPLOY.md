@@ -21,3 +21,11 @@ Deploy timestamp: 01/26/2025 17:33:17
 - Railway usará detecção automática do Node.js
 
 Deploy timestamp: 01/26/2025 17:36:42
+
+## Correção versão Node.js e dependências
+
+- Criado .nvmrc com Node.js 20.11.0
+- Alterado buildCommand para usar --legacy-peer-deps
+- Resolvendo problemas de compatibilidade de versão
+
+Deploy timestamp: 01/26/2025 17:39:15
