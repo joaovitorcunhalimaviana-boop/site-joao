@@ -29,3 +29,10 @@ Deploy timestamp: 01/26/2025 17:36:42
 - Resolvendo problemas de compatibilidade de versão
 
 Deploy timestamp: 01/26/2025 17:39:15
+
+## Correção erro EBUSY cache
+
+- Adicionado rm -rf node_modules/.cache antes do npm ci
+- Resolvendo problema de cache bloqueado no Docker
+
+Deploy timestamp: 01/26/2025 17:42:30
