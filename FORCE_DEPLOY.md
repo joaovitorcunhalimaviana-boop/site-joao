@@ -39,29 +39,53 @@ Deploy timestamp: 01/26/2025 17:42:30
 
 # Correções Aplicadas para Deploy Railway
 
-## Problema: Cache Docker persistente causando falha no npm ci
+## Problema: Conflito Docker mount cache persistente
 - **Erro**: `npm error EBUSY: resource busy or locked, rmdir '/app/node_modules/.cache'`
-- **Solução**: Usar diretório de cache alternativo em `/tmp/.npm` em vez de tentar remover cache existente
-- **Comando atualizado**: `npm ci --legacy-peer-deps --cache /tmp/.npm && npx prisma generate && npm run build`
+- **Causa raiz**: Railway usa `--mount=type=cache` que conflita com npm cache
+- **Solução**: Dockerfile customizado com controle total do processo de build
 
 ## Configurações Aplicadas:
 
-### 1. Node.js 20+ (via .nvmrc)
+### 1. Node.js 20+ (via .nvmrc e Dockerfile)
 - Criado `.nvmrc` com versão `20.11.0`
+- Dockerfile usa `node:20-alpine` diretamente
 - Resolve incompatibilidades de dependências que requerem Node.js 20+
 
-### 2. Railway.json otimizado
-- `buildCommand`: Cache alternativo + `--legacy-peer-deps`
+### 2. Railway.json com Dockerfile
+- `builder`: `DOCKERFILE` (em vez de NIXPACKS)
+- `dockerfilePath`: `Dockerfile`
 - `restartPolicyType`: `ON_FAILURE`
 - `restartPolicyMaxRetries`: 10
 
-### 3. Nixpacks removido
-- Removido `nixpacks.toml` que causava erros no build Docker
-- Railway agora usa detecção automática do Node.js
+### 3. Dockerfile customizado
+- Controle total do processo de build
+- `npm ci --legacy-peer-deps --no-cache` evita conflitos
+- Sequência otimizada: deps → prisma → build
+- Sem cache mounts problemáticos
 
-### 4. Cache Docker alternativo
-- Comando `--cache /tmp/.npm` usa diretório temporário
-- Evita conflitos com cache montado pelo Docker
-- Permite que npm ci execute sem interferência
+### 4. .dockerignore otimizado
+- Exclui `node_modules`, `.next`, logs
+- Reduz tamanho do contexto Docker
+- Melhora performance do build
 
-## Status: Aguardando deploy com cache alternativo
+## Última Correção Aplicada (Dockerfile Customizado)
+
+**Data:** Última atualização
+**Problema:** Erro EBUSY persistente no Docker cache com Nixpacks
+**Solução:** Usar Dockerfile customizado com controle total do build
+
+### Mudanças Aplicadas:
+1. **Dockerfile criado:** Build customizado com Node.js 20-alpine
+2. **railway.json atualizado:** Usar DOCKERFILE builder em vez de NIXPACKS
+3. **.dockerignore criado:** Otimizar build e evitar conflitos
+4. **Cache limpo:** `npm ci --no-cache` para evitar problemas de cache
+
+### Arquivos Criados/Modificados:
+- `Dockerfile` - Build customizado
+- `.dockerignore` - Otimização do build
+- `railway.json` - Builder DOCKERFILE
+- `FORCE_DEPLOY.md` - Documentação da correção
+
+### Status:
+- ✅ Arquivos criados
+- 🔄 Preparando commit e push
