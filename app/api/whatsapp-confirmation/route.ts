@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { formatDateTimeToBrazilian } from '@/lib/date-utils'
 
 export async function POST(request: NextRequest) {
   try {
@@ -139,7 +140,7 @@ function generateDoctorNotificationMessage(data: {
     `📅 *Data:* ${data.selectedDate}\n` +
     `⏰ *Horário:* ${data.selectedTime}\n\n` +
     `✅ *Status:* Confirmação enviada ao paciente\n` +
-    `🕐 *Agendado em:* ${new Date().toLocaleString('pt-BR')}\n\n` +
+    `🕐 *Agendado em:* ${formatDateTimeToBrazilian(new Date())}\n\n` +
     `📋 *Próximas ações:*\n` +
     `• Confirmar disponibilidade na agenda\n` +
     `• Enviar lembrete 24h antes\n` +

@@ -147,44 +147,42 @@ export default function UrgenciasPage() {
               <h2 className='text-2xl lg:text-3xl font-bold text-white mb-8 text-center'>
                 Como Funciona
               </h2>
-              <div className='bg-gradient-to-r from-gray-900/50 to-gray-800/50 border border-gray-700 rounded-lg p-8'>
-                <div className='grid md:grid-cols-3 gap-8 mb-8'>
-                  <div className='text-center'>
-                    <div className='bg-gray-700 rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-4'>
-                      <span className='text-white font-bold text-lg'>1</span>
-                    </div>
-                    <h3 className='text-xl font-semibold text-white mb-3'>
-                      Entre em Contato
-                    </h3>
-                    <p className='text-gray-300 text-lg text-justify'>
-                      Envie uma mensagem pelo WhatsApp explicando sua situação
-                      de urgência
-                    </p>
+              <div className='grid md:grid-cols-3 gap-8'>
+                <div className='text-center bg-gray-900/60 backdrop-blur-sm rounded-2xl p-6 border border-gray-700/50'>
+                  <div className='bg-gray-700 rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-4'>
+                    <span className='text-white font-bold text-lg'>1</span>
                   </div>
-                  <div className='text-center'>
-                    <div className='bg-gray-700 rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-4'>
-                      <span className='text-white font-bold text-lg'>2</span>
-                    </div>
-                    <h3 className='text-xl font-semibold text-white mb-3'>
-                      Agendamento Rápido
-                    </h3>
-                    <p className='text-gray-300 text-lg text-justify'>
-                      Combinamos um horário fora da agenda normal para atendê-lo
-                      no consultório
-                    </p>
+                  <h3 className='text-xl font-semibold text-white mb-3'>
+                    Entre em Contato
+                  </h3>
+                  <p className='text-gray-300 text-lg text-justify'>
+                    Envie uma mensagem pelo WhatsApp explicando sua situação de
+                    urgência
+                  </p>
+                </div>
+                <div className='text-center bg-gray-900/60 backdrop-blur-sm rounded-2xl p-6 border border-gray-700/50'>
+                  <div className='bg-gray-700 rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-4'>
+                    <span className='text-white font-bold text-lg'>2</span>
                   </div>
-                  <div className='text-center'>
-                    <div className='bg-gray-700 rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-4'>
-                      <span className='text-white font-bold text-lg'>3</span>
-                    </div>
-                    <h3 className='text-xl font-semibold text-white mb-3'>
-                      Atendimento Especializado
-                    </h3>
-                    <p className='text-gray-300 text-lg text-justify'>
-                      Receba o cuidado médico que precisa sem esperar pela
-                      agenda regular
-                    </p>
+                  <h3 className='text-xl font-semibold text-white mb-3'>
+                    Agendamento Rápido
+                  </h3>
+                  <p className='text-gray-300 text-lg text-justify'>
+                    Combinamos um horário fora da agenda normal para atendê-lo
+                    no consultório
+                  </p>
+                </div>
+                <div className='text-center bg-gray-900/60 backdrop-blur-sm rounded-2xl p-6 border border-gray-700/50'>
+                  <div className='bg-gray-700 rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-4'>
+                    <span className='text-white font-bold text-lg'>3</span>
                   </div>
+                  <h3 className='text-xl font-semibold text-white mb-3'>
+                    Atendimento Especializado
+                  </h3>
+                  <p className='text-gray-300 text-lg text-justify'>
+                    Receba o cuidado médico que precisa sem esperar pela agenda
+                    regular
+                  </p>
                 </div>
               </div>
             </div>

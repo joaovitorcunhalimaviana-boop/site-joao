@@ -3,32 +3,42 @@
 ## 📱 Opções 100% Gratuitas
 
 ### 1. **Sistema de Monitoramento Manual (Atual)**
+
 ✅ **Totalmente gratuito**
+
 - Mantenha o terminal aberto durante o expediente
 - Clique nos links gerados automaticamente
 - Funciona perfeitamente para consultórios pequenos
 
 ### 2. **Notificações por Email (Recomendado)**
+
 ✅ **Gratuito e automático**
+
 - Receba emails instantâneos com os dados do agendamento
 - Configure para reencaminhar para WhatsApp
 - Mais confiável que soluções não oficiais
 
 ### 3. **Baileys (WhatsApp Web API)**
+
 ⚠️ **Gratuito mas complexo**
+
 - Biblioteca não oficial
 - Requer QR Code para conectar
 - Pode ser bloqueado pelo WhatsApp
 - Instável para uso comercial
 
 ### 4. **Webhook + Zapier/Make (Limitado)**
+
 ✅ **Plano gratuito disponível**
+
 - 100 automações/mês grátis
 - Conecta com WhatsApp Business
 - Interface visual simples
 
 ### 5. **Notificação Push no Navegador**
+
 ✅ **Totalmente gratuito**
+
 - Notificações instantâneas no computador
 - Funciona mesmo com navegador minimizado
 - Ideal para quem fica no computório
@@ -36,6 +46,7 @@
 ## 🎯 **Solução Recomendada: Email + Push**
 
 Vou implementar um sistema híbrido que:
+
 1. **Envia email** com os dados do agendamento
 2. **Mostra notificação push** no navegador
 3. **Mantém os links** do WhatsApp para envio rápido
@@ -65,6 +76,7 @@ Vou implementar um sistema híbrido que:
 ## ⚡ **Implementação Rápida:**
 
 Posso implementar em 10 minutos:
+
 - ✅ Sistema de email gratuito
 - ✅ Notificações push
 - ✅ Interface melhorada
@@ -72,12 +84,12 @@ Posso implementar em 10 minutos:
 
 ## 🆚 **Comparação:**
 
-| Solução | Custo | Confiabilidade | Automação |
-|---------|-------|----------------|----------|
-| **Email + Push** | 🆓 Grátis | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ |
-| Links Manuais | 🆓 Grátis | ⭐⭐⭐⭐ | ⭐⭐ |
-| Baileys | 🆓 Grátis | ⭐⭐ | ⭐⭐⭐ |
-| Twilio | 💰 Pago | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ |
+| Solução          | Custo     | Confiabilidade | Automação  |
+| ---------------- | --------- | -------------- | ---------- |
+| **Email + Push** | 🆓 Grátis | ⭐⭐⭐⭐⭐     | ⭐⭐⭐⭐⭐ |
+| Links Manuais    | 🆓 Grátis | ⭐⭐⭐⭐       | ⭐⭐       |
+| Baileys          | 🆓 Grátis | ⭐⭐           | ⭐⭐⭐     |
+| Twilio           | 💰 Pago   | ⭐⭐⭐⭐⭐     | ⭐⭐⭐⭐⭐ |
 
 ---
 

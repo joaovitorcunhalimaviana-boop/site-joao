@@ -171,10 +171,6 @@ function generateReminderMessage(data: {
         `Aguardamos sua confirmação! 😊`
       )
 
-
-
-
-
     default:
       return (
         baseMessage +

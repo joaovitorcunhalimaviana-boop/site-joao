@@ -45,11 +45,13 @@ my-shadcn-app/
 ## Como Executar o Projeto
 
 1. Instale as dependências:
+
    ```bash
    npm install
    ```
 
 2. Execute o servidor de desenvolvimento:
+
    ```bash
    npm run dev
    ```

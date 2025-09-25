@@ -81,6 +81,7 @@ vercel
 ## ⚙️ Passo 3: Configurar Variáveis de Ambiente no Vercel
 
 ### Via Dashboard:
+
 1. Vá para seu projeto no Vercel
 2. **Settings** → **Environment Variables**
 3. Adicione cada variável:
@@ -89,6 +90,7 @@ vercel
    - Environment: `Production`, `Preview`, `Development`
 
 ### Via CLI:
+
 ```bash
 # Adicionar variáveis uma por uma
 vercel env add DATABASE_URL
@@ -130,11 +132,13 @@ Certifique-se que o `vercel.json` está configurado:
 ## 🌍 Passo 5: Configurar Domínio Personalizado
 
 ### No Vercel Dashboard:
+
 1. **Settings** → **Domains**
 2. **Add Domain**: `joaovitorviana.com.br`
 3. **Add**: `www.joaovitorviana.com.br`
 
 ### Configurar DNS (no seu provedor de domínio):
+
 ```
 Tipo: CNAME
 Nome: www
@@ -150,6 +154,7 @@ Valor: 76.76.19.61
 ### Opções Recomendadas:
 
 #### Neon (PostgreSQL - Gratuito):
+
 1. Acesse: https://neon.tech
 2. Crie uma conta
 3. Crie um novo projeto
@@ -157,6 +162,7 @@ Valor: 76.76.19.61
 5. Adicione no Vercel
 
 #### Supabase (PostgreSQL - Gratuito):
+
 1. Acesse: https://supabase.com
 2. Crie um projeto
 3. Vá em Settings → Database
@@ -166,6 +172,7 @@ Valor: 76.76.19.61
 ## 📧 Passo 7: Configurar Email
 
 ### Gmail (Recomendado):
+
 1. Ative a verificação em 2 etapas
 2. Gere uma "Senha de App"
 3. Use as configurações:
@@ -219,16 +226,19 @@ vercel rm [deployment-url]
 ## 🆘 Troubleshooting
 
 ### Erro de Build:
+
 - Verifique se todas as dependências estão no `package.json`
 - Confirme que não há erros de TypeScript
 - Verifique os logs de build no Vercel
 
 ### Erro de Database:
+
 - Confirme se a `DATABASE_URL` está correta
 - Teste a conexão localmente primeiro
 - Verifique se o banco permite conexões externas
 
 ### Erro de Email:
+
 - Confirme as credenciais SMTP
 - Teste com um serviço como Mailtrap primeiro
 - Verifique se a porta está correta (587 ou 465)
@@ -236,11 +246,13 @@ vercel rm [deployment-url]
 ## 📊 Monitoramento
 
 ### Analytics:
+
 - Configure Google Analytics
 - Use Vercel Analytics (built-in)
 - Monitore Core Web Vitals
 
 ### Logs:
+
 - Vercel Dashboard → Functions
 - Configure Sentry para error tracking
 - Use `console.log` para debug (visível nos logs)
@@ -259,10 +271,12 @@ vercel rm [deployment-url]
 ## 🎉 Pronto!
 
 Seu site estará disponível em:
+
 - **Produção**: https://joaovitorviana.com.br
 - **Preview**: URLs geradas automaticamente para cada commit
 
 **Próximos passos**:
+
 1. Configure backup automático
 2. Monitore performance
 3. Configure alertas de uptime

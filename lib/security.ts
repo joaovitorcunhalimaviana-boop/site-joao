@@ -11,25 +11,23 @@ export function sanitizeHtml(dirty: string): string {
       .replace(/'/g, '&#x27;')
       .replace(/\//g, '&#x2F;')
   }
-  
+
   // Client-side: usar DOMPurify
   return DOMPurify.sanitize(dirty)
 }
 
 // Sanitização de input de texto simples
 export function sanitizeText(input: string): string {
-  return input
-    .trim()
-    .replace(/[<>"'&]/g, (match) => {
-      const entities: Record<string, string> = {
-        '<': '&lt;',
-        '>': '&gt;',
-        '"': '&quot;',
-        "'": '&#x27;',
-        '&': '&amp;'
-      }
-      return entities[match] || match
-    })
+  return input.trim().replace(/[<>"'&]/g, match => {
+    const entities: Record<string, string> = {
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#x27;',
+      '&': '&amp;',
+    }
+    return entities[match] || match
+  })
 }
 
 // Validação de email
@@ -40,57 +38,59 @@ export function isValidEmail(email: string): boolean {
 
 // Validação de telefone brasileiro
 export function isValidPhone(phone: string): boolean {
-  const cleanPhone = phone.replace(/[^\d]/g, '');
-  return /^\d{10,11}$/.test(cleanPhone);
+  const cleanPhone = phone.replace(/[^\d]/g, '')
+  return /^\d{10,11}$/.test(cleanPhone)
 }
 
 // Validação de email (alias para compatibilidade)
 export function validateEmail(email: string): boolean {
-  return isValidEmail(email);
+  return isValidEmail(email)
 }
 
 // Sanitização de dados médicos
-export function sanitizeMedicalFormData(data: Record<string, any>): Record<string, any> {
-  const sanitized: Record<string, any> = {};
-  
+export function sanitizeMedicalFormData(
+  data: Record<string, any>
+): Record<string, any> {
+  const sanitized: Record<string, any> = {}
+
   for (const [key, value] of Object.entries(data)) {
     if (typeof value === 'string') {
-      sanitized[key] = sanitizeText(value);
+      sanitized[key] = sanitizeText(value)
     } else if (typeof value === 'object' && value !== null) {
-      sanitized[key] = sanitizeMedicalFormData(value);
+      sanitized[key] = sanitizeMedicalFormData(value)
     } else {
-      sanitized[key] = value;
+      sanitized[key] = value
     }
   }
-  
-  return sanitized;
+
+  return sanitized
 }
 
 // Validação de CPF
 export function isValidCPF(cpf: string): boolean {
   const cleanCPF = cpf.replace(/\D/g, '')
-  
+
   if (cleanCPF.length !== 11 || /^(\d)\1{10}$/.test(cleanCPF)) {
     return false
   }
-  
+
   let sum = 0
   for (let i = 0; i < 9; i++) {
     sum += parseInt(cleanCPF.charAt(i)) * (10 - i)
   }
-  
+
   let remainder = (sum * 10) % 11
   if (remainder === 10 || remainder === 11) remainder = 0
   if (remainder !== parseInt(cleanCPF.charAt(9))) return false
-  
+
   sum = 0
   for (let i = 0; i < 10; i++) {
     sum += parseInt(cleanCPF.charAt(i)) * (11 - i)
   }
-  
+
   remainder = (sum * 10) % 11
   if (remainder === 10 || remainder === 11) remainder = 0
-  
+
   return remainder === parseInt(cleanCPF.charAt(10))
 }
 
@@ -104,42 +104,42 @@ export function checkRateLimit(
 ): { allowed: boolean; remaining: number; resetTime: number } {
   const now = Date.now()
   const windowStart = now - windowMs
-  
+
   // Limpar entradas antigas
   for (const [key, value] of rateLimitMap.entries()) {
     if (value.resetTime < now) {
       rateLimitMap.delete(key)
     }
   }
-  
+
   const current = rateLimitMap.get(identifier)
-  
+
   if (!current || current.resetTime < now) {
     // Nova janela de tempo
     rateLimitMap.set(identifier, {
       count: 1,
-      resetTime: now + windowMs
+      resetTime: now + windowMs,
     })
     return {
       allowed: true,
       remaining: maxRequests - 1,
-      resetTime: now + windowMs
+      resetTime: now + windowMs,
     }
   }
-  
+
   if (current.count >= maxRequests) {
     return {
       allowed: false,
       remaining: 0,
-      resetTime: current.resetTime
+      resetTime: current.resetTime,
     }
   }
-  
+
   current.count++
   return {
     allowed: true,
     remaining: maxRequests - current.count,
-    resetTime: current.resetTime
+    resetTime: current.resetTime,
   }
 }
 
@@ -150,16 +150,18 @@ export const medicalValidators = {
   age: (value: number): boolean => value >= 0 && value <= 150,
   bloodPressure: {
     systolic: (value: number): boolean => value >= 50 && value <= 300,
-    diastolic: (value: number): boolean => value >= 30 && value <= 200
+    diastolic: (value: number): boolean => value >= 30 && value <= 200,
   },
   heartRate: (value: number): boolean => value >= 30 && value <= 250,
-  temperature: (value: number): boolean => value >= 30 && value <= 45
+  temperature: (value: number): boolean => value >= 30 && value <= 45,
 }
 
 // Sanitização de dados de formulário médico
-export function sanitizeMedicalForm(data: Record<string, any>): Record<string, any> {
+export function sanitizeMedicalForm(
+  data: Record<string, any>
+): Record<string, any> {
   const sanitized: Record<string, any> = {}
-  
+
   for (const [key, value] of Object.entries(data)) {
     if (typeof value === 'string') {
       sanitized[key] = sanitizeText(value)
@@ -179,7 +181,7 @@ export function sanitizeMedicalForm(data: Record<string, any>): Record<string, a
       sanitized[key] = value
     }
   }
-  
+
   return sanitized
 }
 
@@ -188,9 +190,11 @@ export function generateSecureToken(length: number = 32): string {
   if (typeof window !== 'undefined' && window.crypto) {
     const array = new Uint8Array(length)
     window.crypto.getRandomValues(array)
-    return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('')
+    return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join(
+      ''
+    )
   }
-  
+
   // Fallback para Node.js
   const crypto = require('crypto')
   return crypto.randomBytes(length).toString('hex')
@@ -212,5 +216,5 @@ export default {
   medicalValidators,
   sanitizeMedicalForm,
   generateSecureToken,
-  validateSession
+  validateSession,
 }

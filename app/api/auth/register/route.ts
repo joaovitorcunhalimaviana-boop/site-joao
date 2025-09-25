@@ -6,11 +6,11 @@ import { z } from 'zod'
 function getClientIP(request: NextRequest): string {
   const forwarded = request.headers.get('x-forwarded-for')
   const realIP = request.headers.get('x-real-ip')
-  
+
   if (forwarded) {
     return forwarded.split(',')[0].trim()
   }
-  
+
   return realIP || 'unknown'
 }
 
@@ -18,13 +18,13 @@ export async function POST(request: NextRequest) {
   try {
     const clientIP = getClientIP(request)
     const userAgent = request.headers.get('user-agent') || 'Unknown'
-    
+
     // Parse do corpo da requisição
     const body = await request.json()
-    
+
     // Validação dos dados
     const validation = validateData(RegisterSchema, body)
-    
+
     if (!validation.success) {
       await AuditService.log({
         action: 'REGISTER_FAILED_VALIDATION',
@@ -32,14 +32,14 @@ export async function POST(request: NextRequest) {
         details: JSON.stringify({ errors: validation.errors }),
         severity: 'LOW',
         ipAddress: clientIP,
-        userAgent
+        userAgent,
       })
-      
+
       return NextResponse.json(
         {
           success: false,
           error: 'Dados de registro inválidos',
-          errors: validation.errors
+          errors: validation.errors,
         },
         { status: 400 }
       )
@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
 
     // Verificar se o email já existe
     const existingUser = await prisma.user.findUnique({
-      where: { email: email.toLowerCase() }
+      where: { email: email.toLowerCase() },
     })
 
     if (existingUser) {
@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
         details: JSON.stringify({ email }),
         severity: 'MEDIUM',
         ipAddress: clientIP,
-        userAgent
+        userAgent,
       })
 
       return NextResponse.json(
@@ -81,15 +81,15 @@ export async function POST(request: NextRequest) {
         role: role as any,
         isActive: true,
         createdAt: new Date(),
-        updatedAt: new Date()
+        updatedAt: new Date(),
       },
       select: {
         id: true,
         name: true,
         email: true,
         role: true,
-        createdAt: true
-      }
+        createdAt: true,
+      },
     })
 
     // Log de registro bem-sucedido
@@ -97,19 +97,22 @@ export async function POST(request: NextRequest) {
       userId: user.id,
       action: 'USER_REGISTERED',
       resource: 'Auth',
-      details: JSON.stringify({ 
+      details: JSON.stringify({
         email: user.email,
         role: user.role,
-        name: user.name
+        name: user.name,
       }),
       severity: 'LOW',
       ipAddress: clientIP,
-      userAgent
+      userAgent,
     })
 
     // Gerar tokens com configuração específica para médicos
-    const { accessToken, refreshToken } = AuthService.generateTokens(user.id, user.role)
-    
+    const { accessToken, refreshToken } = AuthService.generateTokens(
+      user.id,
+      user.role
+    )
+
     // Salvar refresh token
     await AuthService.saveRefreshToken(user.id, refreshToken)
 
@@ -122,9 +125,9 @@ export async function POST(request: NextRequest) {
         name: user.name,
         email: user.email,
         role: user.role,
-        createdAt: user.createdAt
+        createdAt: user.createdAt,
       },
-      accessToken
+      accessToken,
     })
 
     // Configurar cookie do refresh token
@@ -133,30 +136,31 @@ export async function POST(request: NextRequest) {
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict' as const,
       maxAge: 7 * 24 * 60 * 60, // 7 dias
-      path: '/'
+      path: '/',
     }
 
     response.cookies.set('refreshToken', refreshToken, cookieOptions)
 
     return response
-
   } catch (error) {
     console.error('Erro no registro:', error)
-    
+
     await AuditService.log({
       action: 'REGISTER_ERROR',
       resource: 'Auth',
-      details: JSON.stringify({ error: error instanceof Error ? error.message : 'Unknown error' }),
+      details: JSON.stringify({
+        error: error instanceof Error ? error.message : 'Unknown error',
+      }),
       severity: 'HIGH',
       ipAddress: getClientIP(request),
-      userAgent: request.headers.get('user-agent') || 'Unknown'
+      userAgent: request.headers.get('user-agent') || 'Unknown',
     })
 
     return NextResponse.json(
       {
         success: false,
         error: 'Erro interno do servidor',
-        code: 'INTERNAL_SERVER_ERROR'
+        code: 'INTERNAL_SERVER_ERROR',
       },
       { status: 500 }
     )

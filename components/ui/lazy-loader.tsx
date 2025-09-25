@@ -12,20 +12,26 @@ interface LoadingSpinnerProps {
 }
 
 // Componente de loading personalizado
-export function LoadingSpinner({ size = 'md', className, text }: LoadingSpinnerProps) {
+export function LoadingSpinner({
+  size = 'md',
+  className,
+  text,
+}: LoadingSpinnerProps) {
   const sizeClasses = {
     sm: 'h-4 w-4',
     md: 'h-8 w-8',
-    lg: 'h-12 w-12'
+    lg: 'h-12 w-12',
   }
 
   return (
-    <div className={cn('flex flex-col items-center justify-center p-8', className)}>
-      <Loader2 className={cn('animate-spin text-blue-600', sizeClasses[size])} />
+    <div
+      className={cn('flex flex-col items-center justify-center p-8', className)}
+    >
+      <Loader2
+        className={cn('animate-spin text-blue-600', sizeClasses[size])}
+      />
       {text && (
-        <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-          {text}
-        </p>
+        <p className='mt-2 text-sm text-gray-600 dark:text-gray-400'>{text}</p>
       )}
     </div>
   )
@@ -40,19 +46,25 @@ interface LazyWrapperProps {
 }
 
 // Componente de erro padrão
-function DefaultErrorFallback({ error, retry }: { error: Error; retry: () => void }) {
+function DefaultErrorFallback({
+  error,
+  retry,
+}: {
+  error: Error
+  retry: () => void
+}) {
   return (
-    <div className="flex flex-col items-center justify-center p-8 text-center">
-      <div className="rounded-lg bg-red-50 p-4 dark:bg-red-900/20">
-        <h3 className="text-lg font-semibold text-red-800 dark:text-red-200">
+    <div className='flex flex-col items-center justify-center p-8 text-center'>
+      <div className='rounded-lg bg-red-50 p-4 dark:bg-red-900/20'>
+        <h3 className='text-lg font-semibold text-red-800 dark:text-red-200'>
           Erro ao carregar componente
         </h3>
-        <p className="mt-2 text-sm text-red-600 dark:text-red-300">
+        <p className='mt-2 text-sm text-red-600 dark:text-red-300'>
           {error.message || 'Ocorreu um erro inesperado'}
         </p>
         <button
           onClick={retry}
-          className="mt-4 rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+          className='mt-4 rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2'
         >
           Tentar novamente
         </button>
@@ -70,13 +82,13 @@ export function useLazyComponent<T extends ComponentType<any>>(
     fallback: CustomFallback,
     errorFallback: CustomErrorFallback = DefaultErrorFallback,
     className,
-    loadingText = 'Carregando...'
+    loadingText = 'Carregando...',
   } = options
 
   const LazyComponent = lazy(importFn)
-  const FallbackComponent = CustomFallback || (() => (
-    <LoadingSpinner className={className} text={loadingText} />
-  ))
+  const FallbackComponent =
+    CustomFallback ||
+    (() => <LoadingSpinner className={className} text={loadingText} />)
 
   return function WrappedLazyComponent(props: React.ComponentProps<T>) {
     return (
@@ -189,11 +201,11 @@ export function LazyImage({
     <div className={cn('relative overflow-hidden', className)}>
       {/* Placeholder enquanto carrega */}
       {!isLoaded && !hasError && (
-        <div className="absolute inset-0 flex items-center justify-center bg-gray-100 dark:bg-gray-800">
-          <LoadingSpinner size="sm" />
+        <div className='absolute inset-0 flex items-center justify-center bg-gray-100 dark:bg-gray-800'>
+          <LoadingSpinner size='sm' />
         </div>
       )}
-      
+
       {/* Imagem principal */}
       <img
         ref={imgRef}
@@ -208,13 +220,13 @@ export function LazyImage({
         onError={handleError}
         {...props}
       />
-      
+
       {/* Fallback em caso de erro */}
       {hasError && (
-        <div className="absolute inset-0 flex items-center justify-center bg-gray-100 dark:bg-gray-800">
-          <div className="text-center">
-            <div className="text-gray-400 dark:text-gray-600">📷</div>
-            <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+        <div className='absolute inset-0 flex items-center justify-center bg-gray-100 dark:bg-gray-800'>
+          <div className='text-center'>
+            <div className='text-gray-400 dark:text-gray-600'>📷</div>
+            <p className='mt-1 text-xs text-gray-500 dark:text-gray-400'>
               Erro ao carregar
             </p>
           </div>
@@ -250,7 +262,7 @@ export function LazySection({
   className,
   threshold = 0.1,
   rootMargin = '50px',
-  fallback
+  fallback,
 }: LazySectionProps) {
   const [isVisible, setIsVisible] = React.useState(false)
   const sectionRef = React.useRef<HTMLDivElement>(null)
@@ -275,7 +287,7 @@ export function LazySection({
 
   return (
     <div ref={sectionRef} className={className}>
-      {isVisible ? children : (fallback || <LoadingSpinner />)}
+      {isVisible ? children : fallback || <LoadingSpinner />}
     </div>
   )
 }
@@ -290,24 +302,24 @@ export const LazyPresets = {
   // Para componentes de dashboard
   dashboard: {
     loadingText: 'Carregando dashboard...',
-    className: 'min-h-[400px]'
+    className: 'min-h-[400px]',
   },
-  
+
   // Para modais
   modal: {
     loadingText: 'Carregando...',
-    className: 'min-h-[200px]'
+    className: 'min-h-[200px]',
   },
-  
+
   // Para páginas completas
   page: {
     loadingText: 'Carregando página...',
-    className: 'min-h-screen'
+    className: 'min-h-screen',
   },
-  
+
   // Para componentes pequenos
   component: {
     loadingText: '',
-    className: 'min-h-[100px]'
-  }
+    className: 'min-h-[100px]',
+  },
 }

@@ -221,7 +221,7 @@ export default function GlobalSchema() {
         type='application/ld+json'
         strategy='afterInteractive'
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify(organizationSchema)
+          __html: JSON.stringify(organizationSchema),
         }}
       />
       <Script
@@ -229,7 +229,7 @@ export default function GlobalSchema() {
         type='application/ld+json'
         strategy='afterInteractive'
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify(websiteSchema)
+          __html: JSON.stringify(websiteSchema),
         }}
       />
     </>

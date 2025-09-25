@@ -8,6 +8,10 @@ import {
   PrinterIcon,
   ExclamationTriangleIcon,
 } from '@heroicons/react/24/outline'
+import {
+  formatDateToBrazilian,
+  formatDateTimeToBrazilian,
+} from '@/lib/date-utils'
 
 interface ControlledMedication {
   id: string
@@ -101,7 +105,7 @@ export default function SpecialPrescriptionForm({
       medications: medications.filter(med => med.name.trim() !== ''),
       generalInstructions,
       date: new Date().toISOString(),
-      createdAt: new Date().toLocaleString('pt-BR'),
+      createdAt: formatDateTimeToBrazilian(new Date()),
     }
     onSave?.(prescription)
     alert('Receituário especial salvo com sucesso!')
@@ -117,7 +121,7 @@ export default function SpecialPrescriptionForm({
       medications: medications.filter(med => med.name.trim() !== ''),
       generalInstructions,
       date: new Date().toISOString(),
-      createdAt: new Date().toLocaleString('pt-BR'),
+      createdAt: formatDateTimeToBrazilian(new Date()),
     }
     onPrint?.(prescription)
 
@@ -170,7 +174,7 @@ export default function SpecialPrescriptionForm({
           <strong>Paciente:</strong> ${prescription.patientName}<br>
           <strong>Idade:</strong> ${prescription.patientAge} anos<br>
           <strong>Endereço:</strong> ${prescription.patientAddress}<br>
-          <strong>Data:</strong> ${new Date().toLocaleDateString('pt-BR')}
+          <strong>Data:</strong> ${formatDateToBrazilian(new Date())}
         </div>
         
         <div class="warning">
@@ -213,8 +217,8 @@ export default function SpecialPrescriptionForm({
           <div>${prescription.doctorName}</div>
           <div>CRM: 12831-CRMPB</div>
           <div style="margin-top: 20px; font-size: 12px; color: #666;">
-            Data de emissão: ${new Date().toLocaleDateString('pt-BR')}<br>
-            Válido até: ${new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString('pt-BR')}
+            Data de emissão: ${formatDateToBrazilian(new Date())}<br>
+            Válido até: ${formatDateToBrazilian(new Date(Date.now() + 30 * 24 * 60 * 60 * 1000))}
           </div>
         </div>
       </body>

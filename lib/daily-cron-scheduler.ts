@@ -1,6 +1,11 @@
 // Sistema de agendamento automático diário às 20:00
-import { getTodayISO, formatDateToBrazilian } from './date-utils'
-import { getAppointmentsByDate } from './unified-appointment-system'
+import { getDailyAgendaWithSurgeries } from './unified-appointment-system'
+import {
+  getBrasiliaDate,
+  getTodayISO,
+  formatDateToISO,
+  getBrasiliaTimestamp,
+} from './date-utils'
 
 interface CronJob {
   id: string
@@ -17,12 +22,12 @@ let cronInterval: NodeJS.Timeout | null = null
  */
 export function startDailyCronScheduler(): void {
   console.log('🚀 Iniciando sistema de cron job diário às 20:00...')
-  
+
   // Verificar a cada minuto se chegou às 20:00
   cronInterval = setInterval(async () => {
     await checkAndSendDailyAgendas()
   }, 60000) // Verificar a cada 60 segundos
-  
+
   console.log('✅ Sistema de cron job iniciado (verificação a cada minuto)')
 }
 
@@ -42,38 +47,38 @@ export function stopDailyCronScheduler(): void {
  */
 async function checkAndSendDailyAgendas(): Promise<void> {
   try {
-    const now = new Date()
-    const brasiliaTime = new Date(now.toLocaleString('en-US', { timeZone: 'America/Sao_Paulo' }))
-    
+    const brasiliaTime = getBrasiliaDate()
+
     // Verificar se é exatamente 20:00 (com tolerância de 1 minuto)
     const currentHour = brasiliaTime.getHours()
     const currentMinute = brasiliaTime.getMinutes()
-    
+
     if (currentHour === 20 && currentMinute === 0) {
       console.log('🕐 20:00 detectado - enviando agendas do dia seguinte...')
-      
-      // Calcular data de amanhã
+
+      // Calcular data de amanhã usando funções de Brasília
       const tomorrow = new Date(brasiliaTime)
       tomorrow.setDate(tomorrow.getDate() + 1)
-      const tomorrowISO = tomorrow.toISOString().split('T')[0]
-      
+      const tomorrowISO = formatDateToISO(tomorrow)
+
       // Verificar se já foi enviado hoje
       const todayISO = getTodayISO()
-      const alreadySent = cronJobs.some(job => 
-        job.targetDate === tomorrowISO && 
-        job.status === 'sent' && 
-        job.scheduledTime.toISOString().split('T')[0] === todayISO
+      const alreadySent = cronJobs.some(
+        job =>
+          job.targetDate === tomorrowISO &&
+          job.status === 'sent' &&
+          job.scheduledTime.toISOString().split('T')[0] === todayISO
       )
-      
+
       if (!alreadySent) {
         await sendDailyAgendaForDate(tomorrowISO)
-        
+
         // Registrar como enviado
         cronJobs.push({
           id: `daily-${todayISO}-${tomorrowISO}`,
-          scheduledTime: new Date(),
+          scheduledTime: getBrasiliaDate(),
           targetDate: tomorrowISO,
-          status: 'sent'
+          status: 'sent',
         })
       } else {
         console.log('ℹ️ Agenda para amanhã já foi enviada hoje')
@@ -89,50 +94,61 @@ async function checkAndSendDailyAgendas(): Promise<void> {
  */
 async function sendDailyAgendaForDate(targetDate: string): Promise<void> {
   try {
-    console.log(`📅 Enviando agenda diária para ${targetDate}...`)
-    
-    // Buscar consultas para a data
-    const appointments = await getAppointmentsByDate(targetDate)
-    
-    if (appointments.length === 0) {
-      console.log(`ℹ️ Nenhuma consulta encontrada para ${targetDate} - não enviando agenda`)
+    console.log(`📅 Enviando agenda diária para: ${targetDate}`)
+
+    // Usar a nova função que inclui cirurgias
+    const dailyAgenda = await getDailyAgendaWithSurgeries(targetDate)
+
+    if (
+      !dailyAgenda ||
+      (!dailyAgenda.appointments.length && !dailyAgenda.surgeries.length)
+    ) {
+      console.log(
+        `📭 Nenhuma consulta ou cirurgia encontrada para ${targetDate}`
+      )
       return
     }
-    
-    // Enviar via API
-    const response = await fetch('/api/daily-agenda', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        targetDate,
-        appointments: appointments.map(apt => ({
-          patientName: apt.patientName,
-          appointmentTime: apt.appointmentTime,
-          whatsapp: apt.patientWhatsapp,
-          insuranceType: apt.insuranceType === 'particular' ? 'private' : 'unimed'
-        }))
-      })
-    })
-    
-    if (response.ok) {
-      const result = await response.json()
-      console.log(`✅ Agenda diária enviada com sucesso para ${targetDate}!`)
-      console.log(`👥 Total de pacientes: ${result.totalPatients}`)
-    } else {
-      console.error(`❌ Erro ao enviar agenda para ${targetDate}: ${response.status}`)
+
+    console.log(`👥 Consultas encontradas: ${dailyAgenda.appointments.length}`)
+    console.log(`🏥 Cirurgias encontradas: ${dailyAgenda.surgeries.length}`)
+
+    // Enviar para a API de agenda diária
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
+    const response = await fetch(
+      `${baseUrl}/api/daily-agenda`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          targetDate,
+          appointments: dailyAgenda.appointments,
+        }),
+      }
+    )
+
+    if (!response.ok) {
+      throw new Error(`Erro na API: ${response.status}`)
     }
-    
+
+    const result = await response.json()
+    console.log(
+      `✅ Agenda diária enviada com sucesso para ${targetDate}:`,
+      result
+    )
   } catch (error) {
-    console.error(`❌ Erro ao enviar agenda para ${targetDate}:`, error)
+    console.error(`❌ Erro ao enviar agenda diária para ${targetDate}:`, error)
+    throw error
   }
 }
 
 /**
  * Agenda manualmente uma agenda para uma data específica
  */
-export async function scheduleManualDailyAgenda(targetDate: string): Promise<void> {
+export async function scheduleManualDailyAgenda(
+  targetDate: string
+): Promise<void> {
   console.log(`📋 Agendamento manual de agenda para ${targetDate}...`)
   await sendDailyAgendaForDate(targetDate)
 }
@@ -146,14 +162,15 @@ export function getCronJobStats(): {
   pendingJobs: number
 } {
   const todayISO = getTodayISO()
-  
+
   return {
     totalJobs: cronJobs.length,
-    sentToday: cronJobs.filter(job => 
-      job.status === 'sent' && 
-      job.scheduledTime.toISOString().split('T')[0] === todayISO
+    sentToday: cronJobs.filter(
+      job =>
+        job.status === 'sent' &&
+        job.scheduledTime.toISOString().split('T')[0] === todayISO
     ).length,
-    pendingJobs: cronJobs.filter(job => job.status === 'pending').length
+    pendingJobs: cronJobs.filter(job => job.status === 'pending').length,
   }
 }
 
@@ -161,12 +178,12 @@ export function getCronJobStats(): {
  * Limpa jobs antigos (mais de 7 dias)
  */
 export function cleanupOldCronJobs(): void {
-  const sevenDaysAgo = new Date()
+  const sevenDaysAgo = getBrasiliaDate()
   sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
-  
+
   const initialCount = cronJobs.length
   cronJobs = cronJobs.filter(job => job.scheduledTime > sevenDaysAgo)
-  
+
   const removedCount = initialCount - cronJobs.length
   if (removedCount > 0) {
     console.log(`🧹 Limpeza: ${removedCount} jobs antigos removidos`)
@@ -177,18 +194,19 @@ export function cleanupOldCronJobs(): void {
  * Força o envio da agenda para amanhã (para testes)
  */
 export async function forceSendTomorrowAgenda(): Promise<void> {
-  const tomorrow = new Date()
+  const tomorrow = getBrasiliaDate()
   tomorrow.setDate(tomorrow.getDate() + 1)
-  const tomorrowISO = tomorrow.toISOString().split('T')[0]
-  
+  const tomorrowISO = formatDateToISO(tomorrow)
+
   console.log('🔧 Forçando envio da agenda de amanhã...')
   await sendDailyAgendaForDate(tomorrowISO)
 }
 
 // Iniciar automaticamente quando o módulo for carregado
-if (typeof window === 'undefined') { // Apenas no servidor
+if (typeof window === 'undefined') {
+  // Apenas no servidor
   startDailyCronScheduler()
-  
+
   // Limpeza automática a cada 24 horas
   setInterval(cleanupOldCronJobs, 24 * 60 * 60 * 1000)
 }

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import fs from 'fs'
 import path from 'path'
+import { getTodayISO, getTimestampISO } from '@/lib/date-utils'
 
 interface AgendaItem {
   id: string
@@ -70,8 +71,7 @@ function readPatients() {
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
-    const date =
-      searchParams.get('date') || new Date().toISOString().split('T')[0]
+    const date = searchParams.get('date') || getTodayISO()
     const status = searchParams.get('status')
 
     const agenda = readAgenda()
@@ -142,7 +142,7 @@ export async function POST(request: NextRequest) {
       status: 'pending',
       type,
       notes: notes || '',
-      createdAt: new Date().toISOString(),
+      createdAt: getTimestampISO(),
     }
 
     agenda.push(newAgendaItem)
@@ -187,7 +187,7 @@ export async function PUT(request: NextRequest) {
       if (status) item.status = status
       if (time) item.time = time
       if (notes !== undefined) item.notes = notes
-      item.updatedAt = new Date().toISOString()
+      item.updatedAt = getTimestampISO()
     }
 
     saveAgenda(agenda)

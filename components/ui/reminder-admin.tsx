@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { formatDateToBrazilian } from '@/lib/date-utils'
 import {
   ClockIcon,
   BellIcon,
@@ -411,15 +412,14 @@ const ReminderAdmin: React.FC = () => {
                   </div>
                   <div className='text-right'>
                     <p className='text-gray-300 text-sm'>
-                      {new Date(reminder.scheduledTime).toLocaleDateString(
-                        'pt-BR'
-                      )}
+                      {formatDateToBrazilian(new Date(reminder.scheduledTime))}
                     </p>
                     <p className='text-gray-400 text-xs'>
-                      {new Date(reminder.scheduledTime).toLocaleTimeString(
-                        'pt-BR',
-                        { hour: '2-digit', minute: '2-digit' }
-                      )}
+                      {new Intl.DateTimeFormat('pt-BR', {
+                        timeZone: 'America/Sao_Paulo',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      }).format(new Date(reminder.scheduledTime))}
                     </p>
                   </div>
                 </div>

@@ -255,11 +255,11 @@ export default function LocalSEOSchema() {
 
   return (
     <Script
-      id="local-seo-schema"
-      type="application/ld+json"
-      strategy="afterInteractive"
+      id='local-seo-schema'
+      type='application/ld+json'
+      strategy='afterInteractive'
       dangerouslySetInnerHTML={{
-        __html: JSON.stringify(localBusinessSchema)
+        __html: JSON.stringify(localBusinessSchema),
       }}
     />
   )

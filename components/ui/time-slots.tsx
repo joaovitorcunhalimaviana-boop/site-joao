@@ -48,12 +48,13 @@ const TimeSlots: React.FC<TimeSlotsProps> = ({
   const afternoonSlots = timeSlots
 
   const formatDate = (date: Date) => {
-    return date.toLocaleDateString('pt-BR', {
+    return new Intl.DateTimeFormat('pt-BR', {
+      timeZone: 'America/Sao_Paulo',
       weekday: 'long',
       year: 'numeric',
       month: 'long',
       day: 'numeric',
-    })
+    }).format(date)
   }
 
   const handleTimeClick = (time: string, available: boolean) => {

@@ -151,12 +151,15 @@ export const dateFormatters = {
 
   // Formatar data e hora brasileira
   brazilianDateTime: (date: Date): string => {
-    return date.toLocaleString('pt-BR')
+    return date.toLocaleString('pt-BR', {
+      timeZone: 'America/Sao_Paulo',
+    })
   },
 
   // Formatar hora brasileira
   brazilianTime: (date: Date): string => {
     return date.toLocaleTimeString('pt-BR', {
+      timeZone: 'America/Sao_Paulo',
       hour: '2-digit',
       minute: '2-digit',
     })

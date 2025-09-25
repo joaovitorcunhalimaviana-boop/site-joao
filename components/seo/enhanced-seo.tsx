@@ -99,13 +99,13 @@ export default function EnhancedSEO({
       {/* Structured Data */}
       {structuredData && (
         <Script
-        id="enhanced-seo-schema"
-        type="application/ld+json"
-        strategy="afterInteractive"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify(structuredData)
-        }}
-      />
+          id='enhanced-seo-schema'
+          type='application/ld+json'
+          strategy='afterInteractive'
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(structuredData),
+          }}
+        />
       )}
 
       {/* Breadcrumb Structured Data */}

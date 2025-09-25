@@ -12,6 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
+import { formatDateTimeToBrazilian } from '@/lib/date-utils'
 
 interface MedicalImage {
   id: string
@@ -63,7 +64,7 @@ export default function MedicalImageUpload({
           preview: e.target?.result as string,
           description: '',
           category: 'exame',
-          uploadedAt: new Date().toLocaleString('pt-BR'),
+          uploadedAt: formatDateTimeToBrazilian(new Date()),
         }
         setImages(prev => [...prev, newImage])
       }

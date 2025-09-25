@@ -3,6 +3,7 @@
 ## 🔐 Usuários Cadastrados
 
 ### Médico (Área Médica)
+
 - **Email:** `joao.viana@clinica.com`
 - **Senha:** `123456` ✅ **ATUALIZADA E TESTADA**
 - **Função:** Doutor/Administrador
@@ -10,6 +11,7 @@
 - **CRM:** CRM/SP 123456
 
 ### Secretária (Área Administrativa)
+
 - **Email:** `secretaria@clinica.com`
 - **Senha:** `123456` ✅ **ATUALIZADA E TESTADA**
 - **Função:** Secretária
@@ -42,4 +44,5 @@ node scripts/seed-users.js
 ```
 
 ---
-*Documento gerado automaticamente - Sistema Médico v1.0*
+
+_Documento gerado automaticamente - Sistema Médico v1.0_

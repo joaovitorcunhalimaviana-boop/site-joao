@@ -3,8 +3,10 @@ import { Metadata } from 'next'
 // Configuração base de SEO
 export const BASE_SEO_CONFIG = {
   siteName: 'Dr. João Vítor Viana - Coloproctologista em João Pessoa/PB',
-  siteUrl: process.env['NEXT_PUBLIC_SITE_URL'] || 'https://drjoaovitorviana.com.br',
-  description: 'Dr. João Vítor Viana, especialista em coloproctologia em João Pessoa/PB. Tratamento de hemorroidas, fissuras anais, fístulas e outras condições. Agende sua consulta.',
+  siteUrl:
+    process.env['NEXT_PUBLIC_SITE_URL'] || 'https://drjoaovitorviana.com.br',
+  description:
+    'Dr. João Vítor Viana, especialista em coloproctologia em João Pessoa/PB. Tratamento de hemorroidas, fissuras anais, fístulas e outras condições. Agende sua consulta.',
   keywords: [
     'coloproctologista joão pessoa',
     'dr joão vítor viana',
@@ -19,7 +21,7 @@ export const BASE_SEO_CONFIG = {
     'cirurgia colorretal',
     'consulta proctologia',
     'especialista intestino',
-    'médico coloproctologista pb'
+    'médico coloproctologista pb',
   ],
   author: 'Dr. João Vítor Viana',
   locale: 'pt_BR',

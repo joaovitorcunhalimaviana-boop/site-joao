@@ -1,50 +1,61 @@
 'use client'
 
 import Script from 'next/script'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 
 interface GoogleAnalyticsProps {
   measurementId?: string
 }
 
-export default function GoogleAnalytics({ measurementId }: GoogleAnalyticsProps) {
-  const GA_MEASUREMENT_ID = measurementId || process.env['NEXT_PUBLIC_GA_MEASUREMENT_ID']
+export default function GoogleAnalytics({
+  measurementId,
+}: GoogleAnalyticsProps) {
+  const [isLoaded, setIsLoaded] = useState(false)
+  const [hasError, setHasError] = useState(false)
+  const GA_MEASUREMENT_ID =
+    measurementId || process.env['NEXT_PUBLIC_GA_MEASUREMENT_ID']
 
   useEffect(() => {
-    if (GA_MEASUREMENT_ID && typeof window !== 'undefined') {
-      // Configurar dataLayer
-      window.dataLayer = window.dataLayer || []
-      
-      // Função gtag
-      function gtag(...args: any[]) {
-        window.dataLayer.push(args)
+    if (GA_MEASUREMENT_ID && typeof window !== 'undefined' && !isLoaded && !hasError) {
+      try {
+        // Configurar dataLayer
+        window.dataLayer = window.dataLayer || []
+
+        // Função gtag
+        function gtag(...args: any[]) {
+          window.dataLayer.push(args)
+        }
+
+        // Configuração inicial
+        gtag('js', new Date())
+        gtag('config', GA_MEASUREMENT_ID, {
+          page_title: document.title,
+          page_location: window.location.href,
+          // Configurações de privacidade
+          anonymize_ip: true,
+          allow_google_signals: false,
+          allow_ad_personalization_signals: false,
+        })
+
+        // Eventos personalizados para site médico
+        gtag('event', 'page_view', {
+          page_title: document.title,
+          page_location: window.location.href,
+          content_group1: 'Medical Website',
+          content_group2: 'Coloproctology',
+        })
+
+        // Disponibilizar gtag globalmente
+        ;(window as any).gtag = gtag
+        setIsLoaded(true)
+      } catch (error) {
+        console.warn('Error initializing Google Analytics:', error)
+        setHasError(true)
       }
-
-      // Configuração inicial
-      gtag('js', new Date())
-      gtag('config', GA_MEASUREMENT_ID, {
-        page_title: document.title,
-        page_location: window.location.href,
-        // Configurações de privacidade
-        anonymize_ip: true,
-        allow_google_signals: false,
-        allow_ad_personalization_signals: false,
-      })
-
-      // Eventos personalizados para site médico
-      gtag('event', 'page_view', {
-        page_title: document.title,
-        page_location: window.location.href,
-        content_group1: 'Medical Website',
-        content_group2: 'Coloproctology',
-      })
-
-      // Disponibilizar gtag globalmente
-      ;(window as any).gtag = gtag
     }
-  }, [GA_MEASUREMENT_ID])
+  }, [GA_MEASUREMENT_ID, isLoaded, hasError])
 
-  if (!GA_MEASUREMENT_ID) {
+  if (!GA_MEASUREMENT_ID || hasError) {
     return null
   }
 
@@ -52,11 +63,15 @@ export default function GoogleAnalytics({ measurementId }: GoogleAnalyticsProps)
     <>
       <Script
         src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
-        strategy="afterInteractive"
+        strategy='lazyOnload'
+        onLoad={() => setIsLoaded(true)}
+        onError={(e) => {
+          console.warn('Google Analytics failed to load:', e)
+        }}
       />
       <Script
-        id="google-analytics"
-        strategy="afterInteractive"
+        id='google-analytics'
+        strategy='lazyOnload'
         dangerouslySetInnerHTML={{
           __html: `
             window.dataLayer = window.dataLayer || [];
@@ -69,7 +84,7 @@ export default function GoogleAnalytics({ measurementId }: GoogleAnalyticsProps)
               allow_google_signals: false,
               allow_ad_personalization_signals: false,
             });
-          `
+          `,
         }}
       />
     </>
@@ -91,10 +106,14 @@ export function useGoogleAnalytics() {
 
   const trackPageView = (url: string, title?: string) => {
     if (typeof window !== 'undefined' && (window as any).gtag) {
-      ;(window as any).gtag('config', process.env['NEXT_PUBLIC_GA_MEASUREMENT_ID'], {
-        page_path: url,
-        page_title: title || document.title,
-      })
+      ;(window as any).gtag(
+        'config',
+        process.env['NEXT_PUBLIC_GA_MEASUREMENT_ID'],
+        {
+          page_path: url,
+          page_title: title || document.title,
+        }
+      )
     }
   }
 

@@ -119,7 +119,20 @@ export function isDateInFuture(date: Date | string): boolean {
  * Calcula a idade baseada na data de nascimento (considerando fuso horário de Brasília)
  */
 export function calculateAge(birthDate: Date | string): number {
-  const birth = typeof birthDate === 'string' ? new Date(birthDate) : birthDate
+  let birth: Date
+  
+  if (typeof birthDate === 'string') {
+    // Se for string no formato brasileiro (DD/MM/YYYY), converte para Date
+    if (birthDate.includes('/')) {
+      const [day, month, year] = birthDate.split('/')
+      birth = new Date(parseInt(year), parseInt(month) - 1, parseInt(day))
+    } else {
+      birth = new Date(birthDate)
+    }
+  } else {
+    birth = birthDate
+  }
+  
   const today = getBrasiliaDate()
   let age = today.getFullYear() - birth.getFullYear()
   const monthDiff = today.getMonth() - birth.getMonth()
@@ -136,6 +149,14 @@ export function calculateAge(birthDate: Date | string): number {
  */
 export function getBrasiliaTimestamp(): string {
   return getBrasiliaDate().toISOString()
+}
+
+/**
+ * Obtém o timestamp atual no formato ISO
+ * Alias para getBrasiliaTimestamp para compatibilidade
+ */
+export function getTimestampISO(): string {
+  return getBrasiliaTimestamp()
 }
 
 /**

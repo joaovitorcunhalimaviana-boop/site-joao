@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { DuplicateDetectionService } from '@/lib/duplicate-detection'
 import { AuthService } from '@/lib/database'
 import { z } from 'zod'
+import { getTimestampISO } from '@/lib/date-utils'
 
 // ================================
 // API DE DETECÇÃO DE DUPLICATAS
@@ -11,7 +12,7 @@ const duplicateCheckSchema = z.object({
   cpf: z.string().min(11, 'CPF deve ter pelo menos 11 dígitos'),
   name: z.string().min(2, 'Nome deve ter pelo menos 2 caracteres'),
   phone: z.string().min(10, 'Telefone deve ter pelo menos 10 dígitos'),
-  email: z.string().email('Email inválido').optional()
+  email: z.string().email('Email inválido').optional(),
 })
 
 /**
@@ -23,14 +24,14 @@ export async function POST(request: NextRequest) {
     // Verificar autenticação
     const authHeader = request.headers.get('authorization')
     const token = authHeader?.replace('Bearer ', '')
-    
+
     if (!token) {
       return NextResponse.json(
         { error: 'Token de acesso requerido' },
         { status: 401 }
       )
     }
-    
+
     const authResult = await AuthService.verifyToken(token)
     if (!authResult || !authResult.userId) {
       return NextResponse.json(
@@ -42,12 +43,12 @@ export async function POST(request: NextRequest) {
     // Validar dados de entrada
     const body = await request.json()
     const validation = duplicateCheckSchema.safeParse(body)
-    
+
     if (!validation.success) {
       return NextResponse.json(
-        { 
+        {
           error: 'Dados inválidos',
-          details: validation.error.issues
+          details: validation.error.issues,
         },
         { status: 400 }
       )
@@ -64,19 +65,21 @@ export async function POST(request: NextRequest) {
     )
 
     // Log da verificação para auditoria
-    console.log(`Verificação de duplicata realizada por ${authResult.userId}:`, {
-      cpf: cpf.replace(/\d/g, '*'), // Mascarar CPF no log
-      name,
-      isDuplicate: duplicateResult.isDuplicate,
-      confidence: duplicateResult.confidence,
-      matchedBy: duplicateResult.matchedBy
-    })
+    console.log(
+      `Verificação de duplicata realizada por ${authResult.userId}:`,
+      {
+        cpf: cpf.replace(/\d/g, '*'), // Mascarar CPF no log
+        name,
+        isDuplicate: duplicateResult.isDuplicate,
+        confidence: duplicateResult.confidence,
+        matchedBy: duplicateResult.matchedBy,
+      }
+    )
 
     return NextResponse.json({
       success: true,
-      result: duplicateResult
+      result: duplicateResult,
     })
-
   } catch (error) {
     console.error('Erro na verificação de duplicatas:', error)
     return NextResponse.json(
@@ -95,14 +98,14 @@ export async function GET(request: NextRequest) {
     // Verificar autenticação
     const authHeader = request.headers.get('authorization')
     const token = authHeader?.replace('Bearer ', '')
-    
+
     if (!token) {
       return NextResponse.json(
         { error: 'Token de acesso requerido' },
         { status: 401 }
       )
     }
-    
+
     const authResult = await AuthService.verifyToken(token)
     if (!authResult || !authResult.userId) {
       return NextResponse.json(
@@ -114,34 +117,31 @@ export async function GET(request: NextRequest) {
     // Extrair CPF da URL
     const url = new URL(request.url)
     const cpf = url.searchParams.get('cpf')
-    
+
     if (!cpf) {
-      return NextResponse.json(
-        { error: 'CPF é obrigatório' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'CPF é obrigatório' }, { status: 400 })
     }
 
     // Validar CPF
     if (!DuplicateDetectionService.validateCPF(cpf)) {
       return NextResponse.json(
-        { 
+        {
           error: 'CPF inválido',
-          isValid: false
+          isValid: false,
         },
         { status: 400 }
       )
     }
 
     // Verificar duplicata por CPF
-    const duplicateResult = await DuplicateDetectionService.detectDuplicateByCPF(cpf)
+    const duplicateResult =
+      await DuplicateDetectionService.detectDuplicateByCPF(cpf)
 
     return NextResponse.json({
       success: true,
       cpfValid: true,
-      result: duplicateResult
+      result: duplicateResult,
     })
-
   } catch (error) {
     console.error('Erro na verificação de CPF:', error)
     return NextResponse.json(
@@ -160,14 +160,14 @@ export async function PUT(request: NextRequest) {
     // Verificar autenticação
     const authHeader = request.headers.get('authorization')
     const token = authHeader?.replace('Bearer ', '')
-    
+
     if (!token) {
       return NextResponse.json(
         { error: 'Token de acesso requerido' },
         { status: 401 }
       )
     }
-    
+
     const authResult = await AuthService.verifyToken(token)
     if (!authResult || !authResult.userId) {
       return NextResponse.json(
@@ -204,24 +204,20 @@ export async function PUT(request: NextRequest) {
     )
 
     if (!mergeResult.success) {
-      return NextResponse.json(
-        { error: mergeResult.error },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: mergeResult.error }, { status: 400 })
     }
 
     // Log da mesclagem para auditoria
     console.log(`Pacientes mesclados por ${authResult.userId}:`, {
       keepPatientId,
       removePatientId,
-      timestamp: new Date().toISOString()
+      timestamp: getTimestampISO(),
     })
 
     return NextResponse.json({
       success: true,
-      message: 'Pacientes mesclados com sucesso'
+      message: 'Pacientes mesclados com sucesso',
     })
-
   } catch (error) {
     console.error('Erro na mesclagem de pacientes:', error)
     return NextResponse.json(

@@ -47,12 +47,6 @@ const faqData: FAQItem[] = [
     category: 'consulta',
   },
   {
-    question: 'Qual o melhor tratamento para fissura anal?',
-    answer:
-      'O tratamento da fissura anal pode ser clínico (pomadas, relaxantes musculares, mudanças na dieta) ou cirúrgico nos casos crônicos. Dr. João Vitor Viana avalia cada caso individualmente para definir a melhor abordagem terapêutica.',
-    category: 'tratamento',
-  },
-  {
     question: 'Dr. João Vitor Viana faz colonoscopia?',
     answer:
       'Sim, Dr. João Vitor Viana realiza colonoscopias para diagnóstico e rastreamento de doenças intestinais. O exame é fundamental para detectar pólipos, câncer colorretal e outras alterações do intestino grosso.',

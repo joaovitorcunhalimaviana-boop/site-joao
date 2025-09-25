@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import nodemailer from 'nodemailer'
+import { formatDateTimeToBrazilian } from '@/lib/date-utils'
 
 interface NotificationData {
   fullName: string
@@ -99,7 +100,7 @@ export async function POST(request: NextRequest) {
           
           <div class="footer">
             <p>✅ Agendamento confirmado automaticamente pelo sistema online.</p>
-            <p><small>Recebido em: ${new Date().toLocaleString('pt-BR')}</small></p>
+            <p><small>Recebido em: ${formatDateTimeToBrazilian(new Date())}</small></p>
           </div>
         </div>
       </body>

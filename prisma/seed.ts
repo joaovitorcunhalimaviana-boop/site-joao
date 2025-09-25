@@ -8,7 +8,7 @@ async function main() {
 
   // Criar usuário administrador padrão
   const adminPassword = await hash('admin123', 12)
-  
+
   const admin = await prisma.user.upsert({
     where: { email: 'admin@clinica.com' },
     update: {},
@@ -18,15 +18,15 @@ async function main() {
       name: 'Administrador',
       password: adminPassword,
       role: 'ADMIN',
-      isActive: true
-    }
+      isActive: true,
+    },
   })
 
   console.log('✅ Usuário administrador criado:', admin.email)
 
   // Criar médico padrão
   const doctorPassword = await hash('doctor123', 12)
-  
+
   const doctor = await prisma.user.upsert({
     where: { email: 'medico@clinica.com' },
     update: {},
@@ -37,15 +37,15 @@ async function main() {
       password: doctorPassword,
       role: 'DOCTOR',
       isActive: true,
-      crm: '12345-SP'
-    }
+      crm: '12345-SP',
+    },
   })
 
   console.log('✅ Médico padrão criado:', doctor.email)
 
   // Criar secretária padrão
   const secretaryPassword = await hash('secretary123', 12)
-  
+
   const secretary = await prisma.user.upsert({
     where: { email: 'secretaria@clinica.com' },
     update: {},
@@ -55,8 +55,8 @@ async function main() {
       name: 'Maria Santos',
       password: secretaryPassword,
       role: 'SECRETARY',
-      isActive: true
-    }
+      isActive: true,
+    },
   })
 
   console.log('✅ Secretária padrão criada:', secretary.email)
@@ -75,7 +75,7 @@ async function main() {
       state: 'SP',
       zipCode: '01234-567',
       insuranceType: 'unimed',
-      insurancePlan: 'Unimed Nacional'
+      insurancePlan: 'Unimed Nacional',
     },
     {
       name: 'Carlos Santos',
@@ -89,15 +89,15 @@ async function main() {
       state: 'SP',
       zipCode: '01310-100',
       insuranceType: 'outro',
-      insurancePlan: 'Bradesco Saúde'
-    }
+      insurancePlan: 'Bradesco Saúde',
+    },
   ]
 
   for (const patientData of patients) {
     const patient = await prisma.patient.upsert({
       where: { cpf: patientData.cpf },
       update: {},
-      create: patientData
+      create: patientData,
     })
     console.log('✅ Paciente criado:', patient.name)
   }
@@ -113,28 +113,32 @@ async function main() {
 
   const appointments = [
     {
-      patientId: (await prisma.patient.findFirst({ where: { name: 'Ana Silva' } }))?.id!,
+      patientId: (
+        await prisma.patient.findFirst({ where: { name: 'Ana Silva' } })
+      )?.id!,
       doctorId: doctor.id,
       date: tomorrow,
       time: '09:00',
       type: 'CONSULTATION' as const,
       status: 'SCHEDULED' as const,
-      notes: 'Consulta de rotina'
+      notes: 'Consulta de rotina',
     },
     {
-      patientId: (await prisma.patient.findFirst({ where: { name: 'Carlos Santos' } }))?.id!,
+      patientId: (
+        await prisma.patient.findFirst({ where: { name: 'Carlos Santos' } })
+      )?.id!,
       doctorId: doctor.id,
       date: nextWeek,
       time: '14:30',
       type: 'FOLLOW_UP' as const,
       status: 'SCHEDULED' as const,
-      notes: 'Retorno pós-exame'
-    }
+      notes: 'Retorno pós-exame',
+    },
   ]
 
   for (const appointmentData of appointments) {
     const appointment = await prisma.appointment.create({
-      data: appointmentData
+      data: appointmentData,
     })
     console.log('✅ Agendamento criado para:', appointment.date)
   }
@@ -147,7 +151,7 @@ async function main() {
 }
 
 main()
-  .catch((e) => {
+  .catch(e => {
     console.error('❌ Erro no seed:', e)
     process.exit(1)
   })

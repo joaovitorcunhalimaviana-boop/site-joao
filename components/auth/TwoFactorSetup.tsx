@@ -3,11 +3,24 @@
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
-import { Shield, Smartphone, Key, Copy, Check, AlertTriangle } from 'lucide-react'
+import {
+  Shield,
+  Smartphone,
+  Key,
+  Copy,
+  Check,
+  AlertTriangle,
+} from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import QRCode from 'qrcode'
 
@@ -24,7 +37,9 @@ interface SetupData {
 }
 
 export function TwoFactorSetup({ onComplete, onCancel }: TwoFactorSetupProps) {
-  const [step, setStep] = useState<'setup' | 'verify' | 'backup' | 'complete'>('setup')
+  const [step, setStep] = useState<'setup' | 'verify' | 'backup' | 'complete'>(
+    'setup'
+  )
   const [setupData, setSetupData] = useState<SetupData | null>(null)
   const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string>('')
   const [verificationCode, setVerificationCode] = useState('')
@@ -44,8 +59,8 @@ export function TwoFactorSetup({ onComplete, onCancel }: TwoFactorSetupProps) {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
-        }
+          Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
+        },
       })
 
       if (!response.ok) {
@@ -79,12 +94,12 @@ export function TwoFactorSetup({ onComplete, onCancel }: TwoFactorSetupProps) {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+          Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
         },
         body: JSON.stringify({
           token: verificationCode,
-          mode: 'setup'
-        })
+          mode: 'setup',
+        }),
       })
 
       if (!response.ok) {
@@ -95,7 +110,7 @@ export function TwoFactorSetup({ onComplete, onCancel }: TwoFactorSetupProps) {
       setStep('backup')
       toast({
         title: '2FA Ativado!',
-        description: 'Autenticação de dois fatores configurada com sucesso.'
+        description: 'Autenticação de dois fatores configurada com sucesso.',
       })
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro na verificação')
@@ -110,7 +125,7 @@ export function TwoFactorSetup({ onComplete, onCancel }: TwoFactorSetupProps) {
       setCopiedBackupCodes(true)
       toast({
         title: 'Códigos copiados!',
-        description: 'Códigos de backup copiados para a área de transferência.'
+        description: 'Códigos de backup copiados para a área de transferência.',
       })
     }
   }
@@ -120,7 +135,7 @@ export function TwoFactorSetup({ onComplete, onCancel }: TwoFactorSetupProps) {
       navigator.clipboard.writeText(setupData.manualEntryKey)
       toast({
         title: 'Chave copiada!',
-        description: 'Chave manual copiada para a área de transferência.'
+        description: 'Chave manual copiada para a área de transferência.',
       })
     }
   }
@@ -134,10 +149,10 @@ export function TwoFactorSetup({ onComplete, onCancel }: TwoFactorSetupProps) {
 
   if (isLoading && !setupData) {
     return (
-      <Card className="w-full max-w-md mx-auto">
-        <CardContent className="pt-6">
-          <div className="flex items-center justify-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      <Card className='w-full max-w-md mx-auto'>
+        <CardContent className='pt-6'>
+          <div className='flex items-center justify-center'>
+            <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-primary'></div>
           </div>
         </CardContent>
       </Card>
@@ -145,55 +160,62 @@ export function TwoFactorSetup({ onComplete, onCancel }: TwoFactorSetupProps) {
   }
 
   return (
-    <Card className="w-full max-w-2xl mx-auto">
+    <Card className='w-full max-w-2xl mx-auto'>
       <CardHeader>
-        <div className="flex items-center gap-2">
-          <Shield className="h-6 w-6 text-primary" />
+        <div className='flex items-center gap-2'>
+          <Shield className='h-6 w-6 text-primary' />
           <CardTitle>Configurar Autenticação de Dois Fatores</CardTitle>
         </div>
         <CardDescription>
           Adicione uma camada extra de segurança à sua conta
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className='space-y-6'>
         {error && (
-          <Alert variant="destructive">
-            <AlertTriangle className="h-4 w-4" />
+          <Alert variant='destructive'>
+            <AlertTriangle className='h-4 w-4' />
             <AlertDescription>{error}</AlertDescription>
           </Alert>
         )}
 
         {step === 'setup' && setupData && (
-          <div className="space-y-6">
-            <div className="text-center space-y-4">
-              <h3 className="text-lg font-semibold">1. Escaneie o QR Code</h3>
-              <p className="text-sm text-muted-foreground">
-                Use um aplicativo autenticador como Google Authenticator, Authy ou Microsoft Authenticator
+          <div className='space-y-6'>
+            <div className='text-center space-y-4'>
+              <h3 className='text-lg font-semibold'>1. Escaneie o QR Code</h3>
+              <p className='text-sm text-muted-foreground'>
+                Use um aplicativo autenticador como Google Authenticator, Authy
+                ou Microsoft Authenticator
               </p>
-              
+
               {qrCodeDataUrl && (
-                <div className="flex justify-center">
-                  <img src={qrCodeDataUrl} alt="QR Code 2FA" className="border rounded-lg" />
+                <div className='flex justify-center'>
+                  <img
+                    src={qrCodeDataUrl}
+                    alt='QR Code 2FA'
+                    className='border rounded-lg'
+                  />
                 </div>
               )}
             </div>
 
             <Separator />
 
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold flex items-center gap-2">
-                <Key className="h-5 w-5" />
+            <div className='space-y-4'>
+              <h3 className='text-lg font-semibold flex items-center gap-2'>
+                <Key className='h-5 w-5' />
                 2. Ou digite manualmente
               </h3>
-              <div className="bg-muted p-4 rounded-lg">
-                <p className="text-sm font-mono break-all">{setupData.manualEntryKey}</p>
+              <div className='bg-muted p-4 rounded-lg'>
+                <p className='text-sm font-mono break-all'>
+                  {setupData.manualEntryKey}
+                </p>
                 <Button
-                  variant="outline"
-                  size="sm"
-                  className="mt-2"
+                  variant='outline'
+                  size='sm'
+                  className='mt-2'
                   onClick={copyManualKey}
                 >
-                  <Copy className="h-4 w-4 mr-2" />
+                  <Copy className='h-4 w-4 mr-2' />
                   Copiar chave
                 </Button>
               </div>
@@ -201,27 +223,34 @@ export function TwoFactorSetup({ onComplete, onCancel }: TwoFactorSetupProps) {
 
             <Separator />
 
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold flex items-center gap-2">
-                <Smartphone className="h-5 w-5" />
+            <div className='space-y-4'>
+              <h3 className='text-lg font-semibold flex items-center gap-2'>
+                <Smartphone className='h-5 w-5' />
                 3. Digite o código do app
               </h3>
-              <div className="flex gap-2">
+              <div className='flex gap-2'>
                 <Input
-                  placeholder="000000"
+                  placeholder='000000'
                   value={verificationCode}
-                  onChange={(e) => setVerificationCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                  onChange={e =>
+                    setVerificationCode(
+                      e.target.value.replace(/\D/g, '').slice(0, 6)
+                    )
+                  }
                   maxLength={6}
-                  className="text-center text-lg font-mono"
+                  className='text-center text-lg font-mono'
                 />
-                <Button onClick={verifyAndActivate} disabled={isLoading || verificationCode.length !== 6}>
+                <Button
+                  onClick={verifyAndActivate}
+                  disabled={isLoading || verificationCode.length !== 6}
+                >
                   {isLoading ? 'Verificando...' : 'Verificar'}
                 </Button>
               </div>
             </div>
 
-            <div className="flex gap-2 pt-4">
-              <Button variant="outline" onClick={onCancel} className="flex-1">
+            <div className='flex gap-2 pt-4'>
+              <Button variant='outline' onClick={onCancel} className='flex-1'>
                 Cancelar
               </Button>
             </div>
@@ -229,60 +258,69 @@ export function TwoFactorSetup({ onComplete, onCancel }: TwoFactorSetupProps) {
         )}
 
         {step === 'backup' && setupData && (
-          <div className="space-y-6">
-            <div className="text-center space-y-2">
-              <Check className="h-12 w-12 text-green-500 mx-auto" />
-              <h3 className="text-lg font-semibold">2FA Ativado com Sucesso!</h3>
-              <p className="text-sm text-muted-foreground">
+          <div className='space-y-6'>
+            <div className='text-center space-y-2'>
+              <Check className='h-12 w-12 text-green-500 mx-auto' />
+              <h3 className='text-lg font-semibold'>
+                2FA Ativado com Sucesso!
+              </h3>
+              <p className='text-sm text-muted-foreground'>
                 Salve seus códigos de backup em local seguro
               </p>
             </div>
 
             <Alert>
-              <AlertTriangle className="h-4 w-4" />
+              <AlertTriangle className='h-4 w-4' />
               <AlertDescription>
-                <strong>Importante:</strong> Guarde estes códigos em local seguro. 
-                Você pode usá-los para acessar sua conta se perder o acesso ao aplicativo autenticador.
+                <strong>Importante:</strong> Guarde estes códigos em local
+                seguro. Você pode usá-los para acessar sua conta se perder o
+                acesso ao aplicativo autenticador.
               </AlertDescription>
             </Alert>
 
-            <div className="space-y-4">
-              <h4 className="font-semibold">Códigos de Backup:</h4>
-              <div className="bg-muted p-4 rounded-lg">
-                <div className="grid grid-cols-2 gap-2 font-mono text-sm">
+            <div className='space-y-4'>
+              <h4 className='font-semibold'>Códigos de Backup:</h4>
+              <div className='bg-muted p-4 rounded-lg'>
+                <div className='grid grid-cols-2 gap-2 font-mono text-sm'>
                   {setupData.backupCodes.map((code, index) => (
-                    <div key={index} className="flex items-center gap-2">
-                      <Badge variant="outline">{index + 1}</Badge>
+                    <div key={index} className='flex items-center gap-2'>
+                      <Badge variant='outline'>{index + 1}</Badge>
                       <span>{code}</span>
                     </div>
                   ))}
                 </div>
                 <Button
-                  variant="outline"
-                  size="sm"
-                  className="mt-4"
+                  variant='outline'
+                  size='sm'
+                  className='mt-4'
                   onClick={copyBackupCodes}
                 >
                   {copiedBackupCodes ? (
-                    <><Check className="h-4 w-4 mr-2" />Copiado!</>
+                    <>
+                      <Check className='h-4 w-4 mr-2' />
+                      Copiado!
+                    </>
                   ) : (
-                    <><Copy className="h-4 w-4 mr-2" />Copiar códigos</>
+                    <>
+                      <Copy className='h-4 w-4 mr-2' />
+                      Copiar códigos
+                    </>
                   )}
                 </Button>
               </div>
             </div>
 
-            <Button onClick={finishSetup} className="w-full">
+            <Button onClick={finishSetup} className='w-full'>
               Concluir Configuração
             </Button>
           </div>
         )}
 
         {step === 'complete' && (
-          <div className="text-center space-y-4">
-            <Check className="h-16 w-16 text-green-500 mx-auto" />
-            <h3 className="text-xl font-semibold">Configuração Concluída!</h3>
-            <p className="text-muted-foreground">
+          <div className='text-center space-y-4'>
+            <Check className='h-16 w-16 text-green-500 mx-auto' />
+            <h3 className='text-xl font-semibold'>Configuração Concluída!</h3>
+            <p className='text-muted-foreground'>
               Sua conta agora está protegida com autenticação de dois fatores.
             </p>
           </div>

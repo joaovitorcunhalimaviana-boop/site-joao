@@ -204,15 +204,13 @@ export default function RelatoriosPage() {
               <div className='flex items-center text-gray-300 bg-gray-800/30 px-4 py-2 rounded-xl'>
                 <CalendarDaysIcon className='h-5 w-5 mr-2' />
                 <span className='text-sm'>
-                  {new Date(
-                    selectedDate + 'T12:00:00-03:00'
-                  ).toLocaleDateString('pt-BR', {
+                  {new Intl.DateTimeFormat('pt-BR', {
                     weekday: 'long',
                     year: 'numeric',
                     month: 'long',
                     day: 'numeric',
                     timeZone: 'America/Sao_Paulo',
-                  })}
+                  }).format(new Date(selectedDate + 'T12:00:00-03:00'))}
                 </span>
               </div>
             </div>

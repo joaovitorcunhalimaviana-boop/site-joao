@@ -6,6 +6,10 @@ import {
   PrinterIcon,
   UserIcon,
 } from '@heroicons/react/24/outline'
+import {
+  formatDateToBrazilian,
+  formatDateTimeToBrazilian,
+} from '@/lib/date-utils'
 
 interface MedicalCertificateFormProps {
   patientName: string
@@ -44,7 +48,7 @@ export default function MedicalCertificateForm({
       patientAuthorization,
       patientSignature: patientAuthorization ? patientSignature : '',
       date: new Date().toISOString(),
-      createdAt: new Date().toLocaleString('pt-BR'),
+      createdAt: formatDateTimeToBrazilian(new Date()),
     }
     onSave?.(certificate)
     alert('Atestado médico salvo com sucesso!')
@@ -64,7 +68,7 @@ export default function MedicalCertificateForm({
       patientAuthorization,
       patientSignature: patientAuthorization ? patientSignature : '',
       date: new Date().toISOString(),
-      createdAt: new Date().toLocaleString('pt-BR'),
+      createdAt: formatDateTimeToBrazilian(new Date()),
     }
     onPrint?.(certificate)
 
@@ -169,7 +173,7 @@ export default function MedicalCertificateForm({
         }
         
         <div class="footer">
-          <p>Atestado emitido em ${new Date().toLocaleDateString('pt-BR')}.</p>
+          <p>Atestado emitido em ${formatDateToBrazilian(new Date())}.</p>
           
           <div class="signature-section">
             <div class="signature-line"></div>

@@ -98,7 +98,7 @@ describe('Loading Components', () => {
     })
 
     it('should render with custom className', () => {
-      render(<CardLoading className="custom-class" />)
+      render(<CardLoading className='custom-class' />)
 
       expect(screen.getByTestId('card-loading')).toHaveClass('custom-class')
     })
@@ -282,7 +282,7 @@ describe('LoadingWithTimeout', () => {
   })
 
   it('should render loading component', () => {
-    render(<LoadingWithTimeout text="Loading..." />)
+    render(<LoadingWithTimeout text='Loading...' />)
 
     expect(screen.getByRole('status')).toBeInTheDocument()
     expect(screen.getByText('Loading...')).toBeInTheDocument()
@@ -290,9 +290,13 @@ describe('LoadingWithTimeout', () => {
 
   it('should call onTimeout after timeout', async () => {
     const onTimeoutMock = jest.fn()
-    
+
     render(
-      <LoadingWithTimeout timeout={5000} onTimeout={onTimeoutMock} text="Loading..." />
+      <LoadingWithTimeout
+        timeout={5000}
+        onTimeout={onTimeoutMock}
+        text='Loading...'
+      />
     )
 
     // Avançar o tempo para depois do timeout
@@ -304,14 +308,14 @@ describe('LoadingWithTimeout', () => {
   })
 
   it('should render with different variants', () => {
-    render(<LoadingWithTimeout variant="medical" text="Medical Loading" />)
+    render(<LoadingWithTimeout variant='medical' text='Medical Loading' />)
 
     expect(screen.getByRole('status')).toBeInTheDocument()
     expect(screen.getByText('Medical Loading')).toBeInTheDocument()
   })
 
   it('should render with different sizes', () => {
-    render(<LoadingWithTimeout size="lg" text="Large Loading" />)
+    render(<LoadingWithTimeout size='lg' text='Large Loading' />)
 
     expect(screen.getByRole('status')).toBeInTheDocument()
     expect(screen.getByText('Large Loading')).toBeInTheDocument()
@@ -321,7 +325,7 @@ describe('LoadingWithTimeout', () => {
     const clearTimeoutSpy = jest.spyOn(global, 'clearTimeout')
 
     const { unmount } = render(
-      <LoadingWithTimeout timeout={5000} text="Loading..." />
+      <LoadingWithTimeout timeout={5000} text='Loading...' />
     )
 
     unmount()

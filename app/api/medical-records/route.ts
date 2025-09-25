@@ -86,7 +86,10 @@ export async function GET(request: NextRequest) {
     if (recordId) {
       const record = records.find(r => r.id === recordId)
       if (!record) {
-        return NextResponse.json({ error: 'Prontuário não encontrado' }, { status: 404 })
+        return NextResponse.json(
+          { error: 'Prontuário não encontrado' },
+          { status: 404 }
+        )
       }
       return NextResponse.json(record)
     }
@@ -94,7 +97,10 @@ export async function GET(request: NextRequest) {
     if (patientId) {
       const patientRecords = records.filter(r => r.patientId === patientId)
       // Ordenar por data mais recente primeiro
-      patientRecords.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+      patientRecords.sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      )
       return NextResponse.json(patientRecords)
     }
 
@@ -102,7 +108,10 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(records)
   } catch (error) {
     console.error('Erro ao buscar prontuários:', error)
-    return NextResponse.json({ error: 'Erro interno do servidor' }, { status: 500 })
+    return NextResponse.json(
+      { error: 'Erro interno do servidor' },
+      { status: 500 }
+    )
   }
 }
 
@@ -123,7 +132,7 @@ export async function POST(request: NextRequest) {
       doctorName,
       calculatorResults,
       attachments,
-      diagnosticHypotheses
+      diagnosticHypotheses,
     } = body
 
     // Validação dos campos obrigatórios
@@ -135,12 +144,17 @@ export async function POST(request: NextRequest) {
     }
 
     const records = readMedicalRecords()
-    
+
     const newRecord: MedicalRecord = {
       id: `record_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       patientId,
       date: date || new Date().toISOString().split('T')[0],
-      time: time || new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
+      time:
+        time ||
+        new Date().toLocaleTimeString('pt-BR', {
+          hour: '2-digit',
+          minute: '2-digit',
+        }),
       anamnesis,
       examination: examination || '',
       diagnosis: diagnosis || '',
@@ -151,7 +165,7 @@ export async function POST(request: NextRequest) {
       calculatorResults: calculatorResults || [],
       attachments: attachments || [],
       diagnosticHypotheses: diagnosticHypotheses || [],
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
     }
 
     records.push(newRecord)
@@ -160,7 +174,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(newRecord, { status: 201 })
   } catch (error) {
     console.error('Erro ao criar prontuário:', error)
-    return NextResponse.json({ error: 'Erro interno do servidor' }, { status: 500 })
+    return NextResponse.json(
+      { error: 'Erro interno do servidor' },
+      { status: 500 }
+    )
   }
 }
 
@@ -171,21 +188,27 @@ export async function PUT(request: NextRequest) {
     const { id, ...updateData } = body
 
     if (!id) {
-      return NextResponse.json({ error: 'ID do prontuário é obrigatório' }, { status: 400 })
+      return NextResponse.json(
+        { error: 'ID do prontuário é obrigatório' },
+        { status: 400 }
+      )
     }
 
     const records = readMedicalRecords()
     const recordIndex = records.findIndex(r => r.id === id)
 
     if (recordIndex === -1) {
-      return NextResponse.json({ error: 'Prontuário não encontrado' }, { status: 404 })
+      return NextResponse.json(
+        { error: 'Prontuário não encontrado' },
+        { status: 404 }
+      )
     }
 
     // Atualizar o prontuário
     records[recordIndex] = {
       ...records[recordIndex],
       ...updateData,
-      updatedAt: new Date().toISOString()
+      updatedAt: new Date().toISOString(),
     }
 
     saveMedicalRecords(records)
@@ -193,7 +216,10 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json(records[recordIndex])
   } catch (error) {
     console.error('Erro ao atualizar prontuário:', error)
-    return NextResponse.json({ error: 'Erro interno do servidor' }, { status: 500 })
+    return NextResponse.json(
+      { error: 'Erro interno do servidor' },
+      { status: 500 }
+    )
   }
 }
 
@@ -204,14 +230,20 @@ export async function DELETE(request: NextRequest) {
     const id = searchParams.get('id')
 
     if (!id) {
-      return NextResponse.json({ error: 'ID do prontuário é obrigatório' }, { status: 400 })
+      return NextResponse.json(
+        { error: 'ID do prontuário é obrigatório' },
+        { status: 400 }
+      )
     }
 
     const records = readMedicalRecords()
     const recordIndex = records.findIndex(r => r.id === id)
 
     if (recordIndex === -1) {
-      return NextResponse.json({ error: 'Prontuário não encontrado' }, { status: 404 })
+      return NextResponse.json(
+        { error: 'Prontuário não encontrado' },
+        { status: 404 }
+      )
     }
 
     // Remover o prontuário
@@ -221,6 +253,9 @@ export async function DELETE(request: NextRequest) {
     return NextResponse.json({ message: 'Prontuário excluído com sucesso' })
   } catch (error) {
     console.error('Erro ao excluir prontuário:', error)
-    return NextResponse.json({ error: 'Erro interno do servidor' }, { status: 500 })
+    return NextResponse.json(
+      { error: 'Erro interno do servidor' },
+      { status: 500 }
+    )
   }
 }

@@ -113,63 +113,59 @@ export default function VisitasDomiciliaresPage() {
               <h2 className='text-2xl lg:text-3xl font-bold text-white mb-8 text-center'>
                 Como Funciona
               </h2>
-              <div className='bg-gradient-to-r from-gray-900/50 to-gray-800/50 border border-gray-700 rounded-lg p-8'>
-                <div className='grid md:grid-cols-3 gap-8 mb-8'>
-                  <div className='text-center'>
-                    <div className='bg-gray-700 rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-4'>
-                      <span className='text-white font-bold text-lg'>1</span>
-                    </div>
-                    <h3 className='text-xl font-semibold text-white mb-3'>
-                      Entre em Contato
-                    </h3>
-                    <p className='text-gray-300 text-lg text-justify'>
-                      Envie uma mensagem pelo WhatsApp informando a necessidade
-                      de visita domiciliar
-                    </p>
+              <div className='grid md:grid-cols-3 gap-8 mb-8'>
+                <div className='text-center bg-gray-900/60 backdrop-blur-sm rounded-2xl p-6 border border-gray-700/50'>
+                  <div className='bg-gray-700 rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-4'>
+                    <span className='text-white font-bold text-lg'>1</span>
                   </div>
-                  <div className='text-center'>
-                    <div className='bg-gray-700 rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-4'>
-                      <span className='text-white font-bold text-lg'>2</span>
-                    </div>
-                    <h3 className='text-xl font-semibold text-white mb-3'>
-                      Confirme Horário e Endereço
-                    </h3>
-                    <p className='text-gray-300 text-lg text-justify'>
-                      Combinamos data, horário e confirmamos o endereço para o
-                      atendimento
-                    </p>
-                  </div>
-                  <div className='text-center'>
-                    <div className='bg-gray-700 rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-4'>
-                      <span className='text-white font-bold text-lg'>3</span>
-                    </div>
-                    <h3 className='text-xl font-semibold text-white mb-3'>
-                      Atendimento Especializado
-                    </h3>
-                    <p className='text-gray-300 text-lg text-justify'>
-                      Receba o cuidado médico personalizado no local combinado
-                    </p>
-                  </div>
+                  <h3 className='text-xl font-semibold text-white mb-3'>
+                    Entre em Contato
+                  </h3>
+                  <p className='text-gray-300 text-lg text-justify'>
+                    Envie uma mensagem pelo WhatsApp informando a necessidade de
+                    visita domiciliar
+                  </p>
                 </div>
+                <div className='text-center bg-gray-900/60 backdrop-blur-sm rounded-2xl p-6 border border-gray-700/50'>
+                  <div className='bg-gray-700 rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-4'>
+                    <span className='text-white font-bold text-lg'>2</span>
+                  </div>
+                  <h3 className='text-xl font-semibold text-white mb-3'>
+                    Confirme Horário e Endereço
+                  </h3>
+                  <p className='text-gray-300 text-lg text-justify'>
+                    Combinamos data, horário e confirmamos o endereço para o
+                    atendimento
+                  </p>
+                </div>
+                <div className='text-center bg-gray-900/60 backdrop-blur-sm rounded-2xl p-6 border border-gray-700/50'>
+                  <div className='bg-gray-700 rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-4'>
+                    <span className='text-white font-bold text-lg'>3</span>
+                  </div>
+                  <h3 className='text-xl font-semibold text-white mb-3'>
+                    Atendimento Especializado
+                  </h3>
+                  <p className='text-gray-300 text-lg text-justify'>
+                    Receba o cuidado médico personalizado no local combinado
+                  </p>
+                </div>
+              </div>
 
-                <div className='border-t border-gray-600 pt-6'>
+              <div className='bg-gradient-to-r from-gray-900/50 to-gray-800/50 border border-gray-700 rounded-lg p-8'>
+                <div className='text-center'>
+                  <h3 className='text-xl font-bold text-white mb-4'>
+                    Investimento
+                  </h3>
                   <div className='text-center'>
-                    <h3 className='text-xl font-bold text-white mb-4'>
-                      Investimento
-                    </h3>
-                    <div className='text-center'>
-                      <p className='text-3xl font-bold text-white mb-2'>
-                        R$ 800
-                      </p>
-                      <p className='text-gray-400 text-lg'>
-                        Valor único por visita
-                      </p>
-                    </div>
-                    <p className='text-gray-400 text-lg mt-4 text-center'>
-                      O tempo de atendimento varia conforme a complexidade do
-                      caso, priorizando sempre a qualidade do cuidado
+                    <p className='text-3xl font-bold text-white mb-2'>R$ 800</p>
+                    <p className='text-gray-400 text-lg'>
+                      Valor único por visita
                     </p>
                   </div>
+                  <p className='text-gray-400 text-lg mt-4 text-center'>
+                    O tempo de atendimento varia conforme a complexidade do
+                    caso, priorizando sempre a qualidade do cuidado
+                  </p>
                 </div>
               </div>
             </div>

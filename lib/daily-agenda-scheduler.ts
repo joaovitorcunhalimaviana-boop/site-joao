@@ -67,39 +67,48 @@ function calculateDailyAgendaTime(appointmentDate: string): Date {
 }
 
 // Função para enviar agenda imediatamente
-async function sendDailyAgendaImmediately(targetDate: string) {
+export async function sendDailyAgendaImmediately(targetDate: string) {
   try {
-    console.log('\n' + '📤'.repeat(15))
-    console.log('📋 ENVIANDO AGENDA DIÁRIA')
-    console.log('📤'.repeat(15))
-    console.log(`📆 Data alvo: ${targetDate}`)
+    console.log(`📅 Enviando agenda diária imediatamente para: ${targetDate}`)
 
-    // Buscar todas as consultas para a data específica
-    const appointments = await getAppointmentsForTargetDate(targetDate)
+    // Usar a nova função que inclui cirurgias
+    const dailyAgenda = await getDailyAgendaWithSurgeries(targetDate)
 
-    console.log(`👥 Consultas encontradas: ${appointments.length}`)
-
-    // Enviar via API
-    const response = await fetch('/api/daily-agenda', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        targetDate,
-        appointments,
-      }),
-    })
-
-    if (response.ok) {
-      console.log('✅ Agenda diária enviada com sucesso!')
-    } else {
-      console.log('❌ Erro ao enviar agenda diária')
+    if (
+      !dailyAgenda ||
+      (!dailyAgenda.appointments.length && !dailyAgenda.surgeries.length)
+    ) {
+      console.log(
+        `📭 Nenhuma consulta ou cirurgia encontrada para ${targetDate}`
+      )
+      return
     }
 
-    console.log('📤'.repeat(15) + '\n')
+    // Enviar para a API de agenda diária
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
+    const response = await fetch(
+      `${baseUrl}/api/daily-agenda`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          targetDate,
+          appointments: dailyAgenda.appointments,
+        }),
+      }
+    )
+
+    if (!response.ok) {
+      throw new Error(`Erro na API: ${response.status}`)
+    }
+
+    const result = await response.json()
+    console.log(`✅ Agenda diária enviada com sucesso:`, result)
   } catch (error) {
-    console.error('❌ Erro ao enviar agenda diária:', error)
+    console.error('❌ Erro ao enviar agenda diária imediatamente:', error)
+    throw error
   }
 }
 
@@ -218,3 +227,5 @@ export async function checkPendingDailyAgendas() {
 
   console.log('🔍'.repeat(15) + '\n')
 }
+
+import { getDailyAgendaWithSurgeries } from './unified-appointment-system'

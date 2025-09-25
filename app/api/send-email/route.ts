@@ -15,44 +15,40 @@ function validateEmailContent(emailData: {
   content?: string
 }): { isValid: boolean; threats: string[] } {
   const threats: string[] = []
-  
+
   // Verificar apenas ameaças críticas e óbvias em emails
   const allContent = [
     ...(emailData.recipients || []),
     emailData.subject || '',
     emailData.customContent || '',
-    emailData.content || ''
+    emailData.content || '',
   ].join(' ')
-  
+
   // Padrões muito específicos para emails - apenas ameaças reais
   const criticalPatterns = {
     // XSS muito óbvio
     xss: [
       /<script[^>]*>.*?<\/script>/gi,
       /javascript:\s*[^;]/gi,
-      /<iframe[^>]*src\s*=/gi
+      /<iframe[^>]*src\s*=/gi,
     ],
     // SQL Injection óbvio
-    sql: [
-      /union\s+select\s+/gi,
-      /drop\s+table\s+/gi,
-      /delete\s+from\s+/gi
-    ]
+    sql: [/union\s+select\s+/gi, /drop\s+table\s+/gi, /delete\s+from\s+/gi],
   }
-  
+
   // Verificar XSS crítico
   if (criticalPatterns.xss.some(pattern => pattern.test(allContent))) {
     threats.push('CRITICAL_XSS')
   }
-  
+
   // Verificar SQL Injection crítico
   if (criticalPatterns.sql.some(pattern => pattern.test(allContent))) {
     threats.push('CRITICAL_SQL_INJECTION')
   }
-  
+
   return {
     isValid: threats.length === 0,
-    threats
+    threats,
   }
 }
 
@@ -69,18 +65,24 @@ export async function POST(request: NextRequest) {
     const userAgent = request.headers.get('user-agent') || ''
 
     // Validação de segurança específica para emails - muito mais permissiva
-    console.log('🔍 Validando dados de entrada para email:', JSON.stringify(body, null, 2))
-    
+    console.log(
+      '🔍 Validando dados de entrada para email:',
+      JSON.stringify(body, null, 2)
+    )
+
     // Para emails, validar apenas ameaças críticas e óbvias
     const emailValidation = validateEmailContent({
       recipients: body.recipients,
       subject: body.subject,
       customContent: body.customContent,
-      content: body.content
+      content: body.content,
     })
-    
+
     if (!emailValidation.isValid) {
-      console.log('⚠️ Ameaças críticas detectadas em email:', emailValidation.threats)
+      console.log(
+        '⚠️ Ameaças críticas detectadas em email:',
+        emailValidation.threats
+      )
       logSecurityEvent({
         type: 'SUSPICIOUS_ACTIVITY',
         ip: clientIP,
@@ -95,7 +97,7 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       )
     }
-    
+
     console.log('✅ Validação de segurança passou')
 
     // Validação básica

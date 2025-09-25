@@ -32,22 +32,25 @@ export function extractLGPDContext(request: NextRequest): LGPDContext {
 
   // Extrair IP (considerando proxies)
   const forwarded = request.headers.get('x-forwarded-for')
-  const ipAddress = forwarded ? forwarded.split(',')[0].trim() : 
-                   request.headers.get('x-real-ip') || 
-                   'unknown'
+  const ipAddress = forwarded
+    ? forwarded.split(',')[0].trim()
+    : request.headers.get('x-real-ip') || 'unknown'
 
   const userAgent = request.headers.get('user-agent') || 'unknown'
 
   return {
     userId,
     ipAddress,
-    userAgent
+    userAgent,
   }
 }
 
 // Middleware para auditoria automática de acesso a dados
 export function withLGPDAudit(
-  handler: (request: NextRequest, context: LGPDContext) => Promise<NextResponse>,
+  handler: (
+    request: NextRequest,
+    context: LGPDContext
+  ) => Promise<NextResponse>,
   options: {
     dataType: string
     purpose: string
@@ -71,7 +74,7 @@ export function withLGPDAudit(
       const response = await handler(request, {
         ...context,
         purpose: options.purpose,
-        legalBasis: options.legalBasis
+        legalBasis: options.legalBasis,
       })
 
       // Log de auditoria se foi bem-sucedido e há userId
@@ -86,7 +89,7 @@ export function withLGPDAudit(
           purpose: options.purpose,
           legalBasis: options.legalBasis,
           ipAddress: context.ipAddress,
-          userAgent: context.userAgent
+          userAgent: context.userAgent,
         })
       }
 
@@ -103,7 +106,10 @@ export function withLGPDAudit(
 
 // Middleware para verificação de consentimento
 export function withConsentCheck(
-  handler: (request: NextRequest, context: LGPDContext) => Promise<NextResponse>,
+  handler: (
+    request: NextRequest,
+    context: LGPDContext
+  ) => Promise<NextResponse>,
   purpose: string
 ) {
   return async (request: NextRequest): Promise<NextResponse> => {
@@ -117,10 +123,10 @@ export function withConsentCheck(
 
       if (!hasConsent) {
         return NextResponse.json(
-          { 
+          {
             error: 'Consentimento necessário',
             code: 'CONSENT_REQUIRED',
-            purpose
+            purpose,
           },
           { status: 403 }
         )
@@ -139,10 +145,10 @@ export function withDataMinimization<T>(
 ): Partial<T> {
   // Campos adicionais baseados no papel do usuário
   const roleBasedFields: Record<string, string[]> = {
-    'admin': ['*'], // Admin pode ver tudo
-    'doctor': ['name', 'cpf', 'email', 'phone', 'medicalHistory'],
-    'nurse': ['name', 'phone', 'appointments'],
-    'receptionist': ['name', 'phone', 'appointments']
+    admin: ['*'], // Admin pode ver tudo
+    doctor: ['name', 'cpf', 'email', 'phone', 'medicalHistory'],
+    nurse: ['name', 'phone', 'appointments'],
+    receptionist: ['name', 'phone', 'appointments'],
   }
 
   let finalAllowedFields = allowedFields
@@ -156,7 +162,10 @@ export function withDataMinimization<T>(
     finalAllowedFields = [...allowedFields, ...roleFields]
   }
 
-  return LGPDProtectionMiddleware.minimizeData(data as Record<string, any>, finalAllowedFields) as Partial<T>
+  return LGPDProtectionMiddleware.minimizeData(
+    data as Record<string, any>,
+    finalAllowedFields
+  ) as Partial<T>
 }
 
 // Middleware para verificação de retenção de dados
@@ -173,23 +182,23 @@ export async function checkDataRetention(
       case 'patient':
         const patient = await prisma.patient.findUnique({
           where: { id: resourceId },
-          select: { createdAt: true }
+          select: { createdAt: true },
         })
         createdAt = patient?.createdAt || null
         break
-      
+
       case 'consultation':
         const consultation = await prisma.consultation.findUnique({
           where: { id: resourceId },
-          select: { createdAt: true }
+          select: { createdAt: true },
         })
         createdAt = consultation?.createdAt || null
         break
-      
+
       case 'medicalRecord':
         const record = await prisma.medicalRecord.findUnique({
           where: { id: resourceId },
-          select: { createdAt: true }
+          select: { createdAt: true },
         })
         createdAt = record?.createdAt || null
         break
@@ -216,7 +225,11 @@ export function LGPDRoute(options: {
   requiresConsent?: boolean
   minimizeFields?: string[]
 }) {
-  return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
+  return function (
+    target: any,
+    propertyKey: string,
+    descriptor: PropertyDescriptor
+  ) {
     const originalMethod = descriptor.value
 
     descriptor.value = async function (request: NextRequest, ...args: any[]) {
@@ -239,10 +252,10 @@ export function LGPDRoute(options: {
 
         if (!hasConsent) {
           return NextResponse.json(
-            { 
+            {
               error: 'Consentimento necessário',
               code: 'CONSENT_REQUIRED',
-              purpose: options.purpose
+              purpose: options.purpose,
             },
             { status: 403 }
           )
@@ -273,7 +286,7 @@ export function LGPDRoute(options: {
             purpose: options.purpose,
             legalBasis: options.legalBasis,
             ipAddress: context.ipAddress,
-            userAgent: context.userAgent
+            userAgent: context.userAgent,
           })
         }
 

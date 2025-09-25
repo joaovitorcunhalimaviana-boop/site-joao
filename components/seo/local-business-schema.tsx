@@ -221,11 +221,11 @@ export default function LocalBusinessSchema() {
 
   return (
     <Script
-      id="local-business-schema"
-      type="application/ld+json"
-      strategy="afterInteractive"
+      id='local-business-schema'
+      type='application/ld+json'
+      strategy='afterInteractive'
       dangerouslySetInnerHTML={{
-        __html: JSON.stringify(localBusinessSchema)
+        __html: JSON.stringify(localBusinessSchema),
       }}
     />
   )

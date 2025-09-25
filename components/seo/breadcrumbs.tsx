@@ -35,41 +35,47 @@ const pathToLabel: Record<string, string> = {
   '/area-secretaria': 'Área Secretaria',
 }
 
-export default function Breadcrumbs({ items, className = '' }: BreadcrumbsProps) {
+export default function Breadcrumbs({
+  items,
+  className = '',
+}: BreadcrumbsProps) {
   const pathname = usePathname()
-  
+
   // Se items não foi fornecido, gerar automaticamente baseado na URL
   const breadcrumbItems = items || generateBreadcrumbs(pathname)
-  
+
   if (breadcrumbItems.length <= 1) {
     return null // Não mostrar breadcrumbs na página inicial
   }
 
   return (
-    <nav className={`flex items-center space-x-2 text-sm ${className}`} aria-label="Breadcrumb">
-      <ol className="flex items-center space-x-2">
+    <nav
+      className={`flex items-center space-x-2 text-sm ${className}`}
+      aria-label='Breadcrumb'
+    >
+      <ol className='flex items-center space-x-2'>
         {breadcrumbItems.map((item, index) => {
           const isLast = index === breadcrumbItems.length - 1
-          
+
           return (
-            <li key={item.href} className="flex items-center">
+            <li key={item.href} className='flex items-center'>
               {index === 0 && (
-                <HomeIcon className="w-4 h-4 text-gray-400 mr-2" />
+                <HomeIcon className='w-4 h-4 text-gray-400 mr-2' />
               )}
-              
+
               {isLast ? (
-                <span className="text-blue-400 font-medium" aria-current="page">
+                <span className='text-blue-400 font-medium' aria-current='page'>
                   {item.label}
                 </span>
               ) : (
                 <>
-                  <Link 
+                  <Link
                     href={item.href}
-                    className="text-gray-300 hover:text-white transition-colors duration-200"
+                    className='text-gray-300 hover:text-white transition-colors duration-200'
                   >
                     {item.label}
                   </Link>
-                  <ChevronRightIcon className="w-4 h-4 text-gray-500 mx-2" />
+                  <ChevronRightIcon className='w-4 h-4 text-gray-500 mx-2' />
                 </>
               )}
             </li>
@@ -82,21 +88,19 @@ export default function Breadcrumbs({ items, className = '' }: BreadcrumbsProps)
 
 function generateBreadcrumbs(pathname: string): BreadcrumbItem[] {
   const paths = pathname.split('/').filter(Boolean)
-  const breadcrumbs: BreadcrumbItem[] = [
-    { label: 'Início', href: '/' }
-  ]
-  
+  const breadcrumbs: BreadcrumbItem[] = [{ label: 'Início', href: '/' }]
+
   let currentPath = ''
-  
-  paths.forEach((path) => {
+
+  paths.forEach(path => {
     currentPath += `/${path}`
     const label = pathToLabel[currentPath] || formatPathLabel(path)
     breadcrumbs.push({
       label,
-      href: currentPath
+      href: currentPath,
     })
   })
-  
+
   return breadcrumbs
 }
 
@@ -108,25 +112,29 @@ function formatPathLabel(path: string): string {
 }
 
 // Componente para structured data de breadcrumbs
-export function BreadcrumbStructuredData({ items }: { items: BreadcrumbItem[] }) {
+export function BreadcrumbStructuredData({
+  items,
+}: {
+  items: BreadcrumbItem[]
+}) {
   const structuredData = {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
-    'itemListElement': items.map((item, index) => ({
+    itemListElement: items.map((item, index) => ({
       '@type': 'ListItem',
-      'position': index + 1,
-      'name': item.label,
-      'item': `https://drjoaovitorviana.com.br${item.href}`
-    }))
+      position: index + 1,
+      name: item.label,
+      item: `https://drjoaovitorviana.com.br${item.href}`,
+    })),
   }
 
   return (
     <Script
-      id="breadcrumb-schema"
-      type="application/ld+json"
-      strategy="afterInteractive"
+      id='breadcrumb-schema'
+      type='application/ld+json'
+      strategy='afterInteractive'
       dangerouslySetInnerHTML={{
-        __html: JSON.stringify(structuredData)
+        __html: JSON.stringify(structuredData),
       }}
     />
   )

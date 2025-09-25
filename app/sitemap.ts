@@ -3,12 +3,20 @@ import { MetadataRoute } from 'next'
 type SitemapEntry = {
   url: string
   lastModified?: string | Date
-  changeFrequency?: 'always' | 'hourly' | 'daily' | 'weekly' | 'monthly' | 'yearly' | 'never'
+  changeFrequency?:
+    | 'always'
+    | 'hourly'
+    | 'daily'
+    | 'weekly'
+    | 'monthly'
+    | 'yearly'
+    | 'never'
   priority?: number
 }
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = process.env['NEXT_PUBLIC_SITE_URL'] || 'https://drjoaovitorviana.com.br'
+  const baseUrl =
+    process.env['NEXT_PUBLIC_SITE_URL'] || 'https://drjoaovitorviana.com.br'
   const currentDate = new Date().toISOString()
 
   const routes: SitemapEntry[] = [

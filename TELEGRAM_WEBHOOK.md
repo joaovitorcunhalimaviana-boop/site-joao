@@ -3,6 +3,7 @@
 **Esta é a melhor alternativa para receber notificações instantâneas e confiáveis!**
 
 ## 📱 Por que usar Telegram?
+
 - ✅ **Notificação instantânea** no celular
 - ✅ **100% gratuito** e confiável
 - ✅ **Funciona em qualquer lugar** do mundo
@@ -14,6 +15,7 @@
 ## 🚀 Configuração Passo-a-Passo (5 minutos)
 
 ### **PASSO 1: Criar o Bot**
+
 1. Abra o **Telegram** no seu celular
 2. Procure por: `@BotFather`
 3. Clique em **INICIAR**
@@ -29,12 +31,15 @@
 7. **COPIE O TOKEN** que aparecerá (algo como: `123456789:ABCdefGHIjklMNOpqrsTUVwxyz`)
 
 ### **PASSO 2: Obter seu Chat ID**
+
 1. **Envie qualquer mensagem** para seu bot (ex: "oi")
 2. No **navegador do computador**, acesse:
+
    ```
    https://api.telegram.org/bot<SEU_TOKEN>/getUpdates
    ```
-   *(Substitua `<SEU_TOKEN>` pelo token do passo 1)*
+
+   _(Substitua `<SEU_TOKEN>` pelo token do passo 1)_
 
 3. **Procure** por algo como:
    ```json
@@ -43,6 +48,7 @@
 4. **COPIE O NÚMERO** (seu Chat ID)
 
 ### **PASSO 3: Configurar no Sistema**
+
 1. Abra o arquivo `.env.local`
 2. **Preencha** as linhas:
    ```env
@@ -51,6 +57,7 @@
    ```
 
 ### **PASSO 4: Reiniciar e Testar**
+
 1. **Pare** o servidor (Ctrl+C)
 2. **Inicie** novamente: `npm run dev`
 3. **Teste** fazendo um agendamento
@@ -61,6 +68,7 @@
 ## 📋 Exemplo de Configuração
 
 **Arquivo `.env.local`:**
+
 ```env
 TELEGRAM_BOT_TOKEN=123456789:ABCdefGHIjklMNOpqrsTUVwxyz
 TELEGRAM_CHAT_ID=987654321
@@ -91,15 +99,18 @@ Você receberá mensagens assim:
 ## 🔧 Solução de Problemas
 
 **❌ Não recebo mensagens:**
+
 - Verifique se enviou uma mensagem para o bot primeiro
 - Confirme se o TOKEN e CHAT_ID estão corretos
 - Reinicie o servidor após configurar
 
 **❌ Erro "chat not found":**
+
 - Você precisa enviar uma mensagem para o bot antes
 - Verifique se o CHAT_ID está correto
 
 **❌ Erro "unauthorized":**
+
 - Verifique se o TOKEN está correto
 - Não inclua espaços ou caracteres extras
 

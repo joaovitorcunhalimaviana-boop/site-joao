@@ -65,13 +65,14 @@ class MemoryCache {
     misses: 0,
     size: 0,
     itemCount: 0,
-    hitRate: 0
+    hitRate: 0,
   }
   private maxSize: number
   private maxItems: number
   private cleanupInterval: NodeJS.Timeout | null = null
 
-  constructor(maxSize = 50 * 1024 * 1024, maxItems = 1000) { // 50MB padrão
+  constructor(maxSize = 50 * 1024 * 1024, maxItems = 1000) {
+    // 50MB padrão
     this.maxSize = maxSize
     this.maxItems = maxItems
     this.startCleanup()
@@ -95,7 +96,7 @@ class MemoryCache {
   // Obter item do cache
   get<T>(key: string): T | null {
     const item = this.cache.get(key)
-    
+
     if (!item) {
       this.stats.misses++
       this.updateHitRate()
@@ -125,7 +126,7 @@ class MemoryCache {
     const {
       ttl = 5 * 60 * 1000, // 5 minutos padrão
       tags = [],
-      compress = false
+      compress = false,
     } = options
 
     let processedData = data
@@ -144,7 +145,7 @@ class MemoryCache {
       accessCount: 0,
       lastAccessed: Date.now(),
       tags,
-      size
+      size,
     }
 
     // Verificar limites antes de adicionar
@@ -164,8 +165,8 @@ class MemoryCache {
   // Fazer espaço no cache usando estratégia LRU
   private makeSpace(requiredSize: number) {
     while (
-      (this.stats.size + requiredSize > this.maxSize) ||
-      (this.stats.itemCount >= this.maxItems)
+      this.stats.size + requiredSize > this.maxSize ||
+      this.stats.itemCount >= this.maxItems
     ) {
       // Encontrar item menos recentemente usado
       let oldestKey = ''
@@ -199,14 +200,14 @@ class MemoryCache {
   // Limpar cache por tags
   invalidateByTags(tags: string[]): number {
     let deleted = 0
-    
+
     for (const [key, item] of this.cache) {
       if (item.tags && item.tags.some(tag => tags.includes(tag))) {
         this.cache.delete(key)
         deleted++
       }
     }
-    
+
     this.updateStats()
     return deleted
   }
@@ -215,14 +216,14 @@ class MemoryCache {
   cleanup(): number {
     let cleaned = 0
     const now = Date.now()
-    
+
     for (const [key, item] of this.cache) {
       if (now > item.timestamp + item.ttl) {
         this.cache.delete(key)
         cleaned++
       }
     }
-    
+
     this.updateStats()
     return cleaned
   }
@@ -236,8 +237,10 @@ class MemoryCache {
   // Atualizar estatísticas
   private updateStats() {
     this.stats.itemCount = this.cache.size
-    this.stats.size = Array.from(this.cache.values())
-      .reduce((total, item) => total + (item.size || 0), 0)
+    this.stats.size = Array.from(this.cache.values()).reduce(
+      (total, item) => total + (item.size || 0),
+      0
+    )
   }
 
   private updateHitRate() {
@@ -285,7 +288,7 @@ class PersistentCache {
       if (!stored) return null
 
       const item: CacheItem<T> = JSON.parse(stored)
-      
+
       // Verificar TTL
       if (Date.now() > item.timestamp + item.ttl) {
         localStorage.removeItem(this.prefix + key)
@@ -294,7 +297,7 @@ class PersistentCache {
 
       // Adicionar de volta ao cache em memória
       this.memoryCache.set(key, item.data, { ttl: item.ttl, tags: item.tags })
-      
+
       return item.data
     } catch (error) {
       console.warn('Erro ao ler cache persistente:', error)
@@ -307,12 +310,12 @@ class PersistentCache {
     const {
       ttl = 24 * 60 * 60 * 1000, // 24 horas padrão para persistente
       tags = [],
-      compress = true
+      compress = true,
     } = options
 
     try {
       let processedData = data
-      
+
       // Comprimir se solicitado
       if (compress && typeof data === 'string') {
         processedData = CompressionUtils.compress(data) as T
@@ -325,15 +328,15 @@ class PersistentCache {
         accessCount: 0,
         lastAccessed: Date.now(),
         tags,
-        size: CompressionUtils.calculateSize(processedData)
+        size: CompressionUtils.calculateSize(processedData),
       }
 
       // Salvar no localStorage
       localStorage.setItem(this.prefix + key, JSON.stringify(item))
-      
+
       // Também salvar no cache em memória
       this.memoryCache.set(key, data, options)
-      
+
       return true
     } catch (error) {
       console.warn('Erro ao salvar cache persistente:', error)
@@ -356,18 +359,21 @@ class PersistentCache {
   // Limpar cache por tags
   invalidateByTags(tags: string[]): number {
     let deleted = 0
-    
+
     try {
       // Limpar cache em memória
       deleted += this.memoryCache.invalidateByTags(tags)
-      
+
       // Limpar localStorage
       const keys = Object.keys(localStorage)
       for (const fullKey of keys) {
         if (fullKey.startsWith(this.prefix)) {
           try {
             const item = JSON.parse(localStorage.getItem(fullKey) || '{}')
-            if (item.tags && item.tags.some((tag: string) => tags.includes(tag))) {
+            if (
+              item.tags &&
+              item.tags.some((tag: string) => tags.includes(tag))
+            ) {
               localStorage.removeItem(fullKey)
               deleted++
             }
@@ -379,7 +385,7 @@ class PersistentCache {
     } catch (error) {
       console.warn('Erro ao invalidar cache por tags:', error)
     }
-    
+
     return deleted
   }
 
@@ -387,11 +393,11 @@ class PersistentCache {
   cleanup(): number {
     let cleaned = 0
     const now = Date.now()
-    
+
     try {
       // Limpar cache em memória
       cleaned += this.memoryCache.cleanup()
-      
+
       // Limpar localStorage
       const keys = Object.keys(localStorage)
       for (const fullKey of keys) {
@@ -412,7 +418,7 @@ class PersistentCache {
     } catch (error) {
       console.warn('Erro na limpeza do cache:', error)
     }
-    
+
     return cleaned
   }
 
@@ -420,7 +426,7 @@ class PersistentCache {
   clear(): void {
     try {
       this.memoryCache.clear()
-      
+
       const keys = Object.keys(localStorage)
       for (const key of keys) {
         if (key.startsWith(this.prefix)) {
@@ -444,17 +450,19 @@ class CacheManager {
   private persistentCache: PersistentCache
   private defaultOptions: CacheOptions
 
-  constructor(options: {
-    maxMemorySize?: number
-    maxMemoryItems?: number
-    cachePrefix?: string
-    defaultTTL?: number
-  } = {}) {
+  constructor(
+    options: {
+      maxMemorySize?: number
+      maxMemoryItems?: number
+      cachePrefix?: string
+      defaultTTL?: number
+    } = {}
+  ) {
     const {
       maxMemorySize = 50 * 1024 * 1024,
       maxMemoryItems = 1000,
       cachePrefix = 'app_cache_',
-      defaultTTL = 5 * 60 * 1000
+      defaultTTL = 5 * 60 * 1000,
     } = options
 
     this.memoryCache = new MemoryCache(maxMemorySize, maxMemoryItems)
@@ -462,34 +470,43 @@ class CacheManager {
     this.defaultOptions = { ttl: defaultTTL }
 
     // Limpeza automática a cada hora
-    setInterval(() => {
-      this.cleanup()
-    }, 60 * 60 * 1000)
+    setInterval(
+      () => {
+        this.cleanup()
+      },
+      60 * 60 * 1000
+    )
   }
 
   // Cache em memória (rápido, temporário)
   memory = {
     get: <T>(key: string): T | null => this.memoryCache.get<T>(key),
-    set: <T>(key: string, data: T, options?: CacheOptions): boolean => 
+    set: <T>(key: string, data: T, options?: CacheOptions): boolean =>
       this.memoryCache.set(key, data, { ...this.defaultOptions, ...options }),
     delete: (key: string): boolean => this.memoryCache.delete(key),
     clear: (): void => this.memoryCache.clear(),
-    has: (key: string): boolean => this.memoryCache.has(key)
+    has: (key: string): boolean => this.memoryCache.has(key),
   }
 
   // Cache persistente (mais lento, permanente)
   persistent = {
     get: <T>(key: string): T | null => this.persistentCache.get<T>(key),
-    set: <T>(key: string, data: T, options?: CacheOptions): boolean => 
-      this.persistentCache.set(key, data, { ...this.defaultOptions, persistent: true, ...options }),
+    set: <T>(key: string, data: T, options?: CacheOptions): boolean =>
+      this.persistentCache.set(key, data, {
+        ...this.defaultOptions,
+        persistent: true,
+        ...options,
+      }),
     delete: (key: string): boolean => this.persistentCache.delete(key),
     clear: (): void => this.persistentCache.clear(),
   }
 
   // Invalidar por tags
   invalidateByTags(tags: string[]): number {
-    return this.memoryCache.invalidateByTags(tags) + 
-           this.persistentCache.invalidateByTags(tags)
+    return (
+      this.memoryCache.invalidateByTags(tags) +
+      this.persistentCache.invalidateByTags(tags)
+    )
   }
 
   // Limpeza geral
@@ -518,7 +535,7 @@ export function useCache() {
     persistent: cacheManager.persistent,
     invalidateByTags: (tags: string[]) => cacheManager.invalidateByTags(tags),
     cleanup: () => cacheManager.cleanup(),
-    getStats: () => cacheManager.getStats()
+    getStats: () => cacheManager.getStats(),
   }
 }
 
@@ -540,7 +557,7 @@ export function cached<T extends (...args: any[]) => any>(
 
   return ((...args: Parameters<T>) => {
     const key = `fn_${fn.name}_${keyGenerator(...args)}`
-    
+
     // Tentar obter do cache
     const cached = cache.get(key)
     if (cached !== null) {
@@ -550,7 +567,7 @@ export function cached<T extends (...args: any[]) => any>(
     // Executar função e cachear resultado
     const result = fn(...args)
     cache.set(key, result, cacheOptions)
-    
+
     return result
   }) as T
 }
@@ -564,7 +581,7 @@ export const ApiCache = {
   ): Promise<T> => {
     const { ttl = 5 * 60 * 1000, tags = [], ...fetchOptions } = options
     const cacheKey = `api_${url}_${JSON.stringify(fetchOptions)}`
-    
+
     // Tentar cache primeiro
     const cached = cacheManager.memory.get<T>(cacheKey)
     if (cached !== null) {
@@ -578,21 +595,21 @@ export const ApiCache = {
     }
 
     const data = await response.json()
-    
+
     // Cachear resultado
     cacheManager.memory.set(cacheKey, data, { ttl, tags: ['api', ...tags] })
-    
+
     return data
   },
 
   // Invalidar cache de API por padrão de URL
   invalidateByUrl: (urlPattern: string): number => {
     let deleted = 0
-    
+
     // Usar a instância do MemoryCache diretamente
     if (cacheManager.memory instanceof MemoryCache) {
       const keys = cacheManager.memory.keys()
-      
+
       for (const key of keys) {
         if (key.startsWith('api_') && key.includes(urlPattern)) {
           if (cacheManager.memory.delete(key)) {
@@ -601,9 +618,9 @@ export const ApiCache = {
         }
       }
     }
-    
+
     return deleted
-  }
+  },
 }
 
 // Exportar classes e tipos
@@ -614,5 +631,5 @@ export {
   CompressionUtils,
   type CacheItem,
   type CacheOptions,
-  type CacheStats
+  type CacheStats,
 }

@@ -12,12 +12,14 @@
 ## 🎯 **Como Funciona Agora:**
 
 ### 👤 **Para o Paciente:**
+
 1. Preenche o formulário
 2. Clica "Agendar Consulta"
 3. **Recebe mensagem:** "Agendamento registrado! O doutor será notificado automaticamente"
 4. **Pronto!** Não precisa fazer mais nada
 
 ### 👨‍⚕️ **Para o Doutor:**
+
 1. **Recebe email automático** com todos os detalhes
 2. **Clica no botão WhatsApp** no email
 3. **Mensagem já formatada** abre no WhatsApp
@@ -37,6 +39,7 @@ DOCTOR_EMAIL=joaovitorvianacoloprocto@gmail.com
 ```
 
 **✅ Vantagens:**
+
 - Usa senha normal (não precisa App Password)
 - Configuração em 2 minutos
 - Funciona imediatamente
@@ -53,6 +56,7 @@ DOCTOR_EMAIL=joaovitorvianacoloprocto@gmail.com
 ```
 
 **📋 Passos:**
+
 1. Ativar verificação em 2 etapas
 2. Gerar App Password
 3. Usar a senha de 16 caracteres
@@ -73,11 +77,13 @@ DOCTOR_EMAIL=joaovitorvianacoloprocto@gmail.com
 ## 🚀 **Configuração Rápida (Recomendada):**
 
 ### 1️⃣ **Criar conta Outlook:**
+
 - Acesse: https://outlook.com
 - Clique "Criar conta gratuita"
 - Use: `agendamento.clinica@outlook.com` (exemplo)
 
 ### 2️⃣ **Configurar no sistema:**
+
 ```env
 # Adicionar no .env.local
 OUTLOOK_USER=agendamento.clinica@outlook.com
@@ -86,11 +92,13 @@ DOCTOR_EMAIL=joaovitorvianacoloprocto@gmail.com
 ```
 
 ### 3️⃣ **Reiniciar servidor:**
+
 ```bash
 npm run dev
 ```
 
 ### 4️⃣ **Testar:**
+
 - Faça um agendamento de teste
 - Verifique se chegou email em `joaovitorvianacoloprocto@gmail.com`
 
@@ -124,6 +132,7 @@ npm run dev
 ## 🔄 **Sistema de Backup:**
 
 **Se email falhar:**
+
 - ✅ Link WhatsApp aparece no console
 - ✅ Todas as informações registradas
 - ✅ Paciente recebe confirmação
@@ -134,12 +143,14 @@ npm run dev
 ## 🎯 **Vantagens da Nova Solução:**
 
 ### ✅ **Para o Paciente:**
+
 - Não precisa ter WhatsApp no computador
 - Não precisa enviar mensagem
 - Processo mais simples
 - Confirmação imediata
 
 ### ✅ **Para o Doutor:**
+
 - Email automático com todos os detalhes
 - Botão direto para WhatsApp
 - Mensagem já formatada
@@ -147,6 +158,7 @@ npm run dev
 - Notificação no celular (app Gmail/Outlook)
 
 ### ✅ **Para o Sistema:**
+
 - Funciona 24/7
 - Backup automático
 - Múltiplos provedores de email
@@ -157,17 +169,20 @@ npm run dev
 ## 🆘 **Solução de Problemas:**
 
 ### ❌ **Email não chega:**
+
 1. Verificar configurações no `.env.local`
 2. Testar com Outlook (mais fácil)
 3. Verificar spam/lixo eletrônico
 4. Usar backup do console
 
 ### ❌ **Senha incorreta:**
+
 1. Outlook: usar senha normal
 2. Gmail: usar App Password (16 caracteres)
 3. Yahoo: usar senha normal
 
 ### ❌ **Conta bloqueada:**
+
 1. Verificar login no provedor
 2. Ativar "acesso de apps menos seguros" se necessário
 3. Usar conta nova dedicada
@@ -177,6 +192,7 @@ npm run dev
 ## 💡 **Dica Final:**
 
 **Recomendo criar uma conta Outlook específica** para o sistema:
+
 - `agendamentos.drjoao@outlook.com`
 - Senha simples e segura
 - Dedicada apenas para notificações

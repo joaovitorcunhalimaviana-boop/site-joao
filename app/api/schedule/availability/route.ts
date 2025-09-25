@@ -9,24 +9,36 @@ import { z } from 'zod'
 
 const availabilityCheckSchema = z.object({
   date: z.string().transform(str => new Date(str)),
-  startTime: z.string().regex(/^\d{2}:\d{2}$/, 'Formato de hora inválido (HH:MM)'),
-  endTime: z.string().regex(/^\d{2}:\d{2}$/, 'Formato de hora inválido (HH:MM)')
+  startTime: z
+    .string()
+    .regex(/^\d{2}:\d{2}$/, 'Formato de hora inválido (HH:MM)'),
+  endTime: z
+    .string()
+    .regex(/^\d{2}:\d{2}$/, 'Formato de hora inválido (HH:MM)'),
 })
 
 const availableSlotsSchema = z.object({
   date: z.string().transform(str => new Date(str)),
   slotDuration: z.number().min(15).max(240).default(60), // 15 min a 4 horas
-  workingHours: z.object({
-    start: z.string().regex(/^\d{2}:\d{2}$/, 'Formato de hora inválido (HH:MM)').default('08:00'),
-    end: z.string().regex(/^\d{2}:\d{2}$/, 'Formato de hora inválido (HH:MM)').default('18:00')
-  }).default({ start: '08:00', end: '18:00' })
+  workingHours: z
+    .object({
+      start: z
+        .string()
+        .regex(/^\d{2}:\d{2}$/, 'Formato de hora inválido (HH:MM)')
+        .default('08:00'),
+      end: z
+        .string()
+        .regex(/^\d{2}:\d{2}$/, 'Formato de hora inválido (HH:MM)')
+        .default('18:00'),
+    })
+    .default({ start: '08:00', end: '18:00' }),
 })
 
 const emergencyBlockSchema = z.object({
   title: z.string().min(1, 'Título é obrigatório'),
   description: z.string().optional(),
   startDate: z.string().transform(str => new Date(str)),
-  endDate: z.string().transform(str => new Date(str))
+  endDate: z.string().transform(str => new Date(str)),
 })
 
 /**
@@ -43,7 +55,7 @@ export async function POST(request: NextRequest) {
         { status: 401 }
       )
     }
-    
+
     const token = authHeader.substring(7)
     const authResult = await AuthService.verifyToken(token)
     if (!authResult || !authResult.userId) {
@@ -56,12 +68,12 @@ export async function POST(request: NextRequest) {
     // Validar dados de entrada
     const body = await request.json()
     const validation = availabilityCheckSchema.safeParse(body)
-    
+
     if (!validation.success) {
       return NextResponse.json(
-        { 
+        {
           error: 'Dados inválidos',
-          details: validation.error.issues
+          details: validation.error.issues,
         },
         { status: 400 }
       )
@@ -70,20 +82,20 @@ export async function POST(request: NextRequest) {
     const { date, startTime, endTime } = validation.data
 
     // Verificar disponibilidade
-    const availability = await ScheduleBlockingService.checkTimeSlotAvailability(
-      date,
-      startTime,
-      endTime,
-      authResult.userId
-    )
+    const availability =
+      await ScheduleBlockingService.checkTimeSlotAvailability(
+        date,
+        startTime,
+        endTime,
+        authResult.userId
+      )
 
     return NextResponse.json({
       success: true,
       date: date.toISOString().split('T')[0],
       timeSlot: { startTime, endTime },
-      availability
+      availability,
     })
-
   } catch (error) {
     console.error('Erro ao verificar disponibilidade:', error)
     return NextResponse.json(
@@ -107,7 +119,7 @@ export async function GET(request: NextRequest) {
         { status: 401 }
       )
     }
-    
+
     const token = authHeader.substring(7)
     const authResult = await AuthService.verifyToken(token)
     if (!authResult || !authResult.userId) {
@@ -125,10 +137,7 @@ export async function GET(request: NextRequest) {
     const workingEndParam = url.searchParams.get('workingEnd')
 
     if (!dateParam) {
-      return NextResponse.json(
-        { error: 'Data é obrigatória' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'Data é obrigatória' }, { status: 400 })
     }
 
     // Validar parâmetros
@@ -137,15 +146,15 @@ export async function GET(request: NextRequest) {
       slotDuration: slotDurationParam ? parseInt(slotDurationParam) : 60,
       workingHours: {
         start: workingStartParam || '08:00',
-        end: workingEndParam || '18:00'
-      }
+        end: workingEndParam || '18:00',
+      },
     })
 
     if (!validation.success) {
       return NextResponse.json(
         {
           error: 'Parâmetros inválidos',
-          details: validation.error.issues
+          details: validation.error.issues,
         },
         { status: 400 }
       )
@@ -167,9 +176,8 @@ export async function GET(request: NextRequest) {
       slotDuration,
       workingHours,
       availableSlots,
-      totalSlots: availableSlots.length
+      totalSlots: availableSlots.length,
     })
-
   } catch (error) {
     console.error('Erro ao obter slots disponíveis:', error)
     return NextResponse.json(
@@ -193,7 +201,7 @@ export async function PUT(request: NextRequest) {
         { status: 401 }
       )
     }
-    
+
     const token = authHeader.substring(7)
     const authResult = await AuthService.verifyToken(token)
     if (!authResult || !authResult.userId) {
@@ -210,12 +218,12 @@ export async function PUT(request: NextRequest) {
     // Validar dados de entrada
     const body = await request.json()
     const validation = emergencyBlockSchema.safeParse(body)
-    
+
     if (!validation.success) {
       return NextResponse.json(
-        { 
+        {
           error: 'Dados inválidos',
-          details: validation.error.issues
+          details: validation.error.issues,
         },
         { status: 400 }
       )
@@ -233,10 +241,7 @@ export async function PUT(request: NextRequest) {
     )
 
     if (!result.success) {
-      return NextResponse.json(
-        { error: result.error },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: result.error }, { status: 400 })
     }
 
     // Log da emergência para auditoria
@@ -244,15 +249,14 @@ export async function PUT(request: NextRequest) {
       title,
       startDate,
       endDate,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     })
 
     return NextResponse.json({
       success: true,
       message: 'Bloqueio de emergência criado com sucesso',
-      alert: 'Consultas existentes no período foram canceladas automaticamente'
+      alert: 'Consultas existentes no período foram canceladas automaticamente',
     })
-
   } catch (error) {
     console.error('Erro ao criar bloqueio de emergência:', error)
     return NextResponse.json(
@@ -276,7 +280,7 @@ export async function PATCH(request: NextRequest) {
         { status: 401 }
       )
     }
-    
+
     const token = authHeader.substring(7)
     const authResult = await AuthService.verifyToken(token)
     if (!authResult || !authResult.userId) {
@@ -309,13 +313,15 @@ export async function PATCH(request: NextRequest) {
     }
 
     // Buscar bloqueios no período
-    const blocks = await ScheduleBlockingService.getActiveScheduleBlocks(authResult.userId)
-    
+    const blocks = await ScheduleBlockingService.getActiveScheduleBlocks(
+      authResult.userId
+    )
+
     // Filtrar bloqueios no período solicitado
     const blocksInPeriod = blocks.filter(block => {
       const blockStart = new Date(block.startDate)
       const blockEnd = new Date(block.endDate)
-      
+
       return (
         (blockStart >= startDate && blockStart <= endDate) ||
         (blockEnd >= startDate && blockEnd <= endDate) ||
@@ -324,19 +330,22 @@ export async function PATCH(request: NextRequest) {
     })
 
     // Agrupar por tipo de bloqueio
-    const blocksByType = blocksInPeriod.reduce((acc, block) => {
-      if (!acc[block.blockType]) {
-        acc[block.blockType] = []
-      }
-      acc[block.blockType].push(block)
-      return acc
-    }, {} as Record<string, typeof blocksInPeriod>)
+    const blocksByType = blocksInPeriod.reduce(
+      (acc, block) => {
+        if (!acc[block.blockType]) {
+          acc[block.blockType] = []
+        }
+        acc[block.blockType].push(block)
+        return acc
+      },
+      {} as Record<string, typeof blocksInPeriod>
+    )
 
     return NextResponse.json({
       success: true,
       period: {
         startDate: startDate.toISOString().split('T')[0],
-        endDate: endDate.toISOString().split('T')[0]
+        endDate: endDate.toISOString().split('T')[0],
       },
       blocks: blocksInPeriod,
       blocksByType,
@@ -347,10 +356,9 @@ export async function PATCH(request: NextRequest) {
         emergencyBlocks: blocksByType['emergency']?.length || 0,
         personalBlocks: blocksByType['personal']?.length || 0,
         maintenanceBlocks: blocksByType['maintenance']?.length || 0,
-        otherBlocks: blocksByType['other']?.length || 0
-      }
+        otherBlocks: blocksByType['other']?.length || 0,
+      },
     })
-
   } catch (error) {
     console.error('Erro ao obter calendário:', error)
     return NextResponse.json(

@@ -866,6 +866,22 @@ export default function CirurgiasPage() {
 
                 <div>
                   <label className='block text-sm font-medium text-gray-300 mb-2'>
+                    Hospital *
+                  </label>
+                  <input
+                    type='text'
+                    required
+                    value={formData.hospital}
+                    onChange={e =>
+                      setFormData({ ...formData, hospital: e.target.value })
+                    }
+                    className='w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-blue-400 focus:border-transparent backdrop-blur-sm'
+                    placeholder='Nome do hospital onde será realizada a cirurgia'
+                  />
+                </div>
+
+                <div>
+                  <label className='block text-sm font-medium text-gray-300 mb-2'>
                     Data *
                   </label>
                   <BrazilianDatePicker

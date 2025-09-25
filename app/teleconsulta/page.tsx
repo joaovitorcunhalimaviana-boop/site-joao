@@ -84,7 +84,7 @@ const TeleconsultaPage = () => {
                 Vantagens da Teleconsulta
               </h2>
               <div className='grid md:grid-cols-2 lg:grid-cols-4 gap-8'>
-                <div className='text-center'>
+                <div className='text-center bg-blue-900/30 backdrop-blur-sm rounded-2xl p-6 border border-blue-700/30'>
                   <VideoCameraIcon className='h-12 w-12 text-gray-400 mx-auto mb-4' />
                   <h3 className='text-xl font-semibold text-white mb-2'>
                     Comodidade
@@ -93,7 +93,7 @@ const TeleconsultaPage = () => {
                     Atendimento no conforto da sua casa
                   </p>
                 </div>
-                <div className='text-center'>
+                <div className='text-center bg-blue-900/30 backdrop-blur-sm rounded-2xl p-6 border border-blue-700/30'>
                   <ClockIcon className='h-12 w-12 text-gray-400 mx-auto mb-4' />
                   <h3 className='text-xl font-semibold text-white mb-2'>
                     Flexibilidade
@@ -102,7 +102,7 @@ const TeleconsultaPage = () => {
                     Horários adaptados à sua rotina
                   </p>
                 </div>
-                <div className='text-center'>
+                <div className='text-center bg-blue-900/30 backdrop-blur-sm rounded-2xl p-6 border border-blue-700/30'>
                   <ShieldCheckIcon className='h-12 w-12 text-gray-400 mx-auto mb-4' />
                   <h3 className='text-xl font-semibold text-white mb-2'>
                     Segurança
@@ -111,7 +111,7 @@ const TeleconsultaPage = () => {
                     Evita deslocamentos desnecessários
                   </p>
                 </div>
-                <div className='text-center'>
+                <div className='text-center bg-blue-900/30 backdrop-blur-sm rounded-2xl p-6 border border-blue-700/30'>
                   <PhoneIcon className='h-12 w-12 text-gray-400 mx-auto mb-4' />
                   <h3 className='text-xl font-semibold text-white mb-2'>
                     Acessibilidade
@@ -129,7 +129,7 @@ const TeleconsultaPage = () => {
                 Como Funciona
               </h2>
               <div className='grid md:grid-cols-3 gap-8'>
-                <div className='text-center'>
+                <div className='text-center bg-gray-900/60 backdrop-blur-sm rounded-2xl p-6 border border-gray-700/50'>
                   <div className='bg-gray-700 rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-4'>
                     <span className='text-white font-bold text-lg'>1</span>
                   </div>
@@ -141,7 +141,7 @@ const TeleconsultaPage = () => {
                     conosco
                   </p>
                 </div>
-                <div className='text-center'>
+                <div className='text-center bg-gray-900/60 backdrop-blur-sm rounded-2xl p-6 border border-gray-700/50'>
                   <div className='bg-gray-700 rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-4'>
                     <span className='text-white font-bold text-lg'>2</span>
                   </div>
@@ -153,7 +153,7 @@ const TeleconsultaPage = () => {
                     o médico
                   </p>
                 </div>
-                <div className='text-center'>
+                <div className='text-center bg-gray-900/60 backdrop-blur-sm rounded-2xl p-6 border border-gray-700/50'>
                   <div className='bg-gray-700 rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-4'>
                     <span className='text-white font-bold text-lg'>3</span>
                   </div>
@@ -190,30 +190,28 @@ const TeleconsultaPage = () => {
 
                   {/* Observação Importante */}
                   <div className='bg-yellow-900/30 border border-yellow-600/50 rounded-lg p-4 mt-6'>
-                    <div className='flex items-start space-x-3'>
-                      <svg
-                        className='w-5 h-5 text-yellow-400 mt-0.5 flex-shrink-0'
-                        fill='none'
-                        stroke='currentColor'
-                        viewBox='0 0 24 24'
-                      >
-                        <path
-                          strokeLinecap='round'
-                          strokeLinejoin='round'
-                          strokeWidth={2}
-                          d='M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z'
-                        />
-                      </svg>
-                      <div>
-                        <p className='text-yellow-200 text-sm font-medium mb-1'>
-                          Observação Importante:
-                        </p>
-                        <p className='text-yellow-100 text-lg'>
-                          Pacientes que necessitam de exame físico devem agendar
-                          consulta presencial, pois a teleconsulta não permite
-                          avaliação física adequada.
-                        </p>
-                      </div>
+                    <div className='text-center'>
+                      <p className='text-yellow-200 text-sm font-medium mb-1 flex items-center justify-center'>
+                        <svg
+                          className='w-5 h-5 text-yellow-400 mr-2 flex-shrink-0'
+                          fill='none'
+                          stroke='currentColor'
+                          viewBox='0 0 24 24'
+                        >
+                          <path
+                            strokeLinecap='round'
+                            strokeLinejoin='round'
+                            strokeWidth={2}
+                            d='M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z'
+                          />
+                        </svg>
+                        Observação Importante:
+                      </p>
+                      <p className='text-yellow-100 text-lg'>
+                        Pacientes que necessitam de exame físico devem agendar
+                        consulta presencial, pois a teleconsulta não permite
+                        avaliação física adequada.
+                      </p>
                     </div>
                   </div>
                 </div>

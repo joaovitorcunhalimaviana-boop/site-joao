@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Header from '../../../components/ui/header'
 import BackgroundPattern from '../../../components/ui/background-pattern'
 import MedicalAreaMenu from '../../../components/ui/medical-area-menu'
+import { formatDateToBrazilian } from '@/lib/date-utils'
 import {
   EnvelopeIcon,
   UserGroupIcon,
@@ -89,7 +90,7 @@ export default function EmailsPage() {
             </div>
             
             <div style="padding: 30px;">
-              <h2 style="color: #1e3a8a; margin-bottom: 20px;">Olá, caro paciente!</h2>
+              <h2 style="color: #1e3a8a; margin-bottom: 20px;">Olá, {{PATIENT_NAME}}!</h2>
                
                <p style="line-height: 1.6; margin-bottom: 20px; color: #1f2937; text-align: justify;">É com imenso carinho e satisfação que recebemos você em nossa clínica. Estamos aqui para cuidar da sua saúde com todo o acolhimento, dedicação e excelência que você merece.</p>
              
@@ -151,7 +152,7 @@ export default function EmailsPage() {
             </div>
             
             <div style="padding: 30px;">
-              <h2 style="color: #1e3a8a; margin-bottom: 20px;">Feliz Aniversário!</h2>
+              <h2 style="color: #1e3a8a; margin-bottom: 20px;">Feliz Aniversário, {{PATIENT_NAME}}!</h2>
               
               <p style="line-height: 1.6; margin-bottom: 20px; color: #1f2937; text-align: justify;">É com muito carinho que desejamos um feliz aniversário! Que este novo ano de vida seja repleto de saúde, alegria e realizações.</p>
               
@@ -229,76 +230,75 @@ export default function EmailsPage() {
         selectedPatients.includes(p.id)
       )
 
-      // Preparar dados para envio real
-      const recipients = selectedPatientsData.map(p => p.email)
-      const subject =
-        template?.id === 'welcome'
-          ? 'Bem-vindo à nossa clínica!'
-          : template?.id === 'newsletter'
-            ? 'Novidades e Dicas da Semana'
-            : 'Parabéns pelo seu aniversário!'
+      // Criar um conteúdo personalizado para cada paciente
+      const emailPromises = selectedPatientsData.map(async patient => {
+        // Substituir o nome do paciente no template
+        let personalizedContent =
+          template?.content.replace(/{{PATIENT_NAME}}/g, patient.name) || ''
 
-      // Enviar emails usando a API real
-      const response = await fetch('/api/send-email', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          recipients,
-          subject,
-          template: template?.id,
-          customContent: template?.content,
-        }),
+        const subject =
+          template?.id === 'welcome'
+            ? 'Bem-vindo à nossa clínica!'
+            : template?.id === 'newsletter'
+              ? 'Novidades e Dicas da Semana'
+              : 'Parabéns pelo seu aniversário!'
+
+        return fetch('/api/send-email', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            recipients: [patient.email],
+            subject,
+            template: template?.id,
+            customContent: personalizedContent,
+          }),
+        })
       })
 
-      console.log('📧 Status da resposta HTTP:', response.status)
-      console.log('📧 Headers da resposta:', response.headers)
-      console.log('📧 Response OK:', response.ok)
+      // Aguardar todos os envios
+      const responses = await Promise.all(emailPromises)
+      const results = await Promise.all(
+        responses.map(async response => {
+          if (!response.ok) {
+            const errorText = await response.text()
+            console.error(
+              '❌ Resposta HTTP não OK:',
+              response.status,
+              errorText
+            )
+            throw new Error(`Erro HTTP ${response.status}: ${errorText}`)
+          }
 
-      // Verificar se a resposta é válida antes de tentar fazer parse
-      if (!response.ok) {
-        const errorText = await response.text()
-        console.error('❌ Resposta HTTP não OK:', response.status, errorText)
-        throw new Error(`Erro HTTP ${response.status}: ${errorText}`)
-      }
+          const responseText = await response.text()
+          console.log('📧 Texto bruto da resposta:', responseText)
 
-      // Tentar fazer parse do JSON com tratamento de erro
-      let result
-      try {
-        const responseText = await response.text()
-        console.log('📧 Texto bruto da resposta:', responseText)
-        
-        if (!responseText.trim()) {
-          throw new Error('Resposta vazia da API')
-        }
-        
-        result = JSON.parse(responseText)
-      } catch (parseError) {
-        console.error('❌ Erro ao fazer parse do JSON:', parseError)
-        throw new Error('Resposta inválida da API')
-      }
+          if (!responseText.trim()) {
+            throw new Error('Resposta vazia da API')
+          }
 
-      console.log('📧 Resposta da API (parsed):', result)
-      console.log('📧 result.success:', result.success)
-      console.log('📧 Tipo de result.success:', typeof result.success)
+          return JSON.parse(responseText)
+        })
+      )
 
-      // Verificar se result tem as propriedades esperadas
-      if (typeof result !== 'object' || result === null) {
-        console.error('❌ Result não é um objeto válido:', result)
-        throw new Error('Resposta da API em formato inválido')
-      }
+      console.log('📧 Respostas da API (parsed):', results)
 
-      if (result.success === true) {
+      // Verificar se todos os envios foram bem-sucedidos
+      const allSuccessful = results.every(result => result.success === true)
+
+      if (allSuccessful) {
         alert(
           `E-mails enviados com sucesso para ${selectedPatientsData.length} paciente(s)!`
         )
         setSelectedPatients([])
         setSelectedTemplate('')
       } else {
-        console.error('❌ Falha no envio - result:', result)
-        const errorMessage = result.error || result.message || 'Erro desconhecido no envio de e-mails'
-        throw new Error(errorMessage)
+        const failedCount = results.filter(
+          result => result.success !== true
+        ).length
+        console.error('❌ Falha em alguns envios - results:', results)
+        throw new Error(`Falha no envio de ${failedCount} e-mail(s)`)
       }
     } catch (error) {
       console.error('Erro ao enviar e-mails:', error)
@@ -467,15 +467,13 @@ export default function EmailsPage() {
                           </td>
                           <td className='py-3 px-4 text-gray-300'>
                             {patient.birthDate
-                              ? new Date(
-                                  patient.birthDate + 'T12:00:00'
-                                ).toLocaleDateString('pt-BR')
+                              ? formatDateToBrazilian(
+                                  new Date(patient.birthDate + 'T12:00:00')
+                                )
                               : 'Não informado'}
                           </td>
                           <td className='py-3 px-4 text-gray-300'>
-                            {new Date(patient.createdAt).toLocaleDateString(
-                              'pt-BR'
-                            )}
+                            {formatDateToBrazilian(new Date(patient.createdAt))}
                           </td>
                         </tr>
                       ))}

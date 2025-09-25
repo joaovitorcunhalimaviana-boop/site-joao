@@ -20,6 +20,7 @@ DOCTOR_SPECIALTY="Coloproctologista"
 ### 2. Como Funciona
 
 Quando um paciente confirma um agendamento:
+
 1. ✅ Os dados são validados
 2. 📱 Uma notificação é enviada automaticamente
 3. 📋 A mensagem inclui: nome, email, WhatsApp, data, horário e tipo de plano
@@ -43,6 +44,7 @@ Quando um paciente confirma um agendamento:
 ## 🚀 Opções de Integração
 
 ### Opção 1: Manual (Atual)
+
 - As notificações aparecem no console do servidor
 - Um link direto para WhatsApp é gerado
 - Você pode clicar no link para enviar manualmente
@@ -126,6 +128,7 @@ WhatsApp do médico: 11999999999
 ## 📞 Suporte
 
 Para dúvidas sobre a implementação:
+
 1. Verifique os logs do console
 2. Teste com dados de exemplo
 3. Consulte a documentação da API escolhida (Twilio, etc.)

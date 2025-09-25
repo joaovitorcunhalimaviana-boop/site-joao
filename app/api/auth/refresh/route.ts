@@ -4,11 +4,11 @@ import { AuthService, AuditService, prisma } from '@/lib/database'
 function getClientIP(request: NextRequest): string {
   const forwarded = request.headers.get('x-forwarded-for')
   const realIP = request.headers.get('x-real-ip')
-  
+
   if (forwarded) {
     return forwarded.split(',')[0].trim()
   }
-  
+
   return realIP || 'unknown'
 }
 
@@ -16,10 +16,10 @@ export async function POST(request: NextRequest) {
   try {
     const clientIP = getClientIP(request)
     const userAgent = request.headers.get('user-agent') || 'Unknown'
-    
+
     // Obter refresh token do cookie
     const refreshToken = request.cookies.get('refreshToken')?.value
-    
+
     if (!refreshToken) {
       return NextResponse.json(
         { success: false, error: 'Refresh token não encontrado' },
@@ -33,10 +33,12 @@ export async function POST(request: NextRequest) {
       await AuditService.log({
         action: 'REFRESH_TOKEN_INVALID',
         resource: 'Auth',
-        details: JSON.stringify({ token: refreshToken.substring(0, 20) + '...' }),
+        details: JSON.stringify({
+          token: refreshToken.substring(0, 20) + '...',
+        }),
         severity: 'MEDIUM',
         ipAddress: clientIP,
-        userAgent
+        userAgent,
       })
 
       return NextResponse.json(
@@ -51,8 +53,8 @@ export async function POST(request: NextRequest) {
         token: refreshToken,
         userId: payload.userId,
         expiresAt: {
-          gt: new Date()
-        }
+          gt: new Date(),
+        },
       },
       include: {
         user: {
@@ -61,10 +63,10 @@ export async function POST(request: NextRequest) {
             email: true,
             name: true,
             role: true,
-            isActive: true
-          }
-        }
-      }
+            isActive: true,
+          },
+        },
+      },
     })
 
     if (!storedToken || !storedToken.user.isActive) {
@@ -72,13 +74,13 @@ export async function POST(request: NextRequest) {
         userId: payload.userId,
         action: 'REFRESH_TOKEN_NOT_FOUND_OR_USER_INACTIVE',
         resource: 'Auth',
-        details: JSON.stringify({ 
+        details: JSON.stringify({
           tokenFound: !!storedToken,
-          userActive: storedToken?.user.isActive
+          userActive: storedToken?.user.isActive,
         }),
         severity: 'MEDIUM',
         ipAddress: clientIP,
-        userAgent
+        userAgent,
       })
 
       return NextResponse.json(
@@ -88,13 +90,14 @@ export async function POST(request: NextRequest) {
     }
 
     // Gerar novos tokens mantendo configurações de sessão médica
-    const { accessToken, refreshToken: newRefreshToken } = AuthService.generateTokens(storedToken.user.id, storedToken.user.role)
-    
+    const { accessToken, refreshToken: newRefreshToken } =
+      AuthService.generateTokens(storedToken.user.id, storedToken.user.role)
+
     // Remover o refresh token antigo e salvar o novo
     await prisma.refreshToken.delete({
-      where: { id: storedToken.id }
+      where: { id: storedToken.id },
     })
-    
+
     await AuthService.saveRefreshToken(storedToken.user.id, newRefreshToken)
 
     // Log de refresh bem-sucedido
@@ -102,13 +105,13 @@ export async function POST(request: NextRequest) {
       userId: storedToken.user.id,
       action: 'TOKEN_REFRESHED',
       resource: 'Auth',
-      details: JSON.stringify({ 
+      details: JSON.stringify({
         email: storedToken.user.email,
-        role: storedToken.user.role
+        role: storedToken.user.role,
       }),
       severity: 'LOW',
       ipAddress: clientIP,
-      userAgent
+      userAgent,
     })
 
     // Preparar resposta
@@ -119,8 +122,8 @@ export async function POST(request: NextRequest) {
         id: storedToken.user.id,
         email: storedToken.user.email,
         name: storedToken.user.name,
-        role: storedToken.user.role
-      }
+        role: storedToken.user.role,
+      },
     })
 
     // Configurar novo cookie do refresh token
@@ -129,30 +132,31 @@ export async function POST(request: NextRequest) {
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict' as const,
       maxAge: 7 * 24 * 60 * 60, // 7 dias
-      path: '/'
+      path: '/',
     }
 
     response.cookies.set('refreshToken', newRefreshToken, cookieOptions)
 
     return response
-
   } catch (error) {
     console.error('Erro no refresh token:', error)
-    
+
     await AuditService.log({
       action: 'REFRESH_TOKEN_ERROR',
       resource: 'Auth',
-      details: JSON.stringify({ error: error instanceof Error ? error.message : 'Unknown error' }),
+      details: JSON.stringify({
+        error: error instanceof Error ? error.message : 'Unknown error',
+      }),
       severity: 'HIGH',
       ipAddress: getClientIP(request),
-      userAgent: request.headers.get('user-agent') || 'Unknown'
+      userAgent: request.headers.get('user-agent') || 'Unknown',
     })
 
     return NextResponse.json(
       {
         success: false,
         error: 'Erro interno do servidor',
-        code: 'INTERNAL_SERVER_ERROR'
+        code: 'INTERNAL_SERVER_ERROR',
       },
       { status: 500 }
     )
@@ -163,21 +167,21 @@ export async function DELETE(request: NextRequest) {
   try {
     const clientIP = getClientIP(request)
     const userAgent = request.headers.get('user-agent') || 'Unknown'
-    
+
     // Obter refresh token do cookie
     const refreshToken = request.cookies.get('refreshToken')?.value
-    
+
     if (refreshToken) {
       // Verificar token para obter userId
       const payload = await AuthService.verifyToken(refreshToken, 'refresh')
-      
+
       if (payload) {
         // Remover refresh token do banco
         await prisma.refreshToken.deleteMany({
           where: {
             token: refreshToken,
-            userId: payload.userId
-          }
+            userId: payload.userId,
+          },
         })
 
         // Log de logout
@@ -188,7 +192,7 @@ export async function DELETE(request: NextRequest) {
           details: JSON.stringify({ method: 'refresh_token_deletion' }),
           severity: 'LOW',
           ipAddress: clientIP,
-          userAgent
+          userAgent,
         })
       }
     }
@@ -196,7 +200,7 @@ export async function DELETE(request: NextRequest) {
     // Preparar resposta removendo o cookie
     const response = NextResponse.json({
       success: true,
-      message: 'Logout realizado com sucesso'
+      message: 'Logout realizado com sucesso',
     })
 
     // Remover cookie do refresh token
@@ -205,19 +209,18 @@ export async function DELETE(request: NextRequest) {
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict' as const,
       maxAge: 0,
-      path: '/'
+      path: '/',
     })
 
     return response
-
   } catch (error) {
     console.error('Erro no logout:', error)
-    
+
     return NextResponse.json(
       {
         success: false,
         error: 'Erro interno do servidor',
-        code: 'INTERNAL_SERVER_ERROR'
+        code: 'INTERNAL_SERVER_ERROR',
       },
       { status: 500 }
     )

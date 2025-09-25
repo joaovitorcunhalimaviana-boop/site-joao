@@ -10,19 +10,19 @@ const nextConfig = {
   trailingSlash: true,
   skipTrailingSlashRedirect: true,
   distDir: 'out',
-  
+
   // Configuração para GitHub Pages
   basePath: '/site-joao',
   assetPrefix: '/site-joao/',
-  
+
   images: {
     unoptimized: true, // Necessário para export estático
   },
-  
+
   // Configurações para otimização
   compress: true,
   poweredByHeader: false,
-  
+
   // Security headers (limitados no GitHub Pages)
   async headers() {
     return [
@@ -31,17 +31,17 @@ const nextConfig = {
         headers: [
           {
             key: 'X-Content-Type-Options',
-            value: 'nosniff'
+            value: 'nosniff',
           },
           {
             key: 'Referrer-Policy',
-            value: 'strict-origin-when-cross-origin'
-          }
-        ]
-      }
+            value: 'strict-origin-when-cross-origin',
+          },
+        ],
+      },
     ]
   },
-  
+
   // Bundle optimization
   webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
     if (!dev && !isServer) {
@@ -58,7 +58,7 @@ const nextConfig = {
     }
     return config
   },
-  
+
   // Experimental features
   experimental: {
     optimizeCss: true,

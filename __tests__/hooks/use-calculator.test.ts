@@ -210,31 +210,31 @@ describe('useCalculator Hook', () => {
         result.current.updateField('social_function', 6)
       })
 
-    it('deve exportar dados usando a função exportData', () => {
-      const { result } = renderHook(() => useCalculator(mockIBDQConfig))
+      it('deve exportar dados usando a função exportData', () => {
+        const { result } = renderHook(() => useCalculator(mockIBDQConfig))
 
-      act(() => {
-        result.current.updateField('bowel_symptoms', 6)
-        result.current.updateField('systemic_symptoms', 5)
-        result.current.updateField('emotional_function', 7)
-        result.current.updateField('social_function', 6)
+        act(() => {
+          result.current.updateField('bowel_symptoms', 6)
+          result.current.updateField('systemic_symptoms', 5)
+          result.current.updateField('emotional_function', 7)
+          result.current.updateField('social_function', 6)
+        })
+
+        // Testar se a função exportData existe
+        expect(typeof result.current.exportResult).toBe('function')
       })
 
-      // Testar se a função exportData existe
-      expect(typeof result.current.exportResult).toBe('function')
-    })
+      it('deve permitir salvar resultado', () => {
+        const { result } = renderHook(() => useCalculator(mockIBDQConfig))
 
-    it('deve permitir salvar resultado', () => {
-      const { result } = renderHook(() => useCalculator(mockIBDQConfig))
+        act(() => {
+          result.current.updateField('bowel_symptoms', 6)
+          result.current.updateField('systemic_symptoms', 5)
+        })
 
-      act(() => {
-        result.current.updateField('bowel_symptoms', 6)
-        result.current.updateField('systemic_symptoms', 5)
+        // Testar se a função saveResult existe
+        expect(typeof result.current.saveResult).toBe('function')
       })
-
-      // Testar se a função saveResult existe
-      expect(typeof result.current.saveResult).toBe('function')
-    })
     })
   })
 

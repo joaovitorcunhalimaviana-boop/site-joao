@@ -2,6 +2,10 @@
 
 import { useState } from 'react'
 import { DocumentTextIcon, PrinterIcon } from '@heroicons/react/24/outline'
+import {
+  formatDateToBrazilian,
+  formatDateTimeToBrazilian,
+} from '@/lib/date-utils'
 
 interface MedicalDeclarationFormProps {
   patientName: string
@@ -137,8 +141,8 @@ export default function MedicalDeclarationForm({
       doctorCrm,
       title,
       content,
-      date: new Date().toLocaleDateString('pt-BR'),
-      createdAt: new Date().toLocaleString('pt-BR'),
+      date: formatDateToBrazilian(new Date()),
+      createdAt: formatDateTimeToBrazilian(new Date()),
     }
     onSave?.(declaration)
     alert('Declaração médica salva com sucesso!')
@@ -271,7 +275,7 @@ export default function MedicalDeclarationForm({
         </div>
         
         <div class="date-location">
-          João Pessoa, ${new Date().toLocaleDateString('pt-BR')}
+          João Pessoa, ${formatDateToBrazilian(new Date())}
         </div>
         
         <div class="footer">
@@ -400,7 +404,7 @@ export default function MedicalDeclarationForm({
                 ))}
               </div>
               <div className='text-right mt-8 italic'>
-                João Pessoa, {new Date().toLocaleDateString('pt-BR')}
+                João Pessoa, {formatDateToBrazilian(new Date())}
               </div>
               <div className='text-center mt-12'>
                 <div className='border-t border-black w-64 mx-auto mb-2'></div>

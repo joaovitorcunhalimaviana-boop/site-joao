@@ -32,26 +32,35 @@ export class BackupService {
     schedule: process.env['BACKUP_SCHEDULE'] || '0 2 * * *', // 2 AM daily
     retentionDays: parseInt(process.env['BACKUP_RETENTION_DAYS'] || '30'),
     localPath: process.env['BACKUP_LOCAL_PATH'] || './backups',
-    cloudStorage: process.env['BACKUP_CLOUD_PROVIDER'] ? {
-      provider: process.env['BACKUP_CLOUD_PROVIDER'] as 'aws' | 'gcp' | 'azure',
-      bucket: process.env['AWS_S3_BUCKET'] || process.env['GCP_STORAGE_BUCKET'] || process.env['AZURE_CONTAINER_NAME'] || '',
-      region: process.env['AWS_REGION'] || 'us-east-1',
-      credentials: {
-        accessKeyId: process.env['AWS_ACCESS_KEY_ID'],
-        secretAccessKey: process.env['AWS_SECRET_ACCESS_KEY'],
-        projectId: process.env['GCP_PROJECT_ID'],
-        keyFilename: process.env['GCP_KEY_FILENAME'],
-        accountName: process.env['AZURE_STORAGE_ACCOUNT'],
-        accountKey: process.env['AZURE_STORAGE_KEY']
-      }
-    } : undefined,
+    cloudStorage: process.env['BACKUP_CLOUD_PROVIDER']
+      ? {
+          provider: process.env['BACKUP_CLOUD_PROVIDER'] as
+            | 'aws'
+            | 'gcp'
+            | 'azure',
+          bucket:
+            process.env['AWS_S3_BUCKET'] ||
+            process.env['GCP_STORAGE_BUCKET'] ||
+            process.env['AZURE_CONTAINER_NAME'] ||
+            '',
+          region: process.env['AWS_REGION'] || 'us-east-1',
+          credentials: {
+            accessKeyId: process.env['AWS_ACCESS_KEY_ID'],
+            secretAccessKey: process.env['AWS_SECRET_ACCESS_KEY'],
+            projectId: process.env['GCP_PROJECT_ID'],
+            keyFilename: process.env['GCP_KEY_FILENAME'],
+            accountName: process.env['AZURE_STORAGE_ACCOUNT'],
+            accountKey: process.env['AZURE_STORAGE_KEY'],
+          },
+        }
+      : undefined,
     encryption: {
       enabled: process.env['BACKUP_ENCRYPTION_ENABLED'] === 'true',
-      key: process.env['BACKUP_ENCRYPTION_KEY']
+      key: process.env['BACKUP_ENCRYPTION_KEY'],
     },
     compression: process.env['BACKUP_COMPRESSION'] !== 'false',
-    excludeTables: process.env['BACKUP_EXCLUDE_TABLES']?.split(',') || []
-  };
+    excludeTables: process.env['BACKUP_EXCLUDE_TABLES']?.split(',') || [],
+  }
 
   /**
    * Criar backup completo do banco de dados
@@ -70,19 +79,19 @@ export class BackupService {
 
       const backupId = `backup_${new Date().toISOString().replace(/[:.]/g, '-')}`
       const timestamp = new Date().toISOString()
-      
+
       // Criar diretório de backup se não existir
       await fs.mkdir(this.config.localPath, { recursive: true })
-      
+
       const backupFileName = `${backupId}.sql${this.config.compression ? '.gz' : ''}`
       const backupFilePath = path.join(this.config.localPath, backupFileName)
-      
+
       // Registrar início do backup
       await AuditService.log({
         action: 'BACKUP_STARTED',
         resource: 'Database',
         details: JSON.stringify({ backupId, timestamp }),
-        severity: 'LOW'
+        severity: 'LOW',
       })
 
       // Executar backup do PostgreSQL
@@ -93,7 +102,7 @@ export class BackupService {
 
       // Construir comando pg_dump
       let pgDumpCommand = `pg_dump "${databaseUrl}" --no-owner --no-privileges --clean --if-exists`
-      
+
       // Excluir tabelas se especificado
       if (this.config.excludeTables && this.config.excludeTables.length > 0) {
         for (const table of this.config.excludeTables) {
@@ -110,7 +119,7 @@ export class BackupService {
 
       // Executar backup
       await execAsync(pgDumpCommand)
-      
+
       // Verificar se o arquivo foi criado
       const stats = await fs.stat(backupFilePath)
       if (!stats.isFile()) {
@@ -118,14 +127,14 @@ export class BackupService {
       }
 
       let finalFilePath = backupFilePath
-      
+
       // Criptografar se habilitado
       if (this.config.encryption.enabled && this.config.encryption.key) {
         const encryptedPath = `${backupFilePath}.enc`
         const backupData = await fs.readFile(backupFilePath)
         const encryptedData = EncryptionService.encrypt(backupData.toString())
         await fs.writeFile(encryptedPath, encryptedData)
-        
+
         // Remover arquivo não criptografado
         await fs.unlink(backupFilePath)
         finalFilePath = encryptedPath
@@ -143,9 +152,12 @@ export class BackupService {
           status: 'COMPLETED',
           filename: path.basename(finalFilePath),
           size: (await fs.stat(finalFilePath)).size,
-          checksum: require('crypto').createHash('md5').update(await fs.readFile(finalFilePath)).digest('hex'),
-          completedAt: new Date()
-        }
+          checksum: require('crypto')
+            .createHash('md5')
+            .update(await fs.readFile(finalFilePath))
+            .digest('hex'),
+          completedAt: new Date(),
+        },
       })
 
       // Upload para nuvem se configurado
@@ -154,55 +166,56 @@ export class BackupService {
           await this.uploadToCloud(finalFilePath, backupId)
           await prisma.backupLog.update({
             where: { id: backupId },
-            data: { status: 'COMPLETED' }
+            data: { status: 'COMPLETED' },
           })
         } catch (error) {
           console.error('Erro no upload para nuvem:', error)
           await prisma.backupLog.update({
             where: { id: backupId },
-            data: { 
+            data: {
               status: 'FAILED',
-              errorMessage: error instanceof Error ? error.message : 'Erro no upload'
-            }
+              errorMessage:
+                error instanceof Error ? error.message : 'Erro no upload',
+            },
           })
         }
       }
-
 
       // Log de sucesso
       await AuditService.log({
         action: 'BACKUP_COMPLETED',
         resource: 'Database',
-        details: JSON.stringify({ 
-          backupId, 
-          size: fileSize, 
+        details: JSON.stringify({
+          backupId,
+          size: fileSize,
           compressed: this.config.compression,
           encrypted: this.config.encryption.enabled,
-          cloudUploaded: !!this.config.cloudStorage
+          cloudUploaded: !!this.config.cloudStorage,
         }),
-        severity: 'LOW'
+        severity: 'LOW',
       })
 
       return {
         success: true,
         backupId,
         filePath: finalFilePath,
-        size: fileSize
+        size: fileSize,
       }
-
     } catch (error) {
       console.error('Erro no backup:', error)
-      
+
       await AuditService.log({
         action: 'BACKUP_FAILED',
         resource: 'Database',
-        details: JSON.stringify({ error: error instanceof Error ? error.message : 'Unknown error' }),
-        severity: 'HIGH'
+        details: JSON.stringify({
+          error: error instanceof Error ? error.message : 'Unknown error',
+        }),
+        severity: 'HIGH',
       })
 
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Erro desconhecido'
+        error: error instanceof Error ? error.message : 'Erro desconhecido',
       }
     }
   }
@@ -217,7 +230,7 @@ export class BackupService {
     try {
       // Buscar backup no banco
       const backup = await prisma.backupLog.findUnique({
-        where: { id: backupId }
+        where: { id: backupId },
       })
 
       if (!backup) {
@@ -228,9 +241,17 @@ export class BackupService {
         return { success: false, error: 'Backup não está completo' }
       }
 
-      let restoreFilePath = backup.filename ? path.join(this.config.localPath, backup.filename) : ''
+      let restoreFilePath = backup.filename
+        ? path.join(this.config.localPath, backup.filename)
+        : ''
 
-      if (!restoreFilePath || !await fs.access(restoreFilePath).then(() => true).catch(() => false)) {
+      if (
+        !restoreFilePath ||
+        !(await fs
+          .access(restoreFilePath)
+          .then(() => true)
+          .catch(() => false))
+      ) {
         return { success: false, error: 'Arquivo de backup não encontrado' }
       }
 
@@ -238,7 +259,7 @@ export class BackupService {
       if (this.config.encryption.enabled && this.config.encryption.key) {
         const encryptedData = await fs.readFile(restoreFilePath, 'utf8')
         const decryptedData = EncryptionService.decrypt(encryptedData)
-        
+
         const tempPath = `${restoreFilePath}.temp`
         await fs.writeFile(tempPath, decryptedData)
         restoreFilePath = tempPath
@@ -249,7 +270,7 @@ export class BackupService {
         action: 'RESTORE_STARTED',
         resource: 'Database',
         details: JSON.stringify({ backupId }),
-        severity: 'HIGH'
+        severity: 'HIGH',
       })
 
       const databaseUrl = process.env['DATABASE_URL']
@@ -259,7 +280,7 @@ export class BackupService {
 
       // Construir comando de restauração
       let restoreCommand: string
-      
+
       if (this.config.compression) {
         restoreCommand = `gunzip -c "${restoreFilePath}" | psql "${databaseUrl}"`
       } else {
@@ -279,27 +300,26 @@ export class BackupService {
         action: 'RESTORE_COMPLETED',
         resource: 'Database',
         details: JSON.stringify({ backupId }),
-        severity: 'HIGH'
+        severity: 'HIGH',
       })
 
       return { success: true }
-
     } catch (error) {
       console.error('Erro na restauração:', error)
-      
+
       await AuditService.log({
         action: 'RESTORE_FAILED',
         resource: 'Database',
-        details: JSON.stringify({ 
-          backupId, 
-          error: error instanceof Error ? error.message : 'Unknown error' 
+        details: JSON.stringify({
+          backupId,
+          error: error instanceof Error ? error.message : 'Unknown error',
         }),
-        severity: 'HIGH'
+        severity: 'HIGH',
       })
 
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Erro desconhecido'
+        error: error instanceof Error ? error.message : 'Erro desconhecido',
       }
     }
   }
@@ -313,15 +333,17 @@ export class BackupService {
     error?: string
   }> {
     try {
-      const cutoffDate = new Date(Date.now() - (this.config.retentionDays * 24 * 60 * 60 * 1000))
-      
+      const cutoffDate = new Date(
+        Date.now() - this.config.retentionDays * 24 * 60 * 60 * 1000
+      )
+
       // Buscar backups expirados
       const expiredBackups = await prisma.backupLog.findMany({
         where: {
           startedAt: {
-            lt: cutoffDate
-          }
-        }
+            lt: cutoffDate,
+          },
+        },
       })
 
       let deletedCount = 0
@@ -337,12 +359,12 @@ export class BackupService {
               console.warn(`Arquivo não encontrado: ${filePath}`)
             }
           }
-          
+
           // Remover do banco
           await prisma.backupLog.delete({
-            where: { id: backup.id }
+            where: { id: backup.id },
           })
-          
+
           deletedCount++
         } catch (fileError) {
           console.error(`Erro ao remover backup ${backup.id}:`, fileError)
@@ -353,19 +375,21 @@ export class BackupService {
       await AuditService.log({
         action: 'BACKUP_CLEANUP',
         resource: 'Database',
-        details: JSON.stringify({ deletedCount, retentionDays: this.config.retentionDays }),
-        severity: 'LOW'
+        details: JSON.stringify({
+          deletedCount,
+          retentionDays: this.config.retentionDays,
+        }),
+        severity: 'LOW',
       })
 
       return { success: true, deletedCount }
-
     } catch (error) {
       console.error('Erro na limpeza de backups:', error)
-      
+
       return {
         success: false,
         deletedCount: 0,
-        error: error instanceof Error ? error.message : 'Erro desconhecido'
+        error: error instanceof Error ? error.message : 'Erro desconhecido',
       }
     }
   }
@@ -389,18 +413,17 @@ export class BackupService {
           status: true,
           startedAt: true,
           completedAt: true,
-          checksum: true
-        }
+          checksum: true,
+        },
       })
 
       return { success: true, backups }
-
     } catch (error) {
       console.error('Erro ao listar backups:', error)
-      
+
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Erro desconhecido'
+        error: error instanceof Error ? error.message : 'Erro desconhecido',
       }
     }
   }
@@ -408,7 +431,10 @@ export class BackupService {
   /**
    * Upload para nuvem (implementação básica)
    */
-  private static async uploadToCloud(filePath: string, backupId: string): Promise<void> {
+  private static async uploadToCloud(
+    filePath: string,
+    backupId: string
+  ): Promise<void> {
     // Esta é uma implementação básica - deve ser expandida conforme o provedor
     if (!this.config.cloudStorage) {
       throw new Error('Configuração de nuvem não encontrada')
@@ -416,8 +442,10 @@ export class BackupService {
 
     // TODO: Implementar upload específico para cada provedor
     // AWS S3, Google Cloud Storage, Azure Blob Storage, etc.
-    
-    console.log(`Upload para nuvem simulado: ${backupId} -> ${this.config.cloudStorage.bucket}`)
+
+    console.log(
+      `Upload para nuvem simulado: ${backupId} -> ${this.config.cloudStorage.bucket}`
+    )
   }
 
   /**
@@ -430,7 +458,7 @@ export class BackupService {
     try {
       // Buscar backup no banco
       const backup = await prisma.backupLog.findUnique({
-        where: { id: backupId }
+        where: { id: backupId },
       })
 
       if (!backup) {
@@ -450,7 +478,7 @@ export class BackupService {
 
       // Remover do banco
       await prisma.backupLog.delete({
-        where: { id: backupId }
+        where: { id: backupId },
       })
 
       // Log de sucesso
@@ -458,27 +486,26 @@ export class BackupService {
         action: 'BACKUP_DELETED',
         resource: 'Database',
         details: JSON.stringify({ backupId }),
-        severity: 'MEDIUM'
+        severity: 'MEDIUM',
       })
 
       return { success: true }
-
     } catch (error) {
       console.error('Erro ao deletar backup:', error)
-      
+
       await AuditService.log({
         action: 'BACKUP_DELETE_FAILED',
         resource: 'Database',
-        details: JSON.stringify({ 
-          backupId, 
-          error: error instanceof Error ? error.message : 'Unknown error' 
+        details: JSON.stringify({
+          backupId,
+          error: error instanceof Error ? error.message : 'Unknown error',
         }),
-        severity: 'HIGH'
+        severity: 'HIGH',
       })
 
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Erro desconhecido'
+        error: error instanceof Error ? error.message : 'Erro desconhecido',
       }
     }
   }
@@ -493,7 +520,7 @@ export class BackupService {
   }> {
     try {
       const backup = await prisma.backupLog.findUnique({
-        where: { id: backupId }
+        where: { id: backupId },
       })
 
       if (!backup) {
@@ -510,7 +537,7 @@ export class BackupService {
         try {
           const stats = await fs.stat(filePath)
           const currentSize = stats.size
-          
+
           // Verificar se o tamanho corresponde
           if (backup.size && currentSize !== backup.size) {
             return { success: true, valid: false }
@@ -519,28 +546,29 @@ export class BackupService {
           // Verificar checksum se disponível
           if (backup.checksum) {
             const fileData = await fs.readFile(filePath)
-            const currentChecksum = require('crypto').createHash('md5').update(fileData).digest('hex')
-            
+            const currentChecksum = require('crypto')
+              .createHash('md5')
+              .update(fileData)
+              .digest('hex')
+
             if (currentChecksum !== backup.checksum) {
               return { success: true, valid: false }
             }
           }
 
           return { success: true, valid: true }
-          
         } catch (fileError) {
           return { success: true, valid: false }
         }
       }
 
       return { success: true, valid: false }
-
     } catch (error) {
       console.error('Erro na verificação do backup:', error)
-      
+
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Erro desconhecido'
+        error: error instanceof Error ? error.message : 'Erro desconhecido',
       }
     }
   }

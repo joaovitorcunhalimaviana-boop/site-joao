@@ -5,6 +5,7 @@
 ### 🔐 1. PREPARAÇÃO DAS VARIÁVEIS DE AMBIENTE
 
 #### ✅ Gerar Chaves Seguras
+
 Execute estes comandos para gerar chaves seguras:
 
 ```bash
@@ -25,6 +26,7 @@ node -e "console.log(require('crypto').randomBytes(16).toString('hex'))"
 ```
 
 #### ✅ Configurar Arquivo .env
+
 1. Copie o arquivo `.env.joaovitorviana`
 2. Substitua todas as chaves pelos valores gerados acima
 3. Configure as credenciais do banco de dados
@@ -35,6 +37,7 @@ node -e "console.log(require('crypto').randomBytes(16).toString('hex'))"
 ## OPÇÃO A: VERCEL (RECOMENDADO)
 
 ### Vantagens:
+
 - ✅ Deploy automático
 - ✅ SSL gratuito
 - ✅ CDN global
@@ -42,7 +45,9 @@ node -e "console.log(require('crypto').randomBytes(16).toString('hex'))"
 - ✅ Domínio personalizado gratuito
 
 ### Passos:
+
 1. **Criar conta na Vercel:**
+
    ```
    https://vercel.com
    ```
@@ -67,11 +72,13 @@ node -e "console.log(require('crypto').randomBytes(16).toString('hex'))"
 ## OPÇÃO B: VPS/SERVIDOR DEDICADO
 
 ### Vantagens:
+
 - ✅ Controle total
 - ✅ Pode hospedar banco próprio
 - ✅ Mais barato para alto tráfego
 
 ### Requisitos do Servidor:
+
 - Ubuntu 20.04+ ou CentOS 8+
 - Node.js 18+
 - PostgreSQL 14+
@@ -79,49 +86,53 @@ node -e "console.log(require('crypto').randomBytes(16).toString('hex'))"
 - SSL (Let's Encrypt)
 
 ### Passos:
+
 1. **Configurar servidor:**
+
    ```bash
    # Atualizar sistema
    sudo apt update && sudo apt upgrade -y
-   
+
    # Instalar Node.js
    curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
    sudo apt-get install -y nodejs
-   
+
    # Instalar PostgreSQL
    sudo apt install postgresql postgresql-contrib -y
-   
+
    # Instalar Nginx
    sudo apt install nginx -y
-   
+
    # Instalar PM2
    sudo npm install -g pm2
    ```
 
 2. **Configurar banco de dados:**
+
    ```bash
    sudo -u postgres createuser --interactive
    sudo -u postgres createdb medical_system_prod
    ```
 
 3. **Deploy da aplicação:**
+
    ```bash
    # Clonar repositório
    git clone seu-repositorio.git
    cd seu-projeto
-   
+
    # Instalar dependências
    npm ci
-   
+
    # Configurar variáveis de ambiente
    cp .env.joaovitorviana .env
-   
+
    # Executar migrations
    npx prisma migrate deploy
-   
+
    # Build da aplicação
    npm run build
-   
+
    # Iniciar com PM2
    pm2 start npm --name "medical-system" -- start
    pm2 save
@@ -129,11 +140,12 @@ node -e "console.log(require('crypto').randomBytes(16).toString('hex'))"
    ```
 
 4. **Configurar Nginx:**
+
    ```nginx
    server {
        listen 80;
        server_name joaovitorviana.com.br www.joaovitorviana.com.br;
-       
+
        location / {
            proxy_pass http://localhost:3000;
            proxy_http_version 1.1;
@@ -157,6 +169,7 @@ node -e "console.log(require('crypto').randomBytes(16).toString('hex'))"
 ### 🗄️ 3. CONFIGURAÇÃO DO BANCO DE DADOS
 
 #### Opções de Banco:
+
 1. **Neon (Recomendado para Vercel):** https://neon.tech
 2. **Supabase:** https://supabase.com
 3. **PlanetScale:** https://planetscale.com
@@ -166,6 +179,7 @@ node -e "console.log(require('crypto').randomBytes(16).toString('hex'))"
 ### 📧 4. CONFIGURAÇÃO DE EMAIL
 
 #### Opções de SMTP:
+
 1. **Gmail SMTP** (mais simples)
 2. **SendGrid** (profissional)
 3. **AWS SES** (escalável)
@@ -212,6 +226,7 @@ Valor: mail.joaovitorviana.com.br
 ## 📞 SUPORTE
 
 Se precisar de ajuda, você pode:
+
 1. Verificar os logs: `pm2 logs` (VPS) ou Vercel Dashboard
 2. Testar localmente: `npm run build && npm start`
 3. Verificar banco: `npx prisma studio`

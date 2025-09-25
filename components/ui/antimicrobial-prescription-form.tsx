@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Trash2, Plus, Printer } from 'lucide-react'
+import { formatDateToBrazilian } from '@/lib/date-utils'
 
 interface AntimicrobialMedication {
   id: string
@@ -71,7 +72,7 @@ export default function AntimicrobialPrescriptionForm({
       crm,
       medications,
       generalInstructions,
-      date: new Date().toLocaleDateString('pt-BR'),
+      date: formatDateToBrazilian(new Date()),
     }
     onSave(prescriptionData)
   }
@@ -167,7 +168,7 @@ export default function AntimicrobialPrescriptionForm({
           <strong>Paciente:</strong> ${patientName}<br>
           <strong>ID:</strong> ${patientId}<br>
           <strong>Endereço:</strong> ${editablePatientAddress}<br>
-          <strong>Data:</strong> ${new Date().toLocaleDateString('pt-BR')}
+          <strong>Data:</strong> ${formatDateToBrazilian(new Date())}
         </div>
         
         <div class="medications">

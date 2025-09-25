@@ -157,7 +157,10 @@ export default function NewsletterEditor({
 
   const generatePreview = () => {
     let content = formData.htmlContent
-    content = content.replace(/{{PATIENT_NAME}}/g, 'João da Silva (Exemplo)')
+    content = content.replace(
+      /{{PATIENT_NAME}}/g,
+      '[Nome do Paciente - Exemplo]'
+    )
 
     // Construir seção de dicas de saúde condicionalmente
     const healthTipSection = sectionEnabled.healthTips
@@ -278,10 +281,13 @@ export default function NewsletterEditor({
       const recipients = selectedPatientsData.map(p => p.email)
 
       // Criar um conteúdo personalizado para cada paciente
-      const emailPromises = selectedPatientsData.map(async (patient) => {
+      const emailPromises = selectedPatientsData.map(async patient => {
         // Substituir o nome do paciente no template
-        let personalizedContent = htmlContent.replace(/{{PATIENT_NAME}}/g, patient.name)
-        
+        let personalizedContent = htmlContent.replace(
+          /{{PATIENT_NAME}}/g,
+          patient.name
+        )
+
         return fetch('/api/send-email', {
           method: 'POST',
           headers: {
@@ -299,7 +305,7 @@ export default function NewsletterEditor({
       // Aguardar todos os envios
       const responses = await Promise.all(emailPromises)
       const results = await Promise.all(responses.map(r => r.json()))
-      
+
       // Verificar se todos foram enviados com sucesso
       const allSuccessful = results.every(result => result.success)
 
@@ -313,7 +319,9 @@ export default function NewsletterEditor({
         }
       } else {
         const failedResults = results.filter(result => !result.success)
-        throw new Error(`Erro ao enviar newsletter para ${failedResults.length} paciente(s)`)
+        throw new Error(
+          `Erro ao enviar newsletter para ${failedResults.length} paciente(s)`
+        )
       }
     } catch (error) {
       console.error('Erro ao enviar newsletter:', error)

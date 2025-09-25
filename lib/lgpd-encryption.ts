@@ -21,32 +21,36 @@ export class LGPDEncryptionService {
   private static readonly ALGORITHMS = {
     'aes-256-gcm': { keySize: 32, ivSize: 16 },
     'aes-256-cbc': { keySize: 32, ivSize: 16 },
-    'chacha20-poly1305': { keySize: 32, ivSize: 12 }
+    'chacha20-poly1305': { keySize: 32, ivSize: 12 },
   }
 
   private static readonly DATA_CLASSIFICATION_ALGORITHMS = {
-    'PUBLIC': 'aes-256-cbc',
-    'INTERNAL': 'aes-256-gcm',
-    'CONFIDENTIAL': 'aes-256-gcm',
-    'RESTRICTED': 'chacha20-poly1305'
+    PUBLIC: 'aes-256-cbc',
+    INTERNAL: 'aes-256-gcm',
+    CONFIDENTIAL: 'aes-256-gcm',
+    RESTRICTED: 'chacha20-poly1305',
   }
 
   // Chaves de criptografia por versão (rotação de chaves)
   private static getEncryptionKey(version: string = 'v1'): Buffer {
     const keyEnvVar = `ENCRYPTION_KEY_${version.toUpperCase()}`
     const key = process.env[keyEnvVar] || process.env['ENCRYPTION_KEY']
-    
+
     if (!key) {
       throw new Error(`Chave de criptografia não encontrada: ${keyEnvVar}`)
     }
-    
+
     return Buffer.from(key, 'hex')
   }
 
   // Criptografia com classificação de dados
   static encrypt(
-    plaintext: string, 
-    classification: 'PUBLIC' | 'INTERNAL' | 'CONFIDENTIAL' | 'RESTRICTED' = 'CONFIDENTIAL',
+    plaintext: string,
+    classification:
+      | 'PUBLIC'
+      | 'INTERNAL'
+      | 'CONFIDENTIAL'
+      | 'RESTRICTED' = 'CONFIDENTIAL',
     keyVersion: string = 'v1'
   ): EncryptedData {
     if (!plaintext) {
@@ -56,19 +60,22 @@ export class LGPDEncryptionService {
     const algorithm = this.DATA_CLASSIFICATION_ALGORITHMS[classification]
     const key = this.getEncryptionKey(keyVersion)
     const iv = crypto.randomBytes(16)
-    
+
     const cipher = crypto.createCipheriv(algorithm, key, iv)
     let encrypted = cipher.update(plaintext, 'utf8', 'hex')
     encrypted += cipher.final('hex')
-    
+
     let authTag: Buffer | null = null
     if (algorithm.includes('gcm')) {
       authTag = (cipher as any).getAuthTag()
     }
 
-    const result = iv.toString('hex') + ':' + 
-                  (authTag ? authTag.toString('hex') : '') + ':' + 
-                  encrypted
+    const result =
+      iv.toString('hex') +
+      ':' +
+      (authTag ? authTag.toString('hex') : '') +
+      ':' +
+      encrypted
 
     return {
       data: result,
@@ -76,8 +83,8 @@ export class LGPDEncryptionService {
         algorithm,
         keyVersion,
         encryptedAt: new Date(),
-        dataClassification: classification
-      }
+        dataClassification: classification,
+      },
     }
   }
 
@@ -97,9 +104,9 @@ export class LGPDEncryptionService {
     const algorithm = metadata.algorithm
     const keyVersion = metadata.keyVersion
     const key = this.getEncryptionKey(keyVersion)
-    
+
     const parts = data.split(':')
-    
+
     if (parts.length < 3) {
       throw new Error('Formato de dados criptografados inválido')
     }
@@ -109,21 +116,21 @@ export class LGPDEncryptionService {
     const encryptedText = parts[2]
 
     const decipher = crypto.createDecipheriv(algorithm, key, iv)
-    
+
     if (authTag && algorithm.includes('gcm')) {
-      (decipher as any).setAuthTag(authTag)
+      ;(decipher as any).setAuthTag(authTag)
     }
-    
+
     let decrypted = decipher.update(encryptedText, 'hex', 'utf8')
     decrypted += decipher.final('utf8')
-    
+
     return decrypted
   }
 
   // Descriptografia de formato legado
   private static legacyDecrypt(encryptedData: string): string {
     const parts = encryptedData.split(':')
-    
+
     if (parts.length !== 3) {
       throw new Error('Formato legado inválido')
     }
@@ -131,40 +138,51 @@ export class LGPDEncryptionService {
     const iv = Buffer.from(parts[0], 'hex')
     const authTag = Buffer.from(parts[1], 'hex')
     const encrypted = parts[2]
-    
+
     const key = this.getEncryptionKey('v1')
     const decipher = crypto.createDecipheriv('aes-256-gcm', key, iv)
     decipher.setAuthTag(authTag)
-    
+
     let decrypted = decipher.update(encrypted, 'hex', 'utf8')
     decrypted += decipher.final('utf8')
-    
+
     return decrypted
   }
 
   // Hash seguro para indexação (permite busca sem descriptografar)
   static createSearchableHash(plaintext: string, salt?: string): string {
     const actualSalt = salt || process.env['SEARCH_SALT'] || 'default-salt'
-    return crypto.pbkdf2Sync(plaintext.toLowerCase(), actualSalt, 10000, 32, 'sha256').toString('hex')
+    return crypto
+      .pbkdf2Sync(plaintext.toLowerCase(), actualSalt, 10000, 32, 'sha256')
+      .toString('hex')
   }
 
   // Verificar se dados precisam ser re-criptografados (rotação de chaves)
   static needsReencryption(metadata: EncryptionMetadata): boolean {
     const currentVersion = process.env['CURRENT_KEY_VERSION'] || 'v1'
-    const maxAge = parseInt(process.env['ENCRYPTION_MAX_AGE_DAYS'] || '365') * 24 * 60 * 60 * 1000
-    
+    const maxAge =
+      parseInt(process.env['ENCRYPTION_MAX_AGE_DAYS'] || '365') *
+      24 *
+      60 *
+      60 *
+      1000
+
     const isOldVersion = metadata.keyVersion !== currentVersion
-    const isOldEncryption = (Date.now() - metadata.encryptedAt.getTime()) > maxAge
-    
+    const isOldEncryption = Date.now() - metadata.encryptedAt.getTime() > maxAge
+
     return isOldVersion || isOldEncryption
   }
 
   // Re-criptografar dados com nova chave/algoritmo
-  static reencrypt(encryptedData: EncryptedData, newClassification?: 'PUBLIC' | 'INTERNAL' | 'CONFIDENTIAL' | 'RESTRICTED'): EncryptedData {
+  static reencrypt(
+    encryptedData: EncryptedData,
+    newClassification?: 'PUBLIC' | 'INTERNAL' | 'CONFIDENTIAL' | 'RESTRICTED'
+  ): EncryptedData {
     const plaintext = this.decrypt(encryptedData)
-    const classification = newClassification || encryptedData.metadata.dataClassification
+    const classification =
+      newClassification || encryptedData.metadata.dataClassification
     const newVersion = process.env['CURRENT_KEY_VERSION'] || 'v1'
-    
+
     return this.encrypt(plaintext, classification, newVersion)
   }
 }
@@ -185,7 +203,10 @@ export class LGPDAnonymizationService {
   static anonymizeEmail(email: string): string {
     if (!email || !email.includes('@')) return '***@***.***'
     const [local, domain] = email.split('@')
-    const anonymizedLocal = local.length > 2 ? local[0] + '*'.repeat(local.length - 2) + local.slice(-1) : '***'
+    const anonymizedLocal =
+      local.length > 2
+        ? local[0] + '*'.repeat(local.length - 2) + local.slice(-1)
+        : '***'
     return `${anonymizedLocal}@${domain}`
   }
 
@@ -203,14 +224,20 @@ export class LGPDAnonymizationService {
   // Anonimizar nome (manter primeira letra de cada palavra)
   static anonymizeName(name: string): string {
     if (!name) return '*** ***'
-    return name.split(' ')
-      .map(word => word.length > 0 ? word[0] + '*'.repeat(Math.max(0, word.length - 1)) : '')
+    return name
+      .split(' ')
+      .map(word =>
+        word.length > 0
+          ? word[0] + '*'.repeat(Math.max(0, word.length - 1))
+          : ''
+      )
       .join(' ')
   }
 
   // Pseudonimização reversível (com chave)
   static pseudonymize(data: string, key?: string): string {
-    const pseudoKey = key || process.env['PSEUDONYMIZATION_KEY'] || 'default-pseudo-key'
+    const pseudoKey =
+      key || process.env['PSEUDONYMIZATION_KEY'] || 'default-pseudo-key'
     return crypto.createHmac('sha256', pseudoKey).update(data).digest('hex')
   }
 }
@@ -228,7 +255,7 @@ export class LGPDAuditService {
     purpose,
     legalBasis,
     ipAddress,
-    userAgent
+    userAgent,
   }: {
     userId: string
     dataSubject: string // ID do titular dos dados
@@ -248,12 +275,12 @@ export class LGPDAuditService {
           dataType,
           purpose,
           legalBasis,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         }),
         ipAddress,
         userAgent,
-        severity: 'MEDIUM'
-      }
+        severity: 'MEDIUM',
+      },
     })
   }
 
@@ -266,7 +293,7 @@ export class LGPDAuditService {
     oldValue,
     newValue,
     ipAddress,
-    userAgent
+    userAgent,
   }: {
     userId: string
     dataSubject: string
@@ -286,14 +313,18 @@ export class LGPDAuditService {
         details: JSON.stringify({
           dataType,
           operation,
-          oldValueHash: oldValue ? crypto.createHash('sha256').update(oldValue).digest('hex') : null,
-          newValueHash: newValue ? crypto.createHash('sha256').update(newValue).digest('hex') : null,
-          timestamp: new Date().toISOString()
+          oldValueHash: oldValue
+            ? crypto.createHash('sha256').update(oldValue).digest('hex')
+            : null,
+          newValueHash: newValue
+            ? crypto.createHash('sha256').update(newValue).digest('hex')
+            : null,
+          timestamp: new Date().toISOString(),
         }),
         ipAddress,
         userAgent,
-        severity: operation === 'DELETE' ? 'HIGH' : 'MEDIUM'
-      }
+        severity: operation === 'DELETE' ? 'HIGH' : 'MEDIUM',
+      },
     })
   }
 
@@ -303,23 +334,24 @@ export class LGPDAuditService {
       where: {
         createdAt: {
           gte: startDate,
-          lte: endDate
+          lte: endDate,
         },
         action: {
-          startsWith: 'DATA_'
-        }
+          startsWith: 'DATA_',
+        },
       },
       orderBy: {
-        createdAt: 'desc'
-      }
+        createdAt: 'desc',
+      },
     })
 
     const summary = {
       totalAccesses: logs.filter(log => log.action === 'DATA_ACCESS').length,
-      totalModifications: logs.filter(log => log.action.includes('UPDATE')).length,
+      totalModifications: logs.filter(log => log.action.includes('UPDATE'))
+        .length,
       totalDeletions: logs.filter(log => log.action.includes('DELETE')).length,
       uniqueDataSubjects: new Set(logs.map(log => log.resourceId)).size,
-      complianceScore: this.calculateComplianceScore(logs)
+      complianceScore: this.calculateComplianceScore(logs),
     }
 
     return {
@@ -327,8 +359,8 @@ export class LGPDAuditService {
       summary,
       logs: logs.map(log => ({
         ...log,
-        details: JSON.parse(log.details || '{}')
-      }))
+        details: JSON.parse(log.details || '{}'),
+      })),
     }
   }
 
@@ -359,32 +391,43 @@ export class LGPDProtectionMiddleware {
   }
 
   // Aplicar minimização de dados
-  static minimizeData<T extends Record<string, any>>(data: T, allowedFields: string[]): Partial<T> {
+  static minimizeData<T extends Record<string, any>>(
+    data: T,
+    allowedFields: string[]
+  ): Partial<T> {
     const minimized: Partial<T> = {}
-    
+
     for (const field of allowedFields) {
       if (field in data) {
         minimized[field as keyof T] = data[field]
       }
     }
-    
+
     return minimized
   }
 
   // Aplicar retenção de dados
-  static shouldRetainData(createdAt: Date, retentionPeriodDays: number, dataType?: string): boolean {
+  static shouldRetainData(
+    createdAt: Date,
+    retentionPeriodDays: number,
+    dataType?: string
+  ): boolean {
     // DADOS MÉDICOS: RETENÇÃO PERMANENTE
-    if (process.env['MEDICAL_DATA_PERMANENT'] === 'true' && 
-        (dataType?.includes('medical') || dataType?.includes('patient') || dataType?.includes('consultation'))) {
+    if (
+      process.env['MEDICAL_DATA_PERMANENT'] === 'true' &&
+      (dataType?.includes('medical') ||
+        dataType?.includes('patient') ||
+        dataType?.includes('consultation'))
+    ) {
       return true // Dados médicos nunca são excluídos
     }
-    
+
     // Retenção permanente se configurado como -1
     if (retentionPeriodDays === -1) {
       return true
     }
-    
+
     const retentionPeriodMs = retentionPeriodDays * 24 * 60 * 60 * 1000
-    return (Date.now() - createdAt.getTime()) < retentionPeriodMs
+    return Date.now() - createdAt.getTime() < retentionPeriodMs
   }
 }

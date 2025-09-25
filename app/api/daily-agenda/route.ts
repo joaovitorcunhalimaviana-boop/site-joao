@@ -3,6 +3,11 @@ import {
   sendTelegramDailyAgenda,
   type AppointmentNotificationData,
 } from '../../../lib/telegram-notifications'
+import { getSurgeriesByDate } from '../../../lib/unified-appointment-system'
+import {
+  getDailyBibleVerse,
+  formatBibleVerseForTelegram,
+} from '../../../lib/bible-verses'
 
 // Sistema de agenda diária para o médico
 export async function POST(request: NextRequest) {
@@ -18,8 +23,19 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Gerar mensagem da agenda diária
-    const agendaMessage = generateDailyAgendaMessage(targetDate, appointments)
+    // Buscar cirurgias para a data
+    const surgeries = await getSurgeriesByDate(targetDate)
+    console.log(
+      `🏥 Cirurgias encontradas para ${targetDate}:`,
+      surgeries.length
+    )
+
+    // Gerar mensagem da agenda diária incluindo cirurgias
+    const agendaMessage = generateDailyAgendaMessage(
+      targetDate,
+      appointments,
+      surgeries
+    )
 
     // Converter appointments para o formato padronizado
     const formattedAppointments: AppointmentNotificationData[] =
@@ -39,13 +55,72 @@ export async function POST(request: NextRequest) {
         notes: apt.notes,
       }))
 
-    // Enviar via Telegram usando a nova função padronizada
-    await sendTelegramDailyAgenda(targetDate, formattedAppointments)
+    // Converter cirurgias para o formato padronizado
+    const formattedSurgeries: AppointmentNotificationData[] = surgeries.map(
+      surgery => ({
+        patientName: surgery.patientName,
+        patientPhone: '', // Cirurgias não têm telefone no modelo atual
+        patientWhatsapp: '',
+        patientEmail: '',
+        appointmentDate: targetDate,
+        appointmentTime: surgery.time,
+        insuranceType:
+          surgery.paymentType === 'plano' ? 'unimed' : 'particular',
+        appointmentType: 'cirurgia' as any,
+        source: 'surgery_system' as any,
+        notes: `${surgery.surgeryType} - ${surgery.hospital}`,
+      })
+    )
+
+    // Combinar consultas e cirurgias
+    const allAppointments = [...formattedAppointments, ...formattedSurgeries]
+
+    // Enviar via Telegram usando a mensagem gerada localmente
+    const telegramToken = process.env['TELEGRAM_BOT_TOKEN']
+    const telegramChatId = process.env['TELEGRAM_CHAT_ID']
+
+    if (telegramToken && telegramChatId) {
+      try {
+        const response = await fetch(
+          `https://api.telegram.org/bot${telegramToken}/sendMessage`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json; charset=utf-8',
+            },
+            body: JSON.stringify({
+              chat_id: telegramChatId,
+              text: agendaMessage,
+              parse_mode: 'Markdown',
+              disable_web_page_preview: false,
+            }),
+          }
+        )
+
+        if (!response.ok) {
+          const errorData = await response.json()
+          throw new Error(
+            `Erro na API do Telegram: ${response.status} - ${JSON.stringify(errorData)}`
+          )
+        }
+
+        console.log('✅ Agenda diária Telegram enviada com sucesso!')
+      } catch (telegramError) {
+        console.error(
+          '❌ Erro ao enviar agenda diária Telegram:',
+          telegramError
+        )
+      }
+    } else {
+      console.log('ℹ️ Telegram não configurado - agenda diária não enviada')
+    }
 
     console.log('\n' + '📅'.repeat(20))
     console.log(`📋 AGENDA DIÁRIA ENVIADA - ${targetDate}`)
     console.log('📅'.repeat(20))
-    console.log(`📊 Total de pacientes: ${appointments.length}`)
+    console.log(`👥 Total de consultas: ${appointments.length}`)
+    console.log(`🏥 Total de cirurgias: ${surgeries.length}`)
+    console.log(`📊 Total geral: ${allAppointments.length}`)
     console.log('📤 Telegram: Enviado')
     console.log('📅'.repeat(20) + '\n')
 
@@ -53,6 +128,8 @@ export async function POST(request: NextRequest) {
       success: true,
       message: `Agenda diária para ${targetDate} enviada com sucesso`,
       totalPatients: appointments.length,
+      totalSurgeries: surgeries.length,
+      totalItems: allAppointments.length,
       agendaMessage,
     })
   } catch (error) {
@@ -64,8 +141,14 @@ export async function POST(request: NextRequest) {
   }
 }
 
-function generateDailyAgendaMessage(targetDate: string, appointments: any[]) {
-  const formattedDate = new Date(targetDate).toLocaleDateString('pt-BR', {
+function generateDailyAgendaMessage(
+  targetDate: string,
+  appointments: any[],
+  surgeries: any[]
+) {
+  // Corrigir problema de timezone - adicionar horário para evitar mudança de data
+  const dateWithTime = new Date(targetDate + 'T12:00:00')
+  const formattedDate = dateWithTime.toLocaleDateString('pt-BR', {
     weekday: 'long',
     year: 'numeric',
     month: 'long',
@@ -74,37 +157,79 @@ function generateDailyAgendaMessage(targetDate: string, appointments: any[]) {
 
   let message = `📅 *AGENDA DO DIA*\n\n`
   message += `📆 *${formattedDate.charAt(0).toUpperCase() + formattedDate.slice(1)}*\n\n`
-  message += `👥 *Total de pacientes: ${appointments.length}*\n\n`
+  message += `👥 *Consultas: ${appointments.length}*\n`
+  message += `🏥 *Cirurgias: ${surgeries.length}*\n`
+  message += `📊 *Total: ${appointments.length + surgeries.length}*\n\n`
 
-  if (appointments.length === 0) {
-    message += `🏖️ *Sem consultas agendadas para este dia*\n\n`
+  if (appointments.length === 0 && surgeries.length === 0) {
+    message += `🏖️ *Sem atividades agendadas para este dia*\n\n`
     message += `✨ Aproveite para descansar ou organizar outras atividades!`
+
+    // Adicionar versículo bíblico mesmo quando não há atividades
+    const verse = getDailyBibleVerse(targetDate)
+    message += `\n\n${formatBibleVerseForTelegram(verse)}`
+
     return message
   }
 
-  // Ordenar por horário
-  const sortedAppointments = appointments.sort((a, b) => {
-    return a.appointmentTime.localeCompare(b.appointmentTime)
-  })
+  // Combinar e ordenar por horário
+  const allItems = [
+    ...appointments.map(apt => ({
+      ...apt,
+      type: 'consulta',
+      time: apt.appointmentTime,
+      name: apt.patientName || apt.fullName || 'Nome não informado',
+    })),
+    ...surgeries.map(surgery => ({
+      ...surgery,
+      type: 'cirurgia',
+      time: surgery.time,
+      name: surgery.patientName,
+    })),
+  ].sort((a, b) => a.time.localeCompare(b.time))
 
-  message += `📋 *CONSULTAS AGENDADAS:*\n\n`
+  if (appointments.length > 0) {
+    message += `📋 *CONSULTAS AGENDADAS:*\n\n`
 
-  sortedAppointments.forEach((appointment, index) => {
-    const patientName =
-      appointment.patientName || appointment.fullName || 'Nome não informado'
-    const time = appointment.appointmentTime
-    const insurance =
-      appointment.insuranceType === 'unimed' ? '🏥 Unimed' : '💳 Particular'
-    const whatsapp = appointment.whatsapp || 'Não informado'
+    appointments
+      .sort((a, b) => a.appointmentTime.localeCompare(b.appointmentTime))
+      .forEach((appointment, index) => {
+        const patientName =
+          appointment.patientName ||
+          appointment.fullName ||
+          'Nome não informado'
+        const time = appointment.appointmentTime
+        const insurance =
+          appointment.insuranceType === 'unimed' ? '🏥 Unimed' : '💳 Particular'
+        const whatsapp = appointment.whatsapp || 'Não informado'
 
-    message += `${index + 1}. ⏰ *${time}* - ${patientName}\n`
-    message += `   ${insurance} | 📱 ${whatsapp}\n\n`
-  })
+        message += `${index + 1}. ⏰ *${time}* - ${patientName}\n`
+        message += `   ${insurance} | 📱 ${whatsapp}\n\n`
+      })
+  }
 
-  message += `📞 *Contato do consultório:* (83) 9 9122-1599\n`
-  message += `📍 *Local:* Edifício Arcádia, Sala 101\n`
-  message += `🏥 *Dr. João Vítor Viana - Coloproctologista*\n\n`
-  message += `✅ *Lembrete enviado automaticamente 24h antes*`
+  if (surgeries.length > 0) {
+    message += `🏥 *CIRURGIAS AGENDADAS:*\n\n`
+
+    surgeries
+      .sort((a, b) => a.time.localeCompare(b.time))
+      .forEach((surgery, index) => {
+        const patientName = surgery.patientName
+        const time = surgery.time
+        const surgeryType = surgery.surgeryType
+        const hospital = surgery.hospital
+        const paymentType =
+          surgery.paymentType === 'plano' ? '🏥 Plano' : '💳 Particular'
+
+        message += `${index + 1}. ⏰ *${time}* - ${patientName}\n`
+        message += `   🔪 ${surgeryType}\n`
+        message += `   🏥 ${hospital} | ${paymentType}\n\n`
+      })
+  }
+
+  // Adicionar versículo bíblico no final da mensagem
+  const verse = getDailyBibleVerse(targetDate)
+  message += `${formatBibleVerseForTelegram(verse)}`
 
   return message
 }

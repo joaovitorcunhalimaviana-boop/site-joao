@@ -1,4 +1,4 @@
-'use client';
+'use client'
 
 import HeroSection from '../components/ui/hero-section'
 import Header from '../components/ui/header'
@@ -13,11 +13,11 @@ import StructuredData from '../components/seo/structured-data'
 export default function Home() {
   return (
     <>
-      <StructuredData type="doctor" />
-      <StructuredData type="medicalBusiness" />
-      <StructuredData type="faq" />
-      <div className="min-h-screen bg-black">
-        <Header currentPage="home" />
+      <StructuredData type='doctor' />
+      <StructuredData type='medicalBusiness' />
+      <StructuredData type='faq' />
+      <div className='min-h-screen bg-black'>
+        <Header currentPage='home' />
         <main>
           <HeroSection />
           <AboutSection />

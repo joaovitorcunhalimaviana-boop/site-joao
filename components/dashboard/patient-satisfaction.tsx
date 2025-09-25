@@ -140,11 +140,12 @@ export default function PatientSatisfaction({
   }
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('pt-BR', {
+    return new Intl.DateTimeFormat('pt-BR', {
+      timeZone: 'America/Sao_Paulo',
       day: '2-digit',
       month: '2-digit',
       year: 'numeric',
-    })
+    }).format(new Date(dateString))
   }
 
   const getTrendIcon = (trend: number) => {

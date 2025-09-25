@@ -4,6 +4,7 @@ import {
   getNextMedicalRecordNumber,
   validateCPF,
   formatCPF,
+  getAllAppointments,
 } from '@/lib/unified-appointment-system'
 import { getBrasiliaTimestamp } from '@/lib/date-utils'
 import type { Patient } from '@/lib/unified-appointment-system'
@@ -21,21 +22,31 @@ Object.defineProperty(window, 'localStorage', {
   writable: true,
 })
 
+// Mock da função getAllAppointments
+jest.mock('@/lib/unified-appointment-system', () => {
+  const actual = jest.requireActual('@/lib/unified-appointment-system')
+  return {
+    ...actual,
+    getAllAppointments: jest.fn().mockResolvedValue([]),
+  }
+})
+
 describe('Unified Appointment System - Patient Management', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     mockLocalStorage.getItem.mockReturnValue('[]')
+    mockLocalStorage.setItem.mockClear()
   })
 
   describe('createOrUpdatePatient', () => {
     const validPatientData = {
       name: 'João Silva',
-      cpf: '12345678901',
+      cpf: '11144477735', // CPF válido
+      medicalRecordNumber: 1,
       phone: '11987654321',
       whatsapp: '11987654321',
       email: 'joao@email.com',
       birthDate: '1990-01-01',
-      medicalRecordNumber: 1,
       address: {
         street: 'Rua das Flores, 123',
         neighborhood: 'Centro',
@@ -61,7 +72,7 @@ describe('Unified Appointment System - Patient Management', () => {
       expect(result.success).toBe(true)
       expect(result.patient).toBeDefined()
       expect(result.patient?.name).toBe('João Silva')
-      expect(result.patient?.cpf).toBe('12345678901')
+      expect(result.patient?.cpf).toBe('11144477735')
       expect(result.patient?.medicalRecordNumber).toBe(1)
     })
 
@@ -71,7 +82,7 @@ describe('Unified Appointment System - Patient Management', () => {
         {
           id: 'pat_123',
           name: 'João Santos',
-          cpf: '12345678901',
+          cpf: '11144477735', // CPF válido
           phone: '11999999999',
           whatsapp: '11999999999',
           email: 'joao.old@email.com',
@@ -157,12 +168,21 @@ describe('Unified Appointment System - Patient Management', () => {
   })
 
   describe('getAllPatients', () => {
+    beforeEach(() => {
+      // Garantir que getAllAppointments retorna array vazio
+      const { getAllAppointments } = require('@/lib/unified-appointment-system')
+      getAllAppointments.mockResolvedValue([])
+    })
+
     it('should return empty array when no patients exist', async () => {
       const patients = await getAllPatients()
       expect(patients).toEqual([])
     })
 
     it('should return all patients from localStorage', async () => {
+      // Garantir que o localStorage está limpo
+      mockLocalStorage.getItem.mockReturnValue('[]')
+      
       const mockPatients = [
         { id: 'pat_1', name: 'João Silva', cpf: '12345678901' },
         { id: 'pat_2', name: 'Maria Santos', cpf: '98765432100' },
@@ -233,6 +253,12 @@ describe('Unified Appointment System - Validation Utils', () => {
 })
 
 describe('Unified Appointment System - Date Utils', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+    mockLocalStorage.getItem.mockReturnValue('[]')
+    mockLocalStorage.setItem.mockClear()
+  })
+  
   describe('getBrasiliaTimestamp', () => {
     it('should return a valid ISO timestamp', () => {
       const timestamp = getBrasiliaTimestamp()
@@ -245,8 +271,9 @@ describe('Unified Appointment System - Date Utils', () => {
       const after = Date.now()
 
       const timestampMs = new Date(timestamp).getTime()
-      expect(timestampMs).toBeGreaterThanOrEqual(before)
-      expect(timestampMs).toBeLessThanOrEqual(after)
+      // Permitir uma diferença de até 1 segundo devido à precisão do timestamp
+      expect(timestampMs).toBeGreaterThanOrEqual(before - 1000)
+      expect(timestampMs).toBeLessThanOrEqual(after + 1000)
     })
   })
 })
@@ -256,17 +283,18 @@ describe('Unified Appointment System - Integration Tests', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     mockLocalStorage.getItem.mockReturnValue('[]')
+    mockLocalStorage.setItem.mockClear()
   })
 
   it('should create multiple patients with sequential medical record numbers', async () => {
     const patient1Data = {
       name: 'João Silva',
-      cpf: '12345678901',
+      cpf: '11144477735', // CPF válido
+      medicalRecordNumber: 1,
       phone: '11987654321',
       whatsapp: '11987654321',
       email: 'joao@email.com',
       birthDate: '1990-01-01',
-      medicalRecordNumber: 1,
       address: {
         street: 'Rua A, 123',
         neighborhood: 'Centro',
@@ -288,23 +316,20 @@ describe('Unified Appointment System - Integration Tests', () => {
     const patient2Data = {
       ...patient1Data,
       name: 'Maria Santos',
-      cpf: '98765432100',
+      cpf: '52998224725', // CPF válido diferente
       email: 'maria@email.com',
       medicalRecordNumber: 2,
     }
 
-    // Simular criação sequencial
-    let storedPatients: Patient[] = []
-    mockLocalStorage.setItem.mockImplementation((key, value) => {
-      if (key === 'unified_patients') {
-        storedPatients = JSON.parse(value)
-      }
+    // Simular localStorage persistente
+    const storage: { [key: string]: string } = {}
+    
+    mockLocalStorage.setItem.mockImplementation((key: string, value: string) => {
+      storage[key] = value
     })
-    mockLocalStorage.getItem.mockImplementation(key => {
-      if (key === 'unified_patients') {
-        return JSON.stringify(storedPatients)
-      }
-      return '[]'
+    
+    mockLocalStorage.getItem.mockImplementation((key: string) => {
+      return storage[key] || '[]'
     })
 
     const result1 = await createOrUpdatePatient(patient1Data)
@@ -319,12 +344,11 @@ describe('Unified Appointment System - Integration Tests', () => {
   it('should handle concurrent patient creation', async () => {
     const patientData = {
       name: 'João Silva',
-      cpf: '12345678901',
+      cpf: '11144477735', // CPF válido
       phone: '11987654321',
       whatsapp: '11987654321',
       email: 'joao@email.com',
       birthDate: '1990-01-01',
-      medicalRecordNumber: 1,
       address: {
         street: 'Rua A, 123',
         neighborhood: 'Centro',

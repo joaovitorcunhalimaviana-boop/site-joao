@@ -203,6 +203,11 @@ export const fissuraAnalFAQs: FAQItem[] = [
     answer:
       'Sim, é possível e muito eficaz. O tratamento com toxina botulínica (botox) é uma excelente opção para fissuras anais, especialmente quando o tratamento conservador não apresenta resultados satisfatórios. O botox atua relaxando o músculo esfíncter anal, reduzindo o espasmo e a dor, permitindo que a fissura cicatrize naturalmente. É um procedimento minimamente invasivo, realizado em consultório, com excelentes resultados terapêuticos.',
   },
+  {
+    question: 'Qual o melhor tratamento para fissura anal?',
+    answer:
+      'O tratamento da fissura anal pode ser clínico (pomadas, relaxantes musculares, mudanças na dieta) ou cirúrgico nos casos crônicos. Dr. João Vítor Viana avalia cada caso individualmente para definir a melhor abordagem terapêutica, considerando fatores como tempo de evolução, intensidade dos sintomas e resposta ao tratamento conservador.',
+  },
 ]
 
 // FAQs gerais sobre coloproctologia

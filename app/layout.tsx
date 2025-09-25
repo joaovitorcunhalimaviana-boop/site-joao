@@ -12,14 +12,13 @@ import LocalSEOSchema from '@/components/seo/local-seo-schema'
 import BirthdayInitializer from '@/components/birthday-initializer'
 import ErrorBoundary from '@/components/error-boundary'
 import { defaultMetadata } from '@/lib/seo-metadata'
-import { 
-  generateDoctorStructuredData, 
-  generateMedicalOrganizationStructuredData, 
-  generateWebsiteStructuredData 
+import {
+  generateDoctorStructuredData,
+  generateMedicalOrganizationStructuredData,
+  generateWebsiteStructuredData,
 } from '@/lib/seo-metadata'
-import GoogleAnalytics from '@/components/analytics/google-analytics'
+import { GoogleAnalytics, PerformanceOptimizer } from '@/components/client-components'
 // import WebVitals from '@/components/performance/web-vitals'
-
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -28,9 +27,10 @@ export const metadata: Metadata = {
   ...defaultMetadata,
   title: {
     default: 'Dr. João Vítor Viana - Coloproctologista em João Pessoa',
-    template: '%s | Dr. João Vítor Viana - Coloproctologista'
+    template: '%s | Dr. João Vítor Viana - Coloproctologista',
   },
-  description: 'Dr. João Vítor Viana - Proctologista e Coloproctologista em João Pessoa/PB. Especialista em hemorroidas, fissura anal, fístula, plicoma, constipação intestinal. Agendamento online, teleconsulta e visitas domiciliares. Atendimento particular e convênios.',
+  description:
+    'Dr. João Vítor Viana - Proctologista e Coloproctologista em João Pessoa/PB. Especialista em hemorroidas, fissura anal, fístula, plicoma, constipação intestinal. Agendamento online, teleconsulta e visitas domiciliares. Atendimento particular e convênios.',
   keywords: [
     'proctologista João Pessoa',
     'coloproctologista João Pessoa',
@@ -57,12 +57,14 @@ export const metadata: Metadata = {
     'urgência proctológica João Pessoa',
     'Dr João Vítor Viana',
     'Paraíba PB',
-    'Nordeste Brasil'
+    'Nordeste Brasil',
   ],
   openGraph: {
     ...defaultMetadata.openGraph,
-    title: 'Dr. João Vítor Viana - Proctologista e Coloproctologista em João Pessoa/PB',
-    description: 'Proctologista em João Pessoa. Especialista em hemorroidas, fissura anal, fístula, plicoma e constipação intestinal. Agendamento online, teleconsulta e visitas domiciliares.',
+    title:
+      'Dr. João Vítor Viana - Proctologista e Coloproctologista em João Pessoa/PB',
+    description:
+      'Proctologista em João Pessoa. Especialista em hemorroidas, fissura anal, fístula, plicoma e constipação intestinal. Agendamento online, teleconsulta e visitas domiciliares.',
     siteName: 'Dr. João Vítor Viana',
     images: [
       {
@@ -76,7 +78,8 @@ export const metadata: Metadata = {
   twitter: {
     ...defaultMetadata.twitter,
     title: 'Dr. João Vítor Viana - Proctologista João Pessoa',
-    description: 'Proctologista especialista em hemorroidas, fissura anal, fístula e plicoma em João Pessoa/PB. Agendamento online e teleconsulta disponível.',
+    description:
+      'Proctologista especialista em hemorroidas, fissura anal, fístula e plicoma em João Pessoa/PB. Agendamento online e teleconsulta disponível.',
   },
 }
 
@@ -86,14 +89,20 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="pt-BR" suppressHydrationWarning>
+    <html lang='pt-BR' suppressHydrationWarning>
       <head />
-      <body className={cn(inter.className, "min-h-screen bg-background font-sans antialiased")}>
+      <body
+        className={cn(
+          inter.className,
+          'min-h-screen bg-background font-sans antialiased'
+        )}
+      >
         <GoogleAnalytics />
+        <PerformanceOptimizer />
         <ErrorBoundary>
           <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
+            attribute='class'
+            defaultTheme='system'
             enableSystem
             disableTransitionOnChange
           >
@@ -104,9 +113,7 @@ export default function RootLayout({
             <FAQSchema />
             <BreadcrumbSchema />
             {/* <WebVitals /> */}
-            <main id="main-content">
-              {children}
-            </main>
+            <main id='main-content'>{children}</main>
             <Toaster />
           </ThemeProvider>
         </ErrorBoundary>

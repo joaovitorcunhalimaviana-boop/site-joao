@@ -15,22 +15,25 @@ interface TwilioResponse {
 }
 
 // Função para enviar via Twilio (se configurado)
-async function sendViaTwilio(message: string, toNumber: string): Promise<TwilioResponse> {
+async function sendViaTwilio(
+  message: string,
+  toNumber: string
+): Promise<TwilioResponse> {
   const accountSid = process.env['TWILIO_ACCOUNT_SID']
   const authToken = process.env['TWILIO_AUTH_TOKEN']
   const fromNumber = process.env['TWILIO_WHATSAPP_NUMBER']
-  
+
   if (!accountSid || !authToken || !fromNumber) {
     throw new Error('Credenciais do Twilio não configuradas')
   }
-  
+
   const url = `https://api.twilio.com/2010-04-01/Accounts/${accountSid}/Messages.json`
   const auth = Buffer.from(`${accountSid}:${authToken}`).toString('base64')
-  
+
   const response = await fetch(url, {
     method: 'POST',
     headers: {
-      'Authorization': `Basic ${auth}`,
+      Authorization: `Basic ${auth}`,
       'Content-Type': 'application/x-www-form-urlencoded',
     },
     body: new URLSearchParams({
@@ -39,21 +42,27 @@ async function sendViaTwilio(message: string, toNumber: string): Promise<TwilioR
       Body: message,
     }),
   })
-  
+
   if (!response.ok) {
     const error = await response.text()
     throw new Error(`Erro do Twilio: ${error}`)
   }
-  
+
   return await response.json()
 }
 
 export async function POST(request: NextRequest) {
   try {
     const data: NotificationData = await request.json()
-    
+
     // Validar dados recebidos
-    if (!data.fullName || !data.email || !data.whatsapp || !data.selectedDate || !data.selectedTime) {
+    if (
+      !data.fullName ||
+      !data.email ||
+      !data.whatsapp ||
+      !data.selectedDate ||
+      !data.selectedTime
+    ) {
       return NextResponse.json(
         { error: 'Dados obrigatórios não fornecidos' },
         { status: 400 }
@@ -63,17 +72,21 @@ export async function POST(request: NextRequest) {
     // Formatar a mensagem para WhatsApp
     const message = formatWhatsAppMessage(data)
     const doctorWhatsApp = process.env['DOCTOR_WHATSAPP']
-    
+
     console.log('📱 Nova consulta agendada - Processando notificação:')
     console.log('Paciente:', data.fullName)
     console.log('Data/Hora:', data.selectedDate, 'às', data.selectedTime)
     console.log('WhatsApp do médico:', doctorWhatsApp || 'Não configurado')
-    
+
     let notificationResult: TwilioResponse | null = null
     let method = 'link'
-    
+
     // Tentar enviar via Twilio primeiro (se configurado)
-    if (process.env['TWILIO_ACCOUNT_SID'] && process.env['TWILIO_AUTH_TOKEN'] && doctorWhatsApp) {
+    if (
+      process.env['TWILIO_ACCOUNT_SID'] &&
+      process.env['TWILIO_AUTH_TOKEN'] &&
+      doctorWhatsApp
+    ) {
       try {
         console.log('🔄 Tentando enviar via Twilio...')
         notificationResult = await sendViaTwilio(message, doctorWhatsApp)
@@ -87,23 +100,25 @@ export async function POST(request: NextRequest) {
         console.log('📋 Gerando link manual como fallback...')
       }
     }
-    
+
     // Gerar link direto para WhatsApp (sempre, como backup)
     let whatsappLink: string | null = null
     if (doctorWhatsApp) {
       whatsappLink = generateWhatsAppLink(doctorWhatsApp, message)
       console.log('🔗 Link direto WhatsApp:', whatsappLink)
     }
-    
+
     // Simular delay de processamento
     await new Promise(resolve => setTimeout(resolve, 500))
-    
+
     return NextResponse.json({
       success: true,
-      message: method === 'twilio' ? 'Notificação enviada automaticamente via Twilio' : 'Link de notificação gerado com sucesso',
-      whatsappMessage: message
+      message:
+        method === 'twilio'
+          ? 'Notificação enviada automaticamente via Twilio'
+          : 'Link de notificação gerado com sucesso',
+      whatsappMessage: message,
     })
-    
   } catch (error) {
     console.error('Erro ao enviar notificação:', error)
     return NextResponse.json(
@@ -114,9 +129,17 @@ export async function POST(request: NextRequest) {
 }
 
 function formatWhatsAppMessage(data: NotificationData): string {
-  const { fullName, email, whatsapp, insuranceType, selectedDate, selectedTime } = data
-  
-  return `🏥 *NOVA CONSULTA AGENDADA*\n\n` +
+  const {
+    fullName,
+    email,
+    whatsapp,
+    insuranceType,
+    selectedDate,
+    selectedTime,
+  } = data
+
+  return (
+    `🏥 *NOVA CONSULTA AGENDADA*\n\n` +
     `👤 *Paciente:* ${fullName}\n` +
     `📅 *Data:* ${selectedDate}\n` +
     `🕐 *Horário:* ${selectedTime}\n` +
@@ -124,6 +147,7 @@ function formatWhatsAppMessage(data: NotificationData): string {
     `📱 *WhatsApp:* ${whatsapp}\n` +
     `💳 *Plano:* ${insuranceType === 'unimed' ? 'Unimed' : 'Particular'}\n\n` +
     `✅ Agendamento confirmado pelo sistema online.`
+  )
 }
 
 // Função auxiliar para enviar via WhatsApp Web (link direto)

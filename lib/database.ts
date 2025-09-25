@@ -2,7 +2,11 @@ import { PrismaClient } from '@prisma/client'
 import { hash, compare } from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 import crypto from 'crypto'
-import { LGPDEncryptionService, LGPDAuditService, LGPDAnonymizationService } from './lgpd-encryption'
+import {
+  LGPDEncryptionService,
+  LGPDAuditService,
+  LGPDAnonymizationService,
+} from './lgpd-encryption'
 
 // Singleton do Prisma Client
 const globalForPrisma = globalThis as unknown as {
@@ -22,15 +26,19 @@ export class AuthService {
     return await hash(password, 12)
   }
 
-  static async verifyPassword(password: string, hashedPassword: string): Promise<boolean> {
+  static async verifyPassword(
+    password: string,
+    hashedPassword: string
+  ): Promise<boolean> {
     return await compare(password, hashedPassword)
   }
 
   static generateTokens(userId: string, userRole?: string) {
     // Sessões estendidas para médicos (4 horas vs 15 minutos)
-    const accessTokenExpiry = userRole === 'DOCTOR'
-      ? (process.env['JWT_MEDICAL_SESSION_EXPIRY'] || '4h')
-      : (process.env['JWT_ACCESS_TOKEN_EXPIRY'] || '15m')
+    const accessTokenExpiry =
+      userRole === 'DOCTOR'
+        ? process.env['JWT_MEDICAL_SESSION_EXPIRY'] || '4h'
+        : process.env['JWT_ACCESS_TOKEN_EXPIRY'] || '15m'
 
     const accessToken = jwt.sign(
       { userId, type: 'access', role: userRole },
@@ -52,16 +60,25 @@ export class AuthService {
     )
   }
 
-  static async verifyToken(token: string, type: 'access' | 'refresh' | 'temp_2fa' = 'access') {
+  static async verifyToken(
+    token: string,
+    type: 'access' | 'refresh' | 'temp_2fa' = 'access'
+  ) {
     try {
-      const secret = type === 'refresh' ? process.env['JWT_REFRESH_SECRET'] as string : process.env['JWT_SECRET'] as string
-      const decoded = jwt.verify(token, secret) as { userId: string; type: string }
-      
+      const secret =
+        type === 'refresh'
+          ? (process.env['JWT_REFRESH_SECRET'] as string)
+          : (process.env['JWT_SECRET'] as string)
+      const decoded = jwt.verify(token, secret) as {
+        userId: string
+        type: string
+      }
+
       // Verificar se o tipo do token corresponde ao esperado
       if (decoded.type !== type) {
         return null
       }
-      
+
       return decoded
     } catch {
       return null
@@ -70,19 +87,19 @@ export class AuthService {
 
   static async saveRefreshToken(userId: string, token: string) {
     const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 dias
-    
+
     return await prisma.refreshToken.create({
       data: {
         token,
         userId,
-        expiresAt
-      }
+        expiresAt,
+      },
     })
   }
 
   static async revokeRefreshToken(token: string) {
     return await prisma.refreshToken.delete({
-      where: { token }
+      where: { token },
     })
   }
 }
@@ -93,15 +110,17 @@ export class AuthService {
 
 export class EncryptionService {
   private static algorithm = 'aes-256-cbc'
-  private static key = Buffer.from(process.env['ENCRYPTION_KEY']!, 'utf8')
+  private static key = process.env['ENCRYPTION_KEY']
+    ? Buffer.from(process.env['ENCRYPTION_KEY'], 'utf8')
+    : Buffer.from('default-key-32-chars-long-12345', 'utf8')
 
   static encrypt(text: string): string {
     const iv = crypto.randomBytes(16)
     const cipher = crypto.createCipher(this.algorithm, this.key)
-    
+
     let encrypted = cipher.update(text, 'utf8', 'hex')
     encrypted += cipher.final('hex')
-    
+
     return iv.toString('hex') + ':' + encrypted
   }
 
@@ -109,12 +128,12 @@ export class EncryptionService {
     const parts = encryptedData.split(':')
     const iv = Buffer.from(parts[0], 'hex')
     const encrypted = parts[1]
-    
+
     const decipher = crypto.createDecipher(this.algorithm, this.key)
-    
+
     let decrypted = decipher.update(encrypted, 'hex', 'utf8')
     decrypted += decipher.final('utf8')
-    
+
     return decrypted
   }
 }
@@ -124,18 +143,28 @@ export class EncryptionService {
 // ================================
 
 export class PatientService {
-  static async createPatient(data: any, userId?: string, ipAddress?: string, userAgent?: string) {
+  static async createPatient(
+    data: any,
+    userId?: string,
+    ipAddress?: string,
+    userAgent?: string
+  ) {
     // Criptografar dados sensíveis com LGPD
     const encryptedData = {
       ...data,
-      cpf: data.cpf ? LGPDEncryptionService.encrypt(data.cpf, 'RESTRICTED').data : null,
-      email: data.email ? LGPDEncryptionService.encrypt(data.email, 'CONFIDENTIAL').data : null,
+      cpf: data.cpf
+        ? LGPDEncryptionService.encrypt(data.cpf, 'RESTRICTED').data
+        : null,
+      email: data.email
+        ? LGPDEncryptionService.encrypt(data.email, 'CONFIDENTIAL').data
+        : null,
       phone: LGPDEncryptionService.encrypt(data.phone, 'CONFIDENTIAL').data,
-      whatsapp: LGPDEncryptionService.encrypt(data.whatsapp, 'CONFIDENTIAL').data
+      whatsapp: LGPDEncryptionService.encrypt(data.whatsapp, 'CONFIDENTIAL')
+        .data,
     }
 
     const patient = await prisma.patient.create({
-      data: encryptedData
+      data: encryptedData,
     })
 
     // Log de auditoria LGPD
@@ -147,7 +176,7 @@ export class PatientService {
         operation: 'CREATE',
         newValue: JSON.stringify({ name: data.name, cpf: data.cpf }),
         ipAddress,
-        userAgent
+        userAgent,
       })
     }
 
@@ -159,29 +188,35 @@ export class PatientService {
       resourceId: patient.id,
       details: JSON.stringify({ patientName: data.name }),
       ipAddress,
-      userAgent
+      userAgent,
     })
 
     return patient
   }
 
-  static async getPatient(id: string, userId?: string, purpose?: string, ipAddress?: string, userAgent?: string) {
+  static async getPatient(
+    id: string,
+    userId?: string,
+    purpose?: string,
+    ipAddress?: string,
+    userAgent?: string
+  ) {
     const patient = await prisma.patient.findUnique({
       where: { id },
       include: {
         appointments: {
-          orderBy: { date: 'desc' }
+          orderBy: { date: 'desc' },
         },
         consultations: {
-          orderBy: { startTime: 'desc' }
+          orderBy: { startTime: 'desc' },
         },
         medicalRecords: {
-          orderBy: { createdAt: 'desc' }
+          orderBy: { createdAt: 'desc' },
         },
         medicalAttachments: {
-          orderBy: { uploadedAt: 'desc' }
-        }
-      }
+          orderBy: { uploadedAt: 'desc' },
+        },
+      },
     })
 
     if (!patient) return null
@@ -195,7 +230,7 @@ export class PatientService {
         purpose: purpose || 'Consulta de prontuário',
         legalBasis: 'Execução de contrato',
         ipAddress,
-        userAgent
+        userAgent,
       })
     }
 
@@ -203,21 +238,25 @@ export class PatientService {
     return {
       ...patient,
       cpf: patient.cpf ? LGPDEncryptionService.decrypt(patient.cpf) : null,
-      email: patient.email ? LGPDEncryptionService.decrypt(patient.email) : null,
+      email: patient.email
+        ? LGPDEncryptionService.decrypt(patient.email)
+        : null,
       phone: LGPDEncryptionService.decrypt(patient.phone),
-      whatsapp: LGPDEncryptionService.decrypt(patient.whatsapp)
+      whatsapp: LGPDEncryptionService.decrypt(patient.whatsapp),
     }
   }
 
   static async getAllPatients(page = 1, limit = 50, search?: string) {
     const skip = (page - 1) * limit
-    
-    const where = search ? {
-      OR: [
-        { name: { contains: search, mode: 'insensitive' as const } },
-        // Note: CPF search would need special handling due to encryption
-      ]
-    } : {}
+
+    const where = search
+      ? {
+          OR: [
+            { name: { contains: search, mode: 'insensitive' as const } },
+            // Note: CPF search would need special handling due to encryption
+          ],
+        }
+      : {}
 
     const [patients, total] = await Promise.all([
       prisma.patient.findMany({
@@ -229,12 +268,12 @@ export class PatientService {
           _count: {
             select: {
               appointments: true,
-              consultations: true
-            }
-          }
-        }
+              consultations: true,
+            },
+          },
+        },
       }),
-      prisma.patient.count({ where })
+      prisma.patient.count({ where }),
     ])
 
     return {
@@ -243,10 +282,10 @@ export class PatientService {
         cpf: patient.cpf ? EncryptionService.decrypt(patient.cpf) : null,
         email: patient.email ? EncryptionService.decrypt(patient.email) : null,
         phone: EncryptionService.decrypt(patient.phone),
-        whatsapp: EncryptionService.decrypt(patient.whatsapp)
+        whatsapp: EncryptionService.decrypt(patient.whatsapp),
       })),
       total,
-      pages: Math.ceil(total / limit)
+      pages: Math.ceil(total / limit),
     }
   }
 
@@ -256,11 +295,12 @@ export class PatientService {
     if (data.cpf) encryptedData.cpf = EncryptionService.encrypt(data.cpf)
     if (data.email) encryptedData.email = EncryptionService.encrypt(data.email)
     if (data.phone) encryptedData.phone = EncryptionService.encrypt(data.phone)
-    if (data.whatsapp) encryptedData.whatsapp = EncryptionService.encrypt(data.whatsapp)
+    if (data.whatsapp)
+      encryptedData.whatsapp = EncryptionService.encrypt(data.whatsapp)
 
     const patient = await prisma.patient.update({
       where: { id },
-      data: encryptedData
+      data: encryptedData,
     })
 
     // Log de auditoria
@@ -268,7 +308,7 @@ export class PatientService {
       action: 'UPDATE',
       resource: 'Patient',
       resourceId: id,
-      details: JSON.stringify({ updatedFields: Object.keys(data) })
+      details: JSON.stringify({ updatedFields: Object.keys(data) }),
     })
 
     return patient
@@ -283,17 +323,18 @@ export class PatientService {
           select: {
             appointments: true,
             consultations: true,
-            medicalRecords: true
-          }
-        }
-      }
+            medicalRecords: true,
+          },
+        },
+      },
     })
 
     if (!patient) throw new Error('Paciente não encontrado')
 
     // LGPD: Verificar se pode deletar ou deve anonimizar
-    const hasImportantData = patient._count.consultations > 0 || patient._count.medicalRecords > 0
-    
+    const hasImportantData =
+      patient._count.consultations > 0 || patient._count.medicalRecords > 0
+
     if (hasImportantData) {
       // Anonimizar ao invés de deletar
       return await this.anonymizePatient(id)
@@ -307,38 +348,65 @@ export class PatientService {
       action: 'DELETE',
       resource: 'Patient',
       resourceId: id,
-      details: JSON.stringify({ patientName: patient.name })
+      details: JSON.stringify({ patientName: patient.name }),
     })
 
     return { success: true }
   }
 
-  static async anonymizePatient(id: string, userId?: string, ipAddress?: string, userAgent?: string) {
+  static async anonymizePatient(
+    id: string,
+    userId?: string,
+    ipAddress?: string,
+    userAgent?: string
+  ) {
     // Buscar dados atuais para auditoria
     const currentPatient = await prisma.patient.findUnique({ where: { id } })
     if (!currentPatient) throw new Error('Paciente não encontrado')
 
     // Descriptografar dados atuais para anonimização
-    const currentCpf = currentPatient.cpf ? LGPDEncryptionService.decrypt(currentPatient.cpf) : null
-    const currentEmail = currentPatient.email ? LGPDEncryptionService.decrypt(currentPatient.email) : null
+    const currentCpf = currentPatient.cpf
+      ? LGPDEncryptionService.decrypt(currentPatient.cpf)
+      : null
+    const currentEmail = currentPatient.email
+      ? LGPDEncryptionService.decrypt(currentPatient.email)
+      : null
     const currentPhone = LGPDEncryptionService.decrypt(currentPatient.phone)
-    const currentWhatsapp = LGPDEncryptionService.decrypt(currentPatient.whatsapp)
+    const currentWhatsapp = LGPDEncryptionService.decrypt(
+      currentPatient.whatsapp
+    )
 
     const anonymizedData = {
       name: LGPDAnonymizationService.anonymizeName(currentPatient.name),
-      cpf: currentCpf ? LGPDEncryptionService.encrypt(LGPDAnonymizationService.anonymizeCPF(currentCpf), 'PUBLIC').data : null,
-      email: currentEmail ? LGPDEncryptionService.encrypt(LGPDAnonymizationService.anonymizeEmail(currentEmail), 'PUBLIC').data : null,
-      phone: LGPDEncryptionService.encrypt(LGPDAnonymizationService.anonymizePhone(currentPhone), 'PUBLIC').data,
-      whatsapp: LGPDEncryptionService.encrypt(LGPDAnonymizationService.anonymizePhone(currentWhatsapp), 'PUBLIC').data,
+      cpf: currentCpf
+        ? LGPDEncryptionService.encrypt(
+            LGPDAnonymizationService.anonymizeCPF(currentCpf),
+            'PUBLIC'
+          ).data
+        : null,
+      email: currentEmail
+        ? LGPDEncryptionService.encrypt(
+            LGPDAnonymizationService.anonymizeEmail(currentEmail),
+            'PUBLIC'
+          ).data
+        : null,
+      phone: LGPDEncryptionService.encrypt(
+        LGPDAnonymizationService.anonymizePhone(currentPhone),
+        'PUBLIC'
+      ).data,
+      whatsapp: LGPDEncryptionService.encrypt(
+        LGPDAnonymizationService.anonymizePhone(currentWhatsapp),
+        'PUBLIC'
+      ).data,
       address: null,
       city: null,
       state: null,
-      zipCode: null
+      zipCode: null,
     }
 
     const patient = await prisma.patient.update({
       where: { id },
-      data: anonymizedData
+      data: anonymizedData,
     })
 
     // Log de auditoria LGPD
@@ -348,10 +416,16 @@ export class PatientService {
         dataSubject: id,
         dataType: 'PatientData',
         operation: 'UPDATE',
-        oldValue: JSON.stringify({ name: currentPatient.name, cpf: currentCpf }),
-        newValue: JSON.stringify({ name: anonymizedData.name, anonymized: true }),
+        oldValue: JSON.stringify({
+          name: currentPatient.name,
+          cpf: currentCpf,
+        }),
+        newValue: JSON.stringify({
+          name: anonymizedData.name,
+          anonymized: true,
+        }),
         ipAddress,
-        userAgent
+        userAgent,
       })
     }
 
@@ -364,7 +438,7 @@ export class PatientService {
       details: JSON.stringify({ reason: 'LGPD_COMPLIANCE' }),
       ipAddress,
       userAgent,
-      severity: 'HIGH'
+      severity: 'HIGH',
     })
 
     return patient
@@ -381,8 +455,8 @@ export class ConsultationService {
       data,
       include: {
         patient: true,
-        doctor: true
-      }
+        doctor: true,
+      },
     })
 
     // Log de auditoria
@@ -392,8 +466,8 @@ export class ConsultationService {
       resourceId: consultation.id,
       details: JSON.stringify({
         patientId: data.patientId,
-        doctorId: data.doctorId
-      })
+        doctorId: data.doctorId,
+      }),
     })
 
     return consultation
@@ -407,8 +481,8 @@ export class ConsultationService {
         doctor: true,
         medicalRecord: true,
         prescriptions: true,
-        medicalAttachments: true
-      }
+        medicalAttachments: true,
+      },
     })
   }
 
@@ -419,15 +493,15 @@ export class ConsultationService {
       include: {
         doctor: true,
         medicalRecord: true,
-        prescriptions: true
-      }
+        prescriptions: true,
+      },
     })
   }
 
   static async updateConsultation(id: string, data: any) {
     const consultation = await prisma.consultation.update({
       where: { id },
-      data
+      data,
     })
 
     // Log de auditoria
@@ -435,7 +509,7 @@ export class ConsultationService {
       action: 'UPDATE',
       resource: 'Consultation',
       resourceId: id,
-      details: JSON.stringify({ updatedFields: Object.keys(data) })
+      details: JSON.stringify({ updatedFields: Object.keys(data) }),
     })
 
     return consultation
@@ -453,8 +527,8 @@ export class MedicalRecordService {
       include: {
         patient: true,
         doctor: true,
-        consultation: true
-      }
+        consultation: true,
+      },
     })
 
     // Log de auditoria
@@ -464,8 +538,8 @@ export class MedicalRecordService {
       resourceId: record.id,
       details: JSON.stringify({
         patientId: data.patientId,
-        consultationId: data.consultationId
-      })
+        consultationId: data.consultationId,
+      }),
     })
 
     return record
@@ -477,8 +551,8 @@ export class MedicalRecordService {
       orderBy: { createdAt: 'desc' },
       include: {
         doctor: true,
-        consultation: true
-      }
+        consultation: true,
+      },
     })
   }
 }
@@ -490,13 +564,16 @@ export class MedicalRecordService {
 export class MedicalAttachmentService {
   static async createAttachment(data: any) {
     // Calcular checksum do arquivo para integridade
-    const checksum = crypto.createHash('sha256').update(data.content || '').digest('hex')
-    
+    const checksum = crypto
+      .createHash('sha256')
+      .update(data.content || '')
+      .digest('hex')
+
     const attachment = await prisma.medicalAttachment.create({
       data: {
         ...data,
-        checksum
-      }
+        checksum,
+      },
     })
 
     // Log de auditoria
@@ -507,8 +584,8 @@ export class MedicalAttachmentService {
       details: JSON.stringify({
         patientId: data.patientId,
         filename: data.filename,
-        category: data.category
-      })
+        category: data.category,
+      }),
     })
 
     return attachment
@@ -517,7 +594,7 @@ export class MedicalAttachmentService {
   static async getPatientAttachments(patientId: string) {
     return await prisma.medicalAttachment.findMany({
       where: { patientId },
-      orderBy: { uploadedAt: 'desc' }
+      orderBy: { uploadedAt: 'desc' },
     })
   }
 }
@@ -540,8 +617,8 @@ export class AuditService {
     return await prisma.auditLog.create({
       data: {
         ...data,
-        severity: data.severity || 'LOW'
-      }
+        severity: data.severity || 'LOW',
+      },
     })
   }
 
@@ -554,7 +631,7 @@ export class AuditService {
     severity?: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL'
   }) {
     const where: any = {}
-    
+
     if (filters?.userId) where.userId = filters.userId
     if (filters?.action) where.action = filters.action
     if (filters?.resource) where.resource = filters.resource
@@ -574,10 +651,10 @@ export class AuditService {
             id: true,
             name: true,
             email: true,
-            role: true
-          }
-        }
-      }
+            role: true,
+          },
+        },
+      },
     })
   }
 }
@@ -591,29 +668,32 @@ export class BackupService {
     return await prisma.backupLog.create({
       data: {
         type,
-        status: 'PENDING'
-      }
+        status: 'PENDING',
+      },
     })
   }
 
-  static async updateBackupLog(id: string, data: {
-    status?: 'IN_PROGRESS' | 'COMPLETED' | 'FAILED'
-    filename?: string
-    size?: number
-    checksum?: string
-    completedAt?: Date
-    errorMessage?: string
-  }) {
+  static async updateBackupLog(
+    id: string,
+    data: {
+      status?: 'IN_PROGRESS' | 'COMPLETED' | 'FAILED'
+      filename?: string
+      size?: number
+      checksum?: string
+      completedAt?: Date
+      errorMessage?: string
+    }
+  ) {
     return await prisma.backupLog.update({
       where: { id },
-      data
+      data,
     })
   }
 
   static async getBackupHistory() {
     return await prisma.backupLog.findMany({
       orderBy: { startedAt: 'desc' },
-      take: 50
+      take: 50,
     })
   }
 }
@@ -625,22 +705,26 @@ export class BackupService {
 export class MigrationService {
   static async migrateFromLocalStorage() {
     console.log('Iniciando migração do localStorage para PostgreSQL...')
-    
+
     try {
       // Migrar pacientes
-      const patientsData = JSON.parse(localStorage.getItem('unified-patients') || '[]')
+      const patientsData = JSON.parse(
+        localStorage.getItem('unified-patients') || '[]'
+      )
       for (const patient of patientsData) {
         await PatientService.createPatient(patient)
       }
-      
+
       // Migrar agendamentos
-      const appointmentsData = JSON.parse(localStorage.getItem('unified-appointments') || '[]')
+      const appointmentsData = JSON.parse(
+        localStorage.getItem('unified-appointments') || '[]'
+      )
       for (const appointment of appointmentsData) {
         await prisma.appointment.create({ data: appointment })
       }
-      
+
       // Migrar outros dados...
-      
+
       console.log('Migração concluída com sucesso!')
       return { success: true }
     } catch (error) {

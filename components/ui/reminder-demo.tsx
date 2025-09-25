@@ -135,9 +135,6 @@ const ReminderDemo: React.FC<ReminderDemoProps> = ({ patientData }) => {
             {isLoading ? 'Enviando...' : 'Testar'}
           </button>
         </div>
-
-
-
       </div>
 
       {lastResult && (

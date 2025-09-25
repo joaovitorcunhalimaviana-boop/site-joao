@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
+import { formatDateToBrazilian } from '@/lib/date-utils'
 import {
   Calendar,
   Clock,
@@ -18,6 +19,7 @@ import {
   ArrowLeft,
 } from 'lucide-react'
 import BrazilianDatePicker from '@/components/ui/brazilian-date-picker'
+import { isoDateToBrazilian } from '@/lib/date-utils'
 
 interface AgendaItem {
   id: string
@@ -49,19 +51,13 @@ export default function AgendaPage() {
   const [agenda, setAgenda] = useState<AgendaItem[]>([])
   const [patients, setPatients] = useState<Patient[]>([])
   const [selectedDate, setSelectedDate] = useState(
-    new Date().toLocaleDateString('pt-BR')
+    formatDateToBrazilian(new Date())
   )
   const [loading, setLoading] = useState(true)
   const [showAddForm, setShowAddForm] = useState(false)
   const [selectedPatientId, setSelectedPatientId] = useState('')
   const [selectedTime, setSelectedTime] = useState('08:00')
   const [notes, setNotes] = useState('')
-
-  // Função para converter data ISO (YYYY-MM-DD) para formato brasileiro (DD/MM/YYYY)
-  const formatDateToBrazilian = (isoDate: string): string => {
-    const [year, month, day] = isoDate.split('-')
-    return `${day}/${month}/${year}`
-  }
 
   // Carregar agenda e pacientes
   useEffect(() => {

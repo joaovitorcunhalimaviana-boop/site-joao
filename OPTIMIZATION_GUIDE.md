@@ -7,6 +7,7 @@ Este documento descreve os componentes e utilitários criados para otimizar o pr
 ### 🎨 Componentes de UI Base
 
 #### `components/ui/card-base.tsx`
+
 **Propósito**: Eliminar duplicação de estilos de cards
 
 ```typescript
@@ -21,11 +22,13 @@ const cardClass = getCardClass('hover', 'custom-class')
 ```
 
 **Variantes disponíveis**:
+
 - `primary`: Card padrão com fundo escuro
 - `hover`: Card com efeito hover
 - `interactive`: Card clicável com animações
 
 #### `components/ui/button-base.tsx`
+
 **Propósito**: Sistema unificado de botões para o site médico
 
 ```typescript
@@ -41,11 +44,13 @@ const cardClass = getCardClass('hover', 'custom-class')
 ```
 
 **Variantes disponíveis**:
+
 - `primary`, `secondary`, `outline`, `ghost`
 - `appointment`, `teleconsult`, `emergency` (específicos médicos)
 - `admin`, `success`, `warning`, `destructive`
 
 #### `components/ui/universal-faq.tsx`
+
 **Propósito**: Componente FAQ reutilizável com funcionalidades avançadas
 
 ```typescript
@@ -60,6 +65,7 @@ const cardClass = getCardClass('hover', 'custom-class')
 ```
 
 **Funcionalidades**:
+
 - Busca em tempo real
 - Filtros por categoria
 - Expansão múltipla ou única
@@ -69,6 +75,7 @@ const cardClass = getCardClass('hover', 'custom-class')
 ### 🏗️ Componentes de Layout
 
 #### `components/layout/page-layout.tsx`
+
 **Propósito**: Layout consistente para todas as páginas
 
 ```typescript
@@ -87,12 +94,14 @@ const cardClass = getCardClass('hover', 'custom-class')
 ```
 
 **Variantes de layout**:
+
 - `default`: Layout padrão
 - `centered`: Conteúdo centralizado
 - `wide`: Layout amplo
 - `narrow`: Layout estreito
 
 **Backgrounds disponíveis**:
+
 - `default`: Fundo escuro padrão
 - `gradient`: Gradiente azul médico
 - `dark`: Fundo escuro sólido
@@ -101,6 +110,7 @@ const cardClass = getCardClass('hover', 'custom-class')
 ### 🛠️ Utilitários e Hooks
 
 #### `lib/theme.ts`
+
 **Propósito**: Sistema de tema centralizado
 
 ```typescript
@@ -115,16 +125,20 @@ const buttonClass = utils.getButtonClass('primary', 'lg')
 ```
 
 **Recursos**:
+
 - Paleta de cores médicas
 - Estilos pré-definidos para componentes
 - Utilitários para geração de classes CSS
 - Configurações de tipografia e espaçamento
 
 #### `lib/validation.ts`
+
 **Propósito**: Sistema de validação para formulários médicos
 
 ```typescript
-const { validateSingleField, validateAllFields, errors } = useValidation(medicalFormRules.personalData)
+const { validateSingleField, validateAllFields, errors } = useValidation(
+  medicalFormRules.personalData
+)
 
 // Validar campo individual
 const result = validateSingleField('cpf', '123.456.789-00')
@@ -134,12 +148,14 @@ const formResults = validateAllFields(formData)
 ```
 
 **Validadores disponíveis**:
+
 - CPF, telefone, CEP, email
 - Dados médicos (peso, altura, pressão arterial)
 - Datas e horários
 - Validações customizadas
 
 #### `lib/medical-utils.ts`
+
 **Propósito**: Utilitários específicos para área médica
 
 ```typescript
@@ -154,12 +170,14 @@ const bmr = medicalCalculators.basalMetabolicRate(70, 175, 30, 'M')
 ```
 
 **Funcionalidades**:
+
 - Formatação de documentos brasileiros
 - Cálculos médicos (IMC, TMB, clearance de creatinina)
 - Formatação de dados médicos
 - Validadores específicos da área médica
 
 #### `hooks/use-calculator.ts`
+
 **Propósito**: Hook reutilizável para calculadoras médicas
 
 ```typescript
@@ -167,7 +185,7 @@ const calculator = useCalculator({
   name: 'imc',
   title: 'Calculadora de IMC',
   fields: imcFields,
-  calculateResult: (values) => calculateIMC(values)
+  calculateResult: values => calculateIMC(values),
 })
 
 // Usar o hook
@@ -175,6 +193,7 @@ const { values, result, updateField, reset, saveResult } = calculator
 ```
 
 **Recursos**:
+
 - Estado gerenciado automaticamente
 - Validação de campos
 - Salvamento de resultados
@@ -182,6 +201,7 @@ const { values, result, updateField, reset, saveResult } = calculator
 - Histórico de cálculos
 
 #### `lib/icons.ts`
+
 **Propósito**: Importação centralizada de ícones
 
 ```typescript
@@ -199,6 +219,7 @@ const CustomIcon = createIcon(HeartIcon, { size: 'md', color: 'red' })
 ### 1. Refatorar Componentes Existentes
 
 **Antes**:
+
 ```typescript
 // Código duplicado em múltiplos componentes
 <div className="bg-gray-900/50 backdrop-blur-sm border border-gray-700 rounded-lg p-6">
@@ -209,6 +230,7 @@ const CustomIcon = createIcon(HeartIcon, { size: 'md', color: 'red' })
 ```
 
 **Depois**:
+
 ```typescript
 // Usando componentes otimizados
 <CardBase variant="primary">
@@ -230,8 +252,8 @@ export default function NovaEspecialidade() {
         <p>Conteúdo sobre a especialidade...</p>
         <AppointmentButton>Agendar Consulta</AppointmentButton>
       </Section>
-      
-      <FAQSectionRefactored 
+
+      <FAQSectionRefactored
         variant="detailed"
         showContactSection={true}
       />
@@ -246,10 +268,10 @@ export default function NovaEspecialidade() {
 function FormularioAgendamento() {
   const validation = useValidation(medicalFormRules.appointment)
   const { medicalFormatters } = useMedicalUtils()
-  
+
   return (
     <form>
-      <input 
+      <input
         className={utils.getInputClass(validation.errors.name?.isValid === false)}
         onChange={(e) => validation.validateSingleField('name', e.target.value)}
       />
@@ -264,21 +286,25 @@ function FormularioAgendamento() {
 ## 📊 Benefícios da Otimização
 
 ### Redução de Código
+
 - **Antes**: ~15 componentes com código duplicado
 - **Depois**: 5 componentes base reutilizáveis
 - **Economia**: ~60% menos código duplicado
 
 ### Melhoria na Manutenibilidade
+
 - Alterações centralizadas nos componentes base
 - Consistência visual automática
 - Facilidade para adicionar novas funcionalidades
 
 ### Performance
+
 - Bundle size reduzido
 - Importações otimizadas de ícones
 - Componentes com lazy loading
 
 ### Experiência do Desenvolvedor
+
 - TypeScript com tipagem completa
 - Documentação integrada
 - Hooks reutilizáveis
@@ -287,24 +313,28 @@ function FormularioAgendamento() {
 ## 🔄 Plano de Migração
 
 ### Fase 1: Componentes Base (Concluída)
+
 - ✅ CardBase
 - ✅ ButtonBase
 - ✅ PageLayout
 - ✅ UniversalFAQ
 
 ### Fase 2: Utilitários (Concluída)
+
 - ✅ Sistema de tema
 - ✅ Validação
 - ✅ Utilitários médicos
 - ✅ Hook de calculadora
 
 ### Fase 3: Refatoração (Próxima)
+
 - 🔄 Migrar componentes existentes
 - 🔄 Implementar novos layouts
 - 🔄 Otimizar calculadoras
 - 🔄 Melhorar formulários
 
 ### Fase 4: Otimizações Avançadas
+
 - ⏳ Lazy loading de componentes
 - ⏳ Otimização de imagens
 - ⏳ Service Worker
@@ -313,6 +343,7 @@ function FormularioAgendamento() {
 ## 🧪 Testes e Qualidade
 
 ### Testes Recomendados
+
 ```bash
 # Testes unitários dos utilitários
 npm test lib/validation.test.ts
@@ -324,6 +355,7 @@ npm test components/ui/universal-faq.test.tsx
 ```
 
 ### Linting e Formatação
+
 ```bash
 # Verificar código
 npm run lint

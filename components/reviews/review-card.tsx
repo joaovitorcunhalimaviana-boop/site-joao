@@ -35,11 +35,12 @@ export default function ReviewCard({
   }
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('pt-BR', {
+    return new Intl.DateTimeFormat('pt-BR', {
+      timeZone: 'America/Sao_Paulo',
       year: 'numeric',
       month: 'long',
       day: 'numeric',
-    })
+    }).format(new Date(dateString))
   }
 
   const getInitials = (name: string) => {

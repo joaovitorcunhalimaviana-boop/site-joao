@@ -39,82 +39,99 @@
   }
 }
 
+/* Animação de pulsação do gradiente para o nome do médico */
+@keyframes gradientPulse {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.animate-gradient-pulse {
+  animation: gradientPulse 3s ease-in-out infinite;
+}
+
 /* Forçar formato 24h para inputs de time */
-input[type="time"] {
+input[type='time'] {
   -webkit-appearance: none;
   -moz-appearance: textfield;
   appearance: none;
 }
 
-input[type="time"]::-webkit-datetime-edit-ampm-field {
+input[type='time']::-webkit-datetime-edit-ampm-field {
   display: none;
 }
 
-input[type="time"]::-webkit-datetime-edit {
+input[type='time']::-webkit-datetime-edit {
   color: inherit;
 }
 
-input[type="time"]::-webkit-datetime-edit-fields-wrapper {
+input[type='time']::-webkit-datetime-edit-fields-wrapper {
   background: transparent;
 }
 
-input[type="time"]::-webkit-datetime-edit-text {
+input[type='time']::-webkit-datetime-edit-text {
   color: inherit;
   padding: 0 0.3em;
 }
 
-input[type="time"]::-webkit-datetime-edit-month-field,
-input[type="time"]::-webkit-datetime-edit-day-field,
-input[type="time"]::-webkit-datetime-edit-year-field,
-input[type="time"]::-webkit-datetime-edit-hour-field,
-input[type="time"]::-webkit-datetime-edit-minute-field {
+input[type='time']::-webkit-datetime-edit-month-field,
+input[type='time']::-webkit-datetime-edit-day-field,
+input[type='time']::-webkit-datetime-edit-year-field,
+input[type='time']::-webkit-datetime-edit-hour-field,
+input[type='time']::-webkit-datetime-edit-minute-field {
   color: inherit;
 }
 
-input[type="time"]::-webkit-clear-button {
+input[type='time']::-webkit-clear-button {
   display: none;
 }
 
-input[type="time"]::-webkit-inner-spin-button {
+input[type='time']::-webkit-inner-spin-button {
   display: none;
 }
 
 /* Forçar formato brasileiro para inputs de date */
-input[type="date"] {
+input[type='date'] {
   -webkit-appearance: none;
   -moz-appearance: textfield;
   appearance: none;
 }
 
-input[type="date"]::-webkit-datetime-edit {
+input[type='date']::-webkit-datetime-edit {
   color: inherit;
 }
 
-input[type="date"]::-webkit-datetime-edit-fields-wrapper {
+input[type='date']::-webkit-datetime-edit-fields-wrapper {
   background: transparent;
 }
 
-input[type="date"]::-webkit-datetime-edit-text {
+input[type='date']::-webkit-datetime-edit-text {
   color: inherit;
   padding: 0 0.3em;
 }
 
-input[type="date"]::-webkit-datetime-edit-month-field,
-input[type="date"]::-webkit-datetime-edit-day-field,
-input[type="date"]::-webkit-datetime-edit-year-field {
+input[type='date']::-webkit-datetime-edit-month-field,
+input[type='date']::-webkit-datetime-edit-day-field,
+input[type='date']::-webkit-datetime-edit-year-field {
   color: inherit;
 }
 
-input[type="date"]::-webkit-clear-button {
+input[type='date']::-webkit-clear-button {
   display: none;
 }
 
-input[type="date"]::-webkit-inner-spin-button {
+input[type='date']::-webkit-inner-spin-button {
   display: none;
 }
 
 /* Configuração específica para formato brasileiro */
-input[type="date"][lang="pt-BR"] {
+input[type='date'][lang='pt-BR'] {
   text-align: left;
 }
 
@@ -124,7 +141,7 @@ input[type="date"][lang="pt-BR"] {
 }
 
 /* Configuração adicional para navegadores que suportam */
-input[type="date"]:lang(pt-BR) {
+input[type='date']:lang(pt-BR) {
   direction: ltr;
 }
 
@@ -144,8 +161,8 @@ button:focus,
 button:focus-visible,
 a:focus,
 a:focus-visible,
-[role="button"]:focus,
-[role="button"]:focus-visible {
+[role='button']:focus,
+[role='button']:focus-visible {
   outline: none !important;
   box-shadow: none !important;
 }

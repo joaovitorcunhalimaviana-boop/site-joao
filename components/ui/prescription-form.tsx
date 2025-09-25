@@ -7,6 +7,10 @@ import {
   DocumentTextIcon,
   PrinterIcon,
 } from '@heroicons/react/24/outline'
+import {
+  formatDateToBrazilian,
+  formatDateTimeToBrazilian,
+} from '@/lib/date-utils'
 
 interface Medication {
   id: string
@@ -74,7 +78,7 @@ export default function PrescriptionForm({
       medications: medications.filter(med => med.name.trim() !== ''),
       generalInstructions,
       date: new Date().toISOString(),
-      createdAt: new Date().toLocaleString('pt-BR'),
+      createdAt: formatDateTimeToBrazilian(new Date()),
     }
     onSave?.(prescription)
     alert('Receituário salvo com sucesso!')
@@ -89,7 +93,7 @@ export default function PrescriptionForm({
       medications: medications.filter(med => med.name.trim() !== ''),
       generalInstructions,
       date: new Date().toISOString(),
-      createdAt: new Date().toLocaleString('pt-BR'),
+      createdAt: formatDateTimeToBrazilian(new Date()),
     }
     onPrint?.(prescription)
 
@@ -133,7 +137,7 @@ export default function PrescriptionForm({
         <div class="patient-info">
           <strong>Paciente:</strong> ${prescription.patientName}<br>
           <strong>Idade:</strong> ${prescription.patientAge} anos<br>
-          <strong>Data:</strong> ${new Date().toLocaleDateString('pt-BR')}
+          <strong>Data:</strong> ${formatDateToBrazilian(new Date())}
         </div>
         
         <div class="prescription-content">

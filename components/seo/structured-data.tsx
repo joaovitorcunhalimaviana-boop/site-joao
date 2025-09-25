@@ -3,7 +3,16 @@
 import Script from 'next/script'
 
 interface StructuredDataProps {
-  type: 'doctor' | 'medicalBusiness' | 'article' | 'faq' | 'medicalWebPage' | 'breadcrumb' | 'medicalCondition' | 'medicalSpecialty' | 'medicalProcedure'
+  type:
+    | 'doctor'
+    | 'medicalBusiness'
+    | 'article'
+    | 'faq'
+    | 'medicalWebPage'
+    | 'breadcrumb'
+    | 'medicalCondition'
+    | 'medicalSpecialty'
+    | 'medicalProcedure'
   data?: any
 }
 
@@ -20,7 +29,7 @@ export function MedicalCalculatorSchema({
   description,
   url,
   medicalCondition,
-  purpose
+  purpose,
 }: MedicalCalculatorProps) {
   const structuredData = {
     '@context': 'https://schema.org',
@@ -33,29 +42,31 @@ export function MedicalCalculatorSchema({
     offers: {
       '@type': 'Offer',
       price: '0',
-      priceCurrency: 'BRL'
+      priceCurrency: 'BRL',
     },
-    about: medicalCondition ? {
-      '@type': 'MedicalCondition',
-      name: medicalCondition
-    } : undefined,
+    about: medicalCondition
+      ? {
+          '@type': 'MedicalCondition',
+          name: medicalCondition,
+        }
+      : undefined,
     featureList: [
       'Cálculo automático',
       'Interface intuitiva',
       'Resultados instantâneos',
-      'Baseado em evidências científicas'
+      'Baseado em evidências científicas',
     ],
     isAccessibleForFree: true,
-    inLanguage: 'pt-BR'
+    inLanguage: 'pt-BR',
   }
 
   return (
     <Script
       id={`medical-calculator-${name.toLowerCase().replace(/\s+/g, '-')}`}
-      type="application/ld+json"
-      strategy="afterInteractive"
+      type='application/ld+json'
+      strategy='afterInteractive'
       dangerouslySetInnerHTML={{
-        __html: JSON.stringify(structuredData)
+        __html: JSON.stringify(structuredData),
       }}
     />
   )
@@ -71,9 +82,11 @@ export default function StructuredData({ type, data }: StructuredDataProps) {
           '@id': 'https://drjoaovitorviana.com.br/#doctor',
           name: 'Dr. João Vitor Viana',
           jobTitle: 'Coloproctologista',
-          description: 'Médico especialista em coloproctologia, com foco em hemorroidas, fissura anal, constipação e doenças intestinais.',
+          description:
+            'Médico especialista em coloproctologia, com foco em hemorroidas, fissura anal, constipação e doenças intestinais.',
           url: 'https://drjoaovitorviana.com.br',
-          image: 'https://drjoaovitorviana.com.br/images/dr-joao-vitor-viana.jpg',
+          image:
+            'https://drjoaovitorviana.com.br/images/dr-joao-vitor-viana.jpg',
           telephone: '+55-61-99999-9999',
           email: 'contato@drjoaovitorviana.com.br',
           address: {
@@ -82,20 +95,20 @@ export default function StructuredData({ type, data }: StructuredDataProps) {
             addressLocality: 'Brasília',
             addressRegion: 'DF',
             postalCode: '70390-150',
-            addressCountry: 'BR'
+            addressCountry: 'BR',
           },
           worksFor: {
             '@type': 'MedicalOrganization',
             name: 'Clínica Dr. João Vitor Viana',
-            url: 'https://drjoaovitorviana.com.br'
+            url: 'https://drjoaovitorviana.com.br',
           },
           hasCredential: {
             '@type': 'EducationalOccupationalCredential',
             credentialCategory: 'Medical Degree',
             recognizedBy: {
               '@type': 'Organization',
-              name: 'Conselho Federal de Medicina'
-            }
+              name: 'Conselho Federal de Medicina',
+            },
           },
           knowsAbout: [
             'Coloproctologia',
@@ -106,13 +119,14 @@ export default function StructuredData({ type, data }: StructuredDataProps) {
             'Doença de Crohn',
             'Retocolite Ulcerativa',
             'Colonoscopia',
-            'Cirurgia Colorretal'
+            'Cirurgia Colorretal',
           ],
           medicalSpecialty: [
             {
               '@type': 'MedicalSpecialty',
               name: 'Coloproctologia',
-              description: 'Especialidade médica que trata doenças do intestino grosso, reto e ânus'
+              description:
+                'Especialidade médica que trata doenças do intestino grosso, reto e ânus',
             },
             'Hemorroidas',
             'Fissura Anal',
@@ -120,13 +134,13 @@ export default function StructuredData({ type, data }: StructuredDataProps) {
             'Colonoscopia',
             'Doença de Crohn',
             'Colite Ulcerativa',
-            'Cirurgia Colorretal'
+            'Cirurgia Colorretal',
           ],
           sameAs: [
             'https://www.instagram.com/drjoaovitorviana',
             'https://www.facebook.com/drjoaovitorviana',
-            'https://www.linkedin.com/in/drjoaovitorviana'
-          ]
+            'https://www.linkedin.com/in/drjoaovitorviana',
+          ],
         }
 
       case 'medicalSpecialty':
@@ -134,16 +148,18 @@ export default function StructuredData({ type, data }: StructuredDataProps) {
           '@context': 'https://schema.org',
           '@type': 'MedicalSpecialty',
           name: data?.name || 'Coloproctologia',
-          description: data?.description || 'Especialidade médica focada no diagnóstico e tratamento de doenças do intestino grosso, reto e ânus',
+          description:
+            data?.description ||
+            'Especialidade médica focada no diagnóstico e tratamento de doenças do intestino grosso, reto e ânus',
           associatedAnatomy: {
             '@type': 'AnatomicalStructure',
-            name: 'Sistema Digestivo Baixo'
+            name: 'Sistema Digestivo Baixo',
           },
           relevantSpecialty: [
             'Gastroenterologia',
             'Cirurgia Geral',
-            'Oncologia'
-          ]
+            'Oncologia',
+          ],
         }
 
       case 'medicalCondition':
@@ -151,26 +167,28 @@ export default function StructuredData({ type, data }: StructuredDataProps) {
           '@context': 'https://schema.org',
           '@type': 'MedicalCondition',
           name: data?.name || 'Hemorroidas',
-          description: data?.description || 'Condição médica caracterizada por veias dilatadas na região anal',
+          description:
+            data?.description ||
+            'Condição médica caracterizada por veias dilatadas na região anal',
           code: {
             '@type': 'MedicalCode',
             codeValue: data?.codeValue || 'K64',
-            codingSystem: 'ICD-10'
+            codingSystem: 'ICD-10',
           },
           possibleTreatment: {
             '@type': 'MedicalTherapy',
-            name: data?.treatment || 'Tratamento Clínico e Cirúrgico'
+            name: data?.treatment || 'Tratamento Clínico e Cirúrgico',
           },
           riskFactor: data?.riskFactors || [
             'Constipação crônica',
             'Gravidez',
             'Obesidade',
-            'Sedentarismo'
+            'Sedentarismo',
           ],
           typicalTest: {
             '@type': 'MedicalTest',
-            name: 'Exame Proctológico'
-          }
+            name: 'Exame Proctológico',
+          },
         }
 
       case 'medicalProcedure':
@@ -178,22 +196,26 @@ export default function StructuredData({ type, data }: StructuredDataProps) {
           '@context': 'https://schema.org',
           '@type': 'MedicalProcedure',
           name: data?.name || 'Colonoscopia',
-          description: data?.description || 'Exame endoscópico para visualização do intestino grosso',
+          description:
+            data?.description ||
+            'Exame endoscópico para visualização do intestino grosso',
           procedureType: {
             '@type': 'MedicalProcedureType',
-            name: 'Procedimento Diagnóstico'
+            name: 'Procedimento Diagnóstico',
           },
           bodyLocation: {
             '@type': 'AnatomicalStructure',
-            name: 'Intestino Grosso'
+            name: 'Intestino Grosso',
           },
           preparation: data?.preparation || [
             'Jejum de 12 horas',
             'Preparo intestinal com laxantes',
-            'Suspensão de medicamentos específicos'
+            'Suspensão de medicamentos específicos',
           ],
-          howPerformed: data?.howPerformed || 'Inserção de endoscópio flexível através do ânus para visualização completa do cólon',
-          followup: 'Acompanhamento médico conforme achados do exame'
+          howPerformed:
+            data?.howPerformed ||
+            'Inserção de endoscópio flexível através do ânus para visualização completa do cólon',
+          followup: 'Acompanhamento médico conforme achados do exame',
         }
 
       case 'medicalBusiness':
@@ -202,7 +224,8 @@ export default function StructuredData({ type, data }: StructuredDataProps) {
           '@type': 'MedicalBusiness',
           '@id': 'https://drjoaovitorviana.com.br/#business',
           name: 'Clínica Dr. João Vitor Viana',
-          description: 'Clínica especializada em coloproctologia com atendimento personalizado e tecnologia de ponta.',
+          description:
+            'Clínica especializada em coloproctologia com atendimento personalizado e tecnologia de ponta.',
           url: 'https://drjoaovitorviana.com.br',
           logo: 'https://drjoaovitorviana.com.br/images/logo.png',
           image: 'https://drjoaovitorviana.com.br/images/clinica.jpg',
@@ -214,29 +237,41 @@ export default function StructuredData({ type, data }: StructuredDataProps) {
             addressLocality: 'Brasília',
             addressRegion: 'DF',
             postalCode: '70390-150',
-            addressCountry: 'BR'
+            addressCountry: 'BR',
           },
           geo: {
             '@type': 'GeoCoordinates',
             latitude: '-15.8267',
-            longitude: '-47.9218'
+            longitude: '-47.9218',
           },
           openingHoursSpecification: [
             {
               '@type': 'OpeningHoursSpecification',
-              dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
+              dayOfWeek: [
+                'Monday',
+                'Tuesday',
+                'Wednesday',
+                'Thursday',
+                'Friday',
+              ],
               opens: '08:00',
-              closes: '18:00'
+              closes: '18:00',
             },
             {
               '@type': 'OpeningHoursSpecification',
               dayOfWeek: 'Saturday',
               opens: '08:00',
-              closes: '12:00'
-            }
+              closes: '12:00',
+            },
           ],
           priceRange: '$$',
-          paymentAccepted: ['Cash', 'PIX', 'Credit Card', 'Debit Card', 'Health Insurance'],
+          paymentAccepted: [
+            'Cash',
+            'PIX',
+            'Credit Card',
+            'Debit Card',
+            'Health Insurance',
+          ],
           currenciesAccepted: 'BRL',
           hasOfferCatalog: {
             '@type': 'OfferCatalog',
@@ -247,42 +282,42 @@ export default function StructuredData({ type, data }: StructuredDataProps) {
                 itemOffered: {
                   '@type': 'MedicalProcedure',
                   name: 'Consulta Coloproctológica',
-                  description: 'Consulta especializada em coloproctologia'
-                }
+                  description: 'Consulta especializada em coloproctologia',
+                },
               },
               {
                 '@type': 'Offer',
                 itemOffered: {
                   '@type': 'MedicalProcedure',
                   name: 'Colonoscopia',
-                  description: 'Exame endoscópico do intestino grosso'
-                }
+                  description: 'Exame endoscópico do intestino grosso',
+                },
               },
               {
                 '@type': 'Offer',
                 itemOffered: {
                   '@type': 'MedicalProcedure',
                   name: 'Tratamento de Hemorroidas',
-                  description: 'Tratamento clínico e cirúrgico de hemorroidas'
-                }
+                  description: 'Tratamento clínico e cirúrgico de hemorroidas',
+                },
               },
               {
                 '@type': 'Offer',
                 itemOffered: {
                   '@type': 'MedicalService',
                   name: 'Teleconsulta',
-                  description: 'Consulta médica online'
-                }
-              }
-            ]
+                  description: 'Consulta médica online',
+                },
+              },
+            ],
           },
           aggregateRating: {
             '@type': 'AggregateRating',
             ratingValue: '4.9',
             reviewCount: '150',
             bestRating: '5',
-            worstRating: '1'
-          }
+            worstRating: '1',
+          },
         }
 
       case 'faq':
@@ -295,26 +330,26 @@ export default function StructuredData({ type, data }: StructuredDataProps) {
               name: 'Como agendar uma consulta?',
               acceptedAnswer: {
                 '@type': 'Answer',
-                text: 'Você pode agendar uma consulta através do nosso sistema online, WhatsApp ou telefone. Oferecemos horários flexíveis de segunda a sábado.'
-              }
+                text: 'Você pode agendar uma consulta através do nosso sistema online, WhatsApp ou telefone. Oferecemos horários flexíveis de segunda a sábado.',
+              },
             },
             {
               '@type': 'Question',
               name: 'Quais convênios são aceitos?',
               acceptedAnswer: {
                 '@type': 'Answer',
-                text: 'Aceitamos os principais convênios médicos. Entre em contato para verificar se seu plano está na nossa rede credenciada.'
-              }
+                text: 'Aceitamos os principais convênios médicos. Entre em contato para verificar se seu plano está na nossa rede credenciada.',
+              },
             },
             {
               '@type': 'Question',
               name: 'Fazem teleconsulta?',
               acceptedAnswer: {
                 '@type': 'Answer',
-                text: 'Sim, oferecemos teleconsulta para consultas de retorno e orientações médicas. A primeira consulta deve ser presencial.'
-              }
-            }
-          ]
+                text: 'Sim, oferecemos teleconsulta para consultas de retorno e orientações médicas. A primeira consulta deve ser presencial.',
+              },
+            },
+          ],
         }
 
       default:
@@ -329,10 +364,10 @@ export default function StructuredData({ type, data }: StructuredDataProps) {
   return (
     <Script
       id={`structured-data-${type}`}
-      type="application/ld+json"
-      strategy="afterInteractive"
+      type='application/ld+json'
+      strategy='afterInteractive'
       dangerouslySetInnerHTML={{
-        __html: JSON.stringify(structuredData)
+        __html: JSON.stringify(structuredData),
       }}
     />
   )

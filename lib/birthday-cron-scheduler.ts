@@ -1,6 +1,7 @@
 // Sistema de verificação automática de aniversários diários
 import { getTodayBirthdays, processBirthdayEmails } from './email-service'
 import { getAllPatients } from './unified-appointment-system'
+import { getTodayISO } from './date-utils'
 
 interface BirthdayJob {
   id: string
@@ -182,7 +183,7 @@ export function getBirthdayJobStats(): {
   pendingJobs: number
   totalBirthdaysProcessed: number
 } {
-  const todayISO = new Date().toISOString().split('T')[0]
+  const todayISO = getTodayISO()
 
   const processedToday = birthdayJobs.filter(
     job =>

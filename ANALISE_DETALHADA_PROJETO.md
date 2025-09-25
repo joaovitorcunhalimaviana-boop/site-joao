@@ -7,6 +7,7 @@ Após uma análise completa do projeto de sistema médico Next.js, identifiquei 
 ## 🔧 Problemas Críticos Identificados e Resolvidos
 
 ### ✅ Erros de Sintaxe Corrigidos
+
 - **Problema**: Múltiplos arquivos com erros de sintaxe JSX
 - **Arquivos afetados**: `atendimento/[id]/page.tsx`, `ibdq/page.tsx`, `pac-scores/page.tsx`, `st-marks/page.tsx`, `kudo/page.tsx`, `ses-cd/page.tsx`
 - **Soluções aplicadas**:
@@ -15,12 +16,14 @@ Após uma análise completa do projeto de sistema médico Next.js, identifiquei 
   - Adição de componente Dialog faltante
 
 ### ✅ Dependências Faltantes
+
 - **Instalado**: `@radix-ui/react-dialog`
 - **Criado**: Componente `components/ui/dialog.tsx`
 
 ## 🚀 Melhorias de Performance Recomendadas
 
 ### 1. Lazy Loading e Code Splitting
+
 ```typescript
 // Implementar lazy loading para componentes pesados
 const HeavyCalculator = dynamic(() => import('./HeavyCalculator'), {
@@ -32,6 +35,7 @@ const MedicalArea = dynamic(() => import('./area-medica/page'))
 ```
 
 ### 2. Otimização de Imagens
+
 ```typescript
 // Usar Next.js Image component
 import Image from 'next/image'
@@ -48,6 +52,7 @@ import Image from 'next/image'
 ```
 
 ### 3. Memoização de Componentes
+
 ```typescript
 // Memoizar componentes que fazem cálculos pesados
 const MedicalCalculator = React.memo(({ data }) => {
@@ -59,33 +64,35 @@ const MedicalCalculator = React.memo(({ data }) => {
 ## 🔒 Melhorias de Segurança
 
 ### 1. Headers de Segurança
+
 ```javascript
 // next.config.js
 const securityHeaders = [
   {
     key: 'X-DNS-Prefetch-Control',
-    value: 'on'
+    value: 'on',
   },
   {
     key: 'Strict-Transport-Security',
-    value: 'max-age=63072000; includeSubDomains; preload'
+    value: 'max-age=63072000; includeSubDomains; preload',
   },
   {
     key: 'X-Frame-Options',
-    value: 'DENY'
+    value: 'DENY',
   },
   {
     key: 'X-Content-Type-Options',
-    value: 'nosniff'
+    value: 'nosniff',
   },
   {
     key: 'Referrer-Policy',
-    value: 'origin-when-cross-origin'
-  }
+    value: 'origin-when-cross-origin',
+  },
 ]
 ```
 
 ### 2. Validação de Dados
+
 ```typescript
 // Implementar validação robusta com Zod
 import { z } from 'zod'
@@ -94,11 +101,12 @@ const PatientSchema = z.object({
   name: z.string().min(2).max(100),
   email: z.string().email(),
   phone: z.string().regex(/^\+?[1-9]\d{1,14}$/),
-  birthDate: z.string().datetime()
+  birthDate: z.string().datetime(),
 })
 ```
 
 ### 3. Sanitização de Inputs
+
 ```typescript
 // Sanitizar dados de entrada
 import DOMPurify from 'dompurify'
@@ -111,45 +119,58 @@ const sanitizeInput = (input: string) => {
 ## 🎯 Melhorias de SEO
 
 ### 1. Structured Data Completo
+
 ```typescript
 // Implementar JSON-LD para dados médicos
 const medicalOrganizationSchema = {
-  "@context": "https://schema.org",
-  "@type": "MedicalOrganization",
-  "name": "Clínica Médica",
-  "address": {
-    "@type": "PostalAddress",
-    "streetAddress": "Rua das Flores, 123",
-    "addressLocality": "São Paulo",
-    "addressRegion": "SP",
-    "postalCode": "01234-567"
+  '@context': 'https://schema.org',
+  '@type': 'MedicalOrganization',
+  name: 'Clínica Médica',
+  address: {
+    '@type': 'PostalAddress',
+    streetAddress: 'Rua das Flores, 123',
+    addressLocality: 'São Paulo',
+    addressRegion: 'SP',
+    postalCode: '01234-567',
   },
-  "telephone": "+55-11-1234-5678",
-  "medicalSpecialty": ["Gastroenterologia", "Clínica Geral"]
+  telephone: '+55-11-1234-5678',
+  medicalSpecialty: ['Gastroenterologia', 'Clínica Geral'],
 }
 ```
 
 ### 2. Meta Tags Otimizadas
+
 ```typescript
 // Implementar meta tags dinâmicas
 export const metadata: Metadata = {
   title: 'Calculadora Bristol - Avaliação Intestinal | Clínica Médica',
-  description: 'Utilize nossa calculadora da Escala de Bristol para avaliar a consistência das fezes. Ferramenta médica profissional para diagnóstico.',
-  keywords: 'escala bristol, avaliação intestinal, gastroenterologia, diagnóstico médico',
+  description:
+    'Utilize nossa calculadora da Escala de Bristol para avaliar a consistência das fezes. Ferramenta médica profissional para diagnóstico.',
+  keywords:
+    'escala bristol, avaliação intestinal, gastroenterologia, diagnóstico médico',
   openGraph: {
     title: 'Calculadora Bristol - Avaliação Intestinal',
-    description: 'Ferramenta médica profissional para avaliação da consistência das fezes',
-    images: ['/og-bristol-calculator.jpg']
-  }
+    description:
+      'Ferramenta médica profissional para avaliação da consistência das fezes',
+    images: ['/og-bristol-calculator.jpg'],
+  },
 }
 ```
 
 ### 3. Sitemap Dinâmico
+
 ```typescript
 // app/sitemap.ts
 export default function sitemap(): MetadataRoute.Sitemap {
-  const calculators = ['bristol', 'ibdq', 'kudo', 'ses-cd', 'pac-scores', 'st-marks']
-  
+  const calculators = [
+    'bristol',
+    'ibdq',
+    'kudo',
+    'ses-cd',
+    'pac-scores',
+    'st-marks',
+  ]
+
   return [
     {
       url: 'https://clinica.com',
@@ -162,7 +183,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: new Date(),
       changeFrequency: 'monthly',
       priority: 0.8,
-    }))
+    })),
   ]
 }
 ```
@@ -170,6 +191,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
 ## ♿ Melhorias de Acessibilidade
 
 ### 1. ARIA Labels e Roles
+
 ```typescript
 // Implementar ARIA labels apropriados
 <button
@@ -186,6 +208,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
 ```
 
 ### 2. Navegação por Teclado
+
 ```typescript
 // Implementar navegação por teclado
 const handleKeyDown = (event: KeyboardEvent) => {
@@ -197,6 +220,7 @@ const handleKeyDown = (event: KeyboardEvent) => {
 ```
 
 ### 3. Contraste de Cores
+
 ```css
 /* Garantir contraste adequado (WCAG AA) */
 .text-primary {
@@ -212,6 +236,7 @@ const handleKeyDown = (event: KeyboardEvent) => {
 ## 📱 Otimizações Mobile
 
 ### 1. Touch Targets
+
 ```css
 /* Garantir touch targets de pelo menos 44px */
 .touch-target {
@@ -222,6 +247,7 @@ const handleKeyDown = (event: KeyboardEvent) => {
 ```
 
 ### 2. Layout Responsivo Aprimorado
+
 ```typescript
 // Implementar breakpoints consistentes
 const breakpoints = {
@@ -229,13 +255,14 @@ const breakpoints = {
   md: '768px',
   lg: '1024px',
   xl: '1280px',
-  '2xl': '1536px'
+  '2xl': '1536px',
 }
 ```
 
 ## 🧪 Qualidade de Código
 
 ### 1. TypeScript Strict Mode
+
 ```json
 // tsconfig.json
 {
@@ -248,6 +275,7 @@ const breakpoints = {
 ```
 
 ### 2. Testes Unitários
+
 ```typescript
 // Implementar testes para calculadoras médicas
 import { render, screen, fireEvent } from '@testing-library/react'
@@ -255,26 +283,27 @@ import { BristolCalculator } from './BristolCalculator'
 
 test('calcula corretamente o resultado da Escala de Bristol', () => {
   render(<BristolCalculator />)
-  
+
   fireEvent.click(screen.getByText('Tipo 4'))
-  
+
   expect(screen.getByText('Normal')).toBeInTheDocument()
   expect(screen.getByText('Ideal')).toBeInTheDocument()
 })
 ```
 
 ### 3. Refatoração de Código Duplicado
+
 ```typescript
 // Criar hooks customizados para lógica compartilhada
 const useCalculatorState = <T>(initialState: T) => {
   const [state, setState] = useState<T>(initialState)
   const [isComplete, setIsComplete] = useState(false)
-  
+
   const reset = () => {
     setState(initialState)
     setIsComplete(false)
   }
-  
+
   return { state, setState, isComplete, setIsComplete, reset }
 }
 ```
@@ -282,6 +311,7 @@ const useCalculatorState = <T>(initialState: T) => {
 ## 📊 Monitoramento e Analytics
 
 ### 1. Performance Monitoring
+
 ```typescript
 // Implementar Web Vitals
 import { getCLS, getFID, getFCP, getLCP, getTTFB } from 'web-vitals'
@@ -299,6 +329,7 @@ getTTFB(sendToAnalytics)
 ```
 
 ### 2. Error Tracking
+
 ```typescript
 // Implementar error boundary
 class ErrorBoundary extends React.Component {
@@ -306,7 +337,7 @@ class ErrorBoundary extends React.Component {
     // Log error to monitoring service
     console.error('Error caught by boundary:', error, errorInfo)
   }
-  
+
   render() {
     if (this.state.hasError) {
       return <ErrorFallback />
@@ -319,6 +350,7 @@ class ErrorBoundary extends React.Component {
 ## 🎨 Melhorias de UX/UI
 
 ### 1. Loading States
+
 ```typescript
 // Implementar estados de loading consistentes
 const LoadingSpinner = () => (
@@ -330,6 +362,7 @@ const LoadingSpinner = () => (
 ```
 
 ### 2. Feedback Visual
+
 ```typescript
 // Implementar feedback visual para ações
 const [saved, setSaved] = useState(false)
@@ -350,40 +383,47 @@ const handleSave = async () => {
 ## 📈 Métricas de Sucesso
 
 ### Performance
+
 - **LCP**: < 2.5s
 - **FID**: < 100ms
 - **CLS**: < 0.1
 - **Bundle Size**: Redução de 30%
 
 ### Acessibilidade
+
 - **WCAG AA**: 100% compliance
 - **Lighthouse Accessibility**: Score > 95
 
 ### SEO
+
 - **Core Web Vitals**: Todos em verde
 - **Lighthouse SEO**: Score > 90
 
 ## 🚀 Plano de Implementação
 
 ### Fase 1 (Semana 1-2): Crítico
+
 1. ✅ Corrigir erros de sintaxe
 2. ✅ Resolver dependências faltantes
 3. 🔄 Implementar headers de segurança
 4. 🔄 Adicionar validação de dados
 
 ### Fase 2 (Semana 3-4): Performance
+
 1. Implementar lazy loading
 2. Otimizar imagens
 3. Code splitting
 4. Memoização de componentes
 
 ### Fase 3 (Semana 5-6): SEO e Acessibilidade
+
 1. Structured data completo
 2. Meta tags otimizadas
 3. ARIA labels
 4. Navegação por teclado
 
 ### Fase 4 (Semana 7-8): Qualidade e Monitoramento
+
 1. Testes unitários
 2. TypeScript strict mode
 3. Error tracking

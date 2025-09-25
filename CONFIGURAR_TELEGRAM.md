@@ -21,10 +21,12 @@
 
 1. **Envie "oi"** para seu bot
 2. **Abra no navegador:**
+
    ```
    https://api.telegram.org/botSEU_TOKEN/getUpdates
    ```
-   *(Substitua SEU_TOKEN)*
+
+   _(Substitua SEU_TOKEN)_
 
 3. **Procure:** `"chat":{"id":123456789`
 4. **COPIE O NÚMERO** (seu Chat ID)
@@ -54,6 +56,7 @@ TELEGRAM_CHAT_ID=cole_seu_chat_id_aqui
 ## ✅ PRONTO!
 
 **Agora você receberá:**
+
 - 📱 Notificação instantânea no celular
 - 👤 Dados completos do paciente
 - 🔗 Link direto para WhatsApp
@@ -64,11 +67,13 @@ TELEGRAM_CHAT_ID=cole_seu_chat_id_aqui
 ## 🆘 PROBLEMAS?
 
 **Não funciona?**
+
 - Verifique se enviou mensagem para o bot primeiro
 - Confirme TOKEN e CHAT_ID corretos
 - Reinicie o servidor após configurar
 
 **Dúvidas?**
+
 - Veja o arquivo `TELEGRAM_WEBHOOK.md` para detalhes completos
 
 ---

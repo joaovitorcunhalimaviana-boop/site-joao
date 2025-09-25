@@ -47,15 +47,12 @@ function useIntersectionObserver(
     const element = ref.current
     if (!element) return
 
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        setIsIntersecting(entry.isIntersecting)
-        if (entry.isIntersecting && !hasIntersected) {
-          setHasIntersected(true)
-        }
-      },
-      options
-    )
+    const observer = new IntersectionObserver(([entry]) => {
+      setIsIntersecting(entry.isIntersecting)
+      if (entry.isIntersecting && !hasIntersected) {
+        setHasIntersected(true)
+      }
+    }, options)
 
     observer.observe(element)
     return () => observer.disconnect()
@@ -91,7 +88,7 @@ export function OptimizedImage({
   threshold = 0.1,
   enableRetry = true,
   maxRetries = 3,
-  retryDelay = 1000
+  retryDelay = 1000,
 }: OptimizedImageProps) {
   const imgRef = useRef<HTMLDivElement>(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -100,13 +97,10 @@ export function OptimizedImage({
   const [retryCount, setRetryCount] = useState(0)
 
   // Intersection Observer para lazy loading
-  const { hasIntersected } = useIntersectionObserver(
-    imgRef,
-    {
-      rootMargin,
-      threshold
-    }
-  )
+  const { hasIntersected } = useIntersectionObserver(imgRef, {
+    rootMargin,
+    threshold,
+  })
 
   // Determinar se deve carregar a imagem
   const shouldLoad = priority || !enableIntersectionObserver || hasIntersected
@@ -139,7 +133,16 @@ export function OptimizedImage({
       setHasError(true)
       onError?.()
     }
-  }, [enableRetry, retryCount, maxRetries, retryDelay, fallbackSrc, currentSrc, src, onError])
+  }, [
+    enableRetry,
+    retryCount,
+    maxRetries,
+    retryDelay,
+    fallbackSrc,
+    currentSrc,
+    src,
+    onError,
+  ])
 
   // Reset quando src muda
   useEffect(() => {
@@ -157,9 +160,7 @@ export function OptimizedImage({
         loaderClassName
       )}
     >
-      {showLoader && (
-        <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
-      )}
+      {showLoader && <Loader2 className='w-6 h-6 animate-spin text-gray-400' />}
     </div>
   )
 
@@ -172,19 +173,19 @@ export function OptimizedImage({
       )}
     >
       <svg
-        className="w-8 h-8 mb-2"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
+        className='w-8 h-8 mb-2'
+        fill='none'
+        stroke='currentColor'
+        viewBox='0 0 24 24'
       >
         <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
+          strokeLinecap='round'
+          strokeLinejoin='round'
           strokeWidth={2}
-          d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+          d='M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z'
         />
       </svg>
-      <span className="text-xs text-center">Erro ao carregar imagem</span>
+      <span className='text-xs text-center'>Erro ao carregar imagem</span>
     </div>
   )
 
@@ -198,7 +199,7 @@ export function OptimizedImage({
         )}
         style={{
           width: fill ? '100%' : width,
-          height: fill ? '100%' : height
+          height: fill ? '100%' : height,
         }}
       >
         {renderError()}
@@ -215,7 +216,7 @@ export function OptimizedImage({
         className
       )}
     >
-      {(shouldLoad) && (
+      {shouldLoad && (
         <Image
           src={currentSrc}
           alt={alt}
@@ -224,7 +225,11 @@ export function OptimizedImage({
           fill={fill}
           priority={priority}
           quality={quality}
-          placeholder={placeholder === 'blur' || placeholder === 'empty' ? placeholder : 'empty'}
+          placeholder={
+            placeholder === 'blur' || placeholder === 'empty'
+              ? placeholder
+              : 'empty'
+          }
           blurDataURL={blurDataURL || defaultBlurDataURL}
           sizes={sizes}
           className={cn(
@@ -238,10 +243,10 @@ export function OptimizedImage({
           loading={loading}
         />
       )}
-      
+
       {/* Loading skeleton */}
       {isLoading && (
-        <div className="absolute inset-0 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 animate-pulse" />
+        <div className='absolute inset-0 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 animate-pulse' />
       )}
     </div>
   )
@@ -250,10 +255,10 @@ export function OptimizedImage({
 // Hook para otimização de imagens
 export function useImageOptimization() {
   const [loadedImages, setLoadedImages] = useState<Set<string>>(new Set())
-  
+
   const preloadImage = (src: string) => {
     if (loadedImages.has(src)) return Promise.resolve()
-    
+
     return new Promise<void>((resolve, reject) => {
       const img = new window.Image()
       img.onload = () => {
@@ -279,7 +284,7 @@ export function useImageOptimization() {
     preloadImage,
     preloadImages,
     isImageLoaded,
-    loadedImages: Array.from(loadedImages)
+    loadedImages: Array.from(loadedImages),
   }
 }
 
@@ -302,7 +307,7 @@ export function ImageGallery({
   className,
   imageClassName,
   columns = 3,
-  gap = 4
+  gap = 4,
 }: ImageGalleryProps) {
   const { preloadImages } = useImageOptimization()
 
@@ -313,12 +318,7 @@ export function ImageGallery({
 
   return (
     <div
-      className={cn(
-        'grid',
-        `grid-cols-${columns}`,
-        `gap-${gap}`,
-        className
-      )}
+      className={cn('grid', `grid-cols-${columns}`, `gap-${gap}`, className)}
     >
       {images.map((image, index) => (
         <OptimizedImage

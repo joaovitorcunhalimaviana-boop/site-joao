@@ -14,9 +14,7 @@ const nextConfig = {
   },
   // output: 'export', // Temporariamente desabilitado para resolver erro de Html
   trailingSlash: false,
-  experimental: {
-    serverComponentsExternalPackages: ['@prisma/client', 'prisma']
-  },
+
   images: {
     domains: ['localhost'],
     unoptimized: true
@@ -104,6 +102,18 @@ const nextConfig = {
             name: 'vendors',
             chunks: 'all',
           },
+          analytics: {
+            test: /[\\/]components[\\/]analytics[\\/]/,
+            name: 'analytics',
+            chunks: 'async',
+            priority: 10,
+          },
+          performance: {
+            test: /[\\/]components[\\/]performance[\\/]/,
+            name: 'performance',
+            chunks: 'async',
+            priority: 10,
+          },
         },
       }
     }
@@ -129,7 +139,8 @@ const nextConfig = {
   // Experimental features
   experimental: {
     optimizeCss: true,
-    optimizePackageImports: ['lucide-react', '@radix-ui/react-icons'],
+    optimizePackageImports: ['lucide-react', '@radix-ui/react-icons', '@heroicons/react'],
+    serverComponentsExternalPackages: ['@prisma/client', 'prisma'],
   },
   
   // Redirects for SEO

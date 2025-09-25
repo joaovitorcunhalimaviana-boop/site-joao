@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Header from '../../../components/ui/header'
 import BackgroundPattern from '../../../components/ui/background-pattern'
 import MedicalAreaMenu from '../../../components/ui/medical-area-menu'
+import { formatDateToBrazilian } from '@/lib/date-utils'
 import {
   ArrowLeftIcon,
   UserGroupIcon,
@@ -332,7 +333,7 @@ export default function AdministracaoPage() {
                       </p>
                       <p className='text-xs text-gray-500'>
                         Criado em:{' '}
-                        {new Date(user.createdAt).toLocaleDateString('pt-BR')}
+                        {formatDateToBrazilian(new Date(user.createdAt))}
                       </p>
                     </div>
 

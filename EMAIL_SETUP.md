@@ -39,6 +39,7 @@ DOCTOR_EMAIL=seu.email@gmail.com
 ```
 
 **⚠️ Importante:**
+
 - Use a **App Password** (16 caracteres), não sua senha normal
 - `EMAIL_USER` = seu email Gmail
 - `DOCTOR_EMAIL` = email onde quer receber as notificações (pode ser o mesmo)
@@ -89,11 +90,13 @@ Dr. João Vítor Viana - Coloproctologista
 ## 🔔 **Configurar Notificações no Celular**
 
 ### **iPhone:**
+
 1. App **Mail** > Configurações
 2. Ative **"Buscar Novos Dados"**
 3. Configure para **"Push"** ou **"A cada 15 min"**
 
 ### **Android:**
+
 1. App **Gmail** > Configurações
 2. Selecione sua conta
 3. Ative **"Notificações"**
@@ -112,6 +115,7 @@ Dr. João Vítor Viana - Coloproctologista
 ## 🔍 **Testando a Configuração**
 
 1. **Reinicie o servidor:**
+
    ```bash
    npm run dev
    ```
@@ -129,16 +133,19 @@ Dr. João Vítor Viana - Coloproctologista
 ## 🛠️ **Troubleshooting**
 
 ### **❌ "Erro ao enviar email"**
+
 - Verifique se a App Password está correta
 - Confirme se a verificação em 2 etapas está ativa
 - Teste com outro email Gmail
 
 ### **❌ "Email não chegou"**
+
 - Verifique a pasta **Spam/Lixo Eletrônico**
 - Confirme se `DOCTOR_EMAIL` está correto
 - Teste enviando para outro email
 
 ### **❌ "Credenciais inválidas"**
+
 - Use a **App Password**, não a senha normal
 - Remova espaços da App Password
 - Gere uma nova App Password

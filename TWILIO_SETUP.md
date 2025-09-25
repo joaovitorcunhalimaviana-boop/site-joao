@@ -54,14 +54,17 @@ DOCTOR_WHATSAPP=83991221599
 ## 🔍 Troubleshooting
 
 ### Erro: "Credenciais do Twilio não configuradas"
+
 - Verifique se todas as variáveis estão no `.env.local`
 - Reinicie o servidor após adicionar as variáveis
 
 ### Erro: "Número não autorizado"
+
 - Certifique-se de que seu número está no sandbox
 - Envie a mensagem de ativação novamente
 
 ### Mensagem não chega
+
 - Verifique se o número está correto (apenas números)
 - Confirme que o WhatsApp está conectado ao sandbox
 - Verifique os logs do Twilio no console
@@ -69,11 +72,13 @@ DOCTOR_WHATSAPP=83991221599
 ## 🎯 Próximos Passos
 
 ### Para Produção:
+
 1. **Upgrade da conta**: Adicione cartão de crédito
 2. **WhatsApp Business**: Configure número próprio
 3. **Templates**: Crie templates aprovados pelo WhatsApp
 
 ### Alternativas:
+
 - **WhatsApp Business API**: Para grandes volumes
 - **Baileys**: Biblioteca não oficial (mais complexa)
 - **Zapier/Make**: Automação no-code
@@ -81,6 +86,7 @@ DOCTOR_WHATSAPP=83991221599
 ## 📞 Suporte
 
 Se precisar de ajuda:
+
 1. Documentação oficial: [twilio.com/docs/whatsapp](https://www.twilio.com/docs/whatsapp)
 2. Console do Twilio: Logs detalhados de todas as mensagens
 3. Suporte Twilio: Chat disponível no console

@@ -11,6 +11,7 @@ import {
   checkPendingDailyAgendas,
   scheduleMultipleDailyAgendas,
 } from '../../lib/daily-agenda-scheduler'
+import { formatDateTimeToBrazilian } from '@/lib/date-utils'
 
 interface DailyAgendaStats {
   totalScheduled: number
@@ -104,7 +105,7 @@ const DailyAgendaAdmin: React.FC = () => {
         alert(
           `✅ Agenda de teste enviada com sucesso!\n\nData: ${testDate}\nPacientes: ${result.totalPatients}\n\nVerifique o Telegram para ver a mensagem.`
         )
-        setLastAgendaSent(new Date().toLocaleString('pt-BR'))
+        setLastAgendaSent(formatDateTimeToBrazilian(new Date()))
         await loadStats()
       } else {
         alert(`❌ Erro ao enviar agenda de teste: ${result.error}`)

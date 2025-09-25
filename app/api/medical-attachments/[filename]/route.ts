@@ -11,7 +11,7 @@ export async function GET(
 ) {
   try {
     const { filename } = await params
-    
+
     if (!filename) {
       return NextResponse.json(
         { error: 'Nome do arquivo é obrigatório' },
@@ -20,7 +20,11 @@ export async function GET(
     }
 
     // Validar nome do arquivo para evitar path traversal
-    if (filename.includes('..') || filename.includes('/') || filename.includes('\\')) {
+    if (
+      filename.includes('..') ||
+      filename.includes('/') ||
+      filename.includes('\\')
+    ) {
       return NextResponse.json(
         { error: 'Nome de arquivo inválido' },
         { status: 400 }
@@ -28,7 +32,7 @@ export async function GET(
     }
 
     const filePath = join(ATTACHMENTS_DIR, filename)
-    
+
     if (!existsSync(filePath)) {
       return NextResponse.json(
         { error: 'Arquivo não encontrado' },
@@ -37,11 +41,11 @@ export async function GET(
     }
 
     const fileBuffer = await readFile(filePath)
-    
+
     // Determinar o tipo de conteúdo baseado na extensão
     const extension = filename.split('.').pop()?.toLowerCase()
     let contentType = 'application/octet-stream'
-    
+
     switch (extension) {
       case 'jpg':
       case 'jpeg':
@@ -60,7 +64,8 @@ export async function GET(
         contentType = 'application/msword'
         break
       case 'docx':
-        contentType = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+        contentType =
+          'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
         break
       case 'txt':
         contentType = 'text/plain'
@@ -71,8 +76,8 @@ export async function GET(
       headers: {
         'Content-Type': contentType,
         'Content-Disposition': `inline; filename="${filename}"`,
-        'Cache-Control': 'private, max-age=3600'
-      }
+        'Cache-Control': 'private, max-age=3600',
+      },
     })
   } catch (error) {
     console.error('Erro ao buscar anexo médico:', error)

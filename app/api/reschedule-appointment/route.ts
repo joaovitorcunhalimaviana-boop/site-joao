@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { formatDateTimeToBrazilian } from '@/lib/date-utils'
 
 export async function POST(request: NextRequest) {
   try {
@@ -261,7 +262,7 @@ function generateDoctorRescheduleNotification(data: {
   const baseInfo =
     `👤 *Paciente:* ${data.fullName}\n` +
     `📱 *WhatsApp:* ${data.whatsapp}\n` +
-    `🕐 *Solicitado em:* ${new Date().toLocaleString('pt-BR')}\n\n`
+    `🕐 *Solicitado em:* ${formatDateTimeToBrazilian(new Date())}\n\n`
 
   switch (data.action) {
     case 'request':

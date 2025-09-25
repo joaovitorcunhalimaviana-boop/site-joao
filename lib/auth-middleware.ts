@@ -22,7 +22,7 @@ const PUBLIC_ROUTES = [
   '/api/auth/forgot-password',
   '/api/auth/reset-password',
   '/api/health',
-  '/api/public'
+  '/api/public',
 ]
 
 // Rotas que precisam de permissões específicas
@@ -35,14 +35,14 @@ const ROLE_PERMISSIONS = {
     '/api/medical-records',
     '/api/medical-attachments',
     '/api/prescriptions',
-    '/api/reports'
+    '/api/reports',
   ],
   SECRETARY: [
     '/api/patients',
     '/api/appointments',
     '/api/agenda',
-    '/api/reports/basic'
-  ]
+    '/api/reports/basic',
+  ],
 }
 
 // Rate limiting por usuário
@@ -76,7 +76,7 @@ export class AuthMiddleware {
         response: NextResponse.json(
           { error: 'Token de acesso requerido' },
           { status: 401 }
-        )
+        ),
       }
     }
 
@@ -102,8 +102,8 @@ export class AuthMiddleware {
           name: true,
           role: true,
           isActive: true,
-          lastLogin: true
-        }
+          lastLogin: true,
+        },
       })
 
       if (!user || !user.isActive) {
@@ -113,7 +113,7 @@ export class AuthMiddleware {
           response: NextResponse.json(
             { error: 'Acesso negado' },
             { status: 403 }
-          )
+          ),
         }
       }
 
@@ -124,12 +124,12 @@ export class AuthMiddleware {
           success: false,
           error: 'Rate limit excedido',
           response: NextResponse.json(
-            { 
+            {
               error: 'Muitas requisições. Tente novamente em alguns minutos.',
-              retryAfter: rateLimitResult.retryAfter
+              retryAfter: rateLimitResult.retryAfter,
             },
             { status: 429 }
-          )
+          ),
         }
       }
 
@@ -144,7 +144,7 @@ export class AuthMiddleware {
           details: JSON.stringify({ path: pathname }),
           severity: 'HIGH',
           ipAddress: this.getClientIP(request),
-          userAgent: request.headers.get('user-agent') || undefined
+          userAgent: request.headers.get('user-agent') || undefined,
         })
 
         return {
@@ -153,7 +153,7 @@ export class AuthMiddleware {
           response: NextResponse.json(
             { error: 'Acesso negado para este recurso' },
             { status: 403 }
-          )
+          ),
         }
       }
 
@@ -166,7 +166,7 @@ export class AuthMiddleware {
           details: JSON.stringify({ path: pathname, method: request.method }),
           severity: 'LOW',
           ipAddress: this.getClientIP(request),
-          userAgent: request.headers.get('user-agent') || undefined
+          userAgent: request.headers.get('user-agent') || undefined,
         })
       }
 
@@ -177,19 +177,19 @@ export class AuthMiddleware {
           email: user.email,
           name: user.name,
           role: user.role,
-          isActive: user.isActive
-        }
+          isActive: user.isActive,
+        },
       }
     } catch (error) {
       console.error('Erro na autenticação:', error)
-      
+
       return {
         success: false,
         error: 'Token inválido',
         response: NextResponse.json(
           { error: 'Token de acesso inválido' },
           { status: 401 }
-        )
+        ),
       }
     }
   }
@@ -197,7 +197,10 @@ export class AuthMiddleware {
   /**
    * Verificar rate limiting por usuário
    */
-  private static checkRateLimit(userId: string, userRole?: string): {
+  private static checkRateLimit(
+    userId: string,
+    userRole?: string
+  ): {
     allowed: boolean
     retryAfter?: number
   } {
@@ -210,12 +213,12 @@ export class AuthMiddleware {
    */
   private static checkPermissions(role: string, pathname: string): boolean {
     const permissions = ROLE_PERMISSIONS[role as keyof typeof ROLE_PERMISSIONS]
-    
+
     if (!permissions) return false
-    
+
     // Admin tem acesso total
     if (permissions.includes('*')) return true
-    
+
     // Verificar se o caminho está nas permissões
     return permissions.some(permission => pathname.startsWith(permission))
   }
@@ -231,9 +234,9 @@ export class AuthMiddleware {
       '/api/prescriptions',
       '/api/consultations',
       '/api/reports',
-      '/api/admin'
+      '/api/admin',
     ]
-    
+
     return sensitiveRoutes.some(route => pathname.startsWith(route))
   }
 
@@ -243,34 +246,36 @@ export class AuthMiddleware {
   private static getClientIP(request: NextRequest): string {
     const forwarded = request.headers.get('x-forwarded-for')
     const realIP = request.headers.get('x-real-ip')
-    
+
     if (forwarded) {
       return forwarded.split(',')[0].trim()
     }
-    
+
     if (realIP) {
       return realIP
     }
-    
+
     return 'unknown'
   }
 
   /**
    * Middleware para Next.js API Routes
    */
-  static withAuth(handler: (req: NextRequest, context: AuthContext) => Promise<NextResponse>) {
+  static withAuth(
+    handler: (req: NextRequest, context: AuthContext) => Promise<NextResponse>
+  ) {
     return async (request: NextRequest) => {
       const authResult = await this.authenticate(request)
-      
+
       if (!authResult.success) {
         return authResult.response!
       }
-      
+
       // Criar contexto de autenticação
       const context: AuthContext = {
-        user: authResult.user!
+        user: authResult.user!,
       }
-      
+
       return handler(request, context)
     }
   }
@@ -279,18 +284,21 @@ export class AuthMiddleware {
    * Verificar se o usuário tem uma permissão específica
    */
   static hasPermission(userRole: string, resource: string): boolean {
-    const permissions = ROLE_PERMISSIONS[userRole as keyof typeof ROLE_PERMISSIONS]
-    
+    const permissions =
+      ROLE_PERMISSIONS[userRole as keyof typeof ROLE_PERMISSIONS]
+
     if (!permissions) return false
     if (permissions.includes('*')) return true
-    
+
     return permissions.includes(resource)
   }
 
   /**
    * Middleware para verificar se é admin
    */
-  static requireAdmin(handler: (req: NextRequest, context: AuthContext) => Promise<NextResponse>) {
+  static requireAdmin(
+    handler: (req: NextRequest, context: AuthContext) => Promise<NextResponse>
+  ) {
     return this.withAuth(async (request, context) => {
       if (context.user.role !== 'ADMIN') {
         return NextResponse.json(
@@ -298,7 +306,7 @@ export class AuthMiddleware {
           { status: 403 }
         )
       }
-      
+
       return handler(request, context)
     })
   }
@@ -306,7 +314,9 @@ export class AuthMiddleware {
   /**
    * Middleware para verificar se é médico ou admin
    */
-  static requireDoctor(handler: (req: NextRequest, context: AuthContext) => Promise<NextResponse>) {
+  static requireDoctor(
+    handler: (req: NextRequest, context: AuthContext) => Promise<NextResponse>
+  ) {
     return this.withAuth(async (request, context) => {
       if (!['DOCTOR', 'ADMIN'].includes(context.user.role)) {
         return NextResponse.json(
@@ -314,7 +324,7 @@ export class AuthMiddleware {
           { status: 403 }
         )
       }
-      
+
       return handler(request, context)
     })
   }
@@ -324,7 +334,7 @@ export class AuthMiddleware {
    */
   static cleanupRateLimits() {
     const now = Date.now()
-    
+
     for (const [userId, limit] of userRateLimit.entries()) {
       if (now > limit.resetTime) {
         userRateLimit.delete(userId)
@@ -334,20 +344,29 @@ export class AuthMiddleware {
 }
 
 // Limpar rate limits a cada 5 minutos
-setInterval(() => {
-  AuthMiddleware.cleanupRateLimits()
-}, 5 * 60 * 1000)
+setInterval(
+  () => {
+    AuthMiddleware.cleanupRateLimits()
+  },
+  5 * 60 * 1000
+)
 
 // Exportações nomeadas para compatibilidade
-export const withAuth = (handler: (req: NextRequest, context: AuthContext) => Promise<NextResponse>) => {
+export const withAuth = (
+  handler: (req: NextRequest, context: AuthContext) => Promise<NextResponse>
+) => {
   return AuthMiddleware.withAuth(handler)
 }
 
-export const requireAdmin = (handler: (req: NextRequest, context: AuthContext) => Promise<NextResponse>) => {
+export const requireAdmin = (
+  handler: (req: NextRequest, context: AuthContext) => Promise<NextResponse>
+) => {
   return AuthMiddleware.requireAdmin(handler)
 }
 
-export const requireDoctor = (handler: (req: NextRequest, context: AuthContext) => Promise<NextResponse>) => {
+export const requireDoctor = (
+  handler: (req: NextRequest, context: AuthContext) => Promise<NextResponse>
+) => {
   return AuthMiddleware.requireDoctor(handler)
 }
 

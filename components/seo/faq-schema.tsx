@@ -106,11 +106,11 @@ export default function FAQSchema() {
 
   return (
     <Script
-      id="faq-schema"
-      type="application/ld+json"
-      strategy="afterInteractive"
+      id='faq-schema'
+      type='application/ld+json'
+      strategy='afterInteractive'
       dangerouslySetInnerHTML={{
-        __html: JSON.stringify(faqSchema)
+        __html: JSON.stringify(faqSchema),
       }}
     />
   )

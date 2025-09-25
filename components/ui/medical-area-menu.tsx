@@ -3,8 +3,8 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createPortal } from 'react-dom'
-import { 
-  Bars3Icon, 
+import {
+  Bars3Icon,
   ChevronDownIcon,
   ArrowRightOnRectangleIcon,
   ChartBarIcon,
@@ -12,7 +12,7 @@ import {
   CalculatorIcon,
   EnvelopeIcon,
   CogIcon,
-  ScissorsIcon
+  ScissorsIcon,
 } from '@heroicons/react/24/outline'
 
 interface Doctor {
@@ -77,112 +77,117 @@ export default function MedicalAreaMenu({ currentPage }: MedicalAreaMenuProps) {
     {
       href: '/area-medica',
       label: 'Dashboard',
-      icon: ChartBarIcon
+      icon: ChartBarIcon,
     },
     {
       href: '/area-medica/cirurgias',
       label: 'Controle de Cirurgias',
-      icon: ScissorsIcon
+      icon: ScissorsIcon,
     },
     {
       href: '/area-medica/relatorios',
       label: 'Relatórios de Atendimentos',
-      icon: DocumentTextIcon
+      icon: DocumentTextIcon,
     },
     {
       href: '/area-medica/relatorios-avancados',
       label: 'Relatórios Avançados',
-      icon: DocumentTextIcon
+      icon: DocumentTextIcon,
     },
     {
       href: '/area-medica/calculadoras',
       label: 'Calculadoras Médicas',
-      icon: CalculatorIcon
+      icon: CalculatorIcon,
     },
     {
       href: '/area-medica/emails',
       label: 'Sistema de E-mails',
-      icon: EnvelopeIcon
+      icon: EnvelopeIcon,
     },
     {
       href: '/area-medica/newsletter',
       label: 'Newsletter',
-      icon: EnvelopeIcon
+      icon: EnvelopeIcon,
     },
     {
       href: '/area-medica/administracao',
       label: 'Administração',
-      icon: CogIcon
-    }
+      icon: CogIcon,
+    },
   ]
 
   return (
-    <div className="flex items-center gap-3 relative">
+    <div className='flex items-center gap-3 relative'>
       {/* Menu Dropdown */}
-      <div className="relative dropdown-container">
+      <div className='relative dropdown-container'>
         <button
-          onClick={(e) => {
+          onClick={e => {
             console.log('Menu button clicked!')
             const rect = e.currentTarget.getBoundingClientRect()
             setButtonRect(rect)
             setShowDropdown(!showDropdown)
           }}
-          className="flex items-center px-4 py-2 text-sm text-gray-300 hover:text-blue-400 hover:bg-gray-900/50 rounded-lg transition-all duration-200 border border-gray-700 backdrop-blur-sm"
+          className='flex items-center px-4 py-2 text-sm text-gray-300 hover:text-blue-400 hover:bg-gray-900/50 rounded-lg transition-all duration-200 border border-gray-700 backdrop-blur-sm'
         >
-          <Bars3Icon className="h-4 w-4 mr-2" />
+          <Bars3Icon className='h-4 w-4 mr-2' />
           Menu
-          <ChevronDownIcon className={`h-4 w-4 ml-2 transition-transform duration-200 ${showDropdown ? 'rotate-180' : ''}`} />
+          <ChevronDownIcon
+            className={`h-4 w-4 ml-2 transition-transform duration-200 ${showDropdown ? 'rotate-180' : ''}`}
+          />
         </button>
-        
-        {showDropdown && buttonRect && typeof window !== 'undefined' && createPortal(
-          <div 
-            className="bg-gray-900/95 rounded-lg shadow-xl border border-gray-700 py-2"
-            style={{
-              position: 'fixed',
-              top: buttonRect.bottom + 8,
-              left: buttonRect.right - 256, // 256px = w-64
-              width: '16rem', // w-64
-              zIndex: 999999999
-            }}
-          >
-            {menuItems.map((item, index) => {
-              const Icon = item.icon
-              
-              return (
-                <button
-                  key={index}
-                  className="flex items-center w-full px-4 py-3 text-sm transition-all duration-200 text-left text-gray-300 hover:text-blue-400 hover:bg-gray-800/50"
-                  onClick={() => handleNavigation(item.href)}
-                >
-                  <Icon className="h-4 w-4 mr-3" />
-                  {item.label}
-                </button>
-              )
-            })}
-            
-            <div className="border-t border-gray-700 my-2"></div>
-            
-            <button
-              onClick={() => {
-                handleLogout()
-                setShowDropdown(false)
+
+        {showDropdown &&
+          buttonRect &&
+          typeof window !== 'undefined' &&
+          createPortal(
+            <div
+              className='bg-gray-900/95 rounded-lg shadow-xl border border-gray-700 py-2'
+              style={{
+                position: 'fixed',
+                top: buttonRect.bottom + 8,
+                left: buttonRect.right - 256, // 256px = w-64
+                width: '16rem', // w-64
+                zIndex: 999999999,
               }}
-              className="flex items-center w-full px-4 py-3 text-sm text-gray-300 hover:text-red-400 hover:bg-gray-800/50 transition-all duration-200"
             >
-              <ArrowRightOnRectangleIcon className="h-4 w-4 mr-3" />
-              Sair
-            </button>
-          </div>,
-          document.body
-        )}
+              {menuItems.map((item, index) => {
+                const Icon = item.icon
+
+                return (
+                  <button
+                    key={index}
+                    className='flex items-center w-full px-4 py-3 text-sm transition-all duration-200 text-left text-gray-300 hover:text-blue-400 hover:bg-gray-800/50'
+                    onClick={() => handleNavigation(item.href)}
+                  >
+                    <Icon className='h-4 w-4 mr-3' />
+                    {item.label}
+                  </button>
+                )
+              })}
+
+              <div className='border-t border-gray-700 my-2'></div>
+
+              <button
+                onClick={() => {
+                  handleLogout()
+                  setShowDropdown(false)
+                }}
+                className='flex items-center w-full px-4 py-3 text-sm text-gray-300 hover:text-red-400 hover:bg-gray-800/50 transition-all duration-200'
+              >
+                <ArrowRightOnRectangleIcon className='h-4 w-4 mr-3' />
+                Sair
+              </button>
+            </div>,
+            document.body
+          )}
       </div>
 
       {/* Doctor Info */}
       {doctor && (
-        <div className="flex items-center gap-2 text-sm text-gray-300">
+        <div className='flex items-center gap-2 text-sm text-gray-300'>
           <span>Dr(a). {doctor.name}</span>
-          <span className="text-gray-500">|</span>
-          <span className="text-gray-400">{doctor.specialty}</span>
+          <span className='text-gray-500'>|</span>
+          <span className='text-gray-400'>{doctor.specialty}</span>
         </div>
       )}
     </div>

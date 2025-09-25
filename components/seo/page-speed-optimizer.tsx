@@ -18,7 +18,7 @@ export default function PageSpeedOptimizer({
 }: PageSpeedOptimizerProps) {
   useEffect(() => {
     // Preload de imagens críticas
-    preloadImages.forEach((src) => {
+    preloadImages.forEach(src => {
       const link = document.createElement('link')
       link.rel = 'preload'
       link.as = 'image'
@@ -28,8 +28,8 @@ export default function PageSpeedOptimizer({
 
     // Lazy loading para imagens não críticas
     const images = document.querySelectorAll('img[data-src]')
-    const imageObserver = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
+    const imageObserver = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
         if (entry.isIntersecting) {
           const img = entry.target as HTMLImageElement
           img.src = img.dataset['src'] || ''
@@ -39,11 +39,11 @@ export default function PageSpeedOptimizer({
       })
     })
 
-    images.forEach((img) => imageObserver.observe(img))
+    images.forEach(img => imageObserver.observe(img))
 
     // Cleanup
     return () => {
-      images.forEach((img) => imageObserver.unobserve(img))
+      images.forEach(img => imageObserver.unobserve(img))
     }
   }, [preloadImages])
 
@@ -52,10 +52,14 @@ export default function PageSpeedOptimizer({
       {/* Resource Hints */}
       {enableResourceHints && (
         <>
-          <link rel="preconnect" href="https://fonts.googleapis.com" />
-          <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-          <link rel="dns-prefetch" href="https://www.google-analytics.com" />
-          <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
+          <link rel='preconnect' href='https://fonts.googleapis.com' />
+          <link
+            rel='preconnect'
+            href='https://fonts.gstatic.com'
+            crossOrigin='anonymous'
+          />
+          <link rel='dns-prefetch' href='https://www.google-analytics.com' />
+          <link rel='dns-prefetch' href='https://www.googletagmanager.com' />
         </>
       )}
 
@@ -63,11 +67,11 @@ export default function PageSpeedOptimizer({
       {preloadFonts.map((font, index) => (
         <link
           key={index}
-          rel="preload"
+          rel='preload'
           href={font}
-          as="font"
-          type="font/woff2"
-          crossOrigin="anonymous"
+          as='font'
+          type='font/woff2'
+          crossOrigin='anonymous'
         />
       ))}
 
@@ -81,13 +85,13 @@ export default function PageSpeedOptimizer({
       )}
 
       {/* Performance Optimization Meta Tags */}
-      <meta httpEquiv="x-dns-prefetch-control" content="on" />
-      <meta name="format-detection" content="telephone=no" />
-      
+      <meta httpEquiv='x-dns-prefetch-control' content='on' />
+      <meta name='format-detection' content='telephone=no' />
+
       {/* Viewport Optimization */}
       <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1, viewport-fit=cover"
+        name='viewport'
+        content='width=device-width, initial-scale=1, viewport-fit=cover'
       />
     </Head>
   )
@@ -104,7 +108,8 @@ export function usePageSpeedOptimization() {
         const link = document.createElement('link')
         link.rel = 'preload'
         link.as = 'style'
-        link.href = 'data:text/css;base64,' + btoa(criticalCSS.textContent || '')
+        link.href =
+          'data:text/css;base64,' + btoa(criticalCSS.textContent || '')
         document.head.appendChild(link)
       }
     }
@@ -112,7 +117,7 @@ export function usePageSpeedOptimization() {
     // Otimização de imagens
     const optimizeImages = () => {
       const images = document.querySelectorAll('img')
-      images.forEach((img) => {
+      images.forEach(img => {
         // Adicionar loading lazy para imagens não críticas
         if (!img.hasAttribute('loading') && !img.closest('[data-critical]')) {
           img.loading = 'lazy'
@@ -134,8 +139,10 @@ export function usePageSpeedOptimization() {
     // Otimização de fontes
     const optimizeFonts = () => {
       // Preload de fontes críticas
-      const fontLinks = document.querySelectorAll('link[href*="fonts.googleapis.com"]')
-      fontLinks.forEach((link) => {
+      const fontLinks = document.querySelectorAll(
+        'link[href*="fonts.googleapis.com"]'
+      )
+      fontLinks.forEach(link => {
         const preloadLink = document.createElement('link')
         preloadLink.rel = 'preload'
         preloadLink.as = 'style'
@@ -151,7 +158,7 @@ export function usePageSpeedOptimization() {
 
     // Service Worker para cache
     if ('serviceWorker' in navigator && process.env.NODE_ENV === 'production') {
-      navigator.serviceWorker.register('/sw.js').catch((error) => {
+      navigator.serviceWorker.register('/sw.js').catch(error => {
         console.log('Service Worker registration failed:', error)
       })
     }
@@ -161,16 +168,16 @@ export function usePageSpeedOptimization() {
   const measureWebVitals = () => {
     if (typeof window !== 'undefined') {
       // Largest Contentful Paint (LCP)
-      new PerformanceObserver((entryList) => {
+      new PerformanceObserver(entryList => {
         const entries = entryList.getEntries()
         const lastEntry = entries[entries.length - 1]
         console.log('LCP:', lastEntry.startTime)
       }).observe({ entryTypes: ['largest-contentful-paint'] })
 
       // First Input Delay (FID)
-      new PerformanceObserver((entryList) => {
+      new PerformanceObserver(entryList => {
         const entries = entryList.getEntries()
-        entries.forEach((entry) => {
+        entries.forEach(entry => {
           const fidEntry = entry as any
           console.log('FID:', fidEntry.processingStart - fidEntry.startTime)
         })
@@ -178,9 +185,9 @@ export function usePageSpeedOptimization() {
 
       // Cumulative Layout Shift (CLS)
       let clsValue = 0
-      new PerformanceObserver((entryList) => {
+      new PerformanceObserver(entryList => {
         const entries = entryList.getEntries()
-        entries.forEach((entry) => {
+        entries.forEach(entry => {
           const clsEntry = entry as any
           if (!clsEntry.hadRecentInput) {
             clsValue += clsEntry.value
@@ -218,13 +225,13 @@ interface LazyImageProps {
   height?: number
 }
 
-export function LazyImage({ 
-  src, 
-  alt, 
-  className, 
-  critical = false, 
-  width, 
-  height 
+export function LazyImage({
+  src,
+  alt,
+  className,
+  critical = false,
+  width,
+  height,
 }: LazyImageProps) {
   return (
     <img
@@ -233,7 +240,7 @@ export function LazyImage({
       alt={alt}
       className={`${className} ${critical ? '' : 'lazy'}`}
       loading={critical ? 'eager' : 'lazy'}
-      decoding="async"
+      decoding='async'
       width={width}
       height={height}
     />

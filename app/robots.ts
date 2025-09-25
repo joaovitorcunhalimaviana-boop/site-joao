@@ -1,8 +1,9 @@
 import { MetadataRoute } from 'next'
 
 export default function robots(): MetadataRoute.Robots {
-  const baseUrl = process.env['NEXT_PUBLIC_SITE_URL'] || 'https://drjoaovitorviana.com.br'
-  
+  const baseUrl =
+    process.env['NEXT_PUBLIC_SITE_URL'] || 'https://drjoaovitorviana.com.br'
+
   return {
     rules: [
       {
@@ -10,7 +11,7 @@ export default function robots(): MetadataRoute.Robots {
         allow: '/',
         disallow: [
           '/area-medica/',
-          '/area-secretaria/', 
+          '/area-secretaria/',
           '/admin/',
           '/api/',
           '/private/',
@@ -35,22 +36,12 @@ export default function robots(): MetadataRoute.Robots {
           '/teleconsulta',
           '/avaliacoes',
         ],
-        disallow: [
-          '/area-medica/',
-          '/area-secretaria/',
-          '/admin/',
-          '/api/',
-        ],
+        disallow: ['/area-medica/', '/area-secretaria/', '/admin/', '/api/'],
       },
       {
         userAgent: 'Bingbot',
         allow: '/',
-        disallow: [
-          '/area-medica/',
-          '/area-secretaria/',
-          '/admin/',
-          '/api/',
-        ],
+        disallow: ['/area-medica/', '/area-secretaria/', '/admin/', '/api/'],
       },
     ],
     sitemap: `${baseUrl}/sitemap.xml`,

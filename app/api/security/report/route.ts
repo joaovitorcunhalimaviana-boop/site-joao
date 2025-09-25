@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
 
     const token = authHeader.replace('Bearer ', '')
     const session = await validateSession(token)
-    
+
     if (!session) {
       return NextResponse.json(
         { error: 'Acesso negado. Token inválido.' },
@@ -26,24 +26,32 @@ export async function GET(request: NextRequest) {
 
     // Obter relatório de segurança
     const report = getSecurityReport()
-    
+
     // Adicionar informações adicionais
     const enhancedReport = {
       ...report,
       metadata: {
         generatedAt: new Date().toISOString(),
         generatedBy: 'Sistema',
-        version: '1.0'
+        version: '1.0',
       },
       summary: {
-        criticalEvents: report.recentEvents.filter(e => e.severity === 'CRITICAL').length,
-        highRiskEvents: report.recentEvents.filter(e => e.severity === 'HIGH').length,
-        mediumRiskEvents: report.recentEvents.filter(e => e.severity === 'MEDIUM').length,
-        lowRiskEvents: report.recentEvents.filter(e => e.severity === 'LOW').length,
-        mostCommonThreat: Object.entries(report.eventsByType)
-          .sort(([,a], [,b]) => b - a)[0]?.[0] || 'Nenhum',
-        riskLevel: calculateRiskLevel(report)
-      }
+        criticalEvents: report.recentEvents.filter(
+          e => e.severity === 'CRITICAL'
+        ).length,
+        highRiskEvents: report.recentEvents.filter(e => e.severity === 'HIGH')
+          .length,
+        mediumRiskEvents: report.recentEvents.filter(
+          e => e.severity === 'MEDIUM'
+        ).length,
+        lowRiskEvents: report.recentEvents.filter(e => e.severity === 'LOW')
+          .length,
+        mostCommonThreat:
+          Object.entries(report.eventsByType).sort(
+            ([, a], [, b]) => b - a
+          )[0]?.[0] || 'Nenhum',
+        riskLevel: calculateRiskLevel(report),
+      },
     }
 
     return NextResponse.json(enhancedReport)
@@ -57,15 +65,19 @@ export async function GET(request: NextRequest) {
 }
 
 // Função para calcular nível de risco geral
-function calculateRiskLevel(report: any): 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' {
-  const recentCritical = report.recentEvents.filter((e: any) => 
-    e.severity === 'CRITICAL' && 
-    new Date(e.timestamp) > new Date(Date.now() - 24 * 60 * 60 * 1000) // últimas 24h
+function calculateRiskLevel(
+  report: any
+): 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' {
+  const recentCritical = report.recentEvents.filter(
+    (e: any) =>
+      e.severity === 'CRITICAL' &&
+      new Date(e.timestamp) > new Date(Date.now() - 24 * 60 * 60 * 1000) // últimas 24h
   ).length
-  
-  const recentHigh = report.recentEvents.filter((e: any) => 
-    e.severity === 'HIGH' && 
-    new Date(e.timestamp) > new Date(Date.now() - 24 * 60 * 60 * 1000)
+
+  const recentHigh = report.recentEvents.filter(
+    (e: any) =>
+      e.severity === 'HIGH' &&
+      new Date(e.timestamp) > new Date(Date.now() - 24 * 60 * 60 * 1000)
   ).length
 
   if (recentCritical > 0) return 'CRITICAL'
@@ -87,7 +99,7 @@ export async function POST(request: NextRequest) {
 
     const token = authHeader.replace('Bearer ', '')
     const session = await validateSession(token)
-    
+
     if (!session) {
       return NextResponse.json(
         { error: 'Acesso negado. Token inválido.' },
@@ -96,21 +108,18 @@ export async function POST(request: NextRequest) {
     }
 
     const { action } = await request.json()
-    
+
     if (action === 'clear_logs') {
       // Em uma implementação real, limparia os logs do banco de dados
       return NextResponse.json({
         success: true,
         message: 'Logs de segurança limpos com sucesso',
         clearedAt: new Date().toISOString(),
-        clearedBy: 'Sistema'
+        clearedBy: 'Sistema',
       })
     }
 
-    return NextResponse.json(
-      { error: 'Ação não reconhecida' },
-      { status: 400 }
-    )
+    return NextResponse.json({ error: 'Ação não reconhecida' }, { status: 400 })
   } catch (error) {
     console.error('Erro ao processar ação de segurança:', error)
     return NextResponse.json(
