@@ -9,7 +9,9 @@ Timestamp: 2024-01-20 - Deploy forçado para ativar as variáveis de ambiente.
 - ✅ Variáveis configuradas
 - ✅ SQLite configurado
 - ✅ Railway.json otimizado
-- 🚀 Forçando redeploy...
+- ✅ Node.js 20+ configurado
+- ✅ Nixpacks.toml criado
+- 🚀 Forçando redeploy com correções...
 
 ## Próximos passos:
 
@@ -17,4 +19,12 @@ Timestamp: 2024-01-20 - Deploy forçado para ativar as variáveis de ambiente.
 2. Verificar logs de deploy
 3. Testar aplicação online
 4. Confirmar funcionamento do sistema médico
-Deploy timestamp: 09/25/2025 15:45:28
+
+## Correções aplicadas:
+
+- Node.js atualizado para versão 20.11.0
+- Cache do npm otimizado
+- Configuração de restart policy adicionada
+- Nixpacks configurado para usar Node.js 20+
+
+Deploy timestamp: 01/25/2025 18:48:1415:45:28
