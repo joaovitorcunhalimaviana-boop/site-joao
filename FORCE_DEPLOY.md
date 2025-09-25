@@ -1,30 +1,23 @@
-# Force Deploy - Railway
+# Force Deploy
 
-Este arquivo foi criado para forçar um novo deploy no Railway.
+Este arquivo é usado para forçar um novo deploy no Railway.
 
-Timestamp: 2024-01-20 - Deploy forçado para ativar as variáveis de ambiente.
+Deploy timestamp: 01/26/2025 17:31:25
 
-## Status:
+## Correções aplicadas para Node.js
 
-- ✅ Variáveis configuradas
-- ✅ SQLite configurado
-- ✅ Railway.json otimizado
-- ✅ Node.js 20+ configurado
-- ✅ Nixpacks.toml criado
-- 🚀 Forçando redeploy com correções...
+- Configurado Node.js 20+ no railway.json
+- ~~Criado nixpacks.toml para especificar versões~~ (REMOVIDO - causava erro de build)
+- Otimizado cache do npm
+- Adicionado política de restart
+- ~~Configuração Nixpacks para compatibilidade~~ (REMOVIDO)
 
-## Próximos passos:
+Deploy timestamp: 01/26/2025 17:33:17
 
-1. Aguardar build completar
-2. Verificar logs de deploy
-3. Testar aplicação online
-4. Confirmar funcionamento do sistema médico
+## Correção do build Docker
 
-## Correções aplicadas:
+- Removido nixpacks.toml que estava causando erro no build
+- Mantido apenas railway.json com configuração básica
+- Railway usará detecção automática do Node.js
 
-- Node.js atualizado para versão 20.11.0
-- Cache do npm otimizado
-- Configuração de restart policy adicionada
-- Nixpacks configurado para usar Node.js 20+
-
-Deploy timestamp: 01/25/2025 18:48:1415:45:28
+Deploy timestamp: 01/26/2025 17:36:42
