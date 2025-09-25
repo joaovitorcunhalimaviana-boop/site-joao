@@ -39,10 +39,10 @@ Deploy timestamp: 01/26/2025 17:42:30
 
 # Correções Aplicadas para Deploy Railway
 
-## Problema: Erro EBUSY no cache Docker
-- **Erro**: `rm: cannot remove 'node_modules/.cache': Device or resource busy`
-- **Solução**: Adicionado `|| true` ao comando de remoção do cache para ignorar erros de EBUSY
-- **Comando atualizado**: `rm -rf node_modules/.cache || true && npm ci --legacy-peer-deps && npx prisma generate && npm run build`
+## Problema: Cache Docker persistente causando falha no npm ci
+- **Erro**: `npm error EBUSY: resource busy or locked, rmdir '/app/node_modules/.cache'`
+- **Solução**: Usar diretório de cache alternativo em `/tmp/.npm` em vez de tentar remover cache existente
+- **Comando atualizado**: `npm ci --legacy-peer-deps --cache /tmp/.npm && npx prisma generate && npm run build`
 
 ## Configurações Aplicadas:
 
@@ -51,7 +51,7 @@ Deploy timestamp: 01/26/2025 17:42:30
 - Resolve incompatibilidades de dependências que requerem Node.js 20+
 
 ### 2. Railway.json otimizado
-- `buildCommand`: Limpeza robusta do cache + `--legacy-peer-deps`
+- `buildCommand`: Cache alternativo + `--legacy-peer-deps`
 - `restartPolicyType`: `ON_FAILURE`
 - `restartPolicyMaxRetries`: 10
 
@@ -59,8 +59,9 @@ Deploy timestamp: 01/26/2025 17:42:30
 - Removido `nixpacks.toml` que causava erros no build Docker
 - Railway agora usa detecção automática do Node.js
 
-### 4. Cache Docker robusto
-- Comando `rm -rf node_modules/.cache || true` ignora erros EBUSY
-- Permite que o build continue mesmo se o cache estiver ocupado
+### 4. Cache Docker alternativo
+- Comando `--cache /tmp/.npm` usa diretório temporário
+- Evita conflitos com cache montado pelo Docker
+- Permite que npm ci execute sem interferência
 
-## Status: Aguardando deploy com correção EBUSY
+## Status: Aguardando deploy com cache alternativo
