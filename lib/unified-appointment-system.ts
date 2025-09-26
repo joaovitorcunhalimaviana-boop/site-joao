@@ -62,6 +62,7 @@ export interface Patient {
     conditions?: string[]
     notes?: string
   }
+  source?: 'medical_area' | 'secretary_area' | 'public_appointment' // Origem do cadastro
   createdAt: string
   updatedAt: string
 }
@@ -940,33 +941,21 @@ export async function createPublicAppointment(formData: {
       time: formData.selectedTime,
     })
 
-    // Verificar se o paciente já tem consulta agendada (por nome, celular ou email)
-    const existingAppointments = await getAllAppointments()
-    console.log('📋 Agendamentos existentes:', existingAppointments.length)
-
-    // Obter data atual do Brasil usando timezone correto
-    const today = getTodayISO()
-
-    // Verificar se já existe uma consulta no MESMO DIA E HORÁRIO
+    // Otimização: Verificar apenas conflitos de horário no mesmo dia
     const appointmentDate = formData.selectedDate.toISOString().split('T')[0]
-    console.log(
-      '🔍 Verificando conflitos para:',
-      appointmentDate,
-      formData.selectedTime
-    )
+    console.log('🔍 Verificando conflitos para:', appointmentDate, formData.selectedTime)
 
-    const existingAppointment = existingAppointments.find(
+    // Buscar apenas agendamentos da data específica (mais eficiente)
+    const dayAppointments = await getAppointmentsByDate(appointmentDate)
+    
+    // Verificar se já existe uma consulta no MESMO HORÁRIO (simplificado)
+    const existingAppointment = dayAppointments.find(
       apt =>
         apt.status !== 'cancelada' &&
-        apt.appointmentDate === appointmentDate &&
         apt.appointmentTime === formData.selectedTime &&
-        ((apt.patientCpf && formData.cpf && apt.patientCpf === formData.cpf) ||
-          apt.patientName.toLowerCase() === formData.fullName.toLowerCase() ||
-          apt.patientPhone === formData.phone ||
-          apt.patientWhatsapp === formData.whatsapp ||
-          (apt.patientEmail &&
-            formData.email &&
-            apt.patientEmail.toLowerCase() === formData.email.toLowerCase()))
+        (apt.patientCpf === formData.cpf ||
+         apt.patientPhone === formData.phone ||
+         apt.patientWhatsapp === formData.whatsapp)
     )
 
     if (existingAppointment) {
@@ -1018,7 +1007,7 @@ export async function createPublicAppointment(formData: {
       patientEmail: formData.email,
       patientBirthDate: formData.birthDate,
       insuranceType: formData.insuranceType,
-      appointmentDate: formData.selectedDate.toISOString().split('T')[0],
+      appointmentDate: appointmentDate,
       appointmentTime: formData.selectedTime,
       appointmentType: 'consulta',
       status: 'agendada',

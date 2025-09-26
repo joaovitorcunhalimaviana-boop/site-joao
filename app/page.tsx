@@ -3,10 +3,10 @@
 import HeroSection from '../components/ui/hero-section'
 import Header from '../components/ui/header'
 import Footer from '../components/ui/footer'
-import TestimonialsSection from '../components/ui/testimonials-section'
 import AboutSection from '../components/ui/about-section'
 import FAQSection from '../components/ui/faq-section'
 import { CTASection } from '../components/ui/call-to-action'
+import NewsletterSection from '../components/newsletter/newsletter-section'
 
 import StructuredData from '../components/seo/structured-data'
 
@@ -22,7 +22,7 @@ export default function Home() {
           <HeroSection />
           <AboutSection />
           <FAQSection />
-          <TestimonialsSection />
+          <NewsletterSection />
         </main>
         <Footer />
       </div>

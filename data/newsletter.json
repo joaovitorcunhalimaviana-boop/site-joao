@@ -1,11 +1,57 @@
 {
   "subscribers": [
     {
-      "id": "mg044kg5yxrwli5i9j",
+      "id": "1758854899793_60d8umyp4",
       "email": "teste@gmail.com",
       "name": "Teste Newsletter",
       "subscribed": true,
       "subscribedAt": "2025-09-26T00:37:39.077Z",
+      "source": "newsletter",
+      "preferences": {
+        "healthTips": true,
+        "appointments": true,
+        "promotions": false
+      }
+    },
+    {
+      "id": "1758854899793_d4yhotlj4",
+      "email": "joao.teste@email.com",
+      "name": "Jo�o Teste",
+      "whatsapp": "83999887766",
+      "birthDate": "1990-05-15",
+      "subscribed": true,
+      "subscribedAt": "2025-09-26T02:12:18.388Z",
+      "source": "both",
+      "preferences": {
+        "healthTips": true,
+        "appointments": true,
+        "promotions": false
+      }
+    },
+    {
+      "id": "1758854899793_xivg8p1yd",
+      "email": "joaovitorcunhalimaviana@gmail.com",
+      "name": "João Vítor da Cunha Lima Viana",
+      "whatsapp": "(83) 99866-3089",
+      "birthDate": "1997-01-02",
+      "subscribed": true,
+      "subscribedAt": "2025-09-26T01:06:46.000Z",
+      "source": "both",
+      "preferences": {
+        "healthTips": true,
+        "appointments": true,
+        "promotions": false
+      }
+    },
+    {
+      "id": "1758854899793_yttz7sm42",
+      "email": "maria.teste@email.com",
+      "name": "Maria Santos Teste",
+      "whatsapp": "11987654322",
+      "birthDate": "1985-05-20",
+      "subscribed": true,
+      "subscribedAt": "2025-09-26T01:48:00.000Z",
+      "source": "both",
       "preferences": {
         "healthTips": true,
         "appointments": true,

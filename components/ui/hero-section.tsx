@@ -31,7 +31,7 @@ const HeroSection = () => {
                   style={{ fontSize: 'clamp(2.5rem, 6vw, 5.5rem) !important' }}
                 >
                   <span
-                    className='block text-transparent bg-clip-text w-full animate-gradient-pulse'
+                    className='hero-doctor-name block text-transparent bg-clip-text w-full animate-gradient-pulse'
                     style={{
                       fontSize: 'inherit !important',
                       background:
@@ -239,7 +239,9 @@ const HeroSection = () => {
                     className='block text-white mt-2'
                     style={{ fontSize: 'inherit !important' }}
                   >
-                    Doutor João Vítor Viana
+                    <span className="block text-white font-bold">
+                      Dr. João Vítor Viana
+                    </span>
                   </span>
                 </h2>
               </div>

@@ -1,12 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server'
 import fs from 'fs'
 import path from 'path'
+import { sendWelcomeEmail } from '@/lib/email-service'
+import { sendWelcomeEmailToPatient } from '@/lib/welcome-email-service'
+import { 
+  checkEmailExists, 
+  addEmailToIntegratedSystem, 
+  integrateEmailSystems,
+  readIntegratedEmailData 
+} from '@/lib/email-integration'
 
-// Interface para subscriber
+// Interfaces
 interface Subscriber {
   id: string
   email: string
   name: string
+  whatsapp?: string
+  birthDate?: string
   subscribed: boolean
   subscribedAt: string
   preferences: {
@@ -16,19 +26,14 @@ interface Subscriber {
   }
 }
 
-// Interface para newsletter
 interface Newsletter {
   id: string
   subject: string
   content: string
-  htmlContent: string
   sentAt: string
-  recipients: number
-  openRate?: number
-  clickRate?: number
+  recipientCount: number
 }
 
-// Interface para dados do newsletter
 interface NewsletterData {
   subscribers: Subscriber[]
   newsletters: Newsletter[]
@@ -145,70 +150,132 @@ export async function POST(request: NextRequest) {
     const data = readNewsletterData()
 
     if (action === 'subscribe') {
-      const { email, name, preferences } = body
+      const { email, name, whatsapp, birthDate, preferences } = body
 
       // Validações
       if (!email || !name) {
         return NextResponse.json(
-          { success: false, error: 'Email e nome são obrigatórios' },
+          { success: false, message: 'Email e nome são obrigatórios' },
           { status: 400 }
         )
       }
 
       if (!isValidEmail(email)) {
         return NextResponse.json(
-          { success: false, error: 'Email inválido' },
+          { success: false, message: 'Email inválido' },
           { status: 400 }
         )
       }
 
-      // Verificar se já está inscrito
-      const existingSubscriber = data.subscribers.find(
-        sub => sub.email === email
-      )
-
-      if (existingSubscriber) {
-        if (existingSubscriber.subscribed) {
+      // Verificar se o email já existe no sistema integrado
+      const emailCheck = await checkEmailExists(email)
+      
+      if (emailCheck.exists) {
+        // Se já existe, verificar se está ativo
+        if (emailCheck.data?.subscribed) {
           return NextResponse.json(
-            {
+            { 
               success: false,
-              error: 'Este email já está inscrito no newsletter',
+              message: 'Este email já está cadastrado na newsletter',
+              source: emailCheck.source 
             },
-            { status: 400 }
+            { status: 409 }
           )
         } else {
-          // Reativar inscrição
-          existingSubscriber.subscribed = true
-          existingSubscriber.subscribedAt = new Date().toISOString()
-          existingSubscriber.preferences = preferences || {
-            healthTips: true,
-            appointments: true,
-            promotions: false,
+          // Reativar inscrição existente
+          const existingIndex = data.subscribers.findIndex(
+            sub => sub.email.toLowerCase() === email.toLowerCase()
+          )
+          
+          if (existingIndex !== -1) {
+            data.subscribers[existingIndex] = {
+              ...data.subscribers[existingIndex],
+              subscribed: true,
+              subscribedAt: new Date().toISOString(),
+              name,
+              whatsapp,
+              birthDate,
+              preferences: preferences || {
+                healthTips: true,
+                appointments: true,
+                promotions: false,
+              }
+            }
+            saveNewsletterData(data)
+            
+            // Atualizar sistema integrado
+            await integrateEmailSystems()
+            
+            // Enviar email de boas-vindas usando o novo serviço
+            try {
+              const integratedEmails = readIntegratedEmailData()
+              const patientData = integratedEmails.find(e => e.email.toLowerCase() === email.toLowerCase())
+              
+              if (patientData) {
+                await sendWelcomeEmailToPatient(patientData)
+              } else {
+                await sendWelcomeEmail({ name, email, birthDate })
+              }
+            } catch (emailError) {
+              console.error('❌ Erro ao enviar email de boas-vindas:', emailError)
+            }
+            
+            return NextResponse.json({
+              success: true,
+              message: 'Inscrição reativada com sucesso!',
+              reactivated: true
+            })
           }
         }
-      } else {
-        // Nova inscrição
-        const newSubscriber: Subscriber = {
-          id: generateId(),
-          email,
-          name,
-          subscribed: true,
-          subscribedAt: new Date().toISOString(),
-          preferences: preferences || {
-            healthTips: true,
-            appointments: true,
-            promotions: false,
-          },
-        }
+      }
 
-        data.subscribers.push(newSubscriber)
+      // Adicionar ao sistema integrado
+      const addResult = await addEmailToIntegratedSystem(email, name, 'newsletter', {
+        whatsapp,
+        birthDate,
+        preferences: preferences || {
+          healthTips: true,
+          appointments: true,
+          promotions: false,
+        }
+      })
+
+      if (!addResult.success) {
+        return NextResponse.json(
+          { success: false, message: addResult.message },
+          { status: 400 }
+        )
       }
 
       saveNewsletterData(data)
 
+      // Enviar email de boas-vindas usando o novo serviço
+      try {
+        // Buscar dados integrados do paciente
+        const integratedEmails = readIntegratedEmailData()
+        const patientData = integratedEmails.find(e => e.email.toLowerCase() === email.toLowerCase())
+        
+        if (patientData) {
+          await sendWelcomeEmailToPatient(patientData)
+        } else {
+          // Fallback para o método antigo se não encontrar nos dados integrados
+          await sendWelcomeEmail({ name, email, birthDate })
+        }
+      } catch (emailError) {
+        console.error('❌ Erro ao enviar email de boas-vindas:', emailError)
+        // Não falhar a inscrição por causa do email
+      }
+
+      console.log(`✅ Nova inscrição na newsletter: ${email} (${name})`)
+
       return NextResponse.json({
         success: true,
         message: 'Inscrição realizada com sucesso!',
+        subscriber: {
+          email,
+          name,
+          subscribedAt: new Date().toISOString()
+        }
       })
     }
 
