@@ -1,4 +1,17 @@
 {
-  "subscribers": [],
+  "subscribers": [
+    {
+      "id": "mg044kg5yxrwli5i9j",
+      "email": "teste@gmail.com",
+      "name": "Teste Newsletter",
+      "subscribed": true,
+      "subscribedAt": "2025-09-26T00:37:39.077Z",
+      "preferences": {
+        "healthTips": true,
+        "appointments": true,
+        "promotions": false
+      }
+    }
+  ],
   "newsletters": []
 }

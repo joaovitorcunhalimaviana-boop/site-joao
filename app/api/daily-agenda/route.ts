@@ -177,16 +177,16 @@ function generateDailyAgendaMessage(
     ...appointments.map(apt => ({
       ...apt,
       type: 'consulta',
-      time: apt.appointmentTime,
+      time: apt.appointmentTime || '00:00',
       name: apt.patientName || apt.fullName || 'Nome não informado',
     })),
     ...surgeries.map(surgery => ({
       ...surgery,
       type: 'cirurgia',
-      time: surgery.time,
+      time: surgery.time || '00:00',
       name: surgery.patientName,
     })),
-  ].sort((a, b) => a.time.localeCompare(b.time))
+  ].sort((a, b) => (a.time || '00:00').localeCompare(b.time || '00:00'))
 
   if (appointments.length > 0) {
     message += `📋 *CONSULTAS AGENDADAS:*\n\n`
