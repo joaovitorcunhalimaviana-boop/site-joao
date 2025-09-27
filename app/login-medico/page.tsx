@@ -55,8 +55,18 @@ export default function LoginMedicoPage() {
       if (response.ok && data.success) {
         // Verificar se o usuário pode acessar a área médica
         if (data.user.areas.includes('medica')) {
-          // Salvar dados do usuário
+          // Salvar dados do usuário no formato esperado pelos componentes
           localStorage.setItem('currentUser', JSON.stringify(data.user))
+          
+          // Salvar dados do médico no formato esperado pela área médica
+          const doctorData = {
+            name: data.user.name,
+            email: 'joao.viana@clinica.com',
+            specialty: 'Coloproctologista e Cirurgião Geral',
+            crm: 'CRMPB 12831'
+          }
+          localStorage.setItem('doctor', JSON.stringify(doctorData))
+          
           router.push('/area-medica')
         } else {
           setError('Você não tem permissão para acessar a área médica')

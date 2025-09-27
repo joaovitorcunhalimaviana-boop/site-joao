@@ -9,6 +9,14 @@ import {
   scheduleTestAppointment,
 } from '../../../lib/reminder-scheduler'
 
+// Cache para evitar processamento duplicado
+const processCache = new Map<string, any>()
+const CACHE_TTL = 30000 // 30 segundos
+
+function getCacheKey(data: any): string {
+  return `${data.patientName}-${data.appointmentDate}-${data.appointmentTime}`
+}
+
 // GET - Obter informações do sistema de lembretes
 export async function GET(request: NextRequest) {
   try {
@@ -87,7 +95,7 @@ export async function POST(request: NextRequest) {
         email,
       } = body
 
-      // Validações
+      // Validações otimizadas
       if (!patientName || !whatsapp || !appointmentDate || !appointmentTime) {
         return NextResponse.json(
           {
@@ -104,26 +112,23 @@ export async function POST(request: NextRequest) {
         )
       }
 
-      // Validar formato da data
-      const appointmentDateTime = new Date(
-        `${appointmentDate}T${appointmentTime}:00`
-      )
-      if (isNaN(appointmentDateTime.getTime())) {
-        return NextResponse.json(
-          {
-            success: false,
-            error: 'Data ou horário inválido',
-          },
-          { status: 400 }
-        )
+      // Verificar cache para evitar processamento duplicado
+      const cacheKey = getCacheKey({ patientName, appointmentDate, appointmentTime })
+      const cached = processCache.get(cacheKey)
+      
+      if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+        console.log('📦 Retornando lembretes do cache para:', patientName)
+        return NextResponse.json(cached.data)
       }
 
-      // Verificar se a consulta é no futuro
-      if (appointmentDateTime <= new Date()) {
+      // Validação de data otimizada
+      const appointmentDateTime = new Date(`${appointmentDate}T${appointmentTime}:00`)
+      
+      if (isNaN(appointmentDateTime.getTime()) || appointmentDateTime <= new Date()) {
         return NextResponse.json(
           {
             success: false,
-            error: 'A consulta deve ser agendada para uma data futura',
+            error: 'Data ou horário inválido ou no passado',
           },
           { status: 400 }
         )
@@ -143,7 +148,7 @@ export async function POST(request: NextRequest) {
       // Agendar lembretes
       const scheduledReminders = scheduleAppointmentReminders(appointmentData)
 
-      return NextResponse.json({
+      const response = {
         success: true,
         data: {
           appointment: appointmentData,
@@ -155,7 +160,16 @@ export async function POST(request: NextRequest) {
         },
         message: `Lembretes agendados para ${patientName}`,
         reminderCount: scheduledReminders.length,
+      }
+
+      // Cachear resultado
+      processCache.set(cacheKey, {
+        data: response,
+        timestamp: Date.now()
       })
+
+      return NextResponse.json(response)
+      
     } else if (action === 'cancel') {
       const { appointmentId } = body
 

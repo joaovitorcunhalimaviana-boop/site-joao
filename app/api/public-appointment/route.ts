@@ -1,6 +1,27 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createPublicAppointment } from '../../../lib/unified-appointment-system'
 
+// Cache simples para reduzir consultas repetidas
+const cache = new Map<string, any>()
+const CACHE_TTL = 30000 // 30 segundos
+
+function getCacheKey(data: any): string {
+  return `${data.cpf}-${data.selectedDate}-${data.selectedTime}`
+}
+
+function getFromCache(key: string) {
+  const cached = cache.get(key)
+  if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+    return cached.data
+  }
+  cache.delete(key)
+  return null
+}
+
+function setCache(key: string, data: any) {
+  cache.set(key, { data, timestamp: Date.now() })
+}
+
 // POST - Criar agendamento público através do formulário
 export async function POST(request: NextRequest) {
   try {
@@ -43,6 +64,15 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Verificar cache para evitar duplicações rápidas
+    const cacheKey = getCacheKey({ cpf, selectedDate, selectedTime })
+    const cachedResult = getFromCache(cacheKey)
+    
+    if (cachedResult) {
+      console.log('📦 Retornando resultado do cache')
+      return NextResponse.json(cachedResult)
+    }
+
     // Converter selectedDate para objeto Date se for string
     const dateObject =
       typeof selectedDate === 'string' ? new Date(selectedDate) : selectedDate
@@ -64,9 +94,10 @@ export async function POST(request: NextRequest) {
 
     console.log('📊 Resultado do createPublicAppointment:', result)
 
+    let response
     if (result.success) {
       console.log('✅ Agendamento público criado com sucesso!')
-      return NextResponse.json({
+      response = NextResponse.json({
         success: true,
         appointment: result.appointment,
         patient: result.patient,
@@ -74,7 +105,7 @@ export async function POST(request: NextRequest) {
       })
     } else {
       console.log('❌ Falha ao criar agendamento:', result.error)
-      return NextResponse.json(
+      response = NextResponse.json(
         {
           success: false,
           error: result.error,
@@ -83,6 +114,18 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       )
     }
+
+    // Cachear apenas resultados de sucesso
+    if (result.success) {
+      setCache(cacheKey, {
+        success: true,
+        appointment: result.appointment,
+        patient: result.patient,
+        message: 'Agendamento criado com sucesso!',
+      })
+    }
+
+    return response
   } catch (error) {
     console.error('❌ Erro na API public-appointment:', error)
     return NextResponse.json(

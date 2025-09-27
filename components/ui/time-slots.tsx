@@ -1,5 +1,7 @@
 'use client'
 
+import { useState, useEffect } from 'react'
+
 interface TimeSlot {
   time: string
   available: boolean
@@ -16,34 +18,46 @@ const TimeSlots: React.FC<TimeSlotsProps> = ({
   onTimeSelect,
   selectedTime,
 }) => {
-  // Generate available time slots based on day of week
-  const generateTimeSlots = (): TimeSlot[] => {
-    const slots: TimeSlot[] = []
-    const dayOfWeek = selectedDate.getDay() // 0 = Sunday, 1 = Monday, 4 = Thursday
+  const [timeSlots, setTimeSlots] = useState<TimeSlot[]>([])
+  const [isLoading, setIsLoading] = useState(true)
 
-    let availableTimes: string[] = []
+  // Load available time slots when selectedDate changes
+  useEffect(() => {
+    loadTimeSlots()
+  }, [selectedDate])
 
-    // Define specific times for each day
-    if (dayOfWeek === 1) {
-      // Monday
-      availableTimes = ['15:00']
-    } else if (dayOfWeek === 4) {
-      // Thursday
-      availableTimes = ['14:00']
+  const loadTimeSlots = async () => {
+    setIsLoading(true)
+    try {
+      // Buscar slots da API
+      const response = await fetch('/api/schedule-slots')
+      if (response.ok) {
+        const data = await response.json()
+        if (data.success) {
+          const selectedDateStr = selectedDate.toISOString().split('T')[0] // YYYY-MM-DD
+          
+          // Filtrar slots para a data selecionada e que estejam ativos
+          const availableSlots = data.slots
+            .filter((slot: any) => slot.date === selectedDateStr && slot.isActive)
+            .map((slot: any) => ({
+              time: slot.time,
+              available: true,
+            }))
+          
+          setTimeSlots(availableSlots)
+          setIsLoading(false)
+          return
+        }
+      }
+    } catch (error) {
+      console.error('Erro ao buscar slots da API:', error)
     }
 
-    // Create slots - all available times are set as available
-    availableTimes.forEach(time => {
-      slots.push({
-        time,
-        available: true,
-      })
-    })
-
-    return slots
+    // Se não conseguir carregar da API, não mostrar horários
+    setTimeSlots([])
+    setIsLoading(false)
   }
 
-  const timeSlots = generateTimeSlots()
   // All slots are afternoon slots now
   const afternoonSlots = timeSlots
 
@@ -78,6 +92,17 @@ const TimeSlots: React.FC<TimeSlotsProps> = ({
           <span className='inline-block w-3 h-3 bg-blue-400 rounded-full mr-2'></span>
           Tarde
         </h3>
+      {/* Loading state */}
+      {isLoading ? (
+        <div className='flex justify-center items-center py-8'>
+          <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-blue-400'></div>
+          <span className='ml-3 text-gray-300'>Carregando horários...</span>
+        </div>
+      ) : afternoonSlots.length === 0 ? (
+        <div className='text-center py-8'>
+          <p className='text-gray-400'>Nenhum horário disponível para este dia.</p>
+        </div>
+      ) : (
         <div className='grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3'>
           {afternoonSlots.map(slot => {
             const isSelected = selectedTime === slot.time
@@ -102,6 +127,7 @@ const TimeSlots: React.FC<TimeSlotsProps> = ({
             )
           })}
         </div>
+      )}
       </div>
 
       {/* Legend */}

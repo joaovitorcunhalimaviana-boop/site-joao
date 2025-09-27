@@ -13,6 +13,7 @@ import {
   EnvelopeIcon,
   CogIcon,
   ScissorsIcon,
+  CalendarDaysIcon,
 } from '@heroicons/react/24/outline'
 
 interface Doctor {
@@ -80,6 +81,11 @@ export default function MedicalAreaMenu({ currentPage }: MedicalAreaMenuProps) {
       icon: ChartBarIcon,
     },
     {
+      href: '/area-medica/agenda',
+      label: 'Gestão de Agenda',
+      icon: CalendarDaysIcon,
+    },
+    {
       href: '/area-medica/cirurgias',
       label: 'Controle de Cirurgias',
       icon: ScissorsIcon,
@@ -145,7 +151,7 @@ export default function MedicalAreaMenu({ currentPage }: MedicalAreaMenuProps) {
               style={{
                 position: 'fixed',
                 top: buttonRect.bottom + 8,
-                left: buttonRect.right - 256, // 256px = w-64
+                left: buttonRect.left, // Alinhado à esquerda do botão
                 width: '16rem', // w-64
                 zIndex: 999999999,
               }}
@@ -182,14 +188,7 @@ export default function MedicalAreaMenu({ currentPage }: MedicalAreaMenuProps) {
           )}
       </div>
 
-      {/* Doctor Info */}
-      {doctor && (
-        <div className='flex items-center gap-2 text-sm text-gray-300'>
-          <span>Dr(a). {doctor.name}</span>
-          <span className='text-gray-500'>|</span>
-          <span className='text-gray-400'>{doctor.specialty}</span>
-        </div>
-      )}
+
     </div>
   )
 }

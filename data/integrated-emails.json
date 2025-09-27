@@ -1,74 +1,20 @@
 [
   {
-    "email": "teste@gmail.com",
-    "name": "Teste Newsletter",
-    "source": "newsletter",
-    "subscribed": true,
-    "subscribedAt": "2025-09-26T00:37:39.077Z",
-    "preferences": {
-      "healthTips": true,
-      "appointments": true,
-      "promotions": false
-    },
-    "registrationSources": [
-      "newsletter"
-    ]
-  },
-  {
-    "email": "joao.teste@email.com",
-    "name": "Jo�o Teste",
-    "whatsapp": "83999887766",
-    "birthDate": "1990-05-15",
-    "source": "both",
-    "subscribed": true,
-    "subscribedAt": "2025-09-26T02:12:18.388Z",
-    "preferences": {
-      "healthTips": true,
-      "appointments": true,
-      "promotions": false
-    },
-    "patientId": "pat_1758851259492_iaxqcvyrd",
-    "registrationSources": [
-      "newsletter",
-      "public_scheduling"
-    ]
-  },
-  {
     "email": "joaovitorcunhalimaviana@gmail.com",
     "name": "João Vítor da Cunha Lima Viana",
     "whatsapp": "(83) 99866-3089",
     "birthDate": "1997-01-02",
-    "source": "both",
+    "source": "appointment",
     "subscribed": true,
-    "subscribedAt": "2025-09-26T01:06:46.000Z",
-    "patientId": "pat_1758848806856_gy5z1l86i",
+    "subscribedAt": "2025-09-26T07:57:11.000Z",
+    "patientId": "pat_1758873431381_a1lknjdr8",
+    "registrationSources": [
+      "public_scheduling"
+    ],
     "preferences": {
       "healthTips": true,
       "appointments": true,
       "promotions": false
-    },
-    "registrationSources": [
-      "newsletter",
-      "public_scheduling"
-    ]
-  },
-  {
-    "email": "maria.teste@email.com",
-    "name": "Maria Santos Teste",
-    "whatsapp": "11987654322",
-    "birthDate": "1985-05-20",
-    "source": "both",
-    "subscribed": true,
-    "subscribedAt": "2025-09-26T01:48:00.000Z",
-    "patientId": "pat_1758851280582_r36oz9wso",
-    "preferences": {
-      "healthTips": true,
-      "appointments": true,
-      "promotions": false
-    },
-    "registrationSources": [
-      "newsletter",
-      "public_scheduling"
-    ]
+    }
   }
 ]

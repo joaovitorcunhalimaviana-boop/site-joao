@@ -65,6 +65,8 @@ export default function AreaMedicaPage() {
   const [loadingTimeout, setLoadingTimeout] = useState<NodeJS.Timeout | null>(
     null
   )
+  const [retryCount, setRetryCount] = useState(0)
+  const MAX_RETRIES = 3
   const [showScheduleModal, setShowScheduleModal] = useState(false)
   const [selectedPatientId, setSelectedPatientId] = useState('')
   const [scheduleDate, setScheduleDate] = useState('')
@@ -83,60 +85,48 @@ export default function AreaMedicaPage() {
 
   const router = useRouter()
 
-  console.log('🏥 Área Médica - Componente inicializado')
-
-  // Verificar autenticação e carregar dados
+  // Verificar autenticação e carregar dados iniciais
   useEffect(() => {
-    console.log('🔄 useEffect - Verificando autenticação e carregando dados')
     checkAuth()
     loadDashboardData()
+    setRetryCount(0) // Reset retry count on initial load
+  }, [])
 
-    // Recarregar dados quando a página for focada novamente
-    const handleFocus = () => {
-      console.log('Página focada, recarregando dados...')
+  // Recarregar dados quando a data selecionada mudar
+  useEffect(() => {
+    if (selectedDate) {
+      console.log('📅 Data alterada, recarregando dados para:', selectedDate)
+      setRetryCount(0) // Reset retry count when date changes
       loadDashboardData()
     }
+  }, [selectedDate])
 
-    const handleVisibilityChange = () => {
-      if (!document.hidden) {
-        console.log('Página ficou visível, recarregando dados...')
+  // Configurar listeners e intervalos apenas uma vez
+  useEffect(() => {
+    // Recarregar dados quando a página for focada novamente (com debounce)
+    let focusTimeout: NodeJS.Timeout | null = null
+    const handleFocus = () => {
+      if (focusTimeout) clearTimeout(focusTimeout)
+      focusTimeout = setTimeout(() => {
+        console.log('Página focada, recarregando dados...')
         loadDashboardData()
-      }
+      }, 1000) // Debounce de 1 segundo
     }
 
-    // Recarregar dados automaticamente a cada minuto
+    // Recarregar dados automaticamente a cada 5 minutos (reduzido de 1 minuto)
     const autoReloadInterval = setInterval(() => {
       console.log('Recarregamento automático dos dados...')
       loadDashboardData()
-    }, 60000) // 1 minuto
-
-    // Verificar mudança de dia e limpar dados à meia-noite
-    const checkMidnight = () => {
-      const now = new Date()
-      const brasilia = new Date(
-        now.toLocaleString('en-US', { timeZone: 'America/Sao_Paulo' })
-      )
-
-      if (brasilia.getHours() === 0 && brasilia.getMinutes() === 0) {
-        console.log('Meia-noite detectada - limpando dados do dia anterior')
-        setAttendedPatients([]) // Limpar pacientes atendidos
-        loadDashboardData() // Recarregar dados do novo dia
-      }
-    }
-
-    // Verificar meia-noite a cada minuto
-    const midnightInterval = setInterval(checkMidnight, 60000)
+    }, 300000) // 5 minutos
 
     window.addEventListener('focus', handleFocus)
-    document.addEventListener('visibilitychange', handleVisibilityChange)
 
     return () => {
       window.removeEventListener('focus', handleFocus)
-      document.removeEventListener('visibilitychange', handleVisibilityChange)
       clearInterval(autoReloadInterval)
-      clearInterval(midnightInterval)
+      if (focusTimeout) clearTimeout(focusTimeout)
     }
-  }, [selectedDate])
+  }, [])
 
   const checkAuth = async () => {
     // Sistema simplificado - verificar apenas se há dados do usuário
@@ -205,18 +195,13 @@ export default function AreaMedicaPage() {
             cache: 'no-cache',
           }
         )
-        console.log(
-          '📡 Resposta da API:',
-          dailyAgendaResponse.status,
-          dailyAgendaResponse.statusText
-        )
 
         if (dailyAgendaResponse.ok) {
           const dailyAgendaData = await dailyAgendaResponse.json()
-          console.log('Agenda diária recebida:', dailyAgendaData.agenda)
 
           // Converter agendamentos para formato de pacientes
-          const todayAppointments = dailyAgendaData.agenda.appointments || []
+          const todayAppointments = dailyAgendaData.agenda?.appointments || []
+          
           const todayPatientsData = todayAppointments.map((apt: any) => ({
             id: apt.patientId,
             name: apt.patientName,
@@ -281,11 +266,19 @@ export default function AreaMedicaPage() {
             dailyAgendaResponse.statusText
           )
           console.error('❌ Conteúdo da resposta de erro:', errorText)
-          // Tentar novamente após um pequeno delay
-          setTimeout(() => {
-            console.log('🔄 Tentando recarregar agenda diária...')
-            loadDashboardData()
-          }, 2000)
+          
+          // Implementar retry limitado em vez de loop infinito
+          if (retryCount < MAX_RETRIES) {
+            console.log(`🔄 Tentativa ${retryCount + 1}/${MAX_RETRIES} - Tentando recarregar agenda diária em 3 segundos...`)
+            setTimeout(() => {
+              setRetryCount(prev => prev + 1)
+              loadDashboardData()
+            }, 3000)
+          } else {
+            console.error('❌ Máximo de tentativas atingido. Definindo dados padrão.')
+            setTodayPatients([])
+            setAttendedPatients([])
+          }
           return
         }
 
@@ -341,14 +334,27 @@ export default function AreaMedicaPage() {
         }
       } catch (error) {
         console.error('Erro ao carregar dados:', error)
-        // Verificar se é um erro de rede
+        // Verificar se é um erro de rede e implementar retry limitado
         if (error instanceof TypeError && error.message === 'Failed to fetch') {
-          console.error(
-            'Erro de conexão com a API. Tentando novamente em 3 segundos...'
-          )
-          setTimeout(() => {
-            loadDashboardData()
-          }, 3000)
+          if (retryCount < MAX_RETRIES) {
+            console.error(
+              `Erro de conexão com a API. Tentativa ${retryCount + 1}/${MAX_RETRIES} - Tentando novamente em 5 segundos...`
+            )
+            setTimeout(() => {
+              setRetryCount(prev => prev + 1)
+              loadDashboardData()
+            }, 5000)
+          } else {
+            console.error('❌ Máximo de tentativas de conexão atingido. Definindo dados padrão.')
+            setTodayPatients([])
+            setAttendedPatients([])
+            setPatients([])
+            setStats({
+              totalPatients: 0,
+              todayConsultations: 0,
+              completedToday: 0,
+            })
+          }
         } else {
           // Para outros tipos de erro, definir dados padrão
           console.log('Definindo dados padrão devido ao erro:', error)

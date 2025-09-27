@@ -7,7 +7,7 @@ const transporter = nodemailer.createTransport({
   secure: process.env['EMAIL_SECURE'] === 'true',
   auth: {
     user: process.env['EMAIL_USER'],
-    pass: process.env['EMAIL_PASSWORD'] || process.env['EMAIL_PASS'],
+    pass: process.env['EMAIL_PASS'] || process.env['EMAIL_PASSWORD'],
   },
   tls: {
     rejectUnauthorized: false,
@@ -139,7 +139,7 @@ export async function sendWelcomeEmail(
     )
     console.log(
       '- Pass:',
-      process.env['EMAIL_PASSWORD'] ? 'Configurado' : 'Não configurado'
+      process.env['EMAIL_PASS'] ? 'Configurado' : 'Não configurado'
     )
 
     const mailOptions = {

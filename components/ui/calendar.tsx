@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline'
 
 interface CalendarProps {
@@ -8,12 +8,52 @@ interface CalendarProps {
   selectedDate?: Date
 }
 
+interface ScheduleSlot {
+  id: string
+  date: string
+  time: string
+  isActive: boolean
+  createdAt: string
+}
+
 const Calendar: React.FC<CalendarProps> = ({ onDateSelect, selectedDate }) => {
   const [currentMonth, setCurrentMonth] = useState(new Date())
+  const [availableDates, setAvailableDates] = useState<string[]>([])
+  const [isLoading, setIsLoading] = useState(true)
 
   const today = new Date()
   const year = currentMonth.getFullYear()
   const month = currentMonth.getMonth()
+
+  // Load available dates from schedule slots
+  useEffect(() => {
+    loadAvailableDates()
+  }, [currentMonth])
+
+  const loadAvailableDates = async () => {
+    setIsLoading(true)
+    try {
+      const response = await fetch('/api/schedule-slots')
+      if (response.ok) {
+        const data = await response.json()
+        if (data.success) {
+          // Extract unique dates from active slots
+          const dates = data.slots
+            .filter((slot: ScheduleSlot) => slot.isActive)
+            .map((slot: ScheduleSlot) => slot.date)
+          
+          // Remove duplicates
+          const uniqueDates = [...new Set(dates)]
+          setAvailableDates(uniqueDates)
+        }
+      }
+    } catch (error) {
+      console.error('Erro ao carregar datas disponíveis:', error)
+      // Fallback: no available dates
+      setAvailableDates([])
+    }
+    setIsLoading(false)
+  }
 
   // Get first day of the month and number of days
   const firstDayOfMonth = new Date(year, month, 1)
@@ -62,10 +102,6 @@ const Calendar: React.FC<CalendarProps> = ({ onDateSelect, selectedDate }) => {
   const isDateAvailable = (date: Date) => {
     if (!date) return false
 
-    // Only allow Mondays (1) and Thursdays (4)
-    const dayOfWeek = date.getDay()
-    if (dayOfWeek !== 1 && dayOfWeek !== 4) return false
-
     // Skip past dates (compare only date part, not time)
     const dateOnly = new Date(
       date.getFullYear(),
@@ -79,7 +115,9 @@ const Calendar: React.FC<CalendarProps> = ({ onDateSelect, selectedDate }) => {
     )
     if (dateOnly < todayOnly) return false
 
-    return true
+    // Check if date is in available dates from schedule slots
+    const dateStr = date.toISOString().split('T')[0] // YYYY-MM-DD format
+    return availableDates.includes(dateStr)
   }
 
   const isDateSelected = (date: Date) => {
@@ -170,8 +208,11 @@ const Calendar: React.FC<CalendarProps> = ({ onDateSelect, selectedDate }) => {
 
       {/* Legend */}
       <div className='mt-4 text-xs text-gray-400 text-center'>
-        <p>Atendimentos nas segundas e quintas-feiras</p>
         <p>Selecione uma data disponível</p>
+        {isLoading && <p>Carregando datas disponíveis...</p>}
+        {!isLoading && availableDates.length === 0 && (
+          <p>Nenhuma data disponível no momento</p>
+        )}
       </div>
     </div>
   )

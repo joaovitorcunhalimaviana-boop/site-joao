@@ -1,6 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { formatDateTimeToBrazilian } from '@/lib/date-utils'
 
+// Cache para mensagens geradas recentemente
+const messageCache = new Map<string, any>()
+const CACHE_TTL = 60000 // 1 minuto
+
+function getCacheKey(data: any): string {
+  return `${data.fullName}-${data.selectedDate}-${data.selectedTime}`
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
@@ -30,6 +38,15 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Verificar cache para mensagens já geradas
+    const cacheKey = getCacheKey({ fullName, selectedDate, selectedTime })
+    const cached = messageCache.get(cacheKey)
+    
+    if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+      console.log('📦 Retornando mensagens do cache para:', fullName)
+      return NextResponse.json(cached.data)
+    }
+
     // Gerar mensagem de confirmação para o paciente
     const patientMessage = generatePatientConfirmationMessage({
       fullName,
@@ -56,32 +73,35 @@ export async function POST(request: NextRequest) {
     const patientWhatsAppLink = `https://wa.me/55${patientWhatsApp}?text=${encodeURIComponent(patientMessage)}`
     const doctorWhatsAppLink = `https://wa.me/55${doctorWhatsApp}?text=${encodeURIComponent(doctorMessage)}`
 
-    // Log detalhado
-    console.log('\n' + '='.repeat(80))
-    console.log('🩺 SISTEMA DE CONFIRMAÇÃO WHATSAPP ATIVADO')
-    console.log('='.repeat(80))
-    console.log(`👤 Paciente: ${fullName}`)
-    console.log(`📅 Consulta: ${selectedDate} às ${selectedTime}`)
-    console.log(`📱 WhatsApp: ${whatsapp}`)
-    console.log('\n📋 AÇÕES NECESSÁRIAS:')
-    console.log('1️⃣ ENVIAR CONFIRMAÇÃO PARA O PACIENTE:')
-    console.log(patientWhatsAppLink)
-    console.log('\n2️⃣ NOTIFICAR O MÉDICO:')
-    console.log(doctorWhatsAppLink)
-    console.log('='.repeat(80) + '\n')
+    // Log otimizado (menos verboso)
+    console.log(`🩺 WhatsApp confirmação: ${fullName} - ${selectedDate} ${selectedTime}`)
 
-    // REMOVIDO: Notificação duplicada do Telegram
-    // A notificação principal já é enviada pelo sistema unificado de agendamentos
-    // await sendTelegramNotification(...)
-
-    return NextResponse.json({
+    const response = {
       success: true,
       message: 'Sistema de confirmação WhatsApp ativado',
       patientWhatsAppLink,
       doctorWhatsAppLink,
       patientMessage,
       doctorMessage,
+    }
+
+    // Cachear resultado
+    messageCache.set(cacheKey, {
+      data: response,
+      timestamp: Date.now()
     })
+
+    // Limpar cache antigo periodicamente
+    if (messageCache.size > 100) {
+      const now = Date.now()
+      for (const [key, value] of messageCache.entries()) {
+        if (now - value.timestamp > CACHE_TTL) {
+          messageCache.delete(key)
+        }
+      }
+    }
+
+    return NextResponse.json(response)
   } catch (error) {
     console.error('❌ Erro no sistema de confirmação WhatsApp:', error)
     return NextResponse.json(

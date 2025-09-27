@@ -197,7 +197,7 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({
       // Converter data de nascimento do formato brasileiro para ISO
       const birthDateISO = brazilianDateToISO(formData.birthDate)
 
-      // Enviar dados para a API de agendamento público
+      // 1. CRÍTICO: Criar o agendamento primeiro (bloqueia UI)
       const response = await fetch('/api/public-appointment', {
         method: 'POST',
         headers: {
@@ -241,18 +241,24 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({
         appointmentResult.appointment
       )
 
-      // Enviar notificações (email + WhatsApp)
-      const sentNotifications = await sendNotifications({
-        ...formData,
-        selectedDate: formatDate(selectedDate),
-        selectedTime,
-      })
+      // 2. OTIMIZAÇÃO: Liberar UI imediatamente após agendamento criado
+      setIsSubmitting(false)
+      onSubmit(formData)
 
-      console.log(`📧 Notificações enviadas: ${sentNotifications.join(', ')}`)
+      // 3. BACKGROUND: Processar notificações e lembretes em paralelo (não bloqueia UI)
+      const backgroundTasks = [
+        // Notificações WhatsApp
+        sendNotifications({
+          ...formData,
+          selectedDate: formatDate(selectedDate),
+          selectedTime,
+        }).catch(error => {
+          console.warn('⚠️ Erro nas notificações WhatsApp:', error)
+          return []
+        }),
 
-      // Agendar lembretes automáticos
-      try {
-        const reminderResponse = await fetch('/api/reminder-system', {
+        // Sistema de lembretes
+        fetch('/api/reminder-system', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -266,55 +272,53 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({
             insuranceType: formData.insuranceType,
             email: formData.email,
           }),
-        })
+        }).then(res => res.json()).catch(error => {
+          console.warn('⚠️ Erro no sistema de lembretes:', error)
+          return { success: false, error: error.message }
+        }),
 
-        const reminderResult = await reminderResponse.json()
+        // Email de boas-vindas
+        fetch('/api/welcome-emails', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            action: 'send_single',
+            email: formData.email,
+          }),
+        }).then(res => res.json()).catch(error => {
+          console.warn('⚠️ Erro no email de boas-vindas:', error)
+          return { success: false, error: error.message }
+        }),
 
-        if (reminderResult.success) {
-          console.log(
-            `✅ ${reminderResult.reminderCount} lembretes automáticos agendados!`
-          )
-          console.log('📅 Lembretes:', reminderResult.data.reminders)
-        } else {
-          console.warn(
-            '⚠️ Erro ao agendar lembretes automáticos:',
-            reminderResult.error
-          )
-        }
-      } catch (reminderError) {
-        console.warn(
-          '⚠️ Erro na comunicação com sistema de lembretes:',
-          reminderError
-        )
-      }
-
-      // REMOVIDO: Notificação duplicada do médico
-      // A notificação principal já é enviada pelo sistema unificado de agendamentos
-      // try { await fetch('/api/doctor-notifications', ...) } catch (...) { ... }
-
-      // Agendar agenda diária (24h antes às 20:00)
-      try {
-        await scheduleDailyAgenda({
+        // Agenda diária
+        scheduleDailyAgenda({
           patientName: formData.fullName,
           appointmentDate: selectedDate.toISOString().split('T')[0],
           appointmentTime: selectedTime,
           whatsapp: formData.whatsapp,
           insuranceType:
             formData.insuranceType === 'particular' ? 'private' : 'unimed',
+        }).catch(error => {
+          console.warn('⚠️ Erro na agenda diária:', error)
+          return { success: false, error: error.message }
         })
+      ]
 
-        console.log('✅ Agenda diária agendada com sucesso!')
-      } catch (agendaError) {
-        console.warn('⚠️ Erro ao agendar agenda diária:', agendaError)
-      }
+      // Executar todas as tarefas em paralelo sem bloquear
+      Promise.all(backgroundTasks).then(([notifications, reminders, welcomeEmail, agenda]) => {
+        console.log('🚀 Processamento em background concluído:')
+        console.log('📧 Notificações:', notifications)
+        console.log('⏰ Lembretes:', reminders)
+        console.log('📬 Email de boas-vindas:', welcomeEmail)
+        console.log('📅 Agenda:', agenda)
+      })
 
-      onSubmit(formData)
     } catch (error) {
-      console.error('Erro ao enviar notificações:', error)
-      // Mesmo com erro nas notificações, continua com o agendamento
-      onSubmit(formData)
-    } finally {
+      console.error('❌ Erro crítico no agendamento:', error)
       setIsSubmitting(false)
+      alert('Erro ao criar agendamento. Tente novamente.')
     }
   }
 

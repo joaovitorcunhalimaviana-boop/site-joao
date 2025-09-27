@@ -1,6 +1,7 @@
 // Sistema de verificação automática de aniversários diários
 import { getTodayBirthdays, processBirthdayEmails } from './email-service'
 import { getAllPatients } from './unified-appointment-system'
+import { getAllBirthdayEmails } from './email-integration'
 import { getTodayISO } from './date-utils'
 
 interface BirthdayJob {
@@ -106,17 +107,15 @@ async function processBirthdayEmailsForDate(targetDate: string): Promise<void> {
   try {
     console.log(`🎂 Processando aniversários para ${targetDate}...`)
 
-    // Buscar todos os pacientes
-    const patients = await getAllPatients()
+    // Usar sistema integrado de emails em vez de apenas pacientes do sistema unificado
+    const integratedEmails = await getAllBirthdayEmails()
 
-    // Filtrar pacientes com email e data de nascimento
-    const patientsWithEmail = patients
-      .filter(patient => patient.email && patient.birthDate)
-      .map(patient => ({
-        name: patient.name,
-        email: patient.email!,
-        birthDate: patient.birthDate!,
-      }))
+    // Converter para formato compatível com o sistema de emails
+    const patientsWithEmail = integratedEmails.map(emailData => ({
+      name: emailData.name,
+      email: emailData.email,
+      birthDate: emailData.birthDate!,
+    }))
 
     // Verificar aniversariantes do dia
     const todayBirthdays = getTodayBirthdays(patientsWithEmail)
@@ -127,7 +126,7 @@ async function processBirthdayEmailsForDate(targetDate: string): Promise<void> {
     }
 
     console.log(
-      `🎉 ${todayBirthdays.length} aniversariante(s) encontrado(s) para ${targetDate}`
+      `🎉 ${todayBirthdays.length} aniversariante(s) encontrado(s) para ${targetDate} (sistema integrado)`
     )
 
     // Processar envio de emails

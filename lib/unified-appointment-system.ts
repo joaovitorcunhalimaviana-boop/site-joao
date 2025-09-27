@@ -527,306 +527,131 @@ export async function getAllAppointments(): Promise<UnifiedAppointment[]> {
 }
 
 // Obter agendamentos por data
+// Cache para operações frequentes
+const appointmentCache = new Map<string, UnifiedAppointment[]>()
+const patientCache = new Map<string, Patient>()
+const CACHE_TTL = 60000 // 1 minuto
+
+function getCacheKey(date: string): string {
+  return `appointments-${date}`
+}
+
+function getPatientCacheKey(cpf: string): string {
+  return `patient-${cpf}`
+}
+
+function clearExpiredCache() {
+  // Limpar cache de agendamentos periodicamente
+  if (appointmentCache.size > 50) {
+    appointmentCache.clear()
+  }
+  
+  // Limpar cache de pacientes periodicamente
+  if (patientCache.size > 100) {
+    patientCache.clear()
+  }
+}
+
 export async function getAppointmentsByDate(
   date: string
 ): Promise<UnifiedAppointment[]> {
-  const allAppointments = await getAllAppointments()
-  return allAppointments
-    .filter(apt => apt.appointmentDate === date)
-    .sort((a, b) => a.appointmentTime.localeCompare(b.appointmentTime))
-}
-
-// Obter agenda diária
-export async function getDailyAgenda(date: string): Promise<DailyAgenda> {
-  const appointments = await getAppointmentsByDate(date)
-
-  return {
-    date,
-    appointments,
-    totalPatients: appointments.length,
-    confirmedAppointments: appointments.filter(
-      apt => apt.status === 'confirmada'
-    ).length,
-    pendingAppointments: appointments.filter(apt => apt.status === 'agendada')
-      .length,
-    completedAppointments: appointments.filter(
-      apt => apt.status === 'concluida'
-    ).length,
-  }
-}
-
-// Atualizar status do agendamento
-export async function updateAppointmentStatus(
-  appointmentId: string,
-  status: UnifiedAppointment['status'],
-  notes?: string
-): Promise<{ success: boolean; error?: string }> {
-  try {
-    const appointments = await getAllAppointments()
-    const appointmentIndex = appointments.findIndex(
-      apt => apt.id === appointmentId
-    )
-
-    if (appointmentIndex === -1) {
-      return { success: false, error: 'Agendamento não encontrado' }
-    }
-
-    appointments[appointmentIndex].status = status
-    appointments[appointmentIndex].updatedAt = getBrasiliaTimestamp()
-
-    if (notes) {
-      appointments[appointmentIndex].notes = notes
-    }
-
-    await saveToStorage(APPOINTMENTS_KEY, appointments)
-
-    console.log(`✅ Status atualizado: ${appointmentId} -> ${status}`)
-
-    return { success: true }
-  } catch (error) {
-    console.error('❌ Erro ao atualizar status:', error)
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : 'Erro desconhecido',
-    }
-  }
-}
-
-// Atualizar dados do agendamento
-export async function updateAppointment(
-  appointmentId: string,
-  updateData: {
-    date: string
-    time: string
-    type:
-      | 'consulta'
-      | 'retorno'
-      | 'urgencia'
-      | 'teleconsulta'
-      | 'visita_domiciliar'
-    notes?: string
-  }
-): Promise<{ success: boolean; error?: string }> {
-  try {
-    const appointments = await getAllAppointments()
-    const appointmentIndex = appointments.findIndex(
-      apt => apt.id === appointmentId
-    )
-
-    if (appointmentIndex === -1) {
-      return { success: false, error: 'Agendamento não encontrado' }
-    }
-
-    // Atualizar os dados do agendamento
-    appointments[appointmentIndex].appointmentDate = updateData.date
-    appointments[appointmentIndex].appointmentTime = updateData.time
-    appointments[appointmentIndex].appointmentType = updateData.type
-    appointments[appointmentIndex].updatedAt = getBrasiliaTimestamp()
-
-    if (updateData.notes !== undefined) {
-      appointments[appointmentIndex].notes = updateData.notes
-    }
-
-    await saveToStorage(APPOINTMENTS_KEY, appointments)
-
-    console.log(`✅ Agendamento atualizado: ${appointmentId}`)
-
-    return { success: true }
-  } catch (error) {
-    console.error('❌ Erro ao atualizar agendamento:', error)
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : 'Erro desconhecido',
-    }
-  }
-}
-
-// === FUNÇÕES DE PACIENTES ===
-
-// Função para gerar próximo número de prontuário
-export async function getNextMedicalRecordNumber(): Promise<number> {
-  const patients = await getAllPatients()
-  if (patients.length === 0) {
-    return 1
+  // Verificar cache primeiro
+  const cacheKey = getCacheKey(date)
+  const cached = appointmentCache.get(cacheKey)
+  
+  if (cached) {
+    return cached
   }
 
-  // Encontrar o maior número de prontuário existente
-  const maxRecordNumber = Math.max(
-    ...patients.map(p => p.medicalRecordNumber || 0)
-  )
-  return maxRecordNumber + 1
+  const appointments = await loadFromStorage<UnifiedAppointment>(APPOINTMENTS_KEY)
+  const dayAppointments = appointments.filter(apt => apt.appointmentDate === date)
+  
+  // Cachear resultado
+  appointmentCache.set(cacheKey, dayAppointments)
+  
+  return dayAppointments
 }
 
-// Criar ou atualizar paciente
 export async function createOrUpdatePatient(
   patientData: Omit<Patient, 'id' | 'createdAt' | 'updatedAt'>
 ): Promise<{ success: boolean; patient?: Patient; error?: string }> {
   try {
-    console.log('🔄 Iniciando criação/atualização de paciente:', patientData)
-    const patients = await getAllPatients()
-    console.log('📋 Pacientes existentes:', patients.length)
+    console.log('👤 INICIANDO createOrUpdatePatient:', patientData.name)
 
-    // Validar formato do CPF
-    if (!validateCPF(patientData.cpf)) {
-      console.log('❌ CPF inválido:', patientData.cpf)
-      return {
-        success: false,
-        error: 'CPF inválido. Verifique o número digitado.',
+    // Verificar cache primeiro
+    const cacheKey = getPatientCacheKey(patientData.cpf)
+    let existingPatient = patientCache.get(cacheKey)
+    
+    if (!existingPatient) {
+      // Se não estiver no cache, buscar no storage
+      const patients = await loadFromStorage<Patient>(PATIENTS_KEY)
+      existingPatient = patients.find(p => p.cpf === patientData.cpf)
+      
+      if (existingPatient) {
+        patientCache.set(cacheKey, existingPatient)
       }
     }
 
-    // LÓGICA PRINCIPAL: Buscar paciente existente pelo CPF (identificador único)
-    const existingPatientByCpf = patients.find(p => p.cpf === patientData.cpf)
+    const now = getBrasiliaTimestamp()
 
-    if (existingPatientByCpf) {
-      console.log(
-        '🔄 Paciente encontrado pelo CPF, atualizando dados:',
-        existingPatientByCpf.id
-      )
-      // Atualizar paciente existente (mantém o número do prontuário e ID)
+    if (existingPatient) {
+      console.log('👤 Paciente existente encontrado, atualizando...')
+      
+      // Atualizar dados do paciente existente
       const updatedPatient: Patient = {
-        ...existingPatientByCpf,
-        ...patientData,
-        id: existingPatientByCpf.id, // Manter ID existente
-        medicalRecordNumber: existingPatientByCpf.medicalRecordNumber, // Manter número existente
-        createdAt: existingPatientByCpf.createdAt, // Manter data de criação
-        updatedAt: getBrasiliaTimestamp(),
+        ...existingPatient,
+        name: patientData.name,
+        phone: patientData.phone,
+        whatsapp: patientData.whatsapp,
+        email: patientData.email || existingPatient.email,
+        birthDate: patientData.birthDate || existingPatient.birthDate,
+        insurance: patientData.insurance,
+        updatedAt: now,
       }
 
-      const patientIndex = patients.findIndex(
-        p => p.id === existingPatientByCpf.id
-      )
-      patients[patientIndex] = updatedPatient
-
-      await saveToStorage(PATIENTS_KEY, patients)
-      console.log(
-        '✅ Paciente atualizado com sucesso pelo CPF:',
-        updatedPatient.id,
-        'Prontuário:',
-        updatedPatient.medicalRecordNumber
+      // Atualizar no storage
+      const patients = await loadFromStorage<Patient>(PATIENTS_KEY)
+      const updatedPatients = patients.map(p =>
+        p.id === existingPatient!.id ? updatedPatient : p
       )
 
+      await saveToStorage(PATIENTS_KEY, updatedPatients)
+      
+      // Atualizar cache
+      patientCache.set(cacheKey, updatedPatient)
+      
+      console.log('👤 Paciente atualizado com sucesso!')
       return { success: true, patient: updatedPatient }
     } else {
-      console.log('➕ CPF não encontrado, criando novo paciente')
+      console.log('👤 Criando novo paciente...')
+      
+      // Gerar número de prontuário apenas se necessário
+      const medicalRecordNumber = patientData.medicalRecordNumber || await getNextMedicalRecordNumber()
 
-      // Gerar próximo número de prontuário
-      const medicalRecordNumber = await getNextMedicalRecordNumber()
-      console.log('📋 Número do prontuário:', medicalRecordNumber)
-
-      // Criar novo paciente
       const newPatient: Patient = {
-        ...patientData,
         id: generatePatientId(),
+        name: patientData.name,
+        cpf: patientData.cpf,
         medicalRecordNumber,
-        createdAt: getBrasiliaTimestamp(),
-        updatedAt: getBrasiliaTimestamp(),
+        phone: patientData.phone,
+        whatsapp: patientData.whatsapp,
+        email: patientData.email,
+        birthDate: patientData.birthDate,
+        insurance: patientData.insurance,
+        source: patientData.source || 'public_appointment',
+        createdAt: now,
+        updatedAt: now,
       }
 
+      // Salvar no storage
+      const patients = await loadFromStorage<Patient>(PATIENTS_KEY)
       patients.push(newPatient)
       await saveToStorage(PATIENTS_KEY, patients)
-      console.log(
-        '✅ Novo paciente criado com sucesso:',
-        newPatient.id,
-        'Prontuário:',
-        medicalRecordNumber
-      )
-
-      // Verificar se foi salvo corretamente no array local
-      const savedPatient = patients.find(p => p.id === newPatient.id)
-      if (!savedPatient) {
-        console.error('❌ Paciente não foi encontrado no array após salvar!')
-        return { success: false, error: 'Falha ao salvar paciente no array' }
-      }
-
-      // Enviar e-mail de boas-vindas automaticamente se o paciente tiver e-mail
-      if (newPatient.email) {
-        try {
-          console.log(
-            '📧 Enviando e-mail de boas-vindas para:',
-            newPatient.email
-          )
-
-          // Usar a função direta do email-service no servidor
-          if (typeof window === 'undefined') {
-            // Executando no servidor - usar função direta
-            const { sendWelcomeEmail } = await import('./email-service')
-            const emailSent = await sendWelcomeEmail({
-              name: newPatient.name,
-              email: newPatient.email,
-              birthDate: newPatient.birthDate,
-            })
-
-            if (emailSent) {
-              console.log(
-                '✅ E-mail de boas-vindas enviado com sucesso (servidor)'
-              )
-            } else {
-              console.warn(
-                '⚠️ Falha ao enviar e-mail de boas-vindas (servidor)'
-              )
-            }
-          } else {
-            // Executando no cliente - usar API
-            const emailResponse = await fetch('/api/email', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({
-                type: 'welcome',
-                patientData: {
-                  name: newPatient.name,
-                  email: newPatient.email,
-                },
-              }),
-            })
-
-            if (emailResponse.ok) {
-              const emailResult = await emailResponse.json()
-              if (emailResult.success) {
-                console.log(
-                  '✅ E-mail de boas-vindas enviado com sucesso (cliente)'
-                )
-              } else {
-                console.warn(
-                  '⚠️ Falha ao enviar e-mail de boas-vindas:',
-                  emailResult.message
-                )
-              }
-            } else {
-              console.warn('⚠️ Erro na API de e-mail:', emailResponse.status)
-            }
-          }
-        } catch (emailError) {
-          console.warn('⚠️ Erro ao enviar e-mail de boas-vindas:', emailError)
-          // Não falhar o cadastro por causa do e-mail
-        }
-      }
-
-      // Aguardar um momento para garantir que o localStorage foi atualizado
-      setTimeout(() => {
-        if (typeof window !== 'undefined' && window.localStorage) {
-          const localStorageData = localStorage.getItem('unified-patients')
-          if (localStorageData) {
-            const parsedData = JSON.parse(localStorageData)
-            const localStoragePatient = parsedData.find(
-              (p: Patient) => p.id === newPatient.id
-            )
-            if (localStoragePatient) {
-              console.log(
-                '✅ Paciente verificado no localStorage:',
-                localStoragePatient.name
-              )
-            } else {
-              console.log('❌ Paciente não encontrado no localStorage')
-            }
-          }
-        } else {
-          console.log('📱 localStorage não disponível (servidor)')
-        }
-      }, 100)
-
+      
+      // Adicionar ao cache
+      patientCache.set(cacheKey, newPatient)
+      
+      console.log('👤 Novo paciente criado com sucesso!')
       return { success: true, patient: newPatient }
     }
   } catch (error) {
@@ -838,85 +663,6 @@ export async function createOrUpdatePatient(
   }
 }
 
-// Obter todos os pacientes
-export async function getAllPatients(): Promise<Patient[]> {
-  try {
-    // Carregar pacientes do arquivo/localStorage
-    let patients: Patient[] = []
-    if (typeof window === 'undefined') {
-      patients = await loadFromStorage<Patient>(PATIENTS_KEY)
-    } else {
-      patients = getFromStorage<Patient[]>(PATIENTS_KEY, [])
-    }
-
-    // Carregar agendamentos para extrair pacientes únicos
-    const appointments = await getAllAppointments()
-
-    // Extrair pacientes únicos dos agendamentos que não estão na lista de pacientes
-    const appointmentPatients: Patient[] = []
-    const existingPatientIds = new Set(patients.map(p => p.id))
-    const processedPatientIds = new Set<string>()
-
-    for (const apt of appointments) {
-      // Verificar se o appointment tem dados válidos
-      if (!apt || !apt.patientId) {
-        console.warn('⚠️ Appointment inválido encontrado:', apt)
-        continue
-      }
-
-      // Evitar duplicatas e pacientes já existentes
-      if (
-        !existingPatientIds.has(apt.patientId) &&
-        !processedPatientIds.has(apt.patientId)
-      ) {
-        processedPatientIds.add(apt.patientId)
-
-        const appointmentPatient: Patient = {
-          id: apt.patientId,
-          name: apt.patientName,
-          cpf: apt.patientCpf,
-          medicalRecordNumber: apt.patientMedicalRecordNumber,
-          phone: apt.patientPhone,
-          whatsapp: apt.patientWhatsapp,
-          email: apt.patientEmail || '',
-          birthDate: apt.patientBirthDate || '',
-          insurance: {
-            type: apt.insuranceType,
-            plan: apt.insurancePlan,
-          },
-          createdAt: apt.createdAt,
-          updatedAt: apt.updatedAt,
-        }
-
-        appointmentPatients.push(appointmentPatient)
-      }
-    }
-
-    // Combinar pacientes do arquivo com pacientes dos agendamentos
-    const allPatients = [...patients, ...appointmentPatients]
-
-    console.log(
-      `📋 Total de pacientes encontrados: ${allPatients.length} (${patients.length} do arquivo + ${appointmentPatients.length} dos agendamentos)`
-    )
-
-    return allPatients
-  } catch (error) {
-    console.error('❌ Erro ao obter pacientes:', error)
-    return []
-  }
-}
-
-// Buscar paciente por ID
-export async function getPatientById(
-  patientId: string
-): Promise<Patient | null> {
-  const patients = await getAllPatients()
-  return patients.find(p => p.id === patientId) || null
-}
-
-// === FUNÇÕES DE INTEGRAÇÃO ===
-
-// Criar agendamento a partir do formulário público
 export async function createPublicAppointment(formData: {
   fullName: string
   cpf: string
@@ -945,10 +691,10 @@ export async function createPublicAppointment(formData: {
     const appointmentDate = formData.selectedDate.toISOString().split('T')[0]
     console.log('🔍 Verificando conflitos para:', appointmentDate, formData.selectedTime)
 
-    // Buscar apenas agendamentos da data específica (mais eficiente)
+    // Buscar apenas agendamentos da data específica (com cache)
     const dayAppointments = await getAppointmentsByDate(appointmentDate)
     
-    // Verificar se já existe uma consulta no MESMO HORÁRIO (simplificado)
+    // Verificar se já existe uma consulta no MESMO HORÁRIO (otimizado)
     const existingAppointment = dayAppointments.find(
       apt =>
         apt.status !== 'cancelada' &&
@@ -969,7 +715,7 @@ export async function createPublicAppointment(formData: {
 
     console.log('✅ Nenhum conflito encontrado, prosseguindo...')
 
-    // Primeiro, criar ou atualizar o paciente
+    // Primeiro, criar ou atualizar o paciente (com cache)
     console.log('👤 Criando/atualizando paciente...')
     const patientResult = await createOrUpdatePatient({
       name: formData.fullName,
@@ -1020,6 +766,12 @@ export async function createPublicAppointment(formData: {
       appointmentResult.error
     )
 
+    // Limpar cache de agendamentos para a data
+    if (appointmentResult.success) {
+      appointmentCache.delete(getCacheKey(appointmentDate))
+      clearExpiredCache()
+    }
+
     return {
       success: appointmentResult.success,
       appointment: appointmentResult.appointment,
@@ -1065,6 +817,15 @@ export async function cancelAppointment(
       success: false,
       error: error instanceof Error ? error.message : 'Erro desconhecido',
     }
+  }
+}
+
+export async function getAllPatients(): Promise<Patient[]> {
+  try {
+    return await loadFromStorage<Patient>(PATIENTS_KEY)
+  } catch (error) {
+    console.error('Erro ao carregar todos os pacientes:', error)
+    return []
   }
 }
 
@@ -1166,6 +927,25 @@ export async function getSurgeriesByDate(date: string): Promise<Surgery[]> {
   } catch (error) {
     console.error('Erro ao buscar cirurgias por data:', error)
     return []
+  }
+}
+
+// Obter agenda diária
+export async function getDailyAgenda(date: string): Promise<DailyAgenda> {
+  const appointments = await getAppointmentsByDate(date)
+
+  return {
+    date,
+    appointments,
+    totalPatients: appointments.length,
+    confirmedAppointments: appointments.filter(
+      apt => apt.status === 'confirmada'
+    ).length,
+    pendingAppointments: appointments.filter(apt => apt.status === 'agendada')
+      .length,
+    completedAppointments: appointments.filter(
+      apt => apt.status === 'concluida'
+    ).length,
   }
 }
 
