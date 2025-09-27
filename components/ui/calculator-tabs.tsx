@@ -31,6 +31,8 @@ import IBDQCalculator from '../calculators/ibdq-calculator'
 import BristolCalculator from '../calculators/bristol-calculator'
 import ConstipacaoCalculator from '../calculators/constipacao-calculator'
 import CDAICalculator from '../calculators/cdai-calculator'
+import HarveyBradshawCalculator from '../calculators/harvey-bradshaw-calculator'
+import TrueloveWittsCalculator from '../calculators/truelove-witts-calculator'
 import JNETCalculator from '../calculators/jnet-calculator'
 import UCEISCalculator from '../calculators/uceis-calculator'
 import KudoCalculator from '../calculators/kudo-calculator'
@@ -102,6 +104,20 @@ const calculators: Calculator[] = [
     description: "Crohn's Disease Activity Index",
     category: 'clinical',
     component: CDAICalculator,
+  },
+  {
+    id: 'harvey-bradshaw',
+    name: 'Harvey-Bradshaw Index',
+    description: 'Avaliação simplificada da atividade da Doença de Crohn',
+    category: 'clinical',
+    component: HarveyBradshawCalculator,
+  },
+  {
+    id: 'truelove-witts',
+    name: 'Truelove-Witts',
+    description: 'Critérios de gravidade da colite ulcerativa aguda',
+    category: 'clinical',
+    component: TrueloveWittsCalculator,
   },
   // Escalas Endoscópicas
   {

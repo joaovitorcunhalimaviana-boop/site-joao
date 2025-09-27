@@ -14,6 +14,11 @@ import {
   ArrowRightOnRectangleIcon,
   UserIcon,
   XMarkIcon,
+  ChatBubbleLeftRightIcon,
+  CalculatorIcon,
+  EnvelopeIcon,
+  DocumentTextIcon,
+  ScissorsIcon,
 } from '@heroicons/react/24/outline'
 
 interface Doctor {
@@ -751,6 +756,85 @@ export default function AreaMedicaPage() {
                 </div>
               </div>
             </div>
+          </div>
+
+          {/* Acesso Rápido */}
+          <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8'>
+            <button
+              onClick={() => router.push('/area-medica/emails')}
+              className='bg-gray-900/50 backdrop-blur-sm rounded-2xl shadow-xl p-6 border border-gray-700 hover:border-blue-500/50 hover:bg-gray-800/50 transition-all duration-200 group'
+            >
+              <div className='flex items-center'>
+                <div className='p-3 bg-blue-900/20 rounded-xl group-hover:bg-blue-900/30 transition-colors duration-200'>
+                  <EnvelopeIcon className='h-6 w-6 text-blue-400' />
+                </div>
+                <div className='ml-4 text-left'>
+                  <p className='text-sm font-medium text-white'>
+                    E-mails
+                  </p>
+                  <p className='text-xs text-gray-400'>
+                    Sistema de comunicação
+                  </p>
+                </div>
+              </div>
+            </button>
+
+            <button
+              onClick={() => router.push('/area-medica/whatsapp')}
+              className='bg-gray-900/50 backdrop-blur-sm rounded-2xl shadow-xl p-6 border border-gray-700 hover:border-green-500/50 hover:bg-gray-800/50 transition-all duration-200 group'
+            >
+              <div className='flex items-center'>
+                <div className='p-3 bg-green-900/20 rounded-xl group-hover:bg-green-900/30 transition-colors duration-200'>
+                  <ChatBubbleLeftRightIcon className='h-6 w-6 text-green-400' />
+                </div>
+                <div className='ml-4 text-left'>
+                  <p className='text-sm font-medium text-white'>
+                    WhatsApp
+                  </p>
+                  <p className='text-xs text-gray-400'>
+                    Lista de pacientes
+                  </p>
+                </div>
+              </div>
+            </button>
+
+            <button
+              onClick={() => router.push('/area-medica/cirurgias')}
+              className='bg-gray-900/50 backdrop-blur-sm rounded-2xl shadow-xl p-6 border border-gray-700 hover:border-blue-500/50 hover:bg-gray-800/50 transition-all duration-200 group'
+            >
+              <div className='flex items-center'>
+                <div className='p-3 bg-blue-900/20 rounded-xl group-hover:bg-blue-900/30 transition-colors duration-200'>
+                  <ScissorsIcon className='h-6 w-6 text-blue-400' />
+                </div>
+                <div className='ml-4 text-left'>
+                  <p className='text-sm font-medium text-white'>
+                    Controle de Cirurgias
+                  </p>
+                  <p className='text-xs text-gray-400'>
+                    Gestão cirúrgica
+                  </p>
+                </div>
+              </div>
+            </button>
+
+            <button
+              onClick={() => router.push('/area-medica/agenda')}
+              className='bg-gray-900/50 backdrop-blur-sm rounded-2xl shadow-xl p-6 border border-gray-700 hover:border-blue-500/50 hover:bg-gray-800/50 transition-all duration-200 group'
+            >
+              <div className='flex items-center'>
+                <div className='p-3 bg-blue-900/20 rounded-xl group-hover:bg-blue-900/30 transition-colors duration-200'>
+                  <CalendarDaysIcon className='h-6 w-6 text-blue-400' />
+                </div>
+                <div className='ml-4 text-left'>
+                  <p className='text-sm font-medium text-white'>
+                    Gestão de Agenda
+                  </p>
+                  <p className='text-xs text-gray-400'>
+                    Horários e consultas
+                  </p>
+                </div>
+              </div>
+            </button>
           </div>
 
           {/* Seletor de Data */}

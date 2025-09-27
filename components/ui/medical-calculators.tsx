@@ -21,6 +21,8 @@ import IBDQCalculator from '@/components/calculators/ibdq-calculator'
 import ConstipacaoCalculator from '@/components/calculators/constipacao-calculator'
 import CDAICalculator from '@/components/calculators/cdai-calculator'
 import BMICalculator from '@/components/calculators/bmi-calculator'
+import HarveyBradshawCalculator from '@/components/calculators/harvey-bradshaw-calculator'
+import TrueloveWittsCalculator from '@/components/calculators/truelove-witts-calculator'
 
 interface MedicalCalculatorsProps {
   patientName: string
@@ -37,6 +39,8 @@ type CalculatorType =
   | 'constipacao'
   | 'cdai'
   | 'bmi'
+  | 'harvey-bradshaw'
+  | 'truelove-witts'
 
 const calculatorOptions = [
   { value: 'wexner', label: 'Wexner (Incontinência Fecal)' },
@@ -48,6 +52,8 @@ const calculatorOptions = [
   { value: 'constipacao', label: 'Escala de Constipação' },
   { value: 'cdai', label: 'CDAI (Atividade da Doença de Crohn)' },
   { value: 'bmi', label: 'IMC (Índice de Massa Corporal)' },
+  { value: 'harvey-bradshaw', label: 'Harvey-Bradshaw Index (Doença de Crohn)' },
+  { value: 'truelove-witts', label: 'Truelove-Witts (Retocolite Ulcerativa)' },
 ]
 
 // Score de Wexner para Incontinência Fecal
@@ -376,6 +382,20 @@ export default function MedicalCalculators({
         )
       case 'bmi':
         return <BMICalculator onSave={handleSaveResult} />
+      case 'harvey-bradshaw':
+        return (
+          <HarveyBradshawCalculator
+            onSaveResult={handleSaveResult}
+            darkMode={true}
+          />
+        )
+      case 'truelove-witts':
+        return (
+          <TrueloveWittsCalculator
+            onSaveResult={handleSaveResult}
+            darkMode={true}
+          />
+        )
       default:
         if (selectedCalculator) {
           const calculator = calculatorOptions.find(

@@ -971,3 +971,77 @@ export async function getDailyAgendaWithSurgeries(
     ).length,
   }
 }
+
+// Obter paciente por ID
+export async function getPatientById(patientId: string): Promise<Patient | undefined> {
+  try {
+    const patients = await getAllPatients()
+    return patients.find(p => p.id === patientId)
+  } catch (error) {
+    console.error('Erro ao buscar paciente por ID:', error)
+    return undefined
+  }
+}
+
+// Atualizar status do agendamento
+export async function updateAppointmentStatus(
+  appointmentId: string,
+  status: UnifiedAppointment['status']
+): Promise<boolean> {
+  try {
+    const appointments = await getAllAppointments()
+    const appointmentIndex = appointments.findIndex(
+      apt => apt.id === appointmentId
+    )
+
+    if (appointmentIndex === -1) {
+      return false
+    }
+
+    appointments[appointmentIndex].status = status
+    appointments[appointmentIndex].updatedAt = getBrasiliaTimestamp()
+
+    // Salvar no localStorage (browser) ou arquivo (servidor)
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('unified_appointments', JSON.stringify(appointments))
+    }
+
+    return true
+  } catch (error) {
+    console.error('Erro ao atualizar status do agendamento:', error)
+    return false
+  }
+}
+
+// Atualizar agendamento completo
+export async function updateAppointment(
+  appointmentId: string,
+  updateData: Partial<UnifiedAppointment>
+): Promise<boolean> {
+  try {
+    const appointments = await getAllAppointments()
+    const appointmentIndex = appointments.findIndex(
+      apt => apt.id === appointmentId
+    )
+
+    if (appointmentIndex === -1) {
+      return false
+    }
+
+    appointments[appointmentIndex] = {
+      ...appointments[appointmentIndex],
+      ...updateData,
+      updatedAt: getBrasiliaTimestamp(),
+    }
+
+    // Salvar no localStorage (browser) ou arquivo (servidor)
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('unified_appointments', JSON.stringify(appointments))
+    }
+
+    return true
+  } catch (error) {
+    console.error('Erro ao atualizar agendamento:', error)
+    return false
+  }
+}
