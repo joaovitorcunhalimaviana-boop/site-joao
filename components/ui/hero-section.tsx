@@ -26,38 +26,16 @@ const HeroSection = () => {
           <div className='py-24 sm:py-32 lg:pb-40'>
             <div className='mx-auto max-w-7xl px-6 lg:px-8'>
               <div className='mx-auto text-center'>
-                <h1
-                  className='hero-title text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-bold text-white mb-6 tracking-tight leading-none w-full'
-                  style={{ fontSize: 'clamp(2.5rem, 6vw, 5.5rem) !important' }}
-                >
-                  <span
-                    className='hero-doctor-name block text-transparent bg-clip-text w-full animate-gradient-pulse'
-                    style={{
-                      fontSize: 'inherit !important',
-                      background:
-                        'linear-gradient(90deg, #60a5fa 0%, #60a5fa 20%, #ffffff 50%, #93c5fd 80%, #60a5fa 100%)',
-                      backgroundSize: '200% 100%',
-                      WebkitBackgroundClip: 'text',
-                      backgroundClip: 'text',
-                      animation: 'gradientPulse 3s ease-in-out infinite',
-                    }}
-                  >
+                <h1 className='hero-title font-bold text-white mb-6 tracking-tight leading-none w-full'>
+                  <span className='hero-doctor-name block text-transparent bg-clip-text w-full animate-gradient-pulse'>
                     Dr. João Vítor Viana
                   </span>
                 </h1>
-                <p
-                  className='text-2xl sm:text-3xl md:text-4xl text-blue-400 mb-8 font-medium'
-                  style={{ fontSize: 'clamp(1rem, 2.8vw, 1.6rem) !important' }}
-                >
+                <p className='text-xl sm:text-2xl md:text-3xl text-blue-400 mb-8 font-medium'>
                   Coloproctologista e Cirurgião Geral
                 </p>
                 <div className='max-w-4xl mx-auto mb-16'>
-                  <p
-                    className='text-white text-lg sm:text-xl leading-relaxed text-justify'
-                    style={{
-                      fontSize: 'clamp(1rem, 2.2vw, 1.125rem) !important',
-                    }}
-                  >
+                  <p className='text-white text-base sm:text-lg leading-relaxed text-justify'>
                     Dr. João Vítor Viana é coloproctologista em João Pessoa/PB,
                     dedicando sua carreira ao tratamento especializado de
                     doenças do aparelho digestivo baixo. Com formação sólida,
@@ -222,23 +200,11 @@ const HeroSection = () => {
           <div className='grid grid-cols-1 lg:grid-cols-2 gap-12 items-center'>
             <div className='space-y-6 lg:pl-8'>
               <div className='space-y-4'>
-                <h2
-                  className='font-bold leading-tight'
-                  style={{
-                    fontSize: 'clamp(1.5rem, 3.5vw, 3rem) !important',
-                    lineHeight: '1.1 !important',
-                  }}
-                >
-                  <span
-                    className='block text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-300'
-                    style={{ fontSize: 'inherit !important' }}
-                  >
+                <h2 className='text-3xl lg:text-4xl font-bold leading-tight'>
+                  <span className='block text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-300'>
                     Prazer,
                   </span>
-                  <span
-                    className='block text-white mt-2'
-                    style={{ fontSize: 'inherit !important' }}
-                  >
+                  <span className='block text-white mt-2'>
                     <span className="block text-white font-bold">
                       Dr. João Vítor Viana
                     </span>
