@@ -56,6 +56,12 @@ const morphologyTypes = [
     characteristics: 'Ulceração profunda',
     management: 'Ressecção cirúrgica',
   },
+  {
+    type: '0-3',
+    description: 'Lesão mista/complexa',
+    characteristics: 'Combinação de diferentes morfologias',
+    management: 'Avaliação individualizada - ESD ou cirurgia',
+  },
 ]
 
 const ParisCalculator: React.FC<{

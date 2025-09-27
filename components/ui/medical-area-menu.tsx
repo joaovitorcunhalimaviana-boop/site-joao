@@ -15,6 +15,7 @@ import {
   ScissorsIcon,
   CalendarDaysIcon,
   ChatBubbleLeftRightIcon,
+  MagnifyingGlassIcon,
 } from '@heroicons/react/24/outline'
 
 interface Doctor {
@@ -90,6 +91,11 @@ export default function MedicalAreaMenu({ currentPage }: MedicalAreaMenuProps) {
       href: '/area-medica/whatsapp',
       label: 'Sistema de WhatsApp',
       icon: ChatBubbleLeftRightIcon,
+    },
+    {
+      href: '/area-medica/colonoscopias',
+      label: 'Área de Colonoscopias',
+      icon: MagnifyingGlassIcon,
     },
     {
       href: '/area-medica/cirurgias',

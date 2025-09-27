@@ -1,4 +1,22 @@
-# 🚀 Guia de Deploy - joaovitorviana.com.br
+# 🚀 Instruções de Deploy - Site Dr. João Vitor Viana
+
+## 📋 Resumo das Alterações Recentes
+
+✅ **Nova Funcionalidade Adicionada**: Área de Colonoscopia
+- Sistema completo de gerenciamento de laudos de colonoscopia
+- Templates personalizáveis e snippets rápidos
+- Calculadoras endoscópicas especializadas
+- Assistente de produtividade com IA
+- Interface padronizada com tema azul-escuro transparente
+
+## 🔧 Pré-Deploy Checklist
+
+### ✅ Verificações Concluídas:
+- [x] Build local funcionando (`npm run build` - ✅ Sucesso)
+- [x] Área de colonoscopia totalmente funcional
+- [x] Interface visual padronizada
+- [x] Componentes responsivos
+- [x] TypeScript sem erros
 
 ## ✅ Status do Projeto
 
