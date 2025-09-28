@@ -7,6 +7,7 @@ import {
   sendTelegramAppointmentNotification,
   type AppointmentNotificationData,
 } from './telegram-notifications'
+import { addEmailToIntegratedSystem } from './email-integration'
 
 // Interfaces principais
 export interface UnifiedAppointment {
@@ -816,6 +817,27 @@ export async function createPublicAppointment(formData: {
     if (appointmentResult.success) {
       appointmentCache.delete(getCacheKey(appointmentDate))
       clearExpiredCache()
+
+      // Integrar email ao sistema após agendamento bem-sucedido
+      if (formData.email && formData.email.trim()) {
+        try {
+          console.log('📧 Integrando email ao sistema:', formData.email)
+          await addEmailToIntegratedSystem(
+            formData.email,
+            formData.fullName,
+            'appointment',
+            {
+              whatsapp: formData.whatsapp,
+              birthDate: formData.birthDate,
+              patientId: patientResult.patient?.id
+            }
+          )
+          console.log('✅ Email integrado com sucesso ao sistema')
+        } catch (emailError) {
+          console.error('❌ Erro ao integrar email:', emailError)
+          // Não falhar o agendamento por erro de email
+        }
+      }
     }
 
     return {
