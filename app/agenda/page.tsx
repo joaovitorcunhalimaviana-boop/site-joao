@@ -223,7 +223,7 @@ export default function AgendaPage() {
             }}
           />
         </div>
-        <div className='container mx-auto p-6 pt-20'>
+        <div className='container mx-auto p-6 pt-32'>
           <div className='flex justify-between items-center mb-8'>
             <div className='flex items-center gap-4'>
               <Button

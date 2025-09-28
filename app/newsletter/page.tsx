@@ -14,7 +14,7 @@ export default function NewsletterPage() {
 
       <div className='relative isolate'>
         {/* Hero Section */}
-        <div className='pt-20 pb-16'>
+        <div className='pt-32 pb-16'>
           <div className='mx-auto max-w-7xl px-6 lg:px-8'>
             <div className='mx-auto max-w-2xl text-center'>
               <div className='flex justify-center mb-6'>

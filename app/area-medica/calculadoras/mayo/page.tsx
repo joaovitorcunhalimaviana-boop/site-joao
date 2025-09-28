@@ -226,7 +226,7 @@ export default function MayoScorePage() {
     <div className='min-h-screen bg-gray-900 relative'>
       <BackgroundPattern />
       <Header />
-      <div className='relative z-10 p-4'>
+      <div className='relative z-10 p-4 pt-24'>
         <div className='max-w-4xl mx-auto'>
           {/* Header */}
           <div className='flex items-center justify-between mb-6'>

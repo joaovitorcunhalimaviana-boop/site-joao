@@ -16,15 +16,15 @@ export default function Header({ currentPage }: HeaderProps) {
   }
 
   return (
-    <header className='bg-black/90 backdrop-blur-sm border-b border-gray-700 relative z-50'>
+    <header className='bg-black/90 backdrop-blur-sm border-b border-gray-700 fixed top-0 left-0 right-0 z-50'>
       <div className='container mx-auto px-4 py-4'>
         <div className='flex items-center justify-between'>
           <div className='flex items-center'>
             <div>
-              <h1 className='text-xl font-bold text-white'>
+              <h1 className='text-lg sm:text-xl font-bold text-white'>
                 Dr. João Vítor Viana
               </h1>
-              <p className='text-sm text-blue-200'>Coloproctologista</p>
+              <p className='text-xs sm:text-sm text-blue-200'>Coloproctologista</p>
             </div>
           </div>
 
@@ -50,7 +50,7 @@ export default function Header({ currentPage }: HeaderProps) {
 
       {/* Menu Dropdown */}
       {isMenuOpen && (
-        <div className='absolute right-0 mt-2 w-64 bg-gray-900/95 backdrop-blur-sm rounded-xl shadow-xl border border-gray-700 z-50'>
+        <div className='absolute right-2 sm:right-4 top-full mt-2 w-72 sm:w-64 bg-gray-900/95 backdrop-blur-sm rounded-xl shadow-xl border border-gray-700 z-50 max-h-[80vh] overflow-y-auto'>
           <div className='py-2'>
             <button
               onClick={() => {

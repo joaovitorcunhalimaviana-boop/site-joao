@@ -12,13 +12,20 @@ async function verifyAuth() {
     const cookieStore = await cookies()
     const token = cookieStore.get('auth-token')?.value
 
+    console.log('=== AUTH DEBUG ===')
+    console.log('Token encontrado:', token ? 'SIM' : 'NÃO')
+    console.log('JWT_SECRET:', JWT_SECRET)
+
     if (!token) {
+      console.log('❌ Nenhum token encontrado')
       return null
     }
 
     const decoded = jwt.verify(token, JWT_SECRET) as any
+    console.log('✅ Token decodificado:', decoded)
     return decoded
   } catch (error) {
+    console.log('❌ Erro ao verificar token:', error)
     return null
   }
 }

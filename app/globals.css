@@ -49,6 +49,8 @@
   background-size: 200% 100%;
   -webkit-background-clip: text;
   background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
 }
 
 /* Animação de pulsação do gradiente para o nome do médico */

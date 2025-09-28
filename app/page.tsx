@@ -18,7 +18,7 @@ export default function Home() {
       <StructuredData type='faq' />
       <div className='min-h-screen bg-black'>
         <Header currentPage='home' />
-        <main>
+        <main className='pt-20'>
           <HeroSection />
           <AboutSection />
           <FAQSection />

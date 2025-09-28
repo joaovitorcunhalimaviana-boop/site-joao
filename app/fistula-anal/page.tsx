@@ -51,7 +51,7 @@ export default function FistulaAnalPage() {
         <Header currentPage='fistula-anal' />
 
         {/* Hero Section */}
-        <div className='bg-black pt-20'>
+        <div className='bg-black pt-32'>
           <div className='relative isolate'>
             <div
               className='absolute inset-x-0 -top-40 -z-10 transform-gpu overflow-hidden blur-3xl sm:-top-80'

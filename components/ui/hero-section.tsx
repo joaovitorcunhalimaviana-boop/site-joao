@@ -8,7 +8,7 @@ const HeroSection = () => {
   return (
     <>
       {/* Seção Hero Original */}
-      <div className='bg-black pt-20'>
+      <div className='bg-black'>
         <div className='relative isolate'>
           <div
             className='absolute inset-x-0 -top-40 -z-10 transform-gpu overflow-hidden blur-3xl sm:-top-80'
@@ -27,7 +27,7 @@ const HeroSection = () => {
             <div className='mx-auto max-w-7xl px-6 lg:px-8'>
               <div className='mx-auto text-center'>
                 <h1 className='hero-title font-bold text-white mb-6 tracking-tight leading-none w-full'>
-                  <span className='hero-doctor-name block text-transparent bg-clip-text w-full animate-gradient-pulse'>
+                  <span className='hero-doctor-name block w-full animate-gradient-pulse'>
                     Dr. João Vítor Viana
                   </span>
                 </h1>
