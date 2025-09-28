@@ -33,14 +33,14 @@ interface Consultation {
   date: string
   time: string
   type: string
-  status: 'agendada' | 'confirmada' | 'cancelada' | 'concluida'
+  status: 'scheduled' | 'completed' | 'cancelled' | 'agendada' | 'confirmada' | 'cancelada' | 'concluida'
   notes?: string
 }
 
 interface PatientAppointment {
   id: string
   patientName: string
-  status: 'agendada' | 'confirmada' | 'cancelada' | 'concluida'
+  status: 'scheduled' | 'completed' | 'cancelled' | 'agendada' | 'confirmada' | 'cancelada' | 'concluida'
   time: string
   date?: string
   insurance: {
@@ -59,11 +59,36 @@ export default function RelatoriosPage() {
   >([])
   const [showModal, setShowModal] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
   const router = useRouter()
 
+  // Verificar autenticação
   useEffect(() => {
-    loadDailyAppointments()
-  }, [])
+    const checkAuth = async () => {
+      try {
+        const response = await fetch('/api/auth/verify', {
+          credentials: 'include',
+        })
+        if (response.ok) {
+          setIsAuthenticated(true)
+        } else {
+          router.push('/login')
+          return
+        }
+      } catch (error) {
+        console.error('Erro ao verificar autenticação:', error)
+        router.push('/login')
+        return
+      }
+    }
+    checkAuth()
+  }, [router])
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      loadDailyAppointments()
+    }
+  }, [isAuthenticated])
 
   useEffect(() => {
     loadDayAppointments(selectedDate)
@@ -72,13 +97,26 @@ export default function RelatoriosPage() {
   const loadDailyAppointments = async () => {
     try {
       setIsLoading(true)
-      const response = await fetch('/api/consultations')
+      const response = await fetch('/api/consultations', {
+        credentials: 'include', // Incluir cookies de autenticação
+      })
       if (response.ok) {
         const data = await response.json()
-        setConsultations(data)
+        console.log('Dados recebidos da API:', data)
+        // A API retorna { success: true, consultations: [...] }
+        if (data.success && data.consultations) {
+          setConsultations(data.consultations)
+        } else {
+          console.warn('Formato de dados inesperado:', data)
+          setConsultations([])
+        }
+      } else {
+        console.error('Erro na resposta da API:', response.status, response.statusText)
+        setConsultations([])
       }
     } catch (error) {
       console.error('Erro ao carregar consultas:', error)
+      setConsultations([])
     } finally {
       setIsLoading(false)
     }
@@ -123,12 +161,15 @@ export default function RelatoriosPage() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'confirmada':
+      case 'scheduled':
         return 'bg-green-900/20 text-green-400 border border-green-700'
       case 'agendada':
         return 'bg-blue-900/20 text-blue-400 border border-blue-700'
       case 'concluida':
+      case 'completed':
         return 'bg-purple-900/20 text-purple-400 border border-purple-700'
       case 'cancelada':
+      case 'cancelled':
         return 'bg-red-900/20 text-red-400 border border-red-700'
       default:
         return 'bg-gray-900/20 text-gray-400 border border-gray-700'
