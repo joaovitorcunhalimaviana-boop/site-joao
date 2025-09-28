@@ -114,9 +114,15 @@ function getWelcomeEmailTemplate(patientName: string) {
 }
 
 export async function POST(request: NextRequest) {
+  let name = 'unknown'
+  let email = 'unknown'
+  let source = 'website'
+  
   try {
     const body = await request.json()
-    const { name, email, source = 'website' } = body
+    name = body.name
+    email = body.email
+    source = body.source || 'website'
 
     if (!name || !email) {
       return NextResponse.json(
@@ -172,13 +178,10 @@ export async function POST(request: NextRequest) {
 
     // Registrar erro no log
     try {
-      const body = await request.json()
-      const { name, email, source = 'website' } = body
-      
       const logs = readWelcomeEmailLogs()
       const logEntry: WelcomeEmailLog = {
-        email: email || 'unknown',
-        name: name || 'unknown',
+        email,
+        name,
         sentAt: new Date().toISOString(),
         source,
         success: false
