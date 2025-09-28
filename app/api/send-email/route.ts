@@ -195,16 +195,21 @@ export async function POST(request: NextRequest) {
             host: process.env.EMAIL_HOST || 'smtp.gmail.com',
             port: parseInt(process.env.EMAIL_PORT || '587'),
             secure: false, // Use STARTTLS
+            requireTLS: true, // Force TLS
             auth: {
               user: process.env.EMAIL_USER,
               pass: emailPassword,
             },
             tls: {
               rejectUnauthorized: false,
+              ciphers: 'SSLv3',
             },
-            connectionTimeout: 60000, // 60 seconds
-            greetingTimeout: 30000, // 30 seconds
-            socketTimeout: 60000, // 60 seconds
+            connectionTimeout: 120000, // 2 minutes
+            greetingTimeout: 60000, // 1 minute
+            socketTimeout: 120000, // 2 minutes
+            pool: true,
+            maxConnections: 1,
+            maxMessages: 1,
           })
 
           const mailOptions = {
