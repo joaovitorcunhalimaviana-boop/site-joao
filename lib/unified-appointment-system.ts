@@ -670,7 +670,7 @@ export async function createPublicAppointment(formData: {
   phone: string
   whatsapp: string
   birthDate: string
-  insuranceType: 'unimed' | 'particular'
+  insuranceType: 'unimed' | 'particular' | 'outro'
   selectedDate: Date
   selectedTime: string
 }): Promise<{
