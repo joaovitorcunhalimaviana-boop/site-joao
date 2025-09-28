@@ -434,6 +434,29 @@ export function generatePatientId(): string {
   return `pat_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
 }
 
+// Função para obter o próximo número de prontuário médico
+export async function getNextMedicalRecordNumber(): Promise<number> {
+  try {
+    const patients = await getAllPatients()
+    
+    if (patients.length === 0) {
+      return 1
+    }
+    
+    // Encontrar o maior número de prontuário existente
+    const maxRecordNumber = patients
+      .filter(patient => patient.medicalRecordNumber && typeof patient.medicalRecordNumber === 'number')
+      .reduce((max, patient) => {
+        return Math.max(max, patient.medicalRecordNumber)
+      }, 0)
+    
+    return maxRecordNumber + 1
+  } catch (error) {
+    console.error('❌ Erro ao obter próximo número de prontuário:', error)
+    return 1
+  }
+}
+
 // === FUNÇÕES DE AGENDAMENTO ===
 
 // Criar novo agendamento
