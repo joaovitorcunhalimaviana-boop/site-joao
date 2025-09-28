@@ -12,7 +12,7 @@ const nextConfig = {
     // !! WARN !!
     ignoreBuildErrors: true,
   },
-  output: 'standalone', // Mudando para standalone para Railway
+  // output: 'standalone', // Temporariamente removido para testar Railway
   trailingSlash: false,
 
   // Configurações para otimização
