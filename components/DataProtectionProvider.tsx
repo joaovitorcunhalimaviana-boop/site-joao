@@ -201,38 +201,40 @@ export function DataProtectionProvider({ children }: DataProtectionProviderProps
     <DataProtectionContext.Provider value={contextValue}>
       {children}
       
-      {/* Indicador visual do status de proteção */}
-      <div className="fixed bottom-4 right-4 z-50">
-        <div className={`
-          px-3 py-2 rounded-lg text-xs font-medium shadow-lg transition-all duration-300
-          ${protectionStatus === 'active' ? 'bg-green-500 text-white' : ''}
-          ${protectionStatus === 'initializing' ? 'bg-yellow-500 text-white animate-pulse' : ''}
-          ${protectionStatus === 'error' ? 'bg-red-500 text-white' : ''}
-          ${protectionStatus === 'inactive' ? 'bg-gray-500 text-white' : ''}
-        `}>
-          {protectionStatus === 'active' && '🛡️ Proteção Ativa'}
-          {protectionStatus === 'initializing' && '⏳ Inicializando...'}
-          {protectionStatus === 'error' && '⚠️ Erro na Proteção'}
-          {protectionStatus === 'inactive' && '❌ Proteção Inativa'}
-        </div>
-        
-        {systemHealth !== 'UNKNOWN' && (
+      {/* Indicador visual do status de proteção - apenas em desenvolvimento */}
+      {process.env.NODE_ENV === 'development' && (
+        <div className="fixed bottom-4 right-4 z-50">
           <div className={`
-            mt-1 px-2 py-1 rounded text-xs
-            ${systemHealth === 'HEALTHY' ? 'bg-green-100 text-green-800' : ''}
-            ${systemHealth === 'WARNING' ? 'bg-yellow-100 text-yellow-800' : ''}
-            ${systemHealth === 'CRITICAL' ? 'bg-red-100 text-red-800' : ''}
+            px-3 py-2 rounded-lg text-xs font-medium shadow-lg transition-all duration-300
+            ${protectionStatus === 'active' ? 'bg-green-500 text-white' : ''}
+            ${protectionStatus === 'initializing' ? 'bg-yellow-500 text-white animate-pulse' : ''}
+            ${protectionStatus === 'error' ? 'bg-red-500 text-white' : ''}
+            ${protectionStatus === 'inactive' ? 'bg-gray-500 text-white' : ''}
           `}>
-            Sistema: {systemHealth}
+            {protectionStatus === 'active' && '🛡️ Proteção Ativa'}
+            {protectionStatus === 'initializing' && '⏳ Inicializando...'}
+            {protectionStatus === 'error' && '⚠️ Erro na Proteção'}
+            {protectionStatus === 'inactive' && '❌ Proteção Inativa'}
           </div>
-        )}
-        
-        {lastBackup && (
-          <div className="mt-1 px-2 py-1 rounded text-xs bg-blue-100 text-blue-800">
-            Último backup: {new Date(lastBackup).toLocaleTimeString()}
-          </div>
-        )}
-      </div>
+          
+          {systemHealth !== 'UNKNOWN' && (
+            <div className={`
+              mt-1 px-2 py-1 rounded text-xs
+              ${systemHealth === 'HEALTHY' ? 'bg-green-100 text-green-800' : ''}
+              ${systemHealth === 'WARNING' ? 'bg-yellow-100 text-yellow-800' : ''}
+              ${systemHealth === 'CRITICAL' ? 'bg-red-100 text-red-800' : ''}
+            `}>
+              Sistema: {systemHealth}
+            </div>
+          )}
+          
+          {lastBackup && (
+            <div className="mt-1 px-2 py-1 rounded text-xs bg-blue-100 text-blue-800">
+              Último backup: {new Date(lastBackup).toLocaleTimeString()}
+            </div>
+          )}
+        </div>
+      )}
     </DataProtectionContext.Provider>
   )
 }
