@@ -191,7 +191,7 @@ export async function POST(request: NextRequest) {
 
         if (template === 'welcome') {
           // Enviar email de boas-vindas diretamente usando nodemailer
-          const transporter = nodemailer.createTransport({
+          const transporter = nodemailer.createTransporter({
             host: process.env.EMAIL_HOST || 'smtp.gmail.com',
             port: parseInt(process.env.EMAIL_PORT || '587'),
             secure: process.env.EMAIL_SECURE === 'true',
@@ -218,8 +218,8 @@ export async function POST(request: NextRequest) {
             `
           }
 
-          await transporter.sendMail(mailOptions)
-          success = true
+          const result = await transporter.sendMail(mailOptions)
+          success = !!result.messageId
         } else if (template === 'birthday') {
           success = await sendBirthdayEmail({
             name: 'Caro Paciente',
