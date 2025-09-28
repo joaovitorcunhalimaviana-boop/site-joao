@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import jwt from 'jsonwebtoken'
 import { consultations, type Consultation } from './data'
+import { getAllAppointments, type UnifiedAppointment } from '@/lib/unified-appointment-system'
 
 const JWT_SECRET = process.env['JWT_SECRET'] || 'your-secret-key'
 
@@ -22,6 +23,23 @@ async function verifyAuth() {
   }
 }
 
+// Função para converter agendamentos em consultas
+function convertAppointmentToConsultation(appointment: UnifiedAppointment): Consultation {
+  return {
+    id: appointment.id,
+    patientId: appointment.patientId,
+    patientName: appointment.patientName,
+    date: appointment.appointmentDate,
+    time: appointment.appointmentTime,
+    type: appointment.appointmentType,
+    status: appointment.status === 'agendada' ? 'scheduled' : 
+            appointment.status === 'concluida' ? 'completed' : 
+            appointment.status === 'cancelada' ? 'cancelled' : 'scheduled',
+    notes: appointment.notes || '',
+    createdAt: appointment.createdAt,
+  }
+}
+
 // GET - Listar consultas
 export async function GET() {
   try {
@@ -34,9 +52,30 @@ export async function GET() {
       )
     }
 
+    // Buscar agendamentos do sistema unificado
+    const appointments = await getAllAppointments()
+    
+    // Converter agendamentos em consultas
+    const unifiedConsultations = appointments.map(convertAppointmentToConsultation)
+    
+    // Combinar com consultas existentes (se houver)
+    const allConsultations = [...consultations, ...unifiedConsultations]
+    
+    console.log('=== CONSULTATIONS API DEBUG ===')
+    console.log('Total agendamentos encontrados:', appointments.length)
+    console.log('Total consultas retornadas:', allConsultations.length)
+    console.log('Consultas:', allConsultations.map(c => ({
+      id: c.id,
+      patientName: c.patientName,
+      date: c.date,
+      time: c.time,
+      status: c.status
+    })))
+    console.log('===============================')
+
     return NextResponse.json({
       success: true,
-      consultations,
+      consultations: allConsultations,
     })
   } catch (error) {
     console.error('Erro ao listar consultas:', error)
