@@ -139,27 +139,29 @@ export async function POST(request: NextRequest) {
       process.env['EMAIL_USER'] ? 'Configurado' : 'Não configurado'
     )
     console.log(
-      'EMAIL_PASS:',
-      process.env['EMAIL_PASS'] ? 'Configurado (****)' : 'Não configurado'
+      'EMAIL_PASSWORD:',
+      (process.env['EMAIL_PASSWORD'] || process.env['EMAIL_PASS']) ? 'Configurado (****)' : 'Não configurado'
     )
     console.log('EMAIL_HOST:', process.env['EMAIL_HOST'] || 'smtp.gmail.com')
     console.log('EMAIL_PORT:', process.env['EMAIL_PORT'] || '587')
 
-    if (!process.env['EMAIL_USER'] || !process.env['EMAIL_PASS']) {
+    const emailPassword = process.env['EMAIL_PASSWORD'] || process.env['EMAIL_PASS']
+    
+    if (!process.env['EMAIL_USER'] || !emailPassword) {
       console.error('❌ Configuração de email incompleta:')
       console.error(
         'EMAIL_USER:',
         process.env['EMAIL_USER'] ? 'Configurado' : 'Não configurado'
       )
       console.error(
-        'EMAIL_PASS:',
-        process.env['EMAIL_PASS'] ? 'Configurado' : 'Não configurado'
+        'EMAIL_PASSWORD/EMAIL_PASS:',
+        emailPassword ? 'Configurado' : 'Não configurado'
       )
       return NextResponse.json(
         {
           success: false,
           error:
-            'Configuração de email não encontrada. Verifique as variáveis EMAIL_USER e EMAIL_PASS no arquivo .env.local',
+            'Configuração de email não encontrada. Verifique as variáveis EMAIL_USER e EMAIL_PASSWORD no Railway',
         },
         { status: 500 }
       )
