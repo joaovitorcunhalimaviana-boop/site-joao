@@ -18,6 +18,7 @@ import {
   generateWebsiteStructuredData,
 } from '@/lib/seo-metadata'
 import ClientAnalytics from '@/components/client-analytics'
+import { DataProtectionProvider } from '../components/DataProtectionProvider'
 // import WebVitals from '@/components/performance/web-vitals'
 
 const inter = Inter({ subsets: ['latin'] })
@@ -99,22 +100,24 @@ export default function RootLayout({
       >
         <ClientAnalytics />
         <ErrorBoundary>
-          <ThemeProvider
-            attribute='class'
-            defaultTheme='system'
-            enableSystem
-            disableTransitionOnChange
-          >
-            <BirthdayInitializer />
-            <GlobalSchema />
-            <LocalBusinessSchema />
-            <LocalSEOSchema />
-            <FAQSchema />
-            <BreadcrumbSchema />
-            {/* <WebVitals /> */}
-            <main id='main-content'>{children}</main>
-            <Toaster />
-          </ThemeProvider>
+          <DataProtectionProvider>
+            <ThemeProvider
+              attribute='class'
+              defaultTheme='system'
+              enableSystem
+              disableTransitionOnChange
+            >
+              <BirthdayInitializer />
+              <GlobalSchema />
+              <LocalBusinessSchema />
+              <LocalSEOSchema />
+              <FAQSchema />
+              <BreadcrumbSchema />
+              {/* <WebVitals /> */}
+              <main id='main-content'>{children}</main>
+              <Toaster />
+            </ThemeProvider>
+          </DataProtectionProvider>
         </ErrorBoundary>
       </body>
     </html>
