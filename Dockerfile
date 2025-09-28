@@ -18,8 +18,8 @@ RUN npx prisma generate
 # Build the application
 RUN npm run build
 
-# Expose port
-EXPOSE 3000
+# Expose port (Railway will set PORT env var)
+EXPOSE $PORT
 
 # Start the application
 CMD ["npm", "start"]

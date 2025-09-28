@@ -125,7 +125,7 @@ export class GmailOptimizer {
     try {
       console.log(`🧪 Testando configuração: ${config.name} - ${config.description}`)
       
-      const transporter = nodemailer.createTransporter(config.config)
+      const transporter = nodemailer.createTransport(config.config)
       await transporter.verify()
       
       console.log(`✅ Configuração ${config.name} funcionou!`)
@@ -176,7 +176,7 @@ export class GmailOptimizer {
     }
 
     console.log(`📧 Usando configuração Gmail: ${config.name}`)
-    return nodemailer.createTransporter(config.config)
+    return nodemailer.createTransport(config.config)
   }
 
   // Enviar email com retry automático

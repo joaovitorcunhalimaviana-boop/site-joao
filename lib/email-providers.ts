@@ -32,7 +32,7 @@ export const EMAIL_PROVIDERS: EmailProvider[] = [
     testConnection: async function() {
       if (!process.env.POSTMARK_SERVER_TOKEN) return false
       try {
-        const transporter = nodemailer.createTransporter(this.config)
+        const transporter = nodemailer.createTransport(this.config)
         await transporter.verify()
         return true
       } catch {
@@ -61,7 +61,7 @@ export const EMAIL_PROVIDERS: EmailProvider[] = [
     testConnection: async function() {
       if (!process.env.MAILGUN_SMTP_LOGIN || !process.env.MAILGUN_SMTP_PASSWORD) return false
       try {
-        const transporter = nodemailer.createTransporter(this.config)
+        const transporter = nodemailer.createTransport(this.config)
         await transporter.verify()
         return true
       } catch {
@@ -90,7 +90,7 @@ export const EMAIL_PROVIDERS: EmailProvider[] = [
     testConnection: async function() {
       if (!process.env.SENDGRID_API_KEY) return false
       try {
-        const transporter = nodemailer.createTransporter(this.config)
+        const transporter = nodemailer.createTransport(this.config)
         await transporter.verify()
         return true
       } catch {
@@ -135,10 +135,11 @@ export const EMAIL_PROVIDERS: EmailProvider[] = [
     testConnection: async function() {
       if (!process.env.EMAIL_USER || !process.env.EMAIL_PASSWORD) return false
       try {
-        const transporter = nodemailer.createTransporter(this.config)
+        const transporter = nodemailer.createTransport(this.config)
         await transporter.verify()
         return true
-      } catch {
+      } catch (error) {
+        console.error('Gmail connection error:', error.message)
         return false
       }
     }
@@ -200,7 +201,7 @@ export class EmailProviderManager {
     }
 
     console.log(`📧 Usando provedor: ${this.currentProvider.name}`)
-    return nodemailer.createTransporter(this.currentProvider.config)
+    return nodemailer.createTransport(this.currentProvider.config)
   }
 
   // Marcar provedor como falho e tentar próximo
