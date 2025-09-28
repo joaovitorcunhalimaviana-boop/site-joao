@@ -17,7 +17,7 @@ import {
   generateMedicalOrganizationStructuredData,
   generateWebsiteStructuredData,
 } from '@/lib/seo-metadata'
-import { GoogleAnalytics, PerformanceOptimizer } from '@/components/client-components'
+import ClientAnalytics from '@/components/client-analytics'
 // import WebVitals from '@/components/performance/web-vitals'
 
 const inter = Inter({ subsets: ['latin'] })
@@ -97,8 +97,7 @@ export default function RootLayout({
           'min-h-screen bg-background font-sans antialiased'
         )}
       >
-        <GoogleAnalytics />
-        <PerformanceOptimizer />
+        <ClientAnalytics />
         <ErrorBoundary>
           <ThemeProvider
             attribute='class'

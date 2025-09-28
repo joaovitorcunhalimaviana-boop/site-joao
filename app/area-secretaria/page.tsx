@@ -115,22 +115,44 @@ export default function AreaSecretaria() {
   const syncDataFromBackup = async () => {
     try {
       console.log('🔄 Sincronizando dados do backup...')
-      const response = await fetch('/api/backup-patients')
-
-      if (response.ok) {
-        const data = await response.json()
-        if (data.patients && data.patients.length > 0) {
+      
+      // Sincronizar pacientes
+      const patientsResponse = await fetch('/api/backup-patients')
+      if (patientsResponse.ok) {
+        const patientsData = await patientsResponse.json()
+        if (patientsData.patients && patientsData.patients.length > 0) {
           console.log(
-            `✅ Encontrados ${data.patients.length} pacientes no backup`
+            `✅ Encontrados ${patientsData.patients.length} pacientes no backup`
           )
 
           // Verificar se há dados no localStorage
-          const localData = localStorage.getItem('unified-patients')
-          if (!localData || JSON.parse(localData).length === 0) {
-            console.log('🔄 Restaurando dados do backup para localStorage')
+          const localPatientsData = localStorage.getItem('unified-patients')
+          if (!localPatientsData || JSON.parse(localPatientsData).length === 0) {
+            console.log('🔄 Restaurando dados de pacientes do backup para localStorage')
             localStorage.setItem(
               'unified-patients',
-              JSON.stringify(data.patients)
+              JSON.stringify(patientsData.patients)
+            )
+          }
+        }
+      }
+
+      // Sincronizar agendamentos
+      const appointmentsResponse = await fetch('/api/backup-appointments')
+      if (appointmentsResponse.ok) {
+        const appointmentsData = await appointmentsResponse.json()
+        if (appointmentsData.appointments && appointmentsData.appointments.length > 0) {
+          console.log(
+            `✅ Encontrados ${appointmentsData.appointments.length} agendamentos no backup`
+          )
+
+          // Verificar se há dados no localStorage
+          const localAppointmentsData = localStorage.getItem('unified-appointments')
+          if (!localAppointmentsData || JSON.parse(localAppointmentsData).length === 0) {
+            console.log('🔄 Restaurando dados de agendamentos do backup para localStorage')
+            localStorage.setItem(
+              'unified-appointments',
+              JSON.stringify(appointmentsData.appointments)
             )
           }
         }

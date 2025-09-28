@@ -398,6 +398,8 @@ async function saveToStorage<T>(key: string, data: T): Promise<void> {
     // Backup adicional: salvar também via API para persistência
     if (key === PATIENTS_KEY) {
       savePatientBackup(data as Patient[])
+    } else if (key === APPOINTMENTS_KEY) {
+      saveAppointmentBackup(data as UnifiedAppointment[])
     }
   } catch (error) {
     console.error(`❌ Erro ao salvar ${key} no localStorage:`, error)
@@ -422,6 +424,27 @@ async function savePatientBackup(patients: Patient[]): Promise<void> {
     }
   } catch (error) {
     console.warn('⚠️ Erro ao salvar backup via API:', error)
+  }
+}
+
+// Função para backup de agendamentos via API
+async function saveAppointmentBackup(appointments: UnifiedAppointment[]): Promise<void> {
+  try {
+    const response = await fetch('/api/backup-appointments', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ appointments }),
+    })
+
+    if (response.ok) {
+      console.log('✅ Backup de agendamentos salvo via API')
+    } else {
+      console.warn('⚠️ Falha ao salvar backup de agendamentos via API')
+    }
+  } catch (error) {
+    console.warn('⚠️ Erro ao salvar backup de agendamentos via API:', error)
   }
 }
 
