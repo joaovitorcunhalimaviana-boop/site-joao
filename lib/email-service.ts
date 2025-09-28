@@ -20,15 +20,16 @@ export interface DoctorNotificationData {
  */
 export async function sendWelcomeEmail(patientData: PatientEmailData): Promise<boolean> {
   try {
-    const response = await fetch('/api/send-welcome-email', {
+    const response = await fetch('/api/send-email', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        name: patientData.name,
-        email: patientData.email,
-        source: 'website'
+        recipients: [patientData.email],
+        template: 'welcome',
+        subject: 'Bem-vindo(a) ao consultório Dr. João Vitor Viana',
+        content: `Olá ${patientData.name}, seja bem-vindo(a) ao nosso consultório!`
       })
     })
 

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import nodemailer from 'nodemailer'
 import {
   sendWelcomeEmail,
   sendBirthdayEmail,
@@ -189,11 +190,36 @@ export async function POST(request: NextRequest) {
         let success = false
 
         if (template === 'welcome') {
-          success = await sendWelcomeEmail({
-            name: 'Caro Paciente',
-            email: email,
-            birthDate: '01/01/1990',
+          // Enviar email de boas-vindas diretamente usando nodemailer
+          const transporter = nodemailer.createTransport({
+            host: process.env.EMAIL_HOST || 'smtp.gmail.com',
+            port: parseInt(process.env.EMAIL_PORT || '587'),
+            secure: process.env.EMAIL_SECURE === 'true',
+            auth: {
+              user: process.env.EMAIL_USER,
+              pass: emailPassword,
+            },
+            tls: {
+              rejectUnauthorized: false,
+            },
           })
+
+          const mailOptions = {
+            from: `"Dr. João Vitor Viana" <${process.env.EMAIL_USER}>`,
+            to: email,
+            subject: subject || 'Bem-vindo(a) ao consultório Dr. João Vitor Viana',
+            html: content || `
+              <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <h2>Bem-vindo(a) ao consultório Dr. João Vitor Viana!</h2>
+                <p>Olá! Seja bem-vindo(a) ao nosso consultório.</p>
+                <p>Estamos aqui para cuidar da sua saúde com excelência e dedicação.</p>
+                <p>Atenciosamente,<br>Dr. João Vitor Viana</p>
+              </div>
+            `
+          }
+
+          await transporter.sendMail(mailOptions)
+          success = true
         } else if (template === 'birthday') {
           success = await sendBirthdayEmail({
             name: 'Caro Paciente',
