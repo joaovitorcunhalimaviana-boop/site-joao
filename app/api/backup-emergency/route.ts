@@ -40,8 +40,7 @@ async function createEmergencyBackup(): Promise<BackupData> {
       // surgeries, // Removido - não existe no schema
       reviews,
       users,
-      auditLogs,
-      scheduleBlocks
+      auditLogs
     ] = await Promise.all([
       prisma.patient.findMany({
         include: {
@@ -88,9 +87,17 @@ async function createEmergencyBackup(): Promise<BackupData> {
           updatedAt: true
         }
       }),
-      prisma.auditLog.findMany(),
-      prisma.scheduleBlock.findMany()
+      prisma.auditLog.findMany()
     ])
+
+    // Tentar buscar scheduleBlocks, mas não falhar se não existir
+    let scheduleBlocks: any[] = []
+    try {
+      scheduleBlocks = await prisma.scheduleBlock.findMany()
+    } catch (scheduleError) {
+      console.warn('⚠️ Não foi possível buscar scheduleBlocks:', scheduleError)
+      scheduleBlocks = []
+    }
 
     const backupData: BackupData = {
       timestamp: new Date().toISOString(),
@@ -201,6 +208,19 @@ export async function POST(request: NextRequest) {
   try {
     console.log('🚨 EXECUTANDO BACKUP DE EMERGÊNCIA DOS DADOS MÉDICOS...')
     
+    // Testar conexão com o banco primeiro
+    try {
+      await prisma.$connect()
+      console.log('✅ Conexão com banco estabelecida para backup')
+    } catch (dbError) {
+      console.error('❌ Erro de conexão com banco no backup:', dbError)
+      return NextResponse.json({
+        success: false,
+        message: 'Erro de conexão com o banco de dados durante backup',
+        error: dbError instanceof Error ? dbError.message : 'Erro de conexão desconhecido'
+      }, { status: 500 })
+    }
+    
     // Criar backup completo
     const backupData = await createEmergencyBackup()
     
@@ -250,8 +270,11 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: false,
       message: '❌ FALHA NO BACKUP DE EMERGÊNCIA',
-      error: error instanceof Error ? error.message : 'Erro desconhecido'
+      error: error instanceof Error ? error.message : 'Erro desconhecido',
+      stack: error instanceof Error ? error.stack : undefined
     }, { status: 500 })
+  } finally {
+    await prisma.$disconnect()
   }
 }
 

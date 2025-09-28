@@ -469,7 +469,7 @@ export class DataProtectionScheduler {
       task.lastRun = new Date()
       
       // Executar monitoramento via API
-      const response = await fetch('/api/emergency-dashboard?action=status')
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/emergency-dashboard?action=status`)
       
       if (response.ok) {
         const result = await response.json()

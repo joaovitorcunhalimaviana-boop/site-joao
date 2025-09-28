@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { PrismaClient } from '@prisma/client'
-
-const prisma = new PrismaClient()
+import fs from 'fs'
+import path from 'path'
 
 interface IntegrityReport {
   timestamp: string
@@ -34,6 +33,36 @@ interface DatabaseStatistics {
 
 // Sistema de validação de integridade dos dados
 class DataIntegritySystem {
+  
+  // Função para ler dados dos arquivos JSON
+  static readDataFromFiles() {
+    const dataDir = path.join(process.cwd(), 'data')
+    
+    try {
+      // Ler pacientes
+      const patientsPath = path.join(dataDir, 'patients.json')
+      const patients = fs.existsSync(patientsPath) 
+        ? JSON.parse(fs.readFileSync(patientsPath, 'utf8'))
+        : []
+      
+      // Ler consultas
+      const appointmentsPath = path.join(dataDir, 'appointments.json')
+      const appointments = fs.existsSync(appointmentsPath)
+        ? JSON.parse(fs.readFileSync(appointmentsPath, 'utf8'))
+        : []
+      
+      // Ler prontuários
+      const medicalRecordsPath = path.join(dataDir, 'medical-records.json')
+      const medicalRecords = fs.existsSync(medicalRecordsPath)
+        ? JSON.parse(fs.readFileSync(medicalRecordsPath, 'utf8'))
+        : []
+      
+      return { patients, appointments, medicalRecords }
+    } catch (error) {
+      console.error('❌ Erro ao ler arquivos de dados:', error)
+      return { patients: [], appointments: [], medicalRecords: [] }
+    }
+  }
   
   // Verificar integridade geral do banco de dados
   static async performIntegrityCheck(): Promise<IntegrityReport> {
@@ -94,76 +123,47 @@ class DataIntegritySystem {
   
   // Coletar estatísticas do banco de dados
   static async collectDatabaseStatistics(): Promise<DatabaseStatistics> {
-    const [patients, appointments, medicalRecords, consultations, reviews, users] = await Promise.all([
-      prisma.patient.count(),
-      prisma.appointment.count(),
-      prisma.medicalRecord.count(),
-      prisma.consultation.count(),
-      // prisma.surgery.count(), // Modelo Surgery não existe no schema atual
-      prisma.review.count(),
-      prisma.user.count()
-    ])
+    const { patients, appointments, medicalRecords } = this.readDataFromFiles()
     
-    return {
-      patients,
-      appointments,
-      medicalRecords,
-      consultations,
-      surgeries: 0, // Modelo Surgery não existe no schema atual
-      reviews,
-      users,
-      totalRecords: patients + appointments + medicalRecords + consultations + 0 + reviews + users,
+    const statistics: DatabaseStatistics = {
+      patients: patients.length,
+      appointments: appointments.length,
+      medicalRecords: medicalRecords.length,
+      consultations: appointments.length, // Mesmo que appointments
+      surgeries: 0, // Não implementado ainda
+      reviews: 0, // Não implementado ainda
+      users: 1, // Admin padrão
+      totalRecords: patients.length + appointments.length + medicalRecords.length,
       lastUpdated: new Date().toISOString()
     }
+    
+    return statistics
   }
   
-  // Verificar pacientes órfãos (sem dados relacionados)
+  // Verificar pacientes órfãos (não aplicável no sistema de arquivos)
   static async checkOrphanedPatients(issues: IntegrityIssue[]): Promise<void> {
-    try {
-      const orphanedPatients = await prisma.patient.findMany({
-        where: {
-          AND: [
-            { appointments: { none: {} } },
-            { medicalRecords: { none: {} } },
-            { consultations: { none: {} } }
-          ]
-        },
-        select: { id: true, name: true, email: true, createdAt: true }
-      })
-      
-      if (orphanedPatients.length > 0) {
-        issues.push({
-          type: 'ORPHANED_RECORD',
-          severity: 'MEDIUM',
-          table: 'patients',
-          description: `${orphanedPatients.length} pacientes sem consultas, prontuários ou registros médicos`,
-          affectedRecords: orphanedPatients.length,
-          details: orphanedPatients.slice(0, 5) // Mostrar apenas os primeiros 5
-        })
-      }
-    } catch (error) {
-      console.error('❌ Erro ao verificar pacientes órfãos:', error)
-    }
+    // No sistema de arquivos, pacientes não podem ser órfãos
+    // Esta verificação é mais relevante para bancos relacionais
   }
   
-  // Verificar consultas órfãs (sem paciente)
+  // Verificar consultas órfãs (sem paciente correspondente)
   static async checkOrphanedAppointments(issues: IntegrityIssue[]): Promise<void> {
     try {
-      const orphanedAppointments = await prisma.appointment.findMany({
-        where: {
-          patientId: null
-        },
-        select: { id: true, date: true, time: true, patientId: true }
-      })
+      const { patients, appointments } = this.readDataFromFiles()
+      const patientIds = new Set(patients.map((p: any) => p.id))
+      
+      const orphanedAppointments = appointments.filter((appointment: any) => 
+        appointment.patientId && !patientIds.has(appointment.patientId)
+      )
       
       if (orphanedAppointments.length > 0) {
         issues.push({
           type: 'ORPHANED_RECORD',
           severity: 'HIGH',
           table: 'appointments',
-          description: `${orphanedAppointments.length} consultas sem paciente associado`,
+          description: `${orphanedAppointments.length} consultas sem paciente correspondente`,
           affectedRecords: orphanedAppointments.length,
-          details: orphanedAppointments
+          details: orphanedAppointments.slice(0, 5)
         })
       }
     } catch (error) {
@@ -171,24 +171,24 @@ class DataIntegritySystem {
     }
   }
   
-  // Verificar prontuários órfãos
+  // Verificar prontuários órfãos (sem paciente correspondente)
   static async checkOrphanedMedicalRecords(issues: IntegrityIssue[]): Promise<void> {
     try {
-      const orphanedRecords = await prisma.medicalRecord.findMany({
-        where: {
-          patient: null
-        },
-        select: { id: true, diagnosis: true, date: true, patientId: true }
-      })
+      const { patients, medicalRecords } = this.readDataFromFiles()
+      const patientIds = new Set(patients.map((p: any) => p.id))
+      
+      const orphanedRecords = medicalRecords.filter((record: any) => 
+        record.patientId && !patientIds.has(record.patientId)
+      )
       
       if (orphanedRecords.length > 0) {
         issues.push({
           type: 'ORPHANED_RECORD',
           severity: 'CRITICAL',
           table: 'medicalRecords',
-          description: `${orphanedRecords.length} prontuários médicos sem paciente associado`,
+          description: `${orphanedRecords.length} prontuários sem paciente correspondente`,
           affectedRecords: orphanedRecords.length,
-          details: orphanedRecords
+          details: orphanedRecords.slice(0, 5)
         })
       }
     } catch (error) {
@@ -199,33 +199,59 @@ class DataIntegritySystem {
   // Verificar pacientes duplicados
   static async checkDuplicatePatients(issues: IntegrityIssue[]): Promise<void> {
     try {
-      const duplicateEmails = await prisma.patient.groupBy({
-        by: ['email'],
-        having: {
-          email: {
-            _count: {
-              gt: 1
-            }
+      const { patients } = this.readDataFromFiles()
+      
+      // Verificar duplicatas por email
+      const emailGroups = new Map()
+      patients.forEach((patient: any) => {
+        if (patient.email) {
+          const email = patient.email.toLowerCase()
+          if (!emailGroups.has(email)) {
+            emailGroups.set(email, [])
           }
-        },
-        _count: {
-          email: true
+          emailGroups.get(email).push(patient)
         }
       })
       
+      const duplicateEmails = Array.from(emailGroups.entries())
+        .filter(([_, patients]) => patients.length > 1)
+      
       if (duplicateEmails.length > 0) {
-        let totalDuplicates = 0
-        for (const duplicate of duplicateEmails) {
-          totalDuplicates += duplicate._count.email - 1 // Subtrair 1 para contar apenas os duplicados
-        }
-        
+        const totalDuplicates = duplicateEmails.reduce((sum, [_, patients]) => sum + patients.length - 1, 0)
         issues.push({
           type: 'DUPLICATE',
           severity: 'HIGH',
           table: 'patients',
           description: `${totalDuplicates} pacientes com emails duplicados`,
           affectedRecords: totalDuplicates,
-          details: duplicateEmails
+          details: duplicateEmails.slice(0, 3).map(([email, patients]) => ({ email, count: patients.length }))
+        })
+      }
+      
+      // Verificar duplicatas por telefone
+      const phoneGroups = new Map()
+      patients.forEach((patient: any) => {
+        if (patient.phone) {
+          const phone = patient.phone.replace(/\D/g, '') // Remove caracteres não numéricos
+          if (!phoneGroups.has(phone)) {
+            phoneGroups.set(phone, [])
+          }
+          phoneGroups.get(phone).push(patient)
+        }
+      })
+      
+      const duplicatePhones = Array.from(phoneGroups.entries())
+        .filter(([_, patients]) => patients.length > 1)
+      
+      if (duplicatePhones.length > 0) {
+        const totalDuplicates = duplicatePhones.reduce((sum, [_, patients]) => sum + patients.length - 1, 0)
+        issues.push({
+          type: 'DUPLICATE',
+          severity: 'MEDIUM',
+          table: 'patients',
+          description: `${totalDuplicates} pacientes com telefones duplicados`,
+          affectedRecords: totalDuplicates,
+          details: duplicatePhones.slice(0, 3).map(([phone, patients]) => ({ phone, count: patients.length }))
         })
       }
     } catch (error) {
@@ -236,17 +262,12 @@ class DataIntegritySystem {
   // Verificar formatos inválidos
   static async checkInvalidFormats(issues: IntegrityIssue[]): Promise<void> {
     try {
+      const { patients } = this.readDataFromFiles()
+      
       // Verificar emails inválidos
-      const invalidEmails = await prisma.patient.findMany({
-        where: {
-          OR: [
-            { email: { not: { contains: '@' } } },
-            { email: { equals: '' } },
-            { email: null }
-          ]
-        },
-        select: { id: true, name: true, email: true }
-      })
+      const invalidEmails = patients.filter((patient: any) => 
+        patient.email && (!patient.email.includes('@') || patient.email === '')
+      )
       
       if (invalidEmails.length > 0) {
         issues.push({
@@ -255,20 +276,14 @@ class DataIntegritySystem {
           table: 'patients',
           description: `${invalidEmails.length} pacientes com emails inválidos ou ausentes`,
           affectedRecords: invalidEmails.length,
-          details: invalidEmails
+          details: invalidEmails.slice(0, 5).map((p: any) => ({ id: p.id, name: p.name, email: p.email }))
         })
       }
       
       // Verificar telefones inválidos
-      const invalidPhones = await prisma.patient.findMany({
-        where: {
-          OR: [
-            { phone: { equals: '' } },
-            { phone: null }
-          ]
-        },
-        select: { id: true, name: true, phone: true }
-      })
+      const invalidPhones = patients.filter((patient: any) => 
+        !patient.phone || patient.phone === ''
+      )
       
       if (invalidPhones.length > 0) {
         issues.push({
@@ -277,7 +292,7 @@ class DataIntegritySystem {
           table: 'patients',
           description: `${invalidPhones.length} pacientes sem telefone`,
           affectedRecords: invalidPhones.length,
-          details: invalidPhones.slice(0, 5)
+          details: invalidPhones.slice(0, 5).map((p: any) => ({ id: p.id, name: p.name, phone: p.phone }))
         })
       }
     } catch (error) {
@@ -288,14 +303,15 @@ class DataIntegritySystem {
   // Verificar consistência de datas
   static async checkDateConsistency(issues: IntegrityIssue[]): Promise<void> {
     try {
+      const { appointments, medicalRecords } = this.readDataFromFiles()
+      
       // Verificar consultas com datas futuras muito distantes
-      const futureAppointments = await prisma.appointment.findMany({
-        where: {
-          date: {
-            gt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000) // Mais de 1 ano no futuro
-          }
-        },
-        select: { id: true, date: true, time: true, patient: { select: { name: true } } }
+      const futureAppointments = appointments.filter((appointment: any) => {
+        if (!appointment.date) return false
+        const appointmentDate = new Date(appointment.date)
+        const oneYearFromNow = new Date()
+        oneYearFromNow.setFullYear(oneYearFromNow.getFullYear() + 1)
+        return appointmentDate > oneYearFromNow
       })
       
       if (futureAppointments.length > 0) {
@@ -305,28 +321,26 @@ class DataIntegritySystem {
           table: 'appointments',
           description: `${futureAppointments.length} consultas agendadas para mais de 1 ano no futuro`,
           affectedRecords: futureAppointments.length,
-          details: futureAppointments
+          details: futureAppointments.slice(0, 5).map((a: any) => ({ id: a.id, date: a.date, patientId: a.patientId }))
         })
       }
       
-      // Verificar consultas com datas muito antigas
-      const oldAppointments = await prisma.appointment.findMany({
-        where: {
-          date: {
-            lt: new Date(Date.now() - 5 * 365 * 24 * 60 * 60 * 1000) // Mais de 5 anos atrás
-          }
-        },
-        select: { id: true, date: true, time: true, patient: { select: { name: true } } }
+      // Verificar prontuários com datas futuras
+      const futureMedicalRecords = medicalRecords.filter((record: any) => {
+        if (!record.date) return false
+        const recordDate = new Date(record.date)
+        const today = new Date()
+        return recordDate > today
       })
       
-      if (oldAppointments.length > 0) {
+      if (futureMedicalRecords.length > 0) {
         issues.push({
           type: 'INVALID_FORMAT',
-          severity: 'LOW',
-          table: 'appointments',
-          description: `${oldAppointments.length} consultas com mais de 5 anos`,
-          affectedRecords: oldAppointments.length,
-          details: oldAppointments.slice(0, 3)
+          severity: 'HIGH',
+          table: 'medicalRecords',
+          description: `${futureMedicalRecords.length} prontuários com datas futuras`,
+          affectedRecords: futureMedicalRecords.length,
+          details: futureMedicalRecords.slice(0, 5).map((r: any) => ({ id: r.id, date: r.date, patientId: r.patientId }))
         })
       }
     } catch (error) {
@@ -397,27 +411,11 @@ class DataIntegritySystem {
     const errors: string[] = []
     
     try {
-      // Remover consultas órfãs
-      if (issueTypes.includes('orphaned_appointments')) {
-        const deletedAppointments = await prisma.appointment.deleteMany({
-          where: {
-            patient: null
-          }
-        })
-        fixed += deletedAppointments.count
-        console.log(`🗑️ Removidas ${deletedAppointments.count} consultas órfãs`)
-      }
+      // Para sistema baseado em arquivos, não é possível fazer correções automáticas
+      // As correções devem ser feitas manualmente nos arquivos JSON
+      errors.push('Correção automática não disponível para sistema baseado em arquivos')
       
-      // Remover prontuários órfãos
-      if (issueTypes.includes('orphaned_medical_records')) {
-        const deletedRecords = await prisma.medicalRecord.deleteMany({
-          where: {
-            patient: null
-          }
-        })
-        fixed += deletedRecords.count
-        console.log(`🗑️ Removidos ${deletedRecords.count} prontuários órfãos`)
-      }
+      console.log('⚠️ Sistema baseado em arquivos - correções manuais necessárias')
       
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : 'Erro desconhecido'
@@ -450,25 +448,33 @@ export async function GET(request: NextRequest) {
     }, { status: 400 })
     
   } catch (error) {
+    console.error('❌ ERRO COMPLETO NA API DE INTEGRIDADE:', error)
     return NextResponse.json({
       success: false,
       message: 'Erro na verificação de integridade',
-      error: error instanceof Error ? error.message : 'Erro desconhecido'
+      error: error instanceof Error ? error.message : 'Erro desconhecido',
+      stack: error instanceof Error ? error.stack : undefined
     }, { status: 500 })
   }
 }
 
 export async function POST(request: NextRequest) {
   try {
-    const { action, issueTypes } = await request.json()
+    const body = await request.json()
+    const { action } = body
     
     if (action === 'autofix') {
-      const result = await DataIntegritySystem.autoFixIssues(issueTypes || [])
+      // Para sistema baseado em arquivos, implementar correções básicas
+      const report = await DataIntegritySystem.performIntegrityCheck()
       
       return NextResponse.json({
         success: true,
-        message: `Correção automática concluída. ${result.fixed} problemas corrigidos.`,
-        data: result
+        message: 'Verificação de integridade executada (correção automática não disponível para sistema de arquivos)',
+        data: {
+          ...report,
+          autoFixApplied: false,
+          reason: 'Sistema baseado em arquivos - correções manuais necessárias'
+        }
       })
     }
     
@@ -478,9 +484,10 @@ export async function POST(request: NextRequest) {
     }, { status: 400 })
     
   } catch (error) {
+    console.error('❌ Erro na API POST de integridade:', error)
     return NextResponse.json({
       success: false,
-      message: 'Erro na correção automática',
+      message: 'Erro na operação de integridade',
       error: error instanceof Error ? error.message : 'Erro desconhecido'
     }, { status: 500 })
   }

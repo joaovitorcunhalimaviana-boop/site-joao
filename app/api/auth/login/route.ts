@@ -1,4 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
+import jwt from 'jsonwebtoken'
+
+const JWT_SECRET = process.env['JWT_SECRET'] || 'your-secret-key'
 
 // Usuários simples hardcoded
 const users = {
@@ -30,8 +33,20 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Login bem-sucedido - retornar dados do usuário
-    return NextResponse.json({
+    // Criar token JWT
+    const token = jwt.sign(
+      {
+        username,
+        name: user.name,
+        role: user.role,
+        areas: user.areas,
+      },
+      JWT_SECRET,
+      { expiresIn: '24h' }
+    )
+
+    // Criar resposta com cookie
+    const response = NextResponse.json({
       success: true,
       user: {
         username,
@@ -40,6 +55,19 @@ export async function POST(request: NextRequest) {
         areas: user.areas,
       },
     })
+
+    // Definir cookie de autenticação
+    response.cookies.set('auth-token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 24 * 60 * 60, // 24 horas
+    })
+
+    console.log('✅ Login realizado com sucesso para:', username)
+    console.log('✅ Token criado e cookie definido')
+
+    return response
   } catch (error) {
     console.error('Erro no login:', error)
     return NextResponse.json(

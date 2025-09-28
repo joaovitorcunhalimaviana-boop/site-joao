@@ -116,7 +116,6 @@ async function main() {
       patientId: (
         await prisma.patient.findFirst({ where: { name: 'Ana Silva' } })
       )?.id!,
-      doctorId: doctor.id,
       date: tomorrow,
       time: '09:00',
       type: 'CONSULTATION' as const,
@@ -127,7 +126,6 @@ async function main() {
       patientId: (
         await prisma.patient.findFirst({ where: { name: 'Carlos Santos' } })
       )?.id!,
-      doctorId: doctor.id,
       date: nextWeek,
       time: '14:30',
       type: 'FOLLOW_UP' as const,

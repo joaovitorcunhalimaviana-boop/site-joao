@@ -566,7 +566,32 @@ export async function createAppointment(
 // Obter todos os agendamentos
 export async function getAllAppointments(): Promise<UnifiedAppointment[]> {
   try {
-    return await loadFromStorage<UnifiedAppointment>(APPOINTMENTS_KEY)
+    let appointments = await loadFromStorage<UnifiedAppointment>(APPOINTMENTS_KEY)
+    
+    // Se não há dados no localStorage, tentar carregar do arquivo JSON
+    if (appointments.length === 0 && typeof window === 'undefined') {
+      try {
+        const fs = await import('fs')
+        const path = await import('path')
+        const filePath = path.join(process.cwd(), 'data', 'appointments.json')
+        
+        if (fs.existsSync(filePath)) {
+          const fileData = fs.readFileSync(filePath, 'utf8')
+          const fileAppointments = JSON.parse(fileData) as UnifiedAppointment[]
+          
+          console.log('📁 Carregando agendamentos do arquivo:', fileAppointments.length)
+          
+          // Salvar no storage para próximas consultas
+          await saveToStorage(APPOINTMENTS_KEY, fileAppointments)
+          appointments = fileAppointments
+        }
+      } catch (fileError) {
+        console.log('📁 Nenhum arquivo de dados encontrado, usando dados vazios')
+      }
+    }
+    
+    console.log('📅 Total de agendamentos carregados:', appointments.length)
+    return appointments
   } catch (error) {
     console.error('❌ Erro ao obter agendamentos:', error)
     return []
