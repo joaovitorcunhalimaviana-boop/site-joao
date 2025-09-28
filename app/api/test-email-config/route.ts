@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
       EMAIL_HOST: process.env.EMAIL_HOST || 'Não configurado',
       EMAIL_PORT: process.env.EMAIL_PORT || 'Não configurado',
       EMAIL_USER: process.env.EMAIL_USER ? 'Configurado' : 'Não configurado',
-      EMAIL_PASS: process.env.EMAIL_PASS ? 'Configurado' : 'Não configurado',
+      EMAIL_PASS: (process.env.EMAIL_PASSWORD || process.env.EMAIL_PASS) ? 'Configurado' : 'Não configurado',
       EMAIL_FROM_NAME: process.env.EMAIL_FROM_NAME || 'Não configurado',
       EMAIL_REPLY_TO: process.env.EMAIL_REPLY_TO || 'Não configurado',
     }
