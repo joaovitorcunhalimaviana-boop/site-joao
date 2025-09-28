@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import nodemailer from 'nodemailer'
+import { sendEmailWithFallback } from '../../../lib/email-providers'
 import { formatDateTimeToBrazilian } from '@/lib/date-utils'
 
 interface NotificationData {
@@ -28,23 +28,6 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       )
     }
-
-    // Configurar transporter do email
-    const transporter = nodemailer.createTransport({
-      host: process.env.EMAIL_HOST || 'smtp.gmail.com',
-      port: parseInt(process.env.EMAIL_PORT || '587'),
-      secure: false, // Use STARTTLS
-      auth: {
-        user: process.env['EMAIL_USER'],
-        pass: process.env['EMAIL_PASSWORD'], // App Password do Gmail
-      },
-      tls: {
-        rejectUnauthorized: false,
-      },
-      connectionTimeout: 60000, // 60 seconds
-      greetingTimeout: 30000, // 30 seconds
-      socketTimeout: 60000, // 60 seconds
-    })
 
     // Formatar email HTML
     const emailHtml = `
@@ -135,46 +118,33 @@ NOVA CONSULTA AGENDADA
       `,
     }
 
-    // Enviar email
+    // Enviar email com sistema de fallback
     console.log('📧 Enviando notificação por email...')
     console.log('Para:', mailOptions.to)
     console.log('Assunto:', mailOptions.subject)
 
-    if (process.env['EMAIL_USER'] && process.env['EMAIL_PASSWORD']) {
-      try {
-        await transporter.sendMail(mailOptions)
-        console.log('✅ Email enviado com sucesso!')
+    try {
+      await sendEmailWithFallback(mailOptions)
+      console.log('✅ Email enviado com sucesso!')
 
-        return NextResponse.json({
-          success: true,
-          message: 'Notificação enviada por email com sucesso',
-          method: 'email',
-          sentTo: mailOptions.to,
-        })
-      } catch (emailError) {
-        console.error('❌ Erro ao enviar email:', emailError)
-        return NextResponse.json(
-          {
-            success: false,
-            message: 'Erro ao enviar email. Verifique as configurações.',
-            error:
-              emailError instanceof Error
-                ? emailError.message
-                : 'Erro desconhecido',
-          },
-          { status: 500 }
-        )
-      }
-    } else {
-      console.log('⚠️ Credenciais de email não configuradas')
+      return NextResponse.json({
+        success: true,
+        message: 'Notificação enviada por email com sucesso',
+        method: 'email',
+        sentTo: mailOptions.to,
+      })
+    } catch (emailError) {
+      console.error('❌ Erro ao enviar email:', emailError)
       return NextResponse.json(
         {
           success: false,
-          message:
-            'Credenciais de email não configuradas. Configure EMAIL_USER e EMAIL_PASSWORD no .env.local',
-          requiresSetup: true,
+          message: 'Erro ao enviar email. Verifique as configurações.',
+          error:
+            emailError instanceof Error
+              ? emailError.message
+              : 'Erro desconhecido',
         },
-        { status: 400 }
+        { status: 500 }
       )
     }
   } catch (error) {

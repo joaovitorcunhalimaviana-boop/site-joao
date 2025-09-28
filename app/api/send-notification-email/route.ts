@@ -1,22 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import nodemailer from 'nodemailer'
-
-// Configuração do Nodemailer
-const transporter = nodemailer.createTransport({
-  host: process.env.EMAIL_HOST || 'smtp.gmail.com',
-  port: parseInt(process.env.EMAIL_PORT || '587'),
-  secure: false, // Use STARTTLS
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASSWORD || process.env.EMAIL_PASS,
-  },
-  tls: {
-    rejectUnauthorized: false,
-  },
-  connectionTimeout: 60000, // 60 seconds
-  greetingTimeout: 30000, // 30 seconds
-  socketTimeout: 60000, // 60 seconds
-})
+import { sendEmailWithFallback } from '../../../lib/email-providers'
 
 interface NotificationEmailData {
   doctorEmail: string
@@ -125,7 +108,7 @@ export async function POST(request: NextRequest) {
       additionalInfo
     })
 
-    // Enviar email
+    // Enviar email com sistema de fallback
     const mailOptions = {
       from: `"Sistema de Agendamentos" <${process.env.EMAIL_USER}>`,
       to: doctorEmail,
@@ -133,7 +116,7 @@ export async function POST(request: NextRequest) {
       html: emailTemplate.html
     }
 
-    await transporter.sendMail(mailOptions)
+    await sendEmailWithFallback(mailOptions)
 
     console.log(`📧 Email de notificação enviado para: ${doctorEmail} - ${notificationType}`)
 
