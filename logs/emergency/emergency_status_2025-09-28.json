@@ -1,83 +1,5 @@
 [
   {
-    "timestamp": "2025-09-28T03:26:48.775Z",
-    "overallStatus": "CRITICAL",
-    "alerts": [
-      {
-        "id": "integrity_critical_1759030008775",
-        "type": "INTEGRITY_ISSUE",
-        "severity": "CRITICAL",
-        "title": "Problemas Críticos de Integridade",
-        "description": "1 problemas críticos detectados nos dados",
-        "timestamp": "2025-09-28T03:26:48.775Z",
-        "resolved": false,
-        "actions": [
-          "Executar verificação completa",
-          "Corrigir dados órfãos",
-          "Restaurar backup"
-        ]
-      },
-      {
-        "id": "backup_critical_1759030008775",
-        "type": "BACKUP_FAILURE",
-        "severity": "CRITICAL",
-        "title": "Sistema de Backup Crítico",
-        "description": "Backups não estão funcionando adequadamente",
-        "timestamp": "2025-09-28T03:26:48.775Z",
-        "resolved": false,
-        "actions": [
-          "Executar backup manual",
-          "Verificar configuração",
-          "Testar restauração"
-        ]
-      }
-    ],
-    "systemHealth": {
-      "database": "ONLINE",
-      "api": "ONLINE",
-      "backupSystem": "ONLINE",
-      "auditSystem": "ONLINE",
-      "lastCheck": "2025-09-28T03:26:48.754Z",
-      "uptime": 94.4878131,
-      "responseTime": 7
-    },
-    "dataIntegrity": {
-      "status": "CRITICAL",
-      "lastCheck": "2025-09-28T03:26:48.772Z",
-      "issues": 1,
-      "criticalIssues": 1,
-      "recordCount": 0,
-      "orphanedRecords": 0
-    },
-    "backupStatus": {
-      "status": "CRITICAL",
-      "lastBackup": "NEVER",
-      "nextScheduled": "2025-09-29T05:00:00.000Z",
-      "successRate": 0,
-      "totalBackups": 0,
-      "failedBackups": 0,
-      "cloudProviders": {
-        "github": true,
-        "dropbox": false,
-        "googleDrive": false
-      }
-    },
-    "securityStatus": {
-      "status": "SECURE",
-      "lastSecurityCheck": "2025-09-28T03:26:48.774Z",
-      "suspiciousActivity": 0,
-      "failedLogins": 0,
-      "dataAccess": 0,
-      "encryptionStatus": true
-    },
-    "recommendations": [
-      "⚠️ SITUAÇÃO CRÍTICA: Resolva problemas urgentemente",
-      "🔧 Execute correções automáticas disponíveis",
-      "📋 Monitore o sistema continuamente",
-      "🔄 PRIORIDADE: Corrigir sistema de backup"
-    ]
-  },
-  {
     "timestamp": "2025-09-28T03:27:22.923Z",
     "overallStatus": "CRITICAL",
     "alerts": [
@@ -1530,6 +1452,54 @@
     "securityStatus": {
       "status": "SECURE",
       "lastSecurityCheck": "2025-09-28T04:23:43.306Z",
+      "suspiciousActivity": 0,
+      "failedLogins": 0,
+      "dataAccess": 0,
+      "encryptionStatus": true
+    },
+    "recommendations": [
+      "✅ Sistema funcionando normalmente",
+      "📊 Continue monitoramento regular",
+      "🔄 Mantenha backups atualizados"
+    ]
+  },
+  {
+    "timestamp": "2025-09-28T05:29:52.261Z",
+    "overallStatus": "HEALTHY",
+    "alerts": [],
+    "systemHealth": {
+      "database": "ONLINE",
+      "api": "ONLINE",
+      "backupSystem": "ONLINE",
+      "auditSystem": "ONLINE",
+      "lastCheck": "2025-09-28T05:29:52.206Z",
+      "uptime": 16742.3149696,
+      "responseTime": 13
+    },
+    "dataIntegrity": {
+      "status": "HEALTHY",
+      "lastCheck": "2025-09-28T05:29:52.258Z",
+      "issues": 0,
+      "criticalIssues": 0,
+      "recordCount": 0,
+      "orphanedRecords": 0
+    },
+    "backupStatus": {
+      "status": "HEALTHY",
+      "lastBackup": "2025-09-28T05:29:01.523Z",
+      "nextScheduled": "2025-09-29T05:00:00.000Z",
+      "successRate": 100,
+      "totalBackups": 31,
+      "failedBackups": 0,
+      "cloudProviders": {
+        "github": true,
+        "dropbox": false,
+        "googleDrive": false
+      }
+    },
+    "securityStatus": {
+      "status": "SECURE",
+      "lastSecurityCheck": "2025-09-28T05:29:52.260Z",
       "suspiciousActivity": 0,
       "failedLogins": 0,
       "dataAccess": 0,

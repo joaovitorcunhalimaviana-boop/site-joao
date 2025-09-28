@@ -1,5 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
-import nodemailer from 'nodemailer'
+import { sendEmailWithFallback, EmailProviderManager } from '@/lib/email-providers'
+import { sendGmailOptimized, GmailOptimizer } from '@/lib/gmail-optimizer'
+import { logActivity } from '@/lib/activity-logger'
+import { rateLimiter } from '@/lib/rate-limiter'
+import { AuditService } from '@/lib/database'
+import { z } from 'zod'
 import {
   sendWelcomeEmail,
   sendBirthdayEmail,
@@ -184,37 +189,23 @@ export async function POST(request: NextRequest) {
     let successCount = 0
     let errorCount = 0
 
-    // Enviar emails baseado no template
+    // Enviar emails usando o sistema de provedores alternativos
     for (const email of recipients) {
       try {
         let success = false
+        let messageId = ''
+
+        // Preparar dados do email baseado no template
+        let emailData = {
+          to: email,
+          from: `"Dr. João Vitor Viana" <${process.env.EMAIL_USER || 'noreply@joaovitorviana.com.br'}>`,
+          subject: subject || 'Mensagem do consultório Dr. João Vitor Viana',
+          html: content || 'Conteúdo do email'
+        }
 
         if (template === 'welcome') {
-          // Enviar email de boas-vindas diretamente usando nodemailer
-          const transporter = nodemailer.createTransport({
-            host: process.env.EMAIL_HOST || 'smtp.gmail.com',
-            port: parseInt(process.env.EMAIL_PORT || '587'),
-            secure: false, // Use STARTTLS
-            requireTLS: true, // Force TLS
-            auth: {
-              user: process.env.EMAIL_USER,
-              pass: emailPassword,
-            },
-            tls: {
-              rejectUnauthorized: false,
-              ciphers: 'SSLv3',
-            },
-            connectionTimeout: 120000, // 2 minutes
-            greetingTimeout: 60000, // 1 minute
-            socketTimeout: 120000, // 2 minutes
-            pool: true,
-            maxConnections: 1,
-            maxMessages: 1,
-          })
-
-          const mailOptions = {
-            from: `"Dr. João Vitor Viana" <${process.env.EMAIL_USER}>`,
-            to: email,
+          emailData = {
+            ...emailData,
             subject: subject || 'Bem-vindo(a) ao consultório Dr. João Vitor Viana',
             html: content || `
               <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -225,30 +216,56 @@ export async function POST(request: NextRequest) {
               </div>
             `
           }
-
-          const result = await transporter.sendMail(mailOptions)
-          success = !!result.messageId
         } else if (template === 'birthday') {
-          success = await sendBirthdayEmail({
-            name: 'Caro Paciente',
-            email: email,
-            birthDate: '01/01/1990',
-          })
+          emailData = {
+            ...emailData,
+            subject: subject || 'Feliz Aniversário! 🎉',
+            html: content || `
+              <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <h2>Feliz Aniversário! 🎉</h2>
+                <p>Caro Paciente,</p>
+                <p>Desejamos um feliz aniversário e muita saúde!</p>
+                <p>Atenciosamente,<br>Dr. João Vitor Viana</p>
+              </div>
+            `
+          }
         } else if (template === 'newsletter' || type === 'newsletter') {
-          const newsletterContent =
-            content || customContent || 'Conteúdo da newsletter'
-          success = await sendNewsletterEmail(
-            [email],
-            newsletterContent,
-            subject
-          )
+          const newsletterContent = content || customContent || 'Conteúdo da newsletter'
+          emailData = {
+            ...emailData,
+            subject: subject || 'Newsletter - Dr. João Vitor Viana',
+            html: newsletterContent
+          }
         }
+
+        // Usar o sistema de provedores alternativos
+        let result
+        try {
+          // Primeiro, tentar com o sistema de fallback normal
+          result = await sendEmailWithFallback(emailData)
+          
+        } catch (fallbackError) {
+          console.log('❌ Sistema de fallback falhou, tentando otimizador do Gmail...')
+          
+          // Se o sistema de fallback falhar, tentar o otimizador do Gmail
+          try {
+            result = await sendGmailOptimized(emailData)
+            console.log('✅ Email enviado com sucesso usando otimizador do Gmail')
+            
+          } catch (gmailError) {
+            console.log('❌ Otimizador do Gmail também falhou:', gmailError)
+            throw new Error(`Falha completa no envio: Fallback (${fallbackError.message}) e Gmail otimizado (${gmailError.message})`)
+          }
+        }
+        
+        success = result.success
+        messageId = result.messageId || ''
 
         if (success) {
           results.push({
             email,
             status: 'sent',
-            messageId: `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+            messageId: messageId || `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
             sentAt: new Date().toISOString(),
           })
           successCount++
@@ -256,7 +273,7 @@ export async function POST(request: NextRequest) {
           results.push({
             email,
             status: 'failed',
-            error: 'Falha no envio',
+            error: result.error || 'Falha no envio',
             sentAt: new Date().toISOString(),
           })
           errorCount++

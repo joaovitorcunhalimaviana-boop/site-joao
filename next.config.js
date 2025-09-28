@@ -12,7 +12,7 @@ const nextConfig = {
     // !! WARN !!
     ignoreBuildErrors: true,
   },
-  // output: 'export', // Temporariamente desabilitado para resolver erro de Html
+  output: 'standalone', // Mudando para standalone para Railway
   trailingSlash: false,
 
   // Configurações para otimização
@@ -157,12 +157,7 @@ const nextConfig = {
   
   // Rewrites for clean URLs
   async rewrites() {
-    return [
-      {
-        source: '/sitemap.xml',
-        destination: '/api/sitemap',
-      },
-    ]
+    return []
   },
 }
 

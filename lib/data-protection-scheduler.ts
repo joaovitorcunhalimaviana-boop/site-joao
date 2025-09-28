@@ -278,7 +278,7 @@ export class DataProtectionScheduler {
       
       // Executar backup via API apenas no lado do servidor
       if (typeof window === 'undefined') {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3001'}/api/backup-emergency`, { method: 'POST' })
+        const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/backup-emergency`, { method: 'POST' })
         
         if (response.ok) {
           task.status = 'completed'
@@ -326,7 +326,7 @@ export class DataProtectionScheduler {
       
       // Executar backup completo via API apenas no servidor
       if (typeof window === 'undefined') {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3001'}/api/backup-emergency`, { method: 'POST' })
+        const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/backup-emergency`, { method: 'POST' })
         
         if (response.ok) {
           task.status = 'completed'
@@ -369,7 +369,7 @@ export class DataProtectionScheduler {
       
       // Executar verificação via API apenas no servidor
       if (typeof window === 'undefined') {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3001'}/api/data-integrity?action=check`)
+        const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/data-integrity?action=check`)
         
         if (response.ok) {
           const result = await response.json()
