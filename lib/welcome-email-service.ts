@@ -1,4 +1,3 @@
-import { sendWelcomeEmail, PatientEmailData } from './email-service'
 import { IntegratedEmailData } from './email-integration'
 
 /**
@@ -19,53 +18,6 @@ interface WelcomeEmailLogs {
   lastCheck: string
 }
 
-const WELCOME_LOGS_FILE = 'data/welcome-email-logs.json'
-
-// Função para ler logs de emails de boas-vindas
-function readWelcomeEmailLogs(): WelcomeEmailLogs {
-  const fs = require('fs')
-  const path = require('path')
-  
-  const dataDir = path.join(process.cwd(), 'data')
-  const logsFile = path.join(dataDir, 'welcome-email-logs.json')
-  
-  if (!fs.existsSync(dataDir)) {
-    fs.mkdirSync(dataDir, { recursive: true })
-  }
-  
-  if (!fs.existsSync(logsFile)) {
-    const initialLogs: WelcomeEmailLogs = {
-      logs: [],
-      lastCheck: new Date().toISOString()
-    }
-    fs.writeFileSync(logsFile, JSON.stringify(initialLogs, null, 2))
-    return initialLogs
-  }
-  
-  const data = fs.readFileSync(logsFile, 'utf8')
-  return JSON.parse(data)
-}
-
-// Função para salvar logs de emails de boas-vindas
-function saveWelcomeEmailLogs(logs: WelcomeEmailLogs): void {
-  const fs = require('fs')
-  const path = require('path')
-  
-  const dataDir = path.join(process.cwd(), 'data')
-  const logsFile = path.join(dataDir, 'welcome-email-logs.json')
-  
-  if (!fs.existsSync(dataDir)) {
-    fs.mkdirSync(dataDir, { recursive: true })
-  }
-  
-  fs.writeFileSync(logsFile, JSON.stringify(logs, null, 2))
-}
-
-// Verificar se já foi enviado email de boas-vindas
-function alreadySentWelcomeEmail(email: string, logs: WelcomeEmailLog[]): boolean {
-  return logs.some(log => log.email === email && log.success)
-}
-
 /**
  * Enviar email de boas-vindas para um paciente específico
  */
@@ -73,129 +25,109 @@ export async function sendWelcomeEmailToPatient(
   patientData: IntegratedEmailData
 ): Promise<boolean> {
   try {
-    const logs = readWelcomeEmailLogs()
-    
-    // Verificar se já foi enviado
-    if (alreadySentWelcomeEmail(patientData.email, logs.logs)) {
-      console.log(`📧 Email de boas-vindas já foi enviado para: ${patientData.email}`)
-      return true
-    }
-    
-    // Preparar dados para o email
-    const emailData: PatientEmailData = {
-      name: patientData.name,
-      email: patientData.email,
-      birthDate: patientData.birthDate
-    }
-    
     console.log(`📧 Enviando email de boas-vindas para: ${patientData.name} (${patientData.email})`)
     console.log(`📍 Origem do cadastro: ${patientData.registrationSources?.join(', ') || patientData.source}`)
     
-    // Enviar email
-    const success = await sendWelcomeEmail(emailData)
-    
-    // Registrar no log
-    const logEntry: WelcomeEmailLog = {
-      email: patientData.email,
-      name: patientData.name,
-      sentAt: new Date().toISOString(),
-      source: patientData.registrationSources?.join(', ') || patientData.source,
-      success
-    }
-    
-    logs.logs.push(logEntry)
-    logs.lastCheck = new Date().toISOString()
-    saveWelcomeEmailLogs(logs)
-    
-    if (success) {
-      console.log(`✅ Email de boas-vindas enviado com sucesso para: ${patientData.name}`)
+    // Chamar API route para enviar email
+    const response = await fetch('/api/send-welcome-email', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        name: patientData.name,
+        email: patientData.email,
+        source: patientData.registrationSources?.join(', ') || patientData.source || 'website'
+      })
+    })
+
+    const result = await response.json()
+
+    if (response.ok && result.success) {
+      console.log(`✅ Email de boas-vindas enviado com sucesso para: ${patientData.email}`)
+      return true
     } else {
-      console.log(`❌ Falha ao enviar email de boas-vindas para: ${patientData.name}`)
+      console.error(`❌ Erro ao enviar email de boas-vindas para: ${patientData.email}`, result.error)
+      return false
     }
-    
-    return success
+
   } catch (error) {
-    console.error('❌ Erro ao enviar email de boas-vindas:', error)
+    console.error(`❌ Erro ao enviar email de boas-vindas para: ${patientData.email}`, error)
     return false
   }
 }
 
 /**
- * Enviar emails de boas-vindas para todos os novos pacientes
+ * Processar todos os emails integrados e enviar boas-vindas
  */
-export async function sendWelcomeEmailsToNewPatients(): Promise<{
-  success: boolean
-  stats: {
-    totalChecked: number
-    emailsSent: number
-    emailsFailed: number
-    alreadySent: number
-  }
-  message: string
-}> {
+export async function processIntegratedEmails(): Promise<void> {
   try {
-    console.log('🔄 Iniciando envio de emails de boas-vindas para novos pacientes...')
+    // Buscar emails integrados via API
+    const response = await fetch('/api/integrated-emails')
     
-    // Importar função de integração
-    const { readIntegratedEmailData } = require('./email-integration')
-    const integratedEmails = readIntegratedEmailData()
-    const logs = readWelcomeEmailLogs()
+    if (!response.ok) {
+      console.error('❌ Erro ao buscar emails integrados')
+      return
+    }
+
+    const integratedEmails: IntegratedEmailData[] = await response.json()
     
-    let emailsSent = 0
-    let emailsFailed = 0
-    let alreadySent = 0
+    console.log(`📊 Processando ${integratedEmails.length} emails integrados...`)
     
-    console.log(`📊 Total de emails integrados: ${integratedEmails.length}`)
+    let successCount = 0
+    let errorCount = 0
     
     for (const emailData of integratedEmails) {
-      // Verificar se já foi enviado
-      if (alreadySentWelcomeEmail(emailData.email, logs.logs)) {
-        alreadySent++
-        continue
-      }
-      
-      // Enviar email de boas-vindas
       const success = await sendWelcomeEmailToPatient(emailData)
       
       if (success) {
-        emailsSent++
+        successCount++
       } else {
-        emailsFailed++
+        errorCount++
       }
       
-      // Pequena pausa entre envios
+      // Aguardar um pouco entre envios para evitar spam
       await new Promise(resolve => setTimeout(resolve, 1000))
     }
     
-    const stats = {
-      totalChecked: integratedEmails.length,
-      emailsSent,
-      emailsFailed,
-      alreadySent
-    }
+    console.log(`📈 Processamento concluído: ${successCount} sucessos, ${errorCount} erros`)
     
-    console.log('📊 Estatísticas de emails de boas-vindas:')
-    console.log(`   - Total verificado: ${stats.totalChecked}`)
-    console.log(`   - Emails enviados: ${stats.emailsSent}`)
-    console.log(`   - Emails falharam: ${stats.emailsFailed}`)
-    console.log(`   - Já enviados anteriormente: ${stats.alreadySent}`)
-    
-    return {
-      success: true,
-      stats,
-      message: `Emails de boas-vindas processados: ${emailsSent} enviados, ${emailsFailed} falharam, ${alreadySent} já enviados`
-    }
   } catch (error) {
-    console.error('❌ Erro ao processar emails de boas-vindas:', error)
-    return {
-      success: false,
-      stats: {
-        totalChecked: 0,
-        emailsSent: 0,
-        emailsFailed: 0,
-        alreadySent: 0
+    console.error('❌ Erro ao processar emails integrados:', error)
+  }
+}
+
+/**
+ * Verificar e processar novos emails automaticamente
+ */
+export async function checkAndProcessNewEmails(): Promise<void> {
+  try {
+    console.log('🔍 Verificando novos emails para processamento...')
+    await processIntegratedEmails()
+  } catch (error) {
+    console.error('❌ Erro na verificação automática de emails:', error)
+  }
+}
+
+// Função para uso em componentes React (apenas no cliente)
+export async function sendWelcomeEmailClient(name: string, email: string, source?: string): Promise<boolean> {
+  try {
+    const response = await fetch('/api/send-welcome-email', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
       },
-      message: error instanceof Error ? error.message : 'Erro desconhecido'
-    }
+      body: JSON.stringify({
+        name,
+        email,
+        source: source || 'website'
+      })
+    })
+
+    const result = await response.json()
+    return response.ok && result.success
+  } catch (error) {
+    console.error('Erro ao enviar email de boas-vindas:', error)
+    return false
   }
 }

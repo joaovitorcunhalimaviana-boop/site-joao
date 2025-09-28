@@ -837,30 +837,25 @@ export async function createPublicAppointment(formData: {
           // Enviar email de boas-vindas automaticamente
           try {
             console.log('📧 Enviando email de boas-vindas automaticamente...')
-            const { sendWelcomeEmailToPatient } = await import('./welcome-email-service')
             
-            const patientData = {
-              email: formData.email,
-              name: formData.fullName,
-              whatsapp: formData.whatsapp,
-              birthDate: formData.birthDate,
-              source: 'appointment' as const,
-              subscribed: true,
-              subscribedAt: new Date().toISOString(),
-              patientId: patientResult.patient?.id,
-              registrationSources: ['appointment'],
-              preferences: {
-                healthTips: true,
-                appointments: true,
-                promotions: false
-              }
-            }
+            // Usar API route para enviar email
+            const response = await fetch('/api/send-welcome-email', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                name: formData.fullName,
+                email: formData.email,
+                source: 'appointment'
+              })
+            })
             
-            const emailSent = await sendWelcomeEmailToPatient(patientData)
-            if (emailSent) {
+            const result = await response.json()
+            if (response.ok && result.success) {
               console.log('✅ Email de boas-vindas enviado automaticamente')
             } else {
-              console.log('⚠️ Falha ao enviar email de boas-vindas automaticamente')
+              console.log('⚠️ Falha ao enviar email de boas-vindas automaticamente:', result.error)
             }
           } catch (welcomeEmailError) {
             console.error('❌ Erro ao enviar email de boas-vindas:', welcomeEmailError)
