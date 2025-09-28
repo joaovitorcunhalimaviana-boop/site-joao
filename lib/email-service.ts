@@ -110,3 +110,70 @@ export async function sendBirthdayEmails(patients: PatientEmailData[]): Promise<
     await new Promise(resolve => setTimeout(resolve, 1000))
   }
 }
+
+/**
+ * Enviar email de aniversário individual
+ */
+export async function sendBirthdayEmail(patientData: PatientEmailData): Promise<boolean> {
+  try {
+    const response = await fetch('/api/send-email', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        type: 'birthday',
+        name: patientData.name,
+        email: patientData.email
+      })
+    })
+
+    const result = await response.json()
+    return response.ok && result.success
+  } catch (error) {
+    console.error('Erro ao enviar email de aniversário:', error)
+    return false
+  }
+}
+
+/**
+ * Enviar email de newsletter
+ */
+export async function sendNewsletterEmail(emailData: { email: string; name: string; content: string }): Promise<boolean> {
+  try {
+    const response = await fetch('/api/send-email', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        type: 'newsletter',
+        ...emailData
+      })
+    })
+
+    const result = await response.json()
+    return response.ok && result.success
+  } catch (error) {
+    console.error('Erro ao enviar newsletter:', error)
+    return false
+  }
+}
+
+/**
+ * Processar emails de aniversário em lote
+ */
+export async function processBirthdayEmails(patients: PatientEmailData[]): Promise<void> {
+  console.log(`🎂 Processando ${patients.length} emails de aniversário...`)
+  
+  for (const patient of patients) {
+    try {
+      await sendBirthdayEmail(patient)
+      console.log(`✅ Email de aniversário enviado para ${patient.name}`)
+      // Pequena pausa entre envios
+      await new Promise(resolve => setTimeout(resolve, 1000))
+    } catch (error) {
+      console.error(`❌ Erro ao enviar email para ${patient.name}:`, error)
+    }
+  }
+}

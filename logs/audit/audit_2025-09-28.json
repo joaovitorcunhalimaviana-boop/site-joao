@@ -808,5 +808,69 @@
     },
     "severity": "HIGH",
     "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759032226836_1apqlr3cg",
+    "timestamp": "2025-09-28T04:03:46.836Z",
+    "action": "emergency_backup_failure",
+    "resource": "system",
+    "details": {
+      "taskId": "emergency_backup",
+      "error": "Failed to parse URL from /api/backup-emergency",
+      "timestamp": "2025-09-28T04:03:46.835Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759033524591_3xrhpdwby",
+    "timestamp": "2025-09-28T04:25:24.591Z",
+    "action": "emergency_backup_success",
+    "resource": "system",
+    "details": {
+      "taskId": "emergency_backup",
+      "timestamp": "2025-09-28T04:25:24.589Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759033568903_l9hsr5867",
+    "timestamp": "2025-09-28T04:26:08.903Z",
+    "action": "emergency_backup_failure",
+    "resource": "system",
+    "details": {
+      "taskId": "emergency_backup",
+      "error": "Backup falhou: 500",
+      "timestamp": "2025-09-28T04:26:08.899Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759033606239_ge7db8vp5",
+    "timestamp": "2025-09-28T04:26:46.239Z",
+    "action": "emergency_backup_failure",
+    "resource": "system",
+    "details": {
+      "taskId": "emergency_backup",
+      "error": "Backup falhou: 500",
+      "timestamp": "2025-09-28T04:26:46.234Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759033724008_r258flad4",
+    "timestamp": "2025-09-28T04:28:44.008Z",
+    "action": "emergency_backup_failure",
+    "resource": "system",
+    "details": {
+      "taskId": "emergency_backup",
+      "error": "Backup falhou: 500",
+      "timestamp": "2025-09-28T04:28:44.005Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
   }
 ]

@@ -131,3 +131,28 @@ export async function sendWelcomeEmailClient(name: string, email: string, source
     return false
   }
 }
+
+/**
+ * Enviar emails de boas-vindas para novos pacientes
+ */
+export async function sendWelcomeEmailsToNewPatients(): Promise<{ success: boolean; message: string; processed: number }> {
+  try {
+    console.log('🚀 Iniciando envio de emails de boas-vindas para novos pacientes...')
+    
+    // Processar emails integrados
+    await processIntegratedEmails()
+    
+    return {
+      success: true,
+      message: 'Emails de boas-vindas processados com sucesso',
+      processed: 0 // Será atualizado pela função processIntegratedEmails
+    }
+  } catch (error) {
+    console.error('❌ Erro ao enviar emails de boas-vindas:', error)
+    return {
+      success: false,
+      message: `Erro ao processar emails: ${error instanceof Error ? error.message : 'Erro desconhecido'}`,
+      processed: 0
+    }
+  }
+}
