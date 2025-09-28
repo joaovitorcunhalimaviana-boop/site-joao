@@ -194,7 +194,7 @@ export async function POST(request: NextRequest) {
           const transporter = nodemailer.createTransport({
             host: process.env.EMAIL_HOST || 'smtp.gmail.com',
             port: parseInt(process.env.EMAIL_PORT || '587'),
-            secure: process.env.EMAIL_SECURE === 'true',
+            secure: false, // Use STARTTLS
             auth: {
               user: process.env.EMAIL_USER,
               pass: emailPassword,
@@ -202,6 +202,9 @@ export async function POST(request: NextRequest) {
             tls: {
               rejectUnauthorized: false,
             },
+            connectionTimeout: 60000, // 60 seconds
+            greetingTimeout: 30000, // 30 seconds
+            socketTimeout: 60000, // 60 seconds
           })
 
           const mailOptions = {

@@ -920,5 +920,127 @@
     },
     "severity": "HIGH",
     "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759035600054_ewjkqip5n",
+    "timestamp": "2025-09-28T05:00:00.054Z",
+    "action": "daily_backup_failure",
+    "resource": "system",
+    "details": {
+      "taskId": "daily_backup",
+      "error": "Failed to parse URL from /api/backup-emergency",
+      "timestamp": "2025-09-28T05:00:00.053Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759035600973_fyx0d2c4l",
+    "timestamp": "2025-09-28T05:00:00.973Z",
+    "action": "daily_backup_success",
+    "resource": "system",
+    "details": {
+      "taskId": "daily_backup",
+      "timestamp": "2025-09-28T05:00:00.972Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759035600984_uaz6rbyfm",
+    "timestamp": "2025-09-28T05:00:00.984Z",
+    "action": "daily_backup_success",
+    "resource": "system",
+    "details": {
+      "taskId": "daily_backup",
+      "timestamp": "2025-09-28T05:00:00.983Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759035600995_33j8kjg36",
+    "timestamp": "2025-09-28T05:00:00.995Z",
+    "action": "daily_backup_success",
+    "resource": "system",
+    "details": {
+      "taskId": "daily_backup",
+      "timestamp": "2025-09-28T05:00:00.994Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759035601020_ecxnckc59",
+    "timestamp": "2025-09-28T05:00:01.020Z",
+    "action": "daily_backup_success",
+    "resource": "system",
+    "details": {
+      "taskId": "daily_backup",
+      "timestamp": "2025-09-28T05:00:01.019Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759035601047_in43z72t1",
+    "timestamp": "2025-09-28T05:00:01.047Z",
+    "action": "daily_backup_success",
+    "resource": "system",
+    "details": {
+      "taskId": "daily_backup",
+      "timestamp": "2025-09-28T05:00:01.046Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759035601055_tw66iguov",
+    "timestamp": "2025-09-28T05:00:01.056Z",
+    "action": "daily_backup_success",
+    "resource": "system",
+    "details": {
+      "taskId": "daily_backup",
+      "timestamp": "2025-09-28T05:00:01.055Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759035601060_a3hjfuo0e",
+    "timestamp": "2025-09-28T05:00:01.060Z",
+    "action": "daily_backup_success",
+    "resource": "system",
+    "details": {
+      "taskId": "daily_backup",
+      "timestamp": "2025-09-28T05:00:01.060Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759035601065_q6sm5fnop",
+    "timestamp": "2025-09-28T05:00:01.065Z",
+    "action": "daily_backup_success",
+    "resource": "system",
+    "details": {
+      "taskId": "daily_backup",
+      "timestamp": "2025-09-28T05:00:01.065Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759035826828_vgovzbnrl",
+    "timestamp": "2025-09-28T05:03:46.828Z",
+    "action": "emergency_backup_failure",
+    "resource": "system",
+    "details": {
+      "taskId": "emergency_backup",
+      "error": "Failed to parse URL from /api/backup-emergency",
+      "timestamp": "2025-09-28T05:03:46.826Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
   }
 ]

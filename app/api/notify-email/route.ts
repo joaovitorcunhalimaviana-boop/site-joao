@@ -31,11 +31,19 @@ export async function POST(request: NextRequest) {
 
     // Configurar transporter do email
     const transporter = nodemailer.createTransport({
-      service: 'gmail',
+      host: process.env.EMAIL_HOST || 'smtp.gmail.com',
+      port: parseInt(process.env.EMAIL_PORT || '587'),
+      secure: false, // Use STARTTLS
       auth: {
         user: process.env['EMAIL_USER'],
         pass: process.env['EMAIL_PASSWORD'], // App Password do Gmail
       },
+      tls: {
+        rejectUnauthorized: false,
+      },
+      connectionTimeout: 60000, // 60 seconds
+      greetingTimeout: 30000, // 30 seconds
+      socketTimeout: 60000, // 60 seconds
     })
 
     // Formatar email HTML

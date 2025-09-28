@@ -64,11 +64,19 @@ export async function POST(request: NextRequest) {
 
       try {
         transporter = nodemailer.createTransport({
-          service: config.service,
+          host: process.env.EMAIL_HOST || 'smtp.gmail.com',
+          port: parseInt(process.env.EMAIL_PORT || '587'),
+          secure: false, // Use STARTTLS
           auth: {
             user: config.user,
             pass: config.pass,
           },
+          tls: {
+            rejectUnauthorized: false,
+          },
+          connectionTimeout: 60000, // 60 seconds
+          greetingTimeout: 30000, // 30 seconds
+          socketTimeout: 60000, // 60 seconds
         })
 
         const whatsappLink = `https://wa.me/5583991221599?text=${encodeURIComponent(
