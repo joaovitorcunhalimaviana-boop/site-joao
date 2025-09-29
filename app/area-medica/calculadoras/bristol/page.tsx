@@ -139,7 +139,7 @@ export default function BristolScalePage() {
       <BackgroundPattern />
 
       <div className='relative isolate'>
-        <div className='pt-20 pb-8'>
+        <div className='pt-32 pb-8'>
           <div className='mx-auto max-w-7xl px-6 lg:px-8'>
             <div className='max-w-6xl mx-auto'>
               {/* Header */}

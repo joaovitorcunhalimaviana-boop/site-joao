@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import fs from 'fs'
-import path from 'path'
+import { prisma } from '@/lib/database'
 
 interface IntegrityReport {
   timestamp: string
@@ -33,36 +32,6 @@ interface DatabaseStatistics {
 
 // Sistema de validação de integridade dos dados
 class DataIntegritySystem {
-  
-  // Função para ler dados dos arquivos JSON
-  static readDataFromFiles() {
-    const dataDir = path.join(process.cwd(), 'data')
-    
-    try {
-      // Ler pacientes
-      const patientsPath = path.join(dataDir, 'patients.json')
-      const patients = fs.existsSync(patientsPath) 
-        ? JSON.parse(fs.readFileSync(patientsPath, 'utf8'))
-        : []
-      
-      // Ler consultas
-      const appointmentsPath = path.join(dataDir, 'appointments.json')
-      const appointments = fs.existsSync(appointmentsPath)
-        ? JSON.parse(fs.readFileSync(appointmentsPath, 'utf8'))
-        : []
-      
-      // Ler prontuários
-      const medicalRecordsPath = path.join(dataDir, 'medical-records.json')
-      const medicalRecords = fs.existsSync(medicalRecordsPath)
-        ? JSON.parse(fs.readFileSync(medicalRecordsPath, 'utf8'))
-        : []
-      
-      return { patients, appointments, medicalRecords }
-    } catch (error) {
-      console.error('❌ Erro ao ler arquivos de dados:', error)
-      return { patients: [], appointments: [], medicalRecords: [] }
-    }
-  }
   
   // Verificar integridade geral do banco de dados
   static async performIntegrityCheck(): Promise<IntegrityReport> {
@@ -123,21 +92,50 @@ class DataIntegritySystem {
   
   // Coletar estatísticas do banco de dados
   static async collectDatabaseStatistics(): Promise<DatabaseStatistics> {
-    const { patients, appointments, medicalRecords } = this.readDataFromFiles()
-    
-    const statistics: DatabaseStatistics = {
-      patients: patients.length,
-      appointments: appointments.length,
-      medicalRecords: medicalRecords.length,
-      consultations: appointments.length, // Mesmo que appointments
-      surgeries: 0, // Não implementado ainda
-      reviews: 0, // Não implementado ainda
-      users: 1, // Admin padrão
-      totalRecords: patients.length + appointments.length + medicalRecords.length,
-      lastUpdated: new Date().toISOString()
+    try {
+      const [
+        patientsCount,
+        appointmentsCount,
+        medicalRecordsCount,
+        consultationsCount,
+        reviewsCount,
+        usersCount
+      ] = await Promise.all([
+        prisma.patient.count(),
+        prisma.appointment.count(),
+        prisma.medicalRecord.count(),
+        prisma.consultation.count(),
+        prisma.review.count(),
+        prisma.user.count()
+      ])
+
+      const statistics: DatabaseStatistics = {
+        patients: patientsCount,
+        appointments: appointmentsCount,
+        medicalRecords: medicalRecordsCount,
+        consultations: consultationsCount,
+        surgeries: 0, // Não implementado ainda
+        reviews: reviewsCount,
+        users: usersCount,
+        totalRecords: patientsCount + appointmentsCount + medicalRecordsCount + consultationsCount + reviewsCount + usersCount,
+        lastUpdated: new Date().toISOString()
+      }
+      
+      return statistics
+    } catch (error) {
+      console.error('Erro ao coletar estatísticas do banco:', error)
+      return {
+        patients: 0,
+        appointments: 0,
+        medicalRecords: 0,
+        consultations: 0,
+        surgeries: 0,
+        reviews: 0,
+        users: 0,
+        totalRecords: 0,
+        lastUpdated: new Date().toISOString()
+      }
     }
-    
-    return statistics
   }
   
   // Verificar pacientes órfãos (não aplicável no sistema de arquivos)

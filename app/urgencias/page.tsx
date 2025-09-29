@@ -34,7 +34,7 @@ export default function UrgenciasPage() {
     <div className='min-h-screen bg-black'>
       <BackgroundPattern />
       <Header currentPage='urgencias' />
-      <div className='py-12'>
+      <div className='py-12 pt-24'>
         <div className='max-w-6xl mx-auto px-4 sm:px-6 lg:px-8'>
           {/* Header */}
           <div className='text-center mb-12'>

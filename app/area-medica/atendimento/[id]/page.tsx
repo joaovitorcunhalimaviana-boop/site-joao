@@ -566,7 +566,7 @@ export default function AppointmentPage() {
       <Header currentPage='atendimento' />
 
       {/* Cabeçalho da página */}
-      <div className='bg-gray-800/40 border-b border-gray-700'>
+      <div className='bg-gray-800/40 border-b border-gray-700 mt-16'>
         <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
           <div className='flex justify-between items-center py-4'>
             <div className='flex items-center'>

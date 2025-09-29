@@ -427,7 +427,7 @@ function AgendaManagementPageContent() {
       <BackgroundPattern />
       <Header />
       
-      <div className="relative z-10 container mx-auto px-4 py-8">
+      <div className="relative z-10 container mx-auto px-4 py-8 pt-24">
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Menu Lateral ou Botão Voltar */}
           <div className="lg:w-1/4">

@@ -117,7 +117,8 @@ export async function checkEmailExists(email: string): Promise<{
 // Função para obter emails de aniversário via API
 export async function getAllBirthdayEmails(): Promise<IntegratedEmailData[]> {
   try {
-    const response = await fetch('/api/email-integration?action=birthdays')
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
+    const response = await fetch(`${baseUrl}/api/email-integration?action=birthdays`)
     const result = await response.json()
     
     if (result.success) {

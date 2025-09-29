@@ -126,7 +126,7 @@ export default function NovoPackiente() {
   return (
     <div className='min-h-screen bg-black'>
       <Header currentPage='novo-paciente' />
-      <main className='py-8'>
+      <main className='py-8 pt-24'>
         <div className='max-w-2xl mx-auto px-4'>
           <div className='mb-6 flex justify-between items-center'>
             <h1 className='text-2xl font-bold text-white'>Novo Paciente</h1>

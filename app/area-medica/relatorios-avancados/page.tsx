@@ -44,7 +44,7 @@ export default function RelatoriosAvancadosPage() {
 
       <div className='relative isolate'>
         {/* Header */}
-        <div className='pt-20 pb-8'>
+        <div className='pt-32 pb-8'>
           <div className='mx-auto max-w-7xl px-6 lg:px-8'>
             <div className='flex items-center justify-between'>
               <div className='flex items-center gap-4'>

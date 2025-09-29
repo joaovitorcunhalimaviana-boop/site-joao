@@ -57,7 +57,7 @@ export default function EspecialidadesPage() {
         <Header currentPage='especialidades' />
 
         {/* Main Content */}
-        <main className='container mx-auto px-6 lg:px-8 py-16'>
+        <main className='container mx-auto px-6 lg:px-8 py-16 pt-24'>
           {/* Page Title */}
           <div className='text-center mb-8'>
             <div

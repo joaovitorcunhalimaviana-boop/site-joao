@@ -308,7 +308,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       message: `Verificação de aniversários concluída`,
-      totalChecked: newsletterData.subscribers.length,
+      totalChecked: integratedEmails.length,
       birthdaySubscribers: birthdaySubscribers.length,
       emailsSent: results.filter(r => r.success).length,
       results
@@ -331,7 +331,7 @@ export async function POST(request: NextRequest) {
 export async function GET(request: NextRequest) {
   try {
     const birthdayLogs = readBirthdayLogs()
-    const newsletterData = readNewsletterData()
+    const integratedEmails = await getAllBirthdayEmails()
     
     const currentYear = new Date().getFullYear()
     const currentYearLogs = birthdayLogs.logs.filter(log => log.year === currentYear)
@@ -340,10 +340,10 @@ export async function GET(request: NextRequest) {
     const today = new Date()
     const next30Days = new Date(today.getTime() + (30 * 24 * 60 * 60 * 1000))
     
-    const upcomingBirthdays = newsletterData.subscribers
-      .filter(subscriber => subscriber.subscribed && subscriber.birthDate)
-      .map(subscriber => {
-        const birthDate = new Date(subscriber.birthDate!)
+    const upcomingBirthdays = integratedEmails
+      .filter(emailData => emailData.subscribed && emailData.birthDate)
+      .map(emailData => {
+        const birthDate = new Date(emailData.birthDate!)
         const thisYearBirthday = new Date(currentYear, birthDate.getMonth(), birthDate.getDate())
         
         // Se já passou este ano, considerar o próximo ano
@@ -352,9 +352,9 @@ export async function GET(request: NextRequest) {
         }
         
         return {
-          name: subscriber.name,
-          email: subscriber.email,
-          birthDate: subscriber.birthDate,
+          name: emailData.name,
+          email: emailData.email,
+          birthDate: emailData.birthDate,
           nextBirthday: thisYearBirthday.toISOString(),
           daysUntil: Math.ceil((thisYearBirthday.getTime() - today.getTime()) / (24 * 60 * 60 * 1000))
         }
@@ -371,8 +371,8 @@ export async function GET(request: NextRequest) {
         totalEmailsSentThisYear: currentYearLogs.length,
         lastCheck: birthdayLogs.lastCheck,
         upcomingBirthdays: upcomingBirthdays.slice(0, 10), // Próximos 10
-        totalSubscribersWithBirthdate: newsletterData.subscribers.filter(
-          s => s.subscribed && s.birthDate
+        totalSubscribersWithBirthdate: integratedEmails.filter(
+          emailData => emailData.subscribed && emailData.birthDate
         ).length
       }
     })

@@ -1,4 +1,19 @@
 {
-  "logs": [],
-  "lastCheck": null
+  "logs": [
+    {
+      "email": "teste@example.com",
+      "name": "Teste",
+      "sentAt": "2025-09-29T00:56:16.804Z",
+      "source": "test",
+      "success": true
+    },
+    {
+      "email": "teste@deploy.com",
+      "name": "Teste Deploy",
+      "sentAt": "2025-09-29T01:43:28.389Z",
+      "source": "website",
+      "success": true
+    }
+  ],
+  "lastCheck": "2025-09-29T01:43:28.389Z"
 }
