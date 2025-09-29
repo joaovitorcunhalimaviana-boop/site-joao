@@ -33,7 +33,7 @@ export default function TeleconsultaPage() {
     <div className='min-h-screen bg-black'>
       <BackgroundPattern />
       <Header currentPage='teleconsulta' />
-      <div className='py-12'>
+      <div className='pt-32 pb-12'>
         <div className='max-w-6xl mx-auto px-4 sm:px-6 lg:px-8'>
           {/* Header */}
           <div className='text-center mb-12'>

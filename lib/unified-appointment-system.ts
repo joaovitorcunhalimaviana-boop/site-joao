@@ -137,7 +137,7 @@ async function loadFromStorage<T>(key: string): Promise<T[]> {
       if (key === PATIENTS_KEY) {
         fileName = 'patients.json'
       } else if (key === APPOINTMENTS_KEY) {
-        fileName = 'unified-appointments.json'
+        fileName = 'appointments.json'
       } else {
         fileName = `${key}.json`
       }
@@ -313,7 +313,7 @@ async function saveToStorage<T>(key: string, data: T): Promise<void> {
         if (key === PATIENTS_KEY) {
           fileName = 'patients.json'
         } else if (key === APPOINTMENTS_KEY) {
-          fileName = 'unified-appointments.json'
+          fileName = 'appointments.json'
         } else {
           fileName = `${key}.json`
         }

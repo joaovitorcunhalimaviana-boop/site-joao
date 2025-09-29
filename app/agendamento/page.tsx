@@ -91,7 +91,7 @@ const AgendamentoPage = () => {
     <div className='min-h-screen bg-black'>
       <BackgroundPattern />
       <Header currentPage='agendamento' />
-      <div className='py-12'>
+      <div className='pt-32 pb-12'>
         <div className='max-w-4xl mx-auto px-4 sm:px-6 lg:px-8'>
           {/* Page Title */}
           <div className='text-center mb-8'>
