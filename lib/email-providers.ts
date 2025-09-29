@@ -12,10 +12,39 @@ export interface EmailProvider {
 
 // Configurações dos provedores de email
 export const EMAIL_PROVIDERS: EmailProvider[] = [
-  // 1. Postmark - Recomendado para Railway
+  // 1. Mailtrap - Principal (3500 emails grátis/mês)
+  {
+    name: 'mailtrap',
+    priority: 1,
+    config: {
+      host: 'live.smtp.mailtrap.io',
+      port: 587,
+      secure: false,
+      requireTLS: true,
+      auth: {
+        user: process.env.MAILTRAP_API_TOKEN,
+        pass: process.env.MAILTRAP_API_TOKEN,
+      },
+      connectionTimeout: 60000,
+      greetingTimeout: 30000,
+      socketTimeout: 60000,
+    },
+    testConnection: async function() {
+      if (!process.env.MAILTRAP_API_TOKEN) return false
+      try {
+        const transporter = nodemailer.createTransporter(this.config)
+        await transporter.verify()
+        return true
+      } catch {
+        return false
+      }
+    }
+  },
+
+  // 2. Postmark - Alternativa confiável
   {
     name: 'postmark',
-    priority: 1,
+    priority: 2,
     config: {
       host: 'smtp.postmarkapp.com',
       port: 587,
@@ -32,7 +61,7 @@ export const EMAIL_PROVIDERS: EmailProvider[] = [
     testConnection: async function() {
       if (!process.env.POSTMARK_SERVER_TOKEN) return false
       try {
-        const transporter = nodemailer.createTransport(this.config)
+        const transporter = nodemailer.createTransporter(this.config)
         await transporter.verify()
         return true
       } catch {
@@ -41,10 +70,10 @@ export const EMAIL_PROVIDERS: EmailProvider[] = [
     }
   },
 
-  // 2. Mailgun - Alternativa confiável
+  // 3. Mailgun - Alternativa confiável
   {
     name: 'mailgun',
-    priority: 2,
+    priority: 3,
     config: {
       host: 'smtp.mailgun.org',
       port: 587,
@@ -70,10 +99,10 @@ export const EMAIL_PROVIDERS: EmailProvider[] = [
     }
   },
 
-  // 3. SendGrid - Backup option
+  // 4. SendGrid - Backup option
   {
     name: 'sendgrid',
-    priority: 3,
+    priority: 4,
     config: {
       host: 'smtp.sendgrid.net',
       port: 587,
@@ -99,10 +128,10 @@ export const EMAIL_PROVIDERS: EmailProvider[] = [
     }
   },
 
-  // 4. Gmail - Fallback (com configurações otimizadas para Railway)
+  // 5. Gmail - Fallback (com configurações otimizadas para Railway)
   {
     name: 'gmail',
-    priority: 4,
+    priority: 5,
     config: {
       host: 'smtp.gmail.com',
       port: 587,
@@ -238,6 +267,8 @@ export class EmailProviderManager {
   // Verificar se provedor está configurado
   private isProviderConfigured(provider: EmailProvider): boolean {
     switch (provider.name) {
+      case 'mailtrap':
+        return !!process.env.MAILTRAP_API_TOKEN
       case 'postmark':
         return !!process.env.POSTMARK_SERVER_TOKEN
       case 'mailgun':
