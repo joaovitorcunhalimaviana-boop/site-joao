@@ -8,10 +8,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Separator } from '@/components/ui/separator';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import Header from '@/components/ui/header';
 import Footer from '@/components/ui/footer';
 import { 
@@ -47,10 +43,13 @@ interface Template {
   title: string;
   category: string;
   content: string;
+  description?: string;
   tags: string[];
   createdAt: Date;
+  updatedAt: Date;
   lastUsed?: Date;
   useCount: number;
+  isFavorite: boolean;
 }
 
 interface Snippet {
@@ -98,6 +97,7 @@ export default function ColonoscopyPage() {
   const [showProductivityFeatures, setShowProductivityFeatures] = useState(true);
   const [showSnippets, setShowSnippets] = useState(false);
   const [snippets, setSnippets] = useState<Snippet[]>(DEFAULT_SNIPPETS);
+  const [isEditing, setIsEditing] = useState(false);
   
   // Ref para o editor
   const editorRef = useRef<HTMLTextAreaElement>(null);
@@ -135,10 +135,11 @@ export default function ColonoscopyPage() {
       content: newTemplate.content,
       category: newTemplate.category,
       description: newTemplate.description,
+      tags: [],
       createdAt: new Date(),
       updatedAt: new Date(),
       isFavorite: false,
-      usageCount: 0
+      useCount: 0
     };
 
     const updatedTemplates = [...templates, template];
@@ -155,7 +156,7 @@ export default function ColonoscopyPage() {
     
     // Incrementar contador de uso
     const updatedTemplates = templates.map(t =>
-      t.id === template.id ? { ...t, usageCount: t.usageCount + 1 } : t
+      t.id === template.id ? { ...t, useCount: t.useCount + 1 } : t
     );
     saveTemplates(updatedTemplates);
   };
@@ -207,8 +208,11 @@ export default function ColonoscopyPage() {
       title: currentTemplate?.title || `Template ${templates.length + 1}`,
       category: selectedCategory === 'Todos' ? 'Outros' : selectedCategory,
       content: editorContent,
+      description: currentTemplate?.description,
       tags: extractTags(editorContent),
       createdAt: currentTemplate?.createdAt || new Date(),
+      updatedAt: new Date(),
+      isFavorite: currentTemplate?.isFavorite || false,
       useCount: currentTemplate?.useCount || 0
     };
 

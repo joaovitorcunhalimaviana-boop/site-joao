@@ -956,6 +956,7 @@ export async function getSystemStats(): Promise<{
   todayAppointments: number
   pendingAppointments: number
   completedAppointments: number
+  uniquePendingPatients: number
 }> {
   const appointments = await getAllAppointments()
   const patients = await getAllPatients()
@@ -977,16 +978,24 @@ export async function getSystemStats(): Promise<{
     apt => apt.appointmentDate === today
   )
 
+  // Calcular pacientes únicos com agendamentos pendentes hoje
+  const pendingAppointmentsToday = todayAppointments.filter(
+    apt => apt.status === 'agendada'
+  )
+  
+  const uniquePendingPatients = new Set(
+    pendingAppointmentsToday.map(apt => apt.patientId)
+  ).size
+
   return {
     totalAppointments: appointments.length,
     totalPatients: patients.length,
     todayAppointments: todayAppointments.length,
-    pendingAppointments: todayAppointments.filter(
-      apt => apt.status === 'agendada'
-    ).length,
+    pendingAppointments: pendingAppointmentsToday.length,
     completedAppointments: todayAppointments.filter(
       apt => apt.status === 'concluida'
     ).length,
+    uniquePendingPatients,
   }
 }
 

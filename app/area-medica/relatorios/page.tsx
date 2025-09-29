@@ -298,7 +298,7 @@ export default function RelatoriosPage() {
                   id: consultation.id,
                   date: consultation.date,
                   patientName: consultation.patientName,
-                  status: consultation.status,
+                  status: consultation.status as 'scheduled' | 'completed' | 'cancelled',
                   time: consultation.time,
                 }))}
               />

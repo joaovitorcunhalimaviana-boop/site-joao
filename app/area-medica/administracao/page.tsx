@@ -66,7 +66,7 @@ export default function AdministracaoPage() {
   const checkAuth = async () => {
     // Sistema simplificado - definir dados padrão do médico
     setDoctor({
-      name: 'Dr. João Vítor da Cunha Lima Viana',
+      name: 'João Vítor da Cunha Lima Viana',
       email: 'joao.viana@clinica.com',
       specialty: 'Coloproctologista e Cirurgião Geral',
       crm: 'CRMPB 12831',
