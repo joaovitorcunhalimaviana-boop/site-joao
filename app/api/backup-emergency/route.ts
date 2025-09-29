@@ -11,7 +11,6 @@ interface BackupData {
   appointments: any[]
   medicalRecords: any[]
   consultations: any[]
-  surgeries: any[]
   reviews: any[]
   users: any[]
   auditLogs: any[]
@@ -37,10 +36,10 @@ async function createEmergencyBackup(): Promise<BackupData> {
       appointments,
       consultations,
       medicalRecords,
-      // surgeries, // Removido - não existe no schema
       reviews,
       users,
-      auditLogs
+      auditLogs,
+      scheduleBlocks
     ] = await Promise.all([
       prisma.patient.findMany({
         include: {
@@ -66,12 +65,6 @@ async function createEmergencyBackup(): Promise<BackupData> {
           doctor: true
         }
       }),
-      // Cirurgias não existem no schema atual - removendo
-      // prisma.surgery.findMany({
-      //   include: {
-      //     patient: true
-      //   }
-      // }),
       prisma.review.findMany(),
       prisma.user.findMany({
         select: {
@@ -87,17 +80,9 @@ async function createEmergencyBackup(): Promise<BackupData> {
           updatedAt: true
         }
       }),
-      prisma.auditLog.findMany()
+      prisma.auditLog.findMany(),
+      prisma.scheduleBlock.findMany()
     ])
-
-    // Tentar buscar scheduleBlocks, mas não falhar se não existir
-    let scheduleBlocks: any[] = []
-    try {
-      scheduleBlocks = await prisma.scheduleBlock.findMany()
-    } catch (scheduleError) {
-      console.warn('⚠️ Não foi possível buscar scheduleBlocks:', scheduleError)
-      scheduleBlocks = []
-    }
 
     const backupData: BackupData = {
       timestamp: new Date().toISOString(),
@@ -105,7 +90,6 @@ async function createEmergencyBackup(): Promise<BackupData> {
       appointments,
       medicalRecords,
       consultations,
-      surgeries: [], // Removido - não existe no schema
       reviews,
       users,
       auditLogs,
@@ -120,7 +104,6 @@ async function createEmergencyBackup(): Promise<BackupData> {
       appointments,
       medicalRecords,
       consultations,
-      // surgeries, // Removido - não existe no schema
       reviews,
       users,
       auditLogs,
@@ -258,9 +241,10 @@ export async function POST(request: NextRequest) {
         appointments: backupData.appointments.length,
         medicalRecords: backupData.medicalRecords.length,
         consultations: backupData.consultations.length,
-        surgeries: backupData.surgeries.length,
         reviews: backupData.reviews.length,
-        users: backupData.users.length
+        users: backupData.users.length,
+        auditLogs: backupData.auditLogs.length,
+        scheduleBlocks: backupData.scheduleBlocks.length
       }
     })
     

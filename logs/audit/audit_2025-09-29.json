@@ -1,0 +1,542 @@
+[
+  {
+    "id": "audit_1759105624540_5081a4tzf",
+    "timestamp": "2025-09-29T00:27:04.540Z",
+    "action": "scheduler_initialized",
+    "resource": "system",
+    "details": {
+      "tasksCount": 5,
+      "config": {
+        "backups": {
+          "emergency": {
+            "enabled": true,
+            "interval": 60
+          },
+          "daily": {
+            "enabled": true,
+            "time": "02:00"
+          },
+          "weekly": {
+            "enabled": true,
+            "day": 0,
+            "time": "03:00"
+          },
+          "monthly": {
+            "enabled": true,
+            "day": 1,
+            "time": "04:00"
+          }
+        },
+        "integrity": {
+          "enabled": true,
+          "interval": 6
+        },
+        "cloudBackup": {
+          "enabled": true,
+          "interval": 12
+        },
+        "monitoring": {
+          "enabled": true,
+          "interval": 15
+        }
+      }
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759105693529_g522odelz",
+    "timestamp": "2025-09-29T00:28:13.529Z",
+    "action": "scheduler_initialized",
+    "resource": "system",
+    "details": {
+      "tasksCount": 5,
+      "config": {
+        "backups": {
+          "emergency": {
+            "enabled": true,
+            "interval": 60
+          },
+          "daily": {
+            "enabled": true,
+            "time": "02:00"
+          },
+          "weekly": {
+            "enabled": true,
+            "day": 0,
+            "time": "03:00"
+          },
+          "monthly": {
+            "enabled": true,
+            "day": 1,
+            "time": "04:00"
+          }
+        },
+        "integrity": {
+          "enabled": true,
+          "interval": 6
+        },
+        "cloudBackup": {
+          "enabled": true,
+          "interval": 12
+        },
+        "monitoring": {
+          "enabled": true,
+          "interval": 15
+        }
+      }
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759105708722_dsdzs8oei",
+    "timestamp": "2025-09-29T00:28:28.722Z",
+    "action": "scheduler_initialized",
+    "resource": "system",
+    "details": {
+      "tasksCount": 5,
+      "config": {
+        "backups": {
+          "emergency": {
+            "enabled": true,
+            "interval": 60
+          },
+          "daily": {
+            "enabled": true,
+            "time": "02:00"
+          },
+          "weekly": {
+            "enabled": true,
+            "day": 0,
+            "time": "03:00"
+          },
+          "monthly": {
+            "enabled": true,
+            "day": 1,
+            "time": "04:00"
+          }
+        },
+        "integrity": {
+          "enabled": true,
+          "interval": 6
+        },
+        "cloudBackup": {
+          "enabled": true,
+          "interval": 12
+        },
+        "monitoring": {
+          "enabled": true,
+          "interval": 15
+        }
+      }
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759105766985_8xpum4zje",
+    "timestamp": "2025-09-29T00:29:26.985Z",
+    "action": "scheduler_initialized",
+    "resource": "system",
+    "details": {
+      "tasksCount": 5,
+      "config": {
+        "backups": {
+          "emergency": {
+            "enabled": true,
+            "interval": 60
+          },
+          "daily": {
+            "enabled": true,
+            "time": "02:00"
+          },
+          "weekly": {
+            "enabled": true,
+            "day": 0,
+            "time": "03:00"
+          },
+          "monthly": {
+            "enabled": true,
+            "day": 1,
+            "time": "04:00"
+          }
+        },
+        "integrity": {
+          "enabled": true,
+          "interval": 6
+        },
+        "cloudBackup": {
+          "enabled": true,
+          "interval": 12
+        },
+        "monitoring": {
+          "enabled": true,
+          "interval": 15
+        }
+      }
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759105871785_sebime4wr",
+    "timestamp": "2025-09-29T00:31:11.785Z",
+    "action": "scheduler_initialized",
+    "resource": "system",
+    "details": {
+      "tasksCount": 5,
+      "config": {
+        "backups": {
+          "emergency": {
+            "enabled": true,
+            "interval": 60
+          },
+          "daily": {
+            "enabled": true,
+            "time": "02:00"
+          },
+          "weekly": {
+            "enabled": true,
+            "day": 0,
+            "time": "03:00"
+          },
+          "monthly": {
+            "enabled": true,
+            "day": 1,
+            "time": "04:00"
+          }
+        },
+        "integrity": {
+          "enabled": true,
+          "interval": 6
+        },
+        "cloudBackup": {
+          "enabled": true,
+          "interval": 12
+        },
+        "monitoring": {
+          "enabled": true,
+          "interval": 15
+        }
+      }
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759105931537_gsconx2gx",
+    "timestamp": "2025-09-29T00:32:11.537Z",
+    "action": "scheduler_initialized",
+    "resource": "system",
+    "details": {
+      "tasksCount": 5,
+      "config": {
+        "backups": {
+          "emergency": {
+            "enabled": true,
+            "interval": 60
+          },
+          "daily": {
+            "enabled": true,
+            "time": "02:00"
+          },
+          "weekly": {
+            "enabled": true,
+            "day": 0,
+            "time": "03:00"
+          },
+          "monthly": {
+            "enabled": true,
+            "day": 1,
+            "time": "04:00"
+          }
+        },
+        "integrity": {
+          "enabled": true,
+          "interval": 6
+        },
+        "cloudBackup": {
+          "enabled": true,
+          "interval": 12
+        },
+        "monitoring": {
+          "enabled": true,
+          "interval": 15
+        }
+      }
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759105965623_emz0bi9yz",
+    "timestamp": "2025-09-29T00:32:45.623Z",
+    "action": "scheduler_initialized",
+    "resource": "system",
+    "details": {
+      "tasksCount": 5,
+      "config": {
+        "backups": {
+          "emergency": {
+            "enabled": true,
+            "interval": 60
+          },
+          "daily": {
+            "enabled": true,
+            "time": "02:00"
+          },
+          "weekly": {
+            "enabled": true,
+            "day": 0,
+            "time": "03:00"
+          },
+          "monthly": {
+            "enabled": true,
+            "day": 1,
+            "time": "04:00"
+          }
+        },
+        "integrity": {
+          "enabled": true,
+          "interval": 6
+        },
+        "cloudBackup": {
+          "enabled": true,
+          "interval": 12
+        },
+        "monitoring": {
+          "enabled": true,
+          "interval": 15
+        }
+      }
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759106003847_21g6heshi",
+    "timestamp": "2025-09-29T00:33:23.847Z",
+    "action": "scheduler_initialized",
+    "resource": "system",
+    "details": {
+      "tasksCount": 5,
+      "config": {
+        "backups": {
+          "emergency": {
+            "enabled": true,
+            "interval": 60
+          },
+          "daily": {
+            "enabled": true,
+            "time": "02:00"
+          },
+          "weekly": {
+            "enabled": true,
+            "day": 0,
+            "time": "03:00"
+          },
+          "monthly": {
+            "enabled": true,
+            "day": 1,
+            "time": "04:00"
+          }
+        },
+        "integrity": {
+          "enabled": true,
+          "interval": 6
+        },
+        "cloudBackup": {
+          "enabled": true,
+          "interval": 12
+        },
+        "monitoring": {
+          "enabled": true,
+          "interval": 15
+        }
+      }
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759106127161_wk5w75xkt",
+    "timestamp": "2025-09-29T00:35:27.161Z",
+    "action": "scheduler_initialized",
+    "resource": "system",
+    "details": {
+      "tasksCount": 5,
+      "config": {
+        "backups": {
+          "emergency": {
+            "enabled": true,
+            "interval": 60
+          },
+          "daily": {
+            "enabled": true,
+            "time": "02:00"
+          },
+          "weekly": {
+            "enabled": true,
+            "day": 0,
+            "time": "03:00"
+          },
+          "monthly": {
+            "enabled": true,
+            "day": 1,
+            "time": "04:00"
+          }
+        },
+        "integrity": {
+          "enabled": true,
+          "interval": 6
+        },
+        "cloudBackup": {
+          "enabled": true,
+          "interval": 12
+        },
+        "monitoring": {
+          "enabled": true,
+          "interval": 15
+        }
+      }
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759106135201_1n44kc0he",
+    "timestamp": "2025-09-29T00:35:35.201Z",
+    "action": "scheduler_initialized",
+    "resource": "system",
+    "details": {
+      "tasksCount": 5,
+      "config": {
+        "backups": {
+          "emergency": {
+            "enabled": true,
+            "interval": 60
+          },
+          "daily": {
+            "enabled": true,
+            "time": "02:00"
+          },
+          "weekly": {
+            "enabled": true,
+            "day": 0,
+            "time": "03:00"
+          },
+          "monthly": {
+            "enabled": true,
+            "day": 1,
+            "time": "04:00"
+          }
+        },
+        "integrity": {
+          "enabled": true,
+          "interval": 6
+        },
+        "cloudBackup": {
+          "enabled": true,
+          "interval": 12
+        },
+        "monitoring": {
+          "enabled": true,
+          "interval": 15
+        }
+      }
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759106162492_xe3nhwajf",
+    "timestamp": "2025-09-29T00:36:02.492Z",
+    "action": "scheduler_initialized",
+    "resource": "system",
+    "details": {
+      "tasksCount": 5,
+      "config": {
+        "backups": {
+          "emergency": {
+            "enabled": true,
+            "interval": 60
+          },
+          "daily": {
+            "enabled": true,
+            "time": "02:00"
+          },
+          "weekly": {
+            "enabled": true,
+            "day": 0,
+            "time": "03:00"
+          },
+          "monthly": {
+            "enabled": true,
+            "day": 1,
+            "time": "04:00"
+          }
+        },
+        "integrity": {
+          "enabled": true,
+          "interval": 6
+        },
+        "cloudBackup": {
+          "enabled": true,
+          "interval": 12
+        },
+        "monitoring": {
+          "enabled": true,
+          "interval": 15
+        }
+      }
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759106192487_orxt74ajn",
+    "timestamp": "2025-09-29T00:36:32.487Z",
+    "action": "scheduler_initialized",
+    "resource": "system",
+    "details": {
+      "tasksCount": 5,
+      "config": {
+        "backups": {
+          "emergency": {
+            "enabled": true,
+            "interval": 60
+          },
+          "daily": {
+            "enabled": true,
+            "time": "02:00"
+          },
+          "weekly": {
+            "enabled": true,
+            "day": 0,
+            "time": "03:00"
+          },
+          "monthly": {
+            "enabled": true,
+            "day": 1,
+            "time": "04:00"
+          }
+        },
+        "integrity": {
+          "enabled": true,
+          "interval": 6
+        },
+        "cloudBackup": {
+          "enabled": true,
+          "interval": 12
+        },
+        "monitoring": {
+          "enabled": true,
+          "interval": 15
+        }
+      }
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  }
+]

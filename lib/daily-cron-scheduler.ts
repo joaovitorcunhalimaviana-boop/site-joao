@@ -113,7 +113,7 @@ async function sendDailyAgendaForDate(targetDate: string): Promise<void> {
     console.log(`🏥 Cirurgias encontradas: ${dailyAgenda.surgeries.length}`)
 
     // Enviar para a API de agenda diária
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://www.joaovitorviana.com.br'
     const response = await fetch(
       `${baseUrl}/api/daily-agenda`,
       {

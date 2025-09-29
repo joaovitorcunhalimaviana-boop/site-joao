@@ -1030,7 +1030,7 @@ export async function getSurgeriesByDate(date: string): Promise<Surgery[]> {
     const surgeryDateFormat = `${day}/${month}/${year}`
 
     // Usar URL absoluta no servidor
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://www.joaovitorviana.com.br'
     const url = `${baseUrl}/api/surgeries?date=${encodeURIComponent(surgeryDateFormat)}`
 
     console.log(`📡 Fazendo requisição para: ${url}`)

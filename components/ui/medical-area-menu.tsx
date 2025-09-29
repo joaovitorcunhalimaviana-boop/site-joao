@@ -132,6 +132,11 @@ export default function MedicalAreaMenu({ currentPage }: MedicalAreaMenuProps) {
       label: 'Administração',
       icon: CogIcon,
     },
+    {
+      href: '/area-medica/protecao-dados',
+      label: 'Proteção de Dados',
+      icon: CogIcon,
+    },
   ]
 
   return (

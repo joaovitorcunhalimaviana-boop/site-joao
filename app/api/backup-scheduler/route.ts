@@ -22,7 +22,7 @@ class EmergencyBackupScheduler {
     try {
       console.log('🚨 EXECUTANDO BACKUP AUTOMÁTICO DE EMERGÊNCIA...')
       
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/backup-emergency`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'https://www.joaovitorviana.com.br'}/api/backup-emergency`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

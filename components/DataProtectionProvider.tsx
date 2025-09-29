@@ -47,8 +47,8 @@ export function DataProtectionProvider({ children }: DataProtectionProviderProps
     setProtectionStatus('initializing')
     
     try {
-      // Aguardar um pouco para garantir que a aplicação carregou
-      await new Promise(resolve => setTimeout(resolve, 2000))
+      // Aguardar mais tempo para garantir que a aplicação carregou completamente
+      await new Promise(resolve => setTimeout(resolve, 5000))
       
       // Inicializar sistemas via API
       const response = await fetch('/api/protection-manager', {
@@ -58,7 +58,9 @@ export function DataProtectionProvider({ children }: DataProtectionProviderProps
         },
         body: JSON.stringify({
           action: 'initialize_protection'
-        })
+        }),
+        // Adicionar timeout e configurações de fetch
+        signal: AbortSignal.timeout(30000) // 30 segundos de timeout
       })
       
       if (response.ok) {
@@ -69,14 +71,22 @@ export function DataProtectionProvider({ children }: DataProtectionProviderProps
         setProtectionStatus('active')
         
         // Verificar status inicial
-        await checkProtectionStatus()
+        try {
+          await checkProtectionStatus()
+        } catch (statusError) {
+          console.warn('⚠️ Não foi possível verificar status inicial:', statusError)
+        }
         
         // Executar backup inicial se necessário
         if (result.data?.results?.emergencyBackup) {
           console.log('✅ Backup inicial executado com sucesso')
         } else {
           console.log('⚠️ Executando backup inicial...')
-          await executeEmergencyBackup()
+          try {
+            await executeEmergencyBackup()
+          } catch (backupError) {
+            console.warn('⚠️ Backup inicial falhou, mas sistema continuará funcionando:', backupError)
+          }
         }
         
       } else {
@@ -120,7 +130,11 @@ export function DataProtectionProvider({ children }: DataProtectionProviderProps
         // Verificar se precisa de ação
         if (data.monitoring?.overallStatus === 'CRITICAL' || data.monitoring?.overallStatus === 'EMERGENCY') {
           console.log('🚨 STATUS CRÍTICO DETECTADO - EXECUTANDO BACKUP DE EMERGÊNCIA')
-          await executeEmergencyBackup()
+          try {
+            await executeEmergencyBackup()
+          } catch (emergencyError) {
+            console.error('❌ Falha no backup de emergência:', emergencyError)
+          }
         }
         
         // Atualizar status geral

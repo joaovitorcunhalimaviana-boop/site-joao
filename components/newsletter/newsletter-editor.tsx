@@ -211,42 +211,64 @@ export default function NewsletterEditor({
     }
   }
 
-  const handleSend = async () => {
-    if (!formData.subject.trim()) {
-      setMessage({ type: 'error', text: 'Assunto é obrigatório.' })
-      return
-    }
-
-    // Verificar se pelo menos uma seção está habilitada e tem conteúdo
-    const hasHealthTips = sectionEnabled.healthTips && formData.content.trim()
-    const hasClinicNews =
-      sectionEnabled.clinicNews && formData.clinicNews.trim()
-
-    if (!hasHealthTips && !hasClinicNews) {
-      setMessage({
-        type: 'error',
-        text: 'Selecione pelo menos uma seção e adicione conteúdo.',
-      })
-      return
-    }
-
-    if (selectedPatients.length === 0) {
-      setMessage({ type: 'error', text: 'Selecione pelo menos um paciente.' })
-      return
-    }
-
+  const handleSend = async (e: React.FormEvent) => {
+    e.preventDefault()
     setIsLoading(true)
     setMessage(null)
 
     try {
-      // Preparar conteúdo HTML com as substituições
-      let htmlContent = formData.htmlContent
+      // Validar campos obrigatórios
+      if (!formData.subject.trim()) {
+        throw new Error('Assunto é obrigatório')
+      }
 
-      // Construir seções condicionalmente
+      if (selectedPatients.length === 0) {
+        throw new Error('Selecione pelo menos um paciente')
+      }
+
+      // Construir o template HTML
+      let htmlContent = `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #ffffff;">
+          <div style="text-align: center; margin-bottom: 30px;">
+            <h1 style="color: #1e3a8a; margin: 0; font-size: 28px;">Dr. João Vitor Viana</h1>
+            <p style="color: #64748b; margin: 5px 0 0 0; font-size: 16px;">Coloproctologista e Cirurgião Geral</p>
+          </div>
+          
+          <div style="background-color: #f8fafc; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+            <h2 style="color: #1e3a8a; margin-top: 0;">Olá, {{PATIENT_NAME}}!</h2>
+            <p style="color: #475569; line-height: 1.6; margin: 0;">
+              Esperamos que você esteja bem! Temos algumas informações importantes para compartilhar com você.
+            </p>
+          </div>
+          
+          {{HEALTH_TIP_SECTION}}
+          {{CLINIC_NEWS_SECTION}}
+          
+          <div style="background-color: #1e3a8a; color: white; padding: 20px; border-radius: 8px; text-align: center; margin: 20px 0;">
+            <h3 style="margin-top: 0; color: white;">📞 Precisa agendar uma consulta?</h3>
+            <p style="margin: 10px 0; color: #e2e8f0;">Entre em contato conosco:</p>
+            <div style="margin: 15px 0;">
+              <a href="https://wa.me/5583998663089" style="background-color: #25d366; color: white; padding: 12px 24px; text-decoration: none; border-radius: 25px; display: inline-block; font-weight: bold; margin: 5px;">
+                💬 WhatsApp
+              </a>
+              <a href="https://www.joaovitorviana.com.br/agendamento" style="background-color: #3b82f6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 25px; display: inline-block; font-weight: bold; margin: 5px;">
+                🗓️ Agendar Online
+              </a>
+            </div>
+          </div>
+          
+          <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e2e8f0; color: #64748b; font-size: 14px;">
+            <p>Dr. João Vitor Viana - Coloproctologista</p>
+            <p>📍 João Pessoa/PB | 📞 (83) 99866-3089</p>
+            <p>🌐 <a href="https://www.joaovitorviana.com.br" style="color: #3b82f6;">www.joaovitorviana.com.br</a></p>
+          </div>
+        </div>
+      `
+
       const healthTipSection = sectionEnabled.healthTips
         ? `
-        <div style="background-color: #f8fafc; padding: 20px; border-radius: 8px; margin: 20px 0; border: 1px solid #1e3a8a;">
-          <h3 style="color: #1e3a8a; margin-top: 0;">💡 Dica da Semana</h3>
+        <div style="background-color: #ecfdf5; padding: 20px; border-radius: 8px; margin: 20px 0; border: 1px solid #10b981;">
+          <h3 style="color: #065f46; margin-top: 0;">💡 Dica de Saúde</h3>
           <div style="margin: 0; line-height: 1.6; color: #1f2937; text-align: justify;">
             ${formData.content}
           </div>
@@ -274,60 +296,51 @@ export default function NewsletterEditor({
         clinicNewsSection
       )
 
-      // Enviar newsletter
+      // Obter dados dos pacientes selecionados
       const selectedPatientsData = patients.filter(p =>
         selectedPatients.includes(p.id)
       )
-      const recipients = selectedPatientsData.map(p => p.email)
-
-      // Criar um conteúdo personalizado para cada paciente
-      const emailPromises = selectedPatientsData.map(async patient => {
-        // Substituir o nome do paciente no template
-        let personalizedContent = htmlContent.replace(
-          /{{PATIENT_NAME}}/g,
-          patient.name
-        )
-
-        return fetch('/api/send-email', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            type: 'newsletter',
-            recipients: [patient.email],
-            subject: formData.subject,
-            content: personalizedContent,
-          }),
-        })
+      
+      // Criar lista de emails para o Gmail
+      const recipients = selectedPatientsData.map(p => p.email).join(',')
+      
+      // Criar conteúdo personalizado (usando o primeiro paciente como exemplo)
+      let emailContent = htmlContent.replace(
+        /{{PATIENT_NAME}}/g,
+        'Paciente'
+      )
+      
+      // Converter HTML para texto simples para o corpo do email
+      const textContent = emailContent
+        .replace(/<[^>]*>/g, '') // Remove tags HTML
+        .replace(/\s+/g, ' ') // Remove espaços extras
+        .trim()
+      
+      // Criar URL do Gmail com parâmetros
+      const gmailUrl = new URL('https://mail.google.com/mail/')
+      gmailUrl.searchParams.set('view', 'cm')
+      gmailUrl.searchParams.set('fs', '1')
+      gmailUrl.searchParams.set('to', recipients)
+      gmailUrl.searchParams.set('su', formData.subject)
+      gmailUrl.searchParams.set('body', textContent)
+      
+      // Abrir Gmail em nova aba
+      window.open(gmailUrl.toString(), '_blank')
+      
+      setMessage({
+        type: 'success',
+        text: `Gmail aberto com newsletter pré-formatada para ${selectedPatientsData.length} paciente(s)! Complete o envio no Gmail.`,
       })
-
-      // Aguardar todos os envios
-      const responses = await Promise.all(emailPromises)
-      const results = await Promise.all(responses.map(r => r.json()))
-
-      // Verificar se todos foram enviados com sucesso
-      const allSuccessful = results.every(result => result.success)
-
-      if (allSuccessful) {
-        setMessage({
-          type: 'success',
-          text: `Newsletter enviada com sucesso para ${selectedPatientsData.length} paciente(s)!`,
-        })
-        if (onSend) {
-          await onSend({ ...formData, htmlContent })
-        }
-      } else {
-        const failedResults = results.filter(result => !result.success)
-        throw new Error(
-          `Erro ao enviar newsletter para ${failedResults.length} paciente(s)`
-        )
+      
+      if (onSend) {
+        await onSend({ ...formData, htmlContent })
       }
+      
     } catch (error) {
-      console.error('Erro ao enviar newsletter:', error)
+      console.error('Erro ao preparar newsletter:', error)
       setMessage({
         type: 'error',
-        text: 'Erro ao enviar newsletter. Tente novamente.',
+        text: error instanceof Error ? error.message : 'Erro ao preparar newsletter. Tente novamente.',
       })
     } finally {
       setIsLoading(false)
@@ -596,7 +609,7 @@ export default function NewsletterEditor({
 
           <div className='flex justify-end space-x-2 mt-6'>
             <Button
-              onClick={handleSend}
+              onClick={(e) => handleSend(e)}
               disabled={isLoading || selectedPatients.length === 0}
               className='bg-blue-600 hover:bg-blue-700 text-white'
             >
@@ -605,7 +618,7 @@ export default function NewsletterEditor({
               ) : (
                 <Send className='mr-2 h-4 w-4' />
               )}
-              Enviar Newsletter ({selectedPatients.length})
+              Abrir no Gmail ({selectedPatients.length})
             </Button>
           </div>
         </CardContent>

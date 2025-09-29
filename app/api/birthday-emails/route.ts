@@ -214,7 +214,7 @@ async function sendBirthdayEmail(subscriber: Subscriber): Promise<boolean> {
       `
     }
 
-    const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/send-email`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'https://www.joaovitorviana.com.br'}/api/send-email`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
