@@ -532,5 +532,83 @@
     },
     "severity": "HIGH",
     "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759284327122_hz5s87ko5",
+    "timestamp": "2025-10-01T02:05:27.122Z",
+    "action": "emergency_backup_failure",
+    "resource": "system",
+    "details": {
+      "taskId": "emergency_backup",
+      "error": "Backup falhou: 500",
+      "timestamp": "2025-10-01T02:05:27.120Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759284395605_rvl9puf0c",
+    "timestamp": "2025-10-01T02:06:35.605Z",
+    "action": "emergency_backup_failure",
+    "resource": "system",
+    "details": {
+      "taskId": "emergency_backup",
+      "error": "Backup falhou: 500",
+      "timestamp": "2025-10-01T02:06:35.604Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759284437999_h7gmgye4z",
+    "timestamp": "2025-10-01T02:07:17.999Z",
+    "action": "emergency_backup_failure",
+    "resource": "system",
+    "details": {
+      "taskId": "emergency_backup",
+      "error": "Backup falhou: 500",
+      "timestamp": "2025-10-01T02:07:17.999Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759284547653_3wb0wl0uq",
+    "timestamp": "2025-10-01T02:09:07.653Z",
+    "action": "emergency_backup_failure",
+    "resource": "system",
+    "details": {
+      "taskId": "emergency_backup",
+      "error": "Backup falhou: 500",
+      "timestamp": "2025-10-01T02:09:07.652Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759284782570_qn4i9fd7s",
+    "timestamp": "2025-10-01T02:13:02.570Z",
+    "action": "emergency_backup_failure",
+    "resource": "system",
+    "details": {
+      "taskId": "emergency_backup",
+      "error": "Backup falhou: 500",
+      "timestamp": "2025-10-01T02:13:02.569Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759285304790_5zewefrm3",
+    "timestamp": "2025-10-01T02:21:44.790Z",
+    "action": "emergency_backup_failure",
+    "resource": "system",
+    "details": {
+      "taskId": "emergency_backup",
+      "error": "Backup falhou: 500",
+      "timestamp": "2025-10-01T02:21:44.790Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
   }
 ]

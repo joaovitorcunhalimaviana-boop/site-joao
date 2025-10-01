@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { sendEmailWithFallback } from '@/lib/email-providers'
-import { logActivity } from '@/lib/activity-logger'
+import { auditSystem } from '@/lib/audit-middleware'
 import { rateLimiter } from '@/lib/rate-limiter'
 import { z } from 'zod'
 import { sanitizeMedicalFormData } from '@/lib/security'
@@ -150,7 +150,7 @@ export async function POST(request: NextRequest) {
     await sendEmailWithFallback(mailOptions)
 
     // Log da atividade
-    await logActivity({
+    await auditSystem({
       action: 'BIRTHDAY_EMAIL_SENT',
       details: {
         recipient: sanitizedData.email,
@@ -172,7 +172,7 @@ export async function POST(request: NextRequest) {
 
     // Log do erro
     try {
-      await logActivity({
+      await auditSystem({
         action: 'BIRTHDAY_EMAIL_ERROR',
         details: {
           recipient: email,

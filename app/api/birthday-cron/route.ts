@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { startBirthdayCronJob, stopBirthdayCronJob, getBirthdayJobStatus } from '@/lib/birthday-cron-scheduler'
-import { logActivity } from '@/lib/activity-logger'
+import { auditSystem } from '@/lib/audit-middleware'
 import { rateLimiter } from '@/lib/rate-limiter'
-import { AuditService } from '@/lib/audit-service'
 
-// POST - Iniciar/parar sistema de cron de anivers·rios
+// POST - Iniciar/parar sistema de cron de anivers√°rios
 export async function POST(request: NextRequest) {
   try {
     // Rate limiting
@@ -25,7 +24,7 @@ export async function POST(request: NextRequest) {
 
     if (!action || !['start', 'stop'].includes(action)) {
       return NextResponse.json(
-        { success: false, error: 'AÁ„o inv·lida. Use "start" ou "stop".' },
+        { success: false, error: 'A√ß√£o inv√°lida. Use "start" ou "stop".' },
         { status: 400 }
       )
     }
@@ -33,24 +32,22 @@ export async function POST(request: NextRequest) {
     let result
     if (action === 'start') {
       result = startBirthdayCronJob()
-      await logActivity({
-        action: 'birthday_cron_started',
-        details: 'Sistema de cron de anivers·rios iniciado',
+      await auditSystem('birthday_cron_started', {
+        details: 'Sistema de cron de anivers√°rios iniciado',
         timestamp: new Date().toISOString(),
         source: 'api'
       })
     } else {
       result = stopBirthdayCronJob()
-      await logActivity({
-        action: 'birthday_cron_stopped',
-        details: 'Sistema de cron de anivers·rios parado',
+      await auditSystem('birthday_cron_stopped', {
+        details: 'Sistema de cron de anivers√°rios parado',
         timestamp: new Date().toISOString(),
         source: 'api'
       })
     }
 
     // Auditoria
-    await AuditService.log({
+    await auditSystem({
       action: `birthday_cron_${action}`,
       resource: 'birthday-cron',
       details: {
@@ -67,9 +64,9 @@ export async function POST(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error(' Erro na API de cron de anivers·rios:', error)
+    console.error('‚ùå Erro na API de cron de anivers√°rios:', error)
     
-    await AuditService.log({
+    await auditSystem({
       action: 'birthday_cron_error',
       resource: 'birthday-cron',
       details: {
@@ -96,7 +93,7 @@ export async function GET(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error(' Erro ao verificar status do cron:', error)
+    console.error('‚ùå Erro ao verificar status do cron:', error)
     
     return NextResponse.json(
       { success: false, error: 'Erro interno do servidor' },
