@@ -64,13 +64,26 @@ export default function AdministracaoPage() {
   }, [])
 
   const checkAuth = async () => {
-    // Sistema simplificado - definir dados padrão do médico
-    setDoctor({
-      name: 'João Vítor da Cunha Lima Viana',
-      email: 'joao.viana@clinica.com',
-      specialty: 'Coloproctologista e Cirurgião Geral',
-      crm: 'CRMPB 12831',
-    })
+    // Sistema simplificado - verificar apenas se há dados do usuário
+    const userData = localStorage.getItem('currentUser')
+
+    if (userData) {
+      const user = JSON.parse(userData)
+      setDoctor({
+        name: user.name || 'João Vitor Viana',
+        email: user.email || 'joao.viana@clinica.com',
+        specialty: 'Coloproctologista e Cirurgião Geral',
+        crm: 'CRMPB 12831',
+      })
+    } else {
+      // Definir dados padrão se não houver usuário logado
+      setDoctor({
+        name: 'João Vitor Viana',
+        email: 'joao.viana@clinica.com',
+        specialty: 'Coloproctologista e Cirurgião Geral',
+        crm: 'CRMPB 12831',
+      })
+    }
   }
 
   const loadUsers = async () => {

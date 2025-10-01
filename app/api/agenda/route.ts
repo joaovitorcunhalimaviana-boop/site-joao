@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getTodayISO, getTimestampISO } from '@/lib/date-utils'
 import { 
-  getAppointmentsByDate, 
-  getAllPatients,
+  getAllAppointments,
   createAppointment,
-  updateAppointmentStatus
-} from '@/lib/unified-appointment-system'
+  updateAppointment,
+  UnifiedAppointment
+} from '@/lib/unified-patient-system'
 
 interface AgendaItem {
   id: string
@@ -21,7 +21,7 @@ interface AgendaItem {
 }
 
 // Função para converter agendamento unificado para formato da agenda
-function convertUnifiedToAgenda(unifiedAppointment: any): AgendaItem {
+function convertUnifiedToAgenda(unifiedAppointment: UnifiedAppointment): AgendaItem {
   return {
     id: unifiedAppointment.id,
     patientId: unifiedAppointment.patientId,
@@ -79,11 +79,16 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Data é obrigatória' }, { status: 400 })
     }
 
-    // Buscar agendamentos do sistema unificado
-    const unifiedAppointments = await getAppointmentsByDate(date)
+    // Buscar todos os agendamentos do sistema unificado
+    const allAppointments = await getAllAppointments()
+    
+    // Filtrar por data
+    const appointmentsByDate = allAppointments.filter(
+      appointment => appointment.appointmentDate === date
+    )
     
     // Converter para formato da agenda
-    let agendaItems = unifiedAppointments.map(convertUnifiedToAgenda)
+    let agendaItems = appointmentsByDate.map(convertUnifiedToAgenda)
 
     // Filtrar por status se especificado
     if (status) {
@@ -114,8 +119,11 @@ export async function POST(request: NextRequest) {
     }
 
     // Verificar se já existe agendamento no mesmo horário
-    const existingAppointments = await getAppointmentsByDate(date)
-    const timeConflict = existingAppointments.some(
+    const allAppointments = await getAllAppointments()
+    const appointmentsByDate = allAppointments.filter(
+      appointment => appointment.appointmentDate === date
+    )
+    const timeConflict = appointmentsByDate.some(
       appointment => appointment.appointmentTime === time
     )
 
@@ -145,7 +153,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Converter para formato da agenda
-    const agendaItem = convertUnifiedToAgenda(newAppointment.appointment)
+    const agendaItem = convertUnifiedToAgenda(newAppointment.appointment!)
 
     return NextResponse.json(agendaItem, { status: 201 })
   } catch (error) {
@@ -164,23 +172,38 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: 'ID é obrigatório' }, { status: 400 })
     }
 
-    // Atualizar status no sistema unificado
+    // Preparar dados para atualização
+    const updateData: Partial<UnifiedAppointment> = {}
+    
     if (status) {
-      const unifiedStatus = mapAgendaStatus(status)
-      const updateResult = await updateAppointmentStatus(id, unifiedStatus)
-      
-      if (!updateResult.success) {
-        return NextResponse.json(
-          { error: updateResult.error || 'Erro ao atualizar status' },
-          { status: 400 }
-        )
-      }
+      updateData.status = mapAgendaStatus(status)
+    }
+    
+    if (time) {
+      updateData.appointmentTime = time
+    }
+    
+    if (notes !== undefined) {
+      updateData.notes = notes
     }
 
-    // Para atualizações de horário e notas, precisamos buscar o agendamento e atualizar
-    // (Nota: O sistema unificado pode precisar de uma função específica para isso)
+    // Atualizar no sistema unificado
+    const updateResult = await updateAppointment(id, updateData)
     
-    return NextResponse.json({ message: 'Item atualizado com sucesso' })
+    if (!updateResult.success) {
+      return NextResponse.json(
+        { error: updateResult.error || 'Erro ao atualizar agendamento' },
+        { status: updateResult.error === 'Agendamento não encontrado' ? 404 : 400 }
+      )
+    }
+
+    // Converter para formato da agenda
+    const agendaItem = convertUnifiedToAgenda(updateResult.appointment!)
+    
+    return NextResponse.json({
+      message: 'Item atualizado com sucesso',
+      item: agendaItem
+    })
   } catch (error) {
     console.error('Erro ao atualizar item da agenda:', error)
     return NextResponse.json({ error: 'Erro interno do servidor' }, { status: 500 })
@@ -198,12 +221,12 @@ export async function DELETE(request: NextRequest) {
     }
 
     // Cancelar agendamento (mudando status para cancelada)
-    const cancelResult = await updateAppointmentStatus(id, 'cancelada')
+    const cancelResult = await updateAppointment(id, { status: 'cancelada' })
     
     if (!cancelResult.success) {
       return NextResponse.json(
         { error: cancelResult.error || 'Erro ao cancelar agendamento' },
-        { status: 400 }
+        { status: cancelResult.error === 'Agendamento não encontrado' ? 404 : 400 }
       )
     }
 

@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { sendNewsletterEmail } from '@/lib/email-service'
-import fs from 'fs'
-import path from 'path'
+import { readNewslettersData, saveNewslettersData } from '@/lib/unified-data-service'
 
 export async function POST(request: NextRequest) {
   try {
@@ -89,25 +88,7 @@ export async function POST(request: NextRequest) {
 
       // Salvar histórico da newsletter
       try {
-        const newsletterPath = path.join(
-          process.cwd(),
-          'data',
-          'newsletter.json'
-        )
-        let newsletterHistory: Array<{
-          id: string
-          subject: any
-          content: any
-          recipients: number
-          sentAt: string
-          status: string
-        }> = []
-
-        if (fs.existsSync(newsletterPath)) {
-          newsletterHistory = JSON.parse(
-            fs.readFileSync(newsletterPath, 'utf8')
-          )
-        }
+        const newsletterHistory = readNewslettersData()
 
         newsletterHistory.push({
           id: Date.now().toString(),
@@ -118,10 +99,7 @@ export async function POST(request: NextRequest) {
           status: 'sent',
         })
 
-        fs.writeFileSync(
-          newsletterPath,
-          JSON.stringify(newsletterHistory, null, 2)
-        )
+        saveNewslettersData(newsletterHistory)
         console.log('Histórico da newsletter salvo com sucesso')
       } catch (error) {
         console.error('Erro ao salvar histórico da newsletter:', error)
@@ -162,22 +140,11 @@ export async function POST(request: NextRequest) {
 // GET para buscar histórico de newsletters
 export async function GET() {
   try {
-    const newsletterPath = path.join(process.cwd(), 'data', 'newsletter.json')
-
-    if (!fs.existsSync(newsletterPath)) {
-      return NextResponse.json({
-        success: true,
-        newsletters: [],
-      })
-    }
-
-    const newsletterHistory = JSON.parse(
-      fs.readFileSync(newsletterPath, 'utf8')
-    )
+    const newsletters = readNewslettersData()
 
     return NextResponse.json({
       success: true,
-      newsletters: newsletterHistory.sort(
+      newsletters: newsletters.sort(
         (a: any, b: any) =>
           new Date(b.sentAt).getTime() - new Date(a.sentAt).getTime()
       ),

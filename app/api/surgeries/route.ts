@@ -1,79 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
-import fs from 'fs'
-import path from 'path'
-
-const DATA_DIR = path.join(process.cwd(), 'data')
-const SURGERIES_FILE = path.join(DATA_DIR, 'surgeries.json')
-
-interface Surgery {
-  id: string
-  patientName: string
-  surgeryType: string
-  date: string
-  time: string
-  hospital: string
-  paymentType: 'particular' | 'plano'
-  // Campos para particulares
-  totalValue?: number
-  hospitalValue?: number
-  anesthesiologistValue?: number
-  instrumentalistValue?: number
-  auxiliaryValue?: number
-  doctorValue?: number
-  doctorAmount?: number
-  totalAmount?: number
-  hospitalAmount?: number
-  assistantAmount?: number
-  expectedAmount?: number
-  // Campos para planos
-  procedureCodes?: string
-  insurancePlan?: string
-  status: 'agendada' | 'confirmada' | 'concluida' | 'cancelada'
-  notes?: string
-  createdAt?: string
-  updatedAt?: string
-}
-
-// Garantir que o diretório existe
-function ensureDataDirectory() {
-  if (!fs.existsSync(DATA_DIR)) {
-    fs.mkdirSync(DATA_DIR, { recursive: true })
-  }
-}
-
-// Carregar cirurgias do arquivo
-function loadSurgeries(): Surgery[] {
-  ensureDataDirectory()
-
-  if (!fs.existsSync(SURGERIES_FILE)) {
-    return []
-  }
-
-  try {
-    const data = fs.readFileSync(SURGERIES_FILE, 'utf8')
-    return JSON.parse(data)
-  } catch (error) {
-    console.error('Erro ao carregar cirurgias:', error)
-    return []
-  }
-}
-
-// Salvar cirurgias no arquivo
-function saveSurgeries(surgeries: Surgery[]) {
-  ensureDataDirectory()
-
-  try {
-    fs.writeFileSync(SURGERIES_FILE, JSON.stringify(surgeries, null, 2))
-  } catch (error) {
-    console.error('Erro ao salvar cirurgias:', error)
-    throw error
-  }
-}
-
-// Gerar ID único
-function generateId(): string {
-  return Date.now().toString(36) + Math.random().toString(36).substr(2)
-}
+import { 
+  getAllSurgeries, 
+  getSurgeriesByDate, 
+  createSurgery, 
+  updateSurgery, 
+  deleteSurgery,
+  createOrUpdateCommunicationContact,
+  type Surgery
+} from '@/lib/unified-patient-system'
 
 // GET - Listar cirurgias
 export async function GET(request: NextRequest) {
@@ -83,11 +17,11 @@ export async function GET(request: NextRequest) {
     const status = searchParams.get('status')
     const paymentType = searchParams.get('paymentType')
 
-    let surgeries = loadSurgeries()
+    let surgeries = getAllSurgeries()
 
     // Filtros
     if (date) {
-      surgeries = surgeries.filter(surgery => surgery.date === date)
+      surgeries = getSurgeriesByDate(date)
     }
 
     if (status) {
@@ -136,7 +70,8 @@ export async function POST(request: NextRequest) {
       !body.surgeryType ||
       !body.date ||
       !body.time ||
-      !body.paymentType
+      !body.paymentType ||
+      !body.hospital
     ) {
       return NextResponse.json(
         { success: false, error: 'Campos obrigatórios não preenchidos' },
@@ -144,44 +79,58 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const surgeries = loadSurgeries()
+    // Criar ou atualizar contato de comunicação
+    const contactResult = createOrUpdateCommunicationContact({
+      name: body.patientName,
+      email: body.patientEmail,
+      whatsapp: body.patientWhatsapp,
+      source: 'doctor_area'
+    })
 
-    const newSurgery: Surgery = {
-      id: generateId(),
+    if (!contactResult.success) {
+      return NextResponse.json(
+        { success: false, error: 'Erro ao criar contato de comunicação' },
+        { status: 500 }
+      )
+    }
+
+    // Criar cirurgia usando o sistema unificado
+    const surgeryResult = createSurgery({
+      communicationContactId: contactResult.contact.id,
+      medicalPatientId: body.medicalPatientId,
       patientName: body.patientName,
       surgeryType: body.surgeryType,
       date: body.date,
       time: body.time,
-      hospital: body.hospital || '',
+      hospital: body.hospital,
       paymentType: body.paymentType,
-      status: body.status || 'agendada',
-      notes: body.notes || '',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    }
+      insurancePlan: body.insurancePlan,
+      totalValue: body.totalValue,
+      hospitalValue: body.hospitalValue,
+      anesthesiologistValue: body.anesthesiologistValue,
+      instrumentalistValue: body.instrumentalistValue,
+      auxiliaryValue: body.auxiliaryValue,
+      doctorValue: body.doctorValue,
+      doctorAmount: body.doctorAmount,
+      totalAmount: body.totalAmount,
+      hospitalAmount: body.hospitalAmount,
+      assistantAmount: body.assistantAmount,
+      expectedAmount: body.expectedAmount,
+      procedureCodes: body.procedureCodes,
+      notes: body.notes
+    })
 
-    // Campos específicos para cirurgia particular
-    if (body.paymentType === 'particular') {
-      newSurgery.totalAmount = body.totalAmount || 0
-      newSurgery.hospitalAmount = body.hospitalAmount || 0
-      newSurgery.assistantAmount = body.assistantAmount || 0
-      newSurgery.doctorAmount = body.doctorAmount || 0
+    if (!surgeryResult.success) {
+      return NextResponse.json(
+        { success: false, error: surgeryResult.message },
+        { status: 500 }
+      )
     }
-
-    // Campos específicos para plano de saúde
-    if (body.paymentType === 'plano') {
-      newSurgery.insurancePlan = body.insurancePlan || ''
-      newSurgery.procedureCodes = body.procedureCodes || []
-      newSurgery.expectedAmount = body.expectedAmount || 0
-    }
-
-    surgeries.push(newSurgery)
-    saveSurgeries(surgeries)
 
     return NextResponse.json(
       {
         success: true,
-        surgery: newSurgery,
+        surgery: surgeryResult.surgery,
         message: 'Cirurgia cadastrada com sucesso',
       },
       { status: 201 }
@@ -207,29 +156,41 @@ export async function PUT(request: NextRequest) {
       )
     }
 
-    const surgeries = loadSurgeries()
-    const surgeryIndex = surgeries.findIndex(s => s.id === body.id)
+    // Atualizar cirurgia usando o sistema unificado
+    const surgeryResult = updateSurgery(body.id, {
+      patientName: body.patientName,
+      surgeryType: body.surgeryType,
+      date: body.date,
+      time: body.time,
+      hospital: body.hospital,
+      paymentType: body.paymentType,
+      insurancePlan: body.insurancePlan,
+      totalValue: body.totalValue,
+      hospitalValue: body.hospitalValue,
+      anesthesiologistValue: body.anesthesiologistValue,
+      instrumentalistValue: body.instrumentalistValue,
+      auxiliaryValue: body.auxiliaryValue,
+      doctorValue: body.doctorValue,
+      doctorAmount: body.doctorAmount,
+      totalAmount: body.totalAmount,
+      hospitalAmount: body.hospitalAmount,
+      assistantAmount: body.assistantAmount,
+      expectedAmount: body.expectedAmount,
+      procedureCodes: body.procedureCodes,
+      status: body.status,
+      notes: body.notes
+    })
 
-    if (surgeryIndex === -1) {
+    if (!surgeryResult.success) {
       return NextResponse.json(
-        { success: false, error: 'Cirurgia não encontrada' },
-        { status: 404 }
+        { success: false, error: surgeryResult.message },
+        { status: surgeryResult.message === 'Cirurgia não encontrada' ? 404 : 500 }
       )
     }
 
-    // Atualizar cirurgia mantendo dados existentes
-    const updatedSurgery: Surgery = {
-      ...surgeries[surgeryIndex],
-      ...body,
-      updatedAt: new Date().toISOString(),
-    }
-
-    surgeries[surgeryIndex] = updatedSurgery
-    saveSurgeries(surgeries)
-
     return NextResponse.json({
       success: true,
-      surgery: updatedSurgery,
+      surgery: surgeryResult.surgery,
       message: 'Cirurgia atualizada com sucesso',
     })
   } catch (error) {
@@ -241,7 +202,7 @@ export async function PUT(request: NextRequest) {
   }
 }
 
-// DELETE - Excluir cirurgia
+// DELETE - Deletar cirurgia
 export async function DELETE(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
@@ -254,26 +215,22 @@ export async function DELETE(request: NextRequest) {
       )
     }
 
-    const surgeries = loadSurgeries()
-    const surgeryIndex = surgeries.findIndex(s => s.id === id)
+    // Deletar cirurgia usando o sistema unificado
+    const result = deleteSurgery(id)
 
-    if (surgeryIndex === -1) {
+    if (!result.success) {
       return NextResponse.json(
-        { success: false, error: 'Cirurgia não encontrada' },
-        { status: 404 }
+        { success: false, error: result.message },
+        { status: result.message === 'Cirurgia não encontrada' ? 404 : 500 }
       )
     }
 
-    const deletedSurgery = surgeries.splice(surgeryIndex, 1)[0]
-    saveSurgeries(surgeries)
-
     return NextResponse.json({
       success: true,
-      surgery: deletedSurgery,
-      message: 'Cirurgia excluída com sucesso',
+      message: 'Cirurgia deletada com sucesso',
     })
   } catch (error) {
-    console.error('Erro ao excluir cirurgia:', error)
+    console.error('Erro ao deletar cirurgia:', error)
     return NextResponse.json(
       { success: false, error: 'Erro interno do servidor' },
       { status: 500 }

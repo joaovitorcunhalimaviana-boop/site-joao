@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createPublicAppointment } from '../../../lib/unified-appointment-system'
+import { 
+  createOrUpdateCommunicationContact,
+  createMedicalPatient,
+  createAppointment
+} from '@/lib/unified-patient-system'
 
 // Cache simples para reduzir consultas repetidas
 const cache = new Map<string, any>()
@@ -73,59 +77,81 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(cachedResult)
     }
 
-    // Converter selectedDate para objeto Date se for string
-    const dateObject =
-      typeof selectedDate === 'string' ? new Date(selectedDate) : selectedDate
+    console.log('💾 Criando contato de comunicação e paciente médico...')
 
-    console.log('💾 Chamando createPublicAppointment...')
-
-    // Criar agendamento público
-    const result = await createPublicAppointment({
-      fullName,
-      cpf,
-      email: email || '',
-      phone,
-      whatsapp,
-      birthDate,
-      insuranceType,
-      selectedDate: dateObject,
-      selectedTime,
-    })
-
-    console.log('📊 Resultado do createPublicAppointment:', result)
-
-    let response
-    if (result.success) {
-      console.log('✅ Agendamento público criado com sucesso!')
-      response = NextResponse.json({
-        success: true,
-        appointment: result.appointment,
-        patient: result.patient,
-        message: 'Agendamento criado com sucesso!',
+    try {
+      // 1. Criar ou atualizar contato de comunicação
+      const communicationContact = createOrUpdateCommunicationContact({
+        name: fullName,
+        email: email || undefined,
+        whatsapp,
+        birthDate,
+        source: 'public_appointment'
       })
-    } else {
-      console.log('❌ Falha ao criar agendamento:', result.error)
-      response = NextResponse.json(
+
+      if (!communicationContact.success) {
+        throw new Error(communicationContact.message)
+      }
+
+      // 2. Criar paciente médico
+      const medicalPatient = createMedicalPatient({
+        communicationContactId: communicationContact.contact.id,
+        cpf,
+        fullName,
+        insurance: {
+          type: insuranceType,
+          plan: undefined
+        },
+        consents: {
+          dataProcessing: true,
+          medicalTreatment: true,
+          imageUse: true
+        }
+      })
+
+      if (!medicalPatient.success) {
+        throw new Error(medicalPatient.message)
+      }
+
+      // 3. Criar agendamento unificado
+      const appointmentResult = createAppointment({
+        communicationContactId: communicationContact.contact.id,
+        medicalPatientId: medicalPatient.patient.id,
+        appointmentDate: selectedDate,
+        appointmentTime: selectedTime,
+        appointmentType: 'consulta',
+        source: 'public_appointment'
+      })
+
+      if (!appointmentResult.success) {
+        throw new Error(appointmentResult.message)
+      }
+
+      console.log('✅ Agendamento público criado com sucesso!')
+      
+      const successResponse = {
+        success: true,
+        appointment: appointmentResult.appointment,
+        patient: medicalPatient.patient,
+        communicationContact: communicationContact.contact,
+        message: 'Agendamento criado com sucesso!',
+      }
+
+      // Cachear resultado de sucesso
+      setCache(cacheKey, successResponse)
+      
+      return NextResponse.json(successResponse)
+
+    } catch (creationError) {
+      console.log('❌ Falha ao criar agendamento:', creationError)
+      return NextResponse.json(
         {
           success: false,
-          error: result.error,
-          existingAppointment: result.existingAppointment,
+          error: creationError instanceof Error ? creationError.message : 'Erro ao criar agendamento',
         },
         { status: 400 }
       )
     }
-
-    // Cachear apenas resultados de sucesso
-    if (result.success) {
-      setCache(cacheKey, {
-        success: true,
-        appointment: result.appointment,
-        patient: result.patient,
-        message: 'Agendamento criado com sucesso!',
-      })
-    }
-
-    return response
   } catch (error) {
     console.error('❌ Erro na API public-appointment:', error)
     return NextResponse.json(

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { sendEmailWithFallback } from '../../../lib/email-providers'
+import { getAllPatients, saveAllPatients } from '@/lib/unified-data-service'
 import fs from 'fs'
 import path from 'path'
 
@@ -11,43 +12,28 @@ interface WelcomeEmailLog {
   success: boolean
 }
 
-interface WelcomeEmailLogs {
-  logs: WelcomeEmailLog[]
-  lastCheck: string
-}
-
-// Função para ler logs de emails de boas-vindas
-function readWelcomeEmailLogs(): WelcomeEmailLogs {
-  const dataDir = path.join(process.cwd(), 'data')
-  const logsFile = path.join(dataDir, 'welcome-email-logs.json')
+// Função para salvar log de email de boas-vindas no sistema unificado
+function saveWelcomeEmailLog(email: string, log: WelcomeEmailLog): void {
+  const patients = getAllPatients()
+  const patientIndex = patients.findIndex(p => p.email === email)
   
-  if (!fs.existsSync(dataDir)) {
-    fs.mkdirSync(dataDir, { recursive: true })
-  }
-  
-  if (!fs.existsSync(logsFile)) {
-    const initialLogs: WelcomeEmailLogs = {
-      logs: [],
-      lastCheck: new Date().toISOString()
+  if (patientIndex !== -1) {
+    if (!patients[patientIndex].welcomeEmailLogs) {
+      patients[patientIndex].welcomeEmailLogs = []
     }
-    fs.writeFileSync(logsFile, JSON.stringify(initialLogs, null, 2))
-    return initialLogs
+    patients[patientIndex].welcomeEmailLogs.push(log)
+    saveAllPatients(patients)
   }
-  
-  const data = fs.readFileSync(logsFile, 'utf8')
-  return JSON.parse(data)
 }
 
-// Função para salvar logs de emails de boas-vindas
-function saveWelcomeEmailLogs(logs: WelcomeEmailLogs): void {
-  const dataDir = path.join(process.cwd(), 'data')
-  const logsFile = path.join(dataDir, 'welcome-email-logs.json')
+// Função para verificar se já foi enviado email de boas-vindas
+function hasWelcomeEmailBeenSent(email: string): boolean {
+  const patients = getAllPatients()
+  const patient = patients.find(p => p.email === email)
   
-  if (!fs.existsSync(dataDir)) {
-    fs.mkdirSync(dataDir, { recursive: true })
-  }
+  if (!patient || !patient.welcomeEmailLogs) return false
   
-  fs.writeFileSync(logsFile, JSON.stringify(logs, null, 2))
+  return patient.welcomeEmailLogs.some(log => log.success)
 }
 
 // Template de email de boas-vindas
@@ -117,9 +103,8 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Verificar se já foi enviado email para este paciente
-    const logs = readWelcomeEmailLogs()
-    const alreadySent = logs.logs.some(log => log.email === email && log.success)
+    // Verificar se já foi enviado email para este paciente usando sistema unificado
+    const alreadySent = hasWelcomeEmailBeenSent(email)
 
     if (alreadySent) {
       return NextResponse.json({
@@ -139,7 +124,7 @@ export async function POST(request: NextRequest) {
 
     await sendEmailWithFallback(mailOptions)
 
-    // Registrar no log
+    // Registrar no sistema unificado
     const logEntry: WelcomeEmailLog = {
       email,
       name,
@@ -148,9 +133,7 @@ export async function POST(request: NextRequest) {
       success: true
     }
 
-    logs.logs.push(logEntry)
-    logs.lastCheck = new Date().toISOString()
-    saveWelcomeEmailLogs(logs)
+    saveWelcomeEmailLog(email, logEntry)
 
     console.log(`📧 Email de boas-vindas enviado para: ${name} (${email})`)
 
@@ -162,9 +145,8 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Erro ao enviar email de boas-vindas:', error)
 
-    // Registrar erro no log
+    // Registrar erro no sistema unificado
     try {
-      const logs = readWelcomeEmailLogs()
       const logEntry: WelcomeEmailLog = {
         email,
         name,
@@ -173,9 +155,7 @@ export async function POST(request: NextRequest) {
         success: false
       }
 
-      logs.logs.push(logEntry)
-      logs.lastCheck = new Date().toISOString()
-      saveWelcomeEmailLogs(logs)
+      saveWelcomeEmailLog(email, logEntry)
     } catch (logError) {
       console.error('Erro ao registrar falha no log:', logError)
     }

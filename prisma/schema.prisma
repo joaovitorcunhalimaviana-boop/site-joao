@@ -28,10 +28,14 @@ model User {
   updatedAt            DateTime             @updatedAt
   auditLogs            AuditLog[]
   consultations        Consultation[]
-  duplicateResolutions DuplicateDetection[]
+  duplicateResolutions DuplicateDetection[] @relation("DuplicateResolver")
   medicalRecords       MedicalRecord[]
   refreshTokens        RefreshToken[]
   scheduleBlocks       ScheduleBlock[]
+  scheduleSlots        ScheduleSlot[]       @relation("ScheduleSlotCreator")
+  newsletterData       NewsletterData[]     @relation("NewsletterDataCreator")
+  medicalPatients      MedicalPatient[]     @relation("MedicalPatientCreator")
+  appointments         Appointment[]        @relation("AppointmentCreator")
   twoFactorSetup       TwoFactorSetup?
 
   @@map("users")
@@ -99,25 +103,45 @@ model Patient {
 }
 
 model Appointment {
-  id               String            @id @default(cuid())
-  patientId        String
-  date             DateTime
-  time             String
-  duration         Int               @default(30)
-  type             AppointmentType   @default(CONSULTATION)
-  status           AppointmentStatus @default(SCHEDULED)
-  reason           String?
-  notes            String?
-  reminderSent     Boolean           @default(false)
-  confirmationSent Boolean           @default(false)
-  createdAt        DateTime          @default(now())
-  updatedAt        DateTime          @updatedAt
-  patient          Patient           @relation(fields: [patientId], references: [id], onDelete: Cascade)
-  consultation     Consultation?
+  id                          String                @id @default(cuid())
+  communicationContactId      String
+  medicalPatientId            String?
+  patientId                   String?               // Deprecated: for backward compatibility
+  patientName                 String
+  patientCpf                  String?
+  patientMedicalRecordNumber  Int?
+  patientPhone                String
+  patientWhatsapp             String
+  patientEmail                String?
+  patientBirthDate            String?
+  insuranceType               InsuranceType         @default(PARTICULAR)
+  insurancePlan               String?
+  appointmentDate             String                // YYYY-MM-DD format
+  appointmentTime             String                // HH:MM format
+  appointmentType             AppointmentType       @default(CONSULTATION)
+  status                      AppointmentStatus     @default(SCHEDULED)
+  source                      RegistrationSource    @default(PUBLIC_APPOINTMENT)
+  notes                       String?
+  duration                    Int                   @default(30)
+  reminderSent                Boolean               @default(false)
+  confirmationSent            Boolean               @default(false)
+  createdAt                   DateTime              @default(now())
+  updatedAt                   DateTime              @updatedAt
+  createdBy                   String?
+  
+  // Relations
+  communicationContact        CommunicationContact  @relation(fields: [communicationContactId], references: [id], onDelete: Cascade)
+  medicalPatient              MedicalPatient?       @relation(fields: [medicalPatientId], references: [id])
+  patient                     Patient?              @relation(fields: [patientId], references: [id]) // Deprecated relation
+  creator                     User?                 @relation("AppointmentCreator", fields: [createdBy], references: [id])
+  consultation                Consultation?
 
-  @@index([date])
+  @@index([appointmentDate])
+  @@index([communicationContactId])
+  @@index([medicalPatientId])
   @@index([patientId])
   @@index([status])
+  @@index([source])
   @@map("appointments")
 }
 
@@ -125,40 +149,40 @@ model Consultation {
   id                 String              @id @default(cuid())
   appointmentId      String?             @unique
   patientId          String
+  medicalPatientId   String?
   doctorId           String
   chiefComplaint     String?
   history            String?
   physicalExam       String?
-  diagnosis          String?
-  treatment          String?
-  observations       String?
-  weight             Float?
-  height             Float?
-  bloodPressure      String?
-  heartRate          Int?
-  temperature        Float?
+  assessment         String?
+  plan               String?
+  followUpDate       DateTime?
   status             ConsultationStatus  @default(IN_PROGRESS)
   startTime          DateTime            @default(now())
   endTime            DateTime?
   createdAt          DateTime            @default(now())
   updatedAt          DateTime            @updatedAt
+  appointment        Appointment?        @relation(fields: [appointmentId], references: [id])
   doctor             User                @relation(fields: [doctorId], references: [id])
   patient            Patient             @relation(fields: [patientId], references: [id], onDelete: Cascade)
-  appointment        Appointment?        @relation(fields: [appointmentId], references: [id])
-  medicalAttachments MedicalAttachment[]
-  medicalRecord      MedicalRecord?
+  medicalPatient     MedicalPatient?     @relation(fields: [medicalPatientId], references: [id])
+  attachments        MedicalAttachment[]
+  medicalRecords     MedicalRecord[]
   prescriptions      Prescription[]
 
+  @@index([appointmentId])
   @@index([patientId])
+  @@index([medicalPatientId])
   @@index([doctorId])
-  @@index([startTime])
+  @@index([status])
   @@map("consultations")
 }
 
 model MedicalRecord {
-  id               String       @id @default(cuid())
-  consultationId   String       @unique
+  id               String          @id @default(cuid())
+  consultationId   String          @unique
   patientId        String
+  medicalPatientId String?
   doctorId         String
   content          String
   summary          String?
@@ -166,13 +190,15 @@ model MedicalRecord {
   tags             String?
   digitalSignature String?
   signedAt         DateTime?
-  createdAt        DateTime     @default(now())
-  updatedAt        DateTime     @updatedAt
-  doctor           User         @relation(fields: [doctorId], references: [id])
-  patient          Patient      @relation(fields: [patientId], references: [id], onDelete: Cascade)
-  consultation     Consultation @relation(fields: [consultationId], references: [id], onDelete: Cascade)
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  doctor           User            @relation(fields: [doctorId], references: [id])
+  patient          Patient         @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  medicalPatient   MedicalPatient? @relation(fields: [medicalPatientId], references: [id])
+  consultation     Consultation    @relation(fields: [consultationId], references: [id], onDelete: Cascade)
 
   @@index([patientId])
+  @@index([medicalPatientId])
   @@index([doctorId])
   @@index([createdAt])
   @@map("medical_records")
@@ -221,18 +247,21 @@ model Prescription {
 }
 
 model CalculatorResult {
-  id             String   @id @default(cuid())
+  id             String          @id @default(cuid())
   patientId      String
+  medicalPatientId String?
   calculatorType String
   inputData      String
   results        String
   notes          String?
-  calculatedAt   DateTime @default(now())
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-  patient        Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  calculatedAt   DateTime        @default(now())
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  patient        Patient         @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  medicalPatient MedicalPatient? @relation(fields: [medicalPatientId], references: [id])
 
   @@index([patientId])
+  @@index([medicalPatientId])
   @@index([calculatorType])
   @@index([calculatedAt])
   @@map("calculator_results")
@@ -365,7 +394,7 @@ model DuplicateDetection {
   mergedInto         String?
   detectedAt         DateTime        @default(now())
   updatedAt          DateTime        @updatedAt
-  resolver           User?           @relation(fields: [resolvedBy], references: [id])
+  resolver           User?           @relation("DuplicateResolver", fields: [resolvedBy], references: [id])
   duplicatePatient   Patient?        @relation("DuplicatePatient", fields: [duplicatePatientId], references: [id])
   patient            Patient         @relation("OriginalPatient", fields: [patientId], references: [id], onDelete: Cascade)
 
@@ -374,6 +403,128 @@ model DuplicateDetection {
   @@index([status])
   @@index([detectedAt])
   @@map("duplicate_detections")
+}
+
+model CommunicationContact {
+  id                    String                @id @default(cuid())
+  name                  String
+  email                 String?
+  whatsapp              String?
+  birthDate             String?
+  registrationSources   String?
+  emailSubscribed       Boolean               @default(true)
+  emailNewsletter       Boolean               @default(true)
+  emailHealthTips       Boolean               @default(true)
+  emailAppointments     Boolean               @default(true)
+  emailPromotions       Boolean               @default(false)
+  emailSubscribedAt     DateTime?
+  emailUnsubscribedAt   DateTime?
+  whatsappSubscribed    Boolean               @default(true)
+  whatsappAppointments  Boolean               @default(true)
+  whatsappReminders     Boolean               @default(true)
+  whatsappPromotions    Boolean               @default(false)
+  whatsappSubscribedAt  DateTime?
+  reviewRating          Int?
+  reviewComment         String?
+  reviewDate            DateTime?
+  reviewVerified        Boolean               @default(false)
+  reviewApproved        Boolean               @default(false)
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
+  lastContactAt         DateTime?
+  
+  // Relations
+  medicalPatients       MedicalPatient[]
+  appointments          Appointment[]
+
+  @@index([email])
+  @@index([whatsapp])
+  @@index([emailSubscribed])
+  @@index([whatsappSubscribed])
+  @@map("communication_contacts")
+}
+
+model MedicalPatient {
+  id                        String              @id @default(cuid())
+  communicationContactId    String
+  cpf                       String              @unique
+  medicalRecordNumber       Int                 @unique
+  fullName                  String
+  rg                        String?
+  address                   String?
+  city                      String?
+  state                     String?
+  zipCode                   String?
+  insuranceType             InsuranceType       @default(PARTICULAR)
+  insurancePlan             String?
+  insuranceCardNumber       String?
+  insuranceValidUntil       DateTime?
+  allergies                 String?
+  medications               String?
+  conditions                String?
+  emergencyContact          String?
+  emergencyPhone            String?
+  bloodType                 String?
+  medicalNotes              String?
+  consentDataProcessing     Boolean             @default(false)
+  consentDataProcessingDate DateTime?
+  consentMedicalTreatment   Boolean             @default(false)
+  consentMedicalTreatmentDate DateTime?
+  consentImageUse           Boolean             @default(false)
+  consentImageUseDate       DateTime?
+  createdAt                 DateTime            @default(now())
+  updatedAt                 DateTime            @updatedAt
+  createdBy                 String?
+  isActive                  Boolean             @default(true)
+  
+  // Relations
+  communicationContact      CommunicationContact @relation(fields: [communicationContactId], references: [id], onDelete: Cascade)
+  creator                   User?               @relation("MedicalPatientCreator", fields: [createdBy], references: [id])
+  consultations             Consultation[]
+  medicalRecords            MedicalRecord[]
+  calculatorResults         CalculatorResult[]
+  appointments              Appointment[]
+
+  @@index([communicationContactId])
+  @@index([cpf])
+  @@index([medicalRecordNumber])
+  @@index([createdBy])
+  @@index([isActive])
+  @@map("medical_patients")
+}
+
+model ScheduleSlot {
+  id        String   @id @default(cuid())
+  date      String   // YYYY-MM-DD format
+  time      String   // HH:MM format
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  createdBy String?
+  creator   User?    @relation("ScheduleSlotCreator", fields: [createdBy], references: [id])
+
+  @@index([date])
+  @@index([time])
+  @@index([isActive])
+  @@index([createdBy])
+  @@map("schedule_slots")
+}
+
+model NewsletterData {
+  id          String   @id @default(cuid())
+  title       String
+  content     String
+  isDraft     Boolean  @default(true)
+  sentAt      DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  createdBy   String?
+  creator     User?    @relation("NewsletterDataCreator", fields: [createdBy], references: [id])
+
+  @@index([isDraft])
+  @@index([sentAt])
+  @@index([createdBy])
+  @@map("newsletter_data")
 }
 
 enum UserRole {
@@ -463,4 +614,27 @@ enum DuplicateStatus {
   MERGED
   DISMISSED
   FALSE_POSITIVE
+}
+
+enum InsuranceType {
+  UNIMED
+  PARTICULAR
+  OUTRO
+}
+
+enum RegistrationSource {
+  NEWSLETTER
+  PUBLIC_APPOINTMENT
+  DOCTOR_AREA
+  SECRETARY_AREA
+  REVIEW
+  MEDICAL_AREA
+  PUBLIC_SCHEDULING
+}
+
+enum CommunicationPreference {
+  EMAIL
+  WHATSAPP
+  SMS
+  PHONE
 }

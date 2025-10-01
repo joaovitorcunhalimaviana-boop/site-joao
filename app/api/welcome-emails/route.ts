@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { sendWelcomeEmailsToNewPatients, sendWelcomeEmailToPatient } from '@/lib/welcome-email-service'
-import { readIntegratedEmailData } from '@/lib/email-integration'
+import { getAllPatients } from '@/lib/unified-data-service'
 
 /**
  * GET - Verificar status dos emails de boas-vindas
@@ -11,30 +11,31 @@ export async function GET(request: NextRequest) {
     const action = searchParams.get('action')
     
     if (action === 'status') {
-      // Ler dados integrados e logs
-      const integratedEmails = readIntegratedEmailData()
+      // Usar sistema unificado
+      const allPatients = getAllPatients()
       
-      const fs = require('fs')
-      const path = require('path')
-      const logsFile = path.join(process.cwd(), 'data', 'welcome-email-logs.json')
+      // Contar emails de boas-vindas enviados
+      const welcomeEmailsSent = allPatients.filter(patient => 
+        patient.welcomeEmailLogs && patient.welcomeEmailLogs.some(log => log.success)
+      ).length
       
-      let logs = { logs: [], lastCheck: null }
-      if (fs.existsSync(logsFile)) {
-        const data = fs.readFileSync(logsFile, 'utf8')
-        logs = JSON.parse(data)
-      }
+      const welcomeEmailsFailed = allPatients.filter(patient => 
+        patient.welcomeEmailLogs && patient.welcomeEmailLogs.some(log => !log.success)
+      ).length
+      
+      const patientsWithEmail = allPatients.filter(patient => patient.email).length
       
       const stats = {
-        totalPatients: integratedEmails.length,
-        welcomeEmailsSent: logs.logs.filter((log: any) => log.success).length,
-        welcomeEmailsFailed: logs.logs.filter((log: any) => !log.success).length,
-        pendingWelcomeEmails: integratedEmails.length - logs.logs.filter((log: any) => log.success).length,
-        lastCheck: logs.lastCheck,
+        totalPatients: patientsWithEmail,
+        welcomeEmailsSent,
+        welcomeEmailsFailed,
+        pendingWelcomeEmails: patientsWithEmail - welcomeEmailsSent,
+        lastCheck: new Date().toISOString(),
         registrationSources: {
-          newsletter: integratedEmails.filter(e => e.registrationSources?.includes('newsletter')).length,
-          publicScheduling: integratedEmails.filter(e => e.registrationSources?.includes('public_scheduling')).length,
-          medicalArea: integratedEmails.filter(e => e.registrationSources?.includes('medical_area')).length,
-          secretaryArea: integratedEmails.filter(e => e.registrationSources?.includes('secretary_area')).length
+          newsletter: allPatients.filter(p => p.registrationSources?.includes('newsletter')).length,
+          publicScheduling: allPatients.filter(p => p.registrationSources?.includes('public_scheduling')).length,
+          medicalArea: allPatients.filter(p => p.registrationSources?.includes('medical_area')).length,
+          secretaryArea: allPatients.filter(p => p.registrationSources?.includes('secretary_area')).length
         }
       }
       

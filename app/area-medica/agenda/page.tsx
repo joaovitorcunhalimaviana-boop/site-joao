@@ -132,17 +132,19 @@ function AgendaManagementPageContent() {
   }
 
   useEffect(() => {
-    checkAuth()
-    loadScheduleSlots()
+    if (checkAuth()) {
+      loadScheduleSlots()
+    }
   }, [])
 
   const checkAuth = () => {
     const doctorData = localStorage.getItem('doctor')
     if (!doctorData) {
       router.push('/login-medico')
-      return
+      return false
     }
     setDoctor(JSON.parse(doctorData))
+    return true
   }
 
   const loadScheduleSlots = async () => {
@@ -336,9 +338,7 @@ function AgendaManagementPageContent() {
     setTimeout(() => setMessage(null), 5000)
   }
 
-  const getSlotsForDate = (date: string) => {
-    return scheduleSlots
-      .filter(slot => slot.date === date)
+  const getSlotsForDate = (date: string) => { return (scheduleSlots || []).filter(slot => slot.date === date)
       .sort((a, b) => a.time.localeCompare(b.time))
   }
 
@@ -415,8 +415,8 @@ function AgendaManagementPageContent() {
     return days
   }
 
-  const activeSlots = scheduleSlots.filter(slot => slot.isActive).length
-  const inactiveSlots = scheduleSlots.filter(slot => !slot.isActive).length
+  const activeSlots = scheduleSlots?.filter(slot => slot.isActive && !isPastDate(slot.date))?.length || 0
+  const inactiveSlots = scheduleSlots?.filter(slot => !slot.isActive && !isPastDate(slot.date))?.length || 0
 
   if (!doctor) {
     return null
@@ -659,7 +659,7 @@ function AgendaManagementPageContent() {
                       <div className="flex items-center justify-between">
                         <div>
                           <p className="text-blue-300 text-sm font-medium">Total de Horários</p>
-                          <p className="text-2xl font-bold text-white">{scheduleSlots.length}</p>
+                          <p className="text-2xl font-bold text-white">{scheduleSlots?.length || 0}</p>
                         </div>
                         <div className="p-3 bg-blue-900/30 rounded-xl">
                           <CalendarDaysIcon className="h-6 w-6 text-blue-400" />
@@ -791,3 +791,7 @@ export default function AgendaManagementPage() {
     </Suspense>
   )
 }
+
+
+
+

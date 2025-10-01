@@ -1,55 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
-import fs from 'fs'
-import path from 'path'
-
-interface ScheduleSlot {
-  id: string
-  date: string // YYYY-MM-DD format
-  time: string
-  isActive: boolean
-  createdAt: string
-}
-
-// Caminho para o arquivo de dados
-const DATA_FILE = path.join(process.cwd(), 'data', 'schedule-slots.json')
-
-// Função para garantir que o diretório existe
-function ensureDataDirectory() {
-  const dataDir = path.dirname(DATA_FILE)
-  if (!fs.existsSync(dataDir)) {
-    fs.mkdirSync(dataDir, { recursive: true })
-  }
-}
-
-// Função para obter slots do arquivo
-function getScheduleSlots(): ScheduleSlot[] {
-  try {
-    ensureDataDirectory()
-    if (fs.existsSync(DATA_FILE)) {
-      const data = fs.readFileSync(DATA_FILE, 'utf8')
-      return JSON.parse(data)
-    }
-    return []
-  } catch (error) {
-    console.error('Erro ao ler arquivo de slots:', error)
-    return []
-  }
-}
-
-// Função para salvar slots no arquivo
-function saveScheduleSlots(slots: ScheduleSlot[]): void {
-  try {
-    ensureDataDirectory()
-    fs.writeFileSync(DATA_FILE, JSON.stringify(slots, null, 2))
-  } catch (error) {
-    console.error('Erro ao salvar arquivo de slots:', error)
-  }
-}
+import { 
+  getAllScheduleSlots, 
+  createScheduleSlot, 
+  updateScheduleSlot, 
+  deleteScheduleSlot,
+  ScheduleSlot 
+} from '@/lib/unified-patient-system'
 
 // GET - Obter todos os slots
 export async function GET(request: NextRequest) {
   try {
-    const slots = getScheduleSlots()
+    const slots = await getAllScheduleSlots()
     
     return NextResponse.json({
       success: true,
@@ -95,40 +56,26 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const slots = getScheduleSlots()
+    try {
+      const newSlot = await createScheduleSlot({ date, time })
 
-    // Verificar se já existe um slot para esta data e horário
-    const existingSlot = slots.find(
-      slot => slot.date === date && slot.time === time
-    )
-
-    if (existingSlot) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'Já existe um slot para esta data e horário',
-        },
-        { status: 400 }
-      )
+      return NextResponse.json({
+        success: true,
+        slot: newSlot.slot,
+        message: 'Slot criado com sucesso',
+      })
+    } catch (error: any) {
+      if (error.message.includes('já existe')) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: 'Já existe um slot para esta data e horário',
+          },
+          { status: 400 }
+        )
+      }
+      throw error
     }
-
-    const newSlot: ScheduleSlot = {
-      id: `slot-${date}-${time.replace(':', '')}-${Date.now()}`,
-      date,
-      time,
-      isActive: true,
-      createdAt: new Date().toISOString(),
-    }
-
-    slots.push(newSlot)
-    saveScheduleSlots(slots)
-
-    return NextResponse.json({
-      success: true,
-      slot: newSlot,
-      slots: slots, // Retornar todos os slots atualizados
-      message: 'Slot criado com sucesso',
-    })
   } catch (error) {
     console.error('Erro ao criar slot:', error)
     return NextResponse.json(
@@ -158,27 +105,26 @@ export async function PUT(request: NextRequest) {
       )
     }
 
-    const slots = getScheduleSlots()
-    const slotIndex = slots.findIndex(slot => slot.id === id)
+    try {
+      const updatedSlot = await updateScheduleSlot(id, { isActive })
 
-    if (slotIndex === -1) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'Slot não encontrado',
-        },
-        { status: 404 }
-      )
+      return NextResponse.json({
+        success: true,
+        slot: updatedSlot,
+        message: `Slot ${isActive ? 'ativado' : 'desativado'} com sucesso`,
+      })
+    } catch (error: any) {
+      if (error.message.includes('não encontrado')) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: 'Slot não encontrado',
+          },
+          { status: 404 }
+        )
+      }
+      throw error
     }
-
-    slots[slotIndex].isActive = isActive
-    saveScheduleSlots(slots)
-
-    return NextResponse.json({
-      success: true,
-      slot: slots[slotIndex],
-      message: `Slot ${isActive ? 'ativado' : 'desativado'} com sucesso`,
-    })
   } catch (error) {
     console.error('Erro ao atualizar slot:', error)
     return NextResponse.json(
@@ -208,27 +154,26 @@ export async function DELETE(request: NextRequest) {
       )
     }
 
-    const slots = getScheduleSlots()
-    const slotIndex = slots.findIndex(slot => slot.id === id)
+    try {
+      const removedSlot = await deleteScheduleSlot(id)
 
-    if (slotIndex === -1) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'Slot não encontrado',
-        },
-        { status: 404 }
-      )
+      return NextResponse.json({
+        success: true,
+        slot: removedSlot,
+        message: 'Slot removido com sucesso',
+      })
+    } catch (error: any) {
+      if (error.message.includes('não encontrado')) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: 'Slot não encontrado',
+          },
+          { status: 404 }
+        )
+      }
+      throw error
     }
-
-    const removedSlot = slots.splice(slotIndex, 1)[0]
-    saveScheduleSlots(slots)
-
-    return NextResponse.json({
-      success: true,
-      slot: removedSlot,
-      message: 'Slot removido com sucesso',
-    })
   } catch (error) {
     console.error('Erro ao remover slot:', error)
     return NextResponse.json(

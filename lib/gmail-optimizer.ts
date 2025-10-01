@@ -21,8 +21,8 @@ export const GMAIL_CONFIGURATIONS: GmailConfig[] = [
       secure: false,
       requireTLS: true,
       auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASSWORD,
+        user: process.env['EMAIL_USER'],
+        pass: process.env['EMAIL_PASSWORD'],
       },
       connectionTimeout: 30000,
       greetingTimeout: 15000,
@@ -46,8 +46,8 @@ export const GMAIL_CONFIGURATIONS: GmailConfig[] = [
       port: 465,
       secure: true,
       auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASSWORD,
+        user: process.env['EMAIL_USER'],
+        pass: process.env['EMAIL_PASSWORD'],
       },
       connectionTimeout: 45000,
       greetingTimeout: 20000,
@@ -69,8 +69,8 @@ export const GMAIL_CONFIGURATIONS: GmailConfig[] = [
       secure: false,
       requireTLS: false,
       auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASSWORD,
+        user: process.env['EMAIL_USER'],
+        pass: process.env['EMAIL_PASSWORD'],
       },
       connectionTimeout: 60000,
       greetingTimeout: 30000,
@@ -93,8 +93,8 @@ export const GMAIL_CONFIGURATIONS: GmailConfig[] = [
       port: 587,
       secure: false,
       auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASSWORD,
+        user: process.env['EMAIL_USER'],
+        pass: process.env['EMAIL_PASSWORD'],
       },
       connectionTimeout: 20000,
       greetingTimeout: 10000,
@@ -117,7 +117,7 @@ export class GmailOptimizer {
 
   // Testar uma configuração específica
   async testConfiguration(config: GmailConfig): Promise<boolean> {
-    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASSWORD) {
+    if (!process.env['EMAIL_USER'] || !process.env['EMAIL_PASSWORD']) {
       console.log('❌ Credenciais do Gmail não configuradas')
       return false
     }

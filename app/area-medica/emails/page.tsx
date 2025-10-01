@@ -298,7 +298,7 @@ export default function EmailsPage() {
           result => result.success !== true
         ).length
         console.error('❌ Falha em alguns envios - results:', results)
-        throw new Error(`Falha no envio de ${failedCount} e-mail(s)`)
+        const failedEmails = results.filter(r => r.success !== true).map(r => r.email || "Unknown").join(", "); throw new Error(`Falha no envio de ${failedCount} e-mail(s): ${failedEmails}`)
       }
     } catch (error) {
       console.error('Erro ao enviar e-mails:', error)
@@ -663,3 +663,5 @@ export default function EmailsPage() {
     </div>
   )
 }
+
+

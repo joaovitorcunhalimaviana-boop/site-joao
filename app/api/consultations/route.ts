@@ -1,10 +1,27 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import jwt from 'jsonwebtoken'
-import { consultations, type Consultation } from './data'
-import { getAllAppointments, type UnifiedAppointment } from '@/lib/unified-appointment-system'
+import { 
+  getAllAppointments, 
+  createAppointment,
+  updateAppointment,
+  UnifiedAppointment 
+} from '@/lib/unified-patient-system'
 
 const JWT_SECRET = process.env['JWT_SECRET'] || 'your-secret-key'
+
+// Interface para consultas (compatibilidade)
+interface Consultation {
+  id: string
+  patientId: string
+  patientName: string
+  date: string
+  time: string
+  type: string
+  status: 'scheduled' | 'completed' | 'cancelled'
+  notes?: string
+  createdAt: string
+}
 
 // Função para verificar autenticação
 async function verifyAuth() {
@@ -65,8 +82,8 @@ export async function GET() {
     // Converter agendamentos em consultas
     const unifiedConsultations = appointments.map(convertAppointmentToConsultation)
     
-    // Combinar com consultas existentes (se houver)
-    const allConsultations = [...consultations, ...unifiedConsultations]
+    // Usar apenas as consultas unificadas
+    const allConsultations = unifiedConsultations
     
     console.log('=== CONSULTATIONS API DEBUG ===')
     console.log('Total agendamentos encontrados:', appointments.length)
@@ -115,23 +132,33 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const newConsultation: Consultation = {
-      id: Date.now().toString(),
+    // Criar agendamento no sistema unificado
+    const appointmentData = {
       patientId,
       patientName,
-      date,
-      time,
-      type,
-      status: 'scheduled',
+      appointmentDate: date,
+      appointmentTime: time,
+      appointmentType: type,
+      status: 'agendada' as const,
       notes: notes || '',
-      createdAt: new Date().toISOString(),
+      createdBy: auth.username || 'system'
     }
 
-    consultations.push(newConsultation)
+    const result = await createAppointment(appointmentData)
+
+    if (!result.success) {
+      return NextResponse.json(
+        { success: false, error: result.error },
+        { status: 400 }
+      )
+    }
+
+    // Converter para formato de consulta
+    const consultation = convertAppointmentToConsultation(result.appointment!)
 
     return NextResponse.json({
       success: true,
-      consultation: newConsultation,
+      consultation,
     })
   } catch (error) {
     console.error('Erro ao criar consulta:', error)
@@ -163,23 +190,35 @@ export async function PUT(request: NextRequest) {
       )
     }
 
-    const consultationIndex = consultations.findIndex(c => c.id === id)
+    // Converter dados de consulta para formato de agendamento
+    const appointmentUpdateData: Partial<UnifiedAppointment> = {}
+    
+    if (updateData.date) appointmentUpdateData.appointmentDate = updateData.date
+    if (updateData.time) appointmentUpdateData.appointmentTime = updateData.time
+    if (updateData.type) appointmentUpdateData.appointmentType = updateData.type
+    if (updateData.notes !== undefined) appointmentUpdateData.notes = updateData.notes
+    if (updateData.status) {
+      appointmentUpdateData.status = 
+        updateData.status === 'scheduled' ? 'agendada' :
+        updateData.status === 'completed' ? 'concluida' :
+        updateData.status === 'cancelled' ? 'cancelada' : 'agendada'
+    }
 
-    if (consultationIndex === -1) {
+    const result = await updateAppointment(id, appointmentUpdateData)
+
+    if (!result.success) {
       return NextResponse.json(
-        { success: false, error: 'Consulta não encontrada' },
-        { status: 404 }
+        { success: false, error: result.error },
+        { status: result.error === 'Agendamento não encontrado' ? 404 : 400 }
       )
     }
 
-    consultations[consultationIndex] = {
-      ...consultations[consultationIndex],
-      ...updateData,
-    }
+    // Converter para formato de consulta
+    const consultation = convertAppointmentToConsultation(result.appointment!)
 
     return NextResponse.json({
       success: true,
-      consultation: consultations[consultationIndex],
+      consultation,
     })
   } catch (error) {
     console.error('Erro ao atualizar consulta:', error)
@@ -212,23 +251,22 @@ export async function DELETE(request: NextRequest) {
       )
     }
 
-    const consultationIndex = consultations.findIndex(c => c.id === id)
+    // Atualizar status para cancelada no sistema unificado
+    const result = await updateAppointment(id, { status: 'cancelada' })
 
-    if (consultationIndex === -1) {
+    if (!result.success) {
       return NextResponse.json(
-        { success: false, error: 'Consulta não encontrada' },
-        { status: 404 }
+        { success: false, error: result.error },
+        { status: result.error === 'Agendamento não encontrado' ? 404 : 400 }
       )
     }
 
-    const consultation = consultations[consultationIndex]
-    if (consultation) {
-      consultation.status = 'cancelled'
-    }
+    // Converter para formato de consulta
+    const consultation = convertAppointmentToConsultation(result.appointment!)
 
     return NextResponse.json({
       success: true,
-      message: 'Consulta cancelada com sucesso',
+      consultation,
     })
   } catch (error) {
     console.error('Erro ao cancelar consulta:', error)

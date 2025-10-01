@@ -7,7 +7,7 @@ const JWT_SECRET = process.env['JWT_SECRET'] || 'your-secret-key'
 const users = {
   'joao.viana': {
     password: 'Logos1.1',
-    name: 'Dr. João Vítor da Cunha Lima Viana',
+    name: 'Dr. João Vítor Viana',
     role: 'admin', // Pode acessar tudo
     areas: ['medica', 'secretaria'],
   },
@@ -49,11 +49,12 @@ export async function POST(request: NextRequest) {
     const response = NextResponse.json({
       success: true,
       user: {
-        username,
+        id: 'doctor-1',
         name: user.name,
+        email: 'joao.viana@clinica.com',
         role: user.role,
-        areas: user.areas,
-      },
+        areas: user.areas
+      }
     })
 
     // Definir cookie de autenticação
@@ -64,8 +65,8 @@ export async function POST(request: NextRequest) {
       maxAge: 24 * 60 * 60, // 24 horas
     })
 
-    console.log('✅ Login realizado com sucesso para:', username)
-    console.log('✅ Token criado e cookie definido')
+    console.log(' Login realizado com sucesso para:', username)
+    console.log(' Token criado e cookie definido')
 
     return response
   } catch (error) {

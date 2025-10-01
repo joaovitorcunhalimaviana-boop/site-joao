@@ -9,13 +9,12 @@ import {
   ArrowRightOnRectangleIcon,
   ChartBarIcon,
   DocumentTextIcon,
-  CalculatorIcon,
+  UserGroupIcon,
   EnvelopeIcon,
   CogIcon,
   ScissorsIcon,
   CalendarDaysIcon,
   ChatBubbleLeftRightIcon,
-  MagnifyingGlassIcon,
 } from '@heroicons/react/24/outline'
 
 interface Doctor {
@@ -83,6 +82,11 @@ export default function MedicalAreaMenu({ currentPage }: MedicalAreaMenuProps) {
       icon: ChartBarIcon,
     },
     {
+      href: '/area-medica/pacientes',
+      label: 'Lista de Pacientes',
+      icon: UserGroupIcon,
+    },
+    {
       href: '/area-medica/agenda',
       label: 'Gestão de Agenda',
       icon: CalendarDaysIcon,
@@ -93,11 +97,6 @@ export default function MedicalAreaMenu({ currentPage }: MedicalAreaMenuProps) {
       icon: ChatBubbleLeftRightIcon,
     },
     {
-      href: '/area-medica/colonoscopias',
-      label: 'Área de Colonoscopias',
-      icon: MagnifyingGlassIcon,
-    },
-    {
       href: '/area-medica/cirurgias',
       label: 'Controle de Cirurgias',
       icon: ScissorsIcon,
@@ -106,16 +105,6 @@ export default function MedicalAreaMenu({ currentPage }: MedicalAreaMenuProps) {
       href: '/area-medica/relatorios',
       label: 'Relatórios de Atendimentos',
       icon: DocumentTextIcon,
-    },
-    {
-      href: '/area-medica/relatorios-avancados',
-      label: 'Relatórios Avançados',
-      icon: DocumentTextIcon,
-    },
-    {
-      href: '/area-medica/calculadoras',
-      label: 'Calculadoras Médicas',
-      icon: CalculatorIcon,
     },
     {
       href: '/area-medica/emails',

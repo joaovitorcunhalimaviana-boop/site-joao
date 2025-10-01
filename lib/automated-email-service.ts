@@ -312,27 +312,29 @@ export class AutomatedEmailService {
    */
   private async logWelcomeEmail(data: WelcomeEmailData, messageId?: string): Promise<void> {
     try {
-      const logPath = 'data/welcome-email-logs.json'
-      let logs: any[] = []
-
-      try {
-        const fs = await import('fs/promises')
-        const existingData = await fs.readFile(logPath, 'utf-8')
-        logs = JSON.parse(existingData)
-      } catch (error) {
-        // Arquivo não existe ou está vazio, começar com array vazio
+      const { getAllPatients, saveAllPatients } = await import('./unified-data-service')
+      const patients = getAllPatients()
+      
+      const patientIndex = patients.findIndex(p => p.email === data.patientEmail)
+      
+      if (patientIndex !== -1) {
+        // Adicionar log ao paciente existente
+        if (!patients[patientIndex].welcomeEmailLogs) {
+          patients[patientIndex].welcomeEmailLogs = []
+        }
+        
+        patients[patientIndex].welcomeEmailLogs!.push({
+          email: data.patientEmail,
+          name: data.patientName,
+          sentAt: new Date().toISOString(),
+          source: 'automated-service',
+          success: true
+        })
+        
+        saveAllPatients(patients)
+      } else {
+        console.warn(`⚠️ Paciente não encontrado no sistema unificado: ${data.patientEmail}`)
       }
-
-      logs.push({
-        timestamp: new Date().toISOString(),
-        patientName: data.patientName,
-        patientEmail: data.patientEmail,
-        messageId,
-        status: 'sent'
-      })
-
-      const fs = await import('fs/promises')
-      await fs.writeFile(logPath, JSON.stringify(logs, null, 2))
 
     } catch (error) {
       console.error('❌ Erro ao registrar log de e-mail de boas-vindas:', error)

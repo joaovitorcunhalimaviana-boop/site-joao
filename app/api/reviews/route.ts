@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
-import fs from 'fs'
-import path from 'path'
 import { withRateLimit, RATE_LIMIT_CONFIGS } from '@/lib/rate-limiter'
+import { 
+  getAllCommunicationContacts,
+  createOrUpdateCommunicationContact,
+  CommunicationContact
+} from '@/lib/unified-patient-system'
 
 interface Review {
   id: string
@@ -24,103 +27,27 @@ interface ReviewsData {
   }
 }
 
-const REVIEWS_FILE = path.join(process.cwd(), 'data', 'reviews.json')
-
-// Função para garantir que o diretório existe
-function ensureDataDirectory() {
-  const dataDir = path.dirname(REVIEWS_FILE)
-  if (!fs.existsSync(dataDir)) {
-    fs.mkdirSync(dataDir, { recursive: true })
-  }
+// Função para converter contatos de comunicação em reviews
+function convertContactsToReviews(contacts: CommunicationContact[]): Review[] {
+  return contacts
+    .filter(contact => contact.reviewData && contact.reviewData.rating > 0)
+    .map(contact => ({
+      id: contact.id,
+      patientName: contact.name,
+      email: contact.email || '',
+      phone: contact.phone || '',
+      rating: contact.reviewData!.rating,
+      comment: contact.reviewData!.comment,
+      date: contact.reviewData!.reviewDate,
+      verified: contact.reviewData!.verified || false,
+      approved: contact.reviewData!.approved || true
+    }))
 }
 
-// Função para ler as avaliações
-function readReviews(): ReviewsData {
-  ensureDataDirectory()
-
-  if (!fs.existsSync(REVIEWS_FILE)) {
-    const initialData: ReviewsData = {
-      reviews: [
-        {
-          id: '1',
-          patientName: 'Maria Silva',
-          email: 'maria@email.com',
-          rating: 5,
-          comment:
-            'Excelente atendimento! Dr. João é muito atencioso e profissional. Recomendo a todos.',
-          date: '2024-01-15T10:30:00Z',
-          verified: true,
-          approved: true,
-        },
-        {
-          id: '2',
-          patientName: 'Carlos Santos',
-          email: 'carlos@email.com',
-          rating: 5,
-          comment:
-            'Profissional excepcional! Resolveu meu problema de forma rápida e eficiente. Muito obrigado!',
-          date: '2024-01-10T14:20:00Z',
-          verified: true,
-          approved: true,
-        },
-        {
-          id: '3',
-          patientName: 'Ana Costa',
-          email: 'ana@email.com',
-          rating: 4,
-          comment:
-            'Muito bom atendimento. Clínica bem organizada e médico competente.',
-          date: '2024-01-08T09:15:00Z',
-          verified: true,
-          approved: true,
-        },
-        {
-          id: '4',
-          patientName: 'Roberto Lima',
-          email: 'roberto@email.com',
-          rating: 5,
-          comment:
-            'Dr. João é um excelente profissional. Me senti muito seguro durante todo o tratamento.',
-          date: '2024-01-05T16:45:00Z',
-          verified: true,
-          approved: true,
-        },
-      ],
-      stats: {
-        totalReviews: 4,
-        averageRating: 4.75,
-        ratingDistribution: { 5: 3, 4: 1, 3: 0, 2: 0, 1: 0 },
-      },
-    }
-    fs.writeFileSync(REVIEWS_FILE, JSON.stringify(initialData, null, 2))
-    return initialData
-  }
-
-  try {
-    const data = fs.readFileSync(REVIEWS_FILE, 'utf8')
-    return JSON.parse(data)
-  } catch (error) {
-    console.error('Erro ao ler arquivo de avaliações:', error)
-    return {
-      reviews: [],
-      stats: {
-        totalReviews: 0,
-        averageRating: 0,
-        ratingDistribution: { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 },
-      },
-    }
-  }
-}
-
-// Função para salvar as avaliações
-function saveReviews(data: ReviewsData) {
-  ensureDataDirectory()
-  try {
-    fs.writeFileSync(REVIEWS_FILE, JSON.stringify(data, null, 2))
-  } catch (error) {
-    console.error('Erro ao salvar arquivo de avaliações:', error)
-    throw new Error('Erro ao salvar avaliação')
-  }
+// Função para obter reviews do sistema unificado
+async function getReviewsFromUnifiedSystem(): Promise<Review[]> {
+  const contacts = getAllCommunicationContacts()
+  return convertContactsToReviews(contacts)
 }
 
 // Função para calcular estatísticas
@@ -214,18 +141,35 @@ export async function GET(request: NextRequest) {
     RATE_LIMIT_CONFIGS.PUBLIC,
     async () => {
       try {
-        const data = readReviews()
+        const { searchParams } = new URL(request.url)
+        const approved = searchParams.get('approved')
+        const rating = searchParams.get('rating')
 
-        // Retornar apenas avaliações aprovadas para o público
-        const approvedReviews = data.reviews
-          .filter(review => review.approved)
-          .sort(
-            (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
-          )
+        // Obter reviews do sistema unificado
+        const reviews = await getReviewsFromUnifiedSystem()
+
+        // Filtrar por aprovação se especificado
+        let filteredReviews = reviews
+        if (approved === 'true') {
+          filteredReviews = reviews.filter(review => review.approved)
+        } else if (approved === 'false') {
+          filteredReviews = reviews.filter(review => !review.approved)
+        }
+
+        // Filtrar por rating se especificado
+        if (rating) {
+          const ratingNum = parseInt(rating)
+          if (ratingNum >= 1 && ratingNum <= 5) {
+            filteredReviews = filteredReviews.filter(review => review.rating === ratingNum)
+          }
+        }
+
+        // Calcular estatísticas
+        const stats = calculateStats(filteredReviews)
 
         return NextResponse.json({
-          reviews: approvedReviews,
-          stats: data.stats,
+          reviews: filteredReviews,
+          stats,
         })
       } catch (error) {
         console.error('Erro ao buscar avaliações:', error)
@@ -236,7 +180,7 @@ export async function GET(request: NextRequest) {
       }
     },
     {
-      auditAction: 'REVIEWS_ACCESS',
+      auditAction: 'REVIEW_LIST',
       resourceName: 'Reviews API',
     }
   )
@@ -292,41 +236,53 @@ export async function POST(request: NextRequest) {
           )
         }
 
-        // Ler dados existentes
-        const data = readReviews()
-
-        // Verificar se já existe avaliação deste email
-        const existingReview = data.reviews.find(
-          review => review.email.toLowerCase() === email.toLowerCase()
+        // Verificar se já existe review deste email no sistema unificado
+        const contacts = getAllCommunicationContacts()
+        const existingContact = contacts.find(
+          contact => contact.email?.toLowerCase() === email.toLowerCase() && contact.reviewData
         )
-        if (existingReview) {
+
+        if (existingContact) {
           return NextResponse.json(
             { error: 'Já existe uma avaliação para este email' },
             { status: 400 }
           )
         }
 
-        // Criar nova avaliação
-        const newReview: Review = {
-          id: Date.now().toString(),
-          patientName: patientName.trim(),
+        // Criar ou atualizar contato com dados da review
+        const contactResult = createOrUpdateCommunicationContact({
+          name: patientName.trim(),
           email: email.trim().toLowerCase(),
-          phone: phone?.trim() || '',
-          rating: parseInt(rating),
-          comment: comment.trim(),
-          date: new Date().toISOString(),
-          verified: false,
-          approved: true, // Auto-aprovar por enquanto, pode ser alterado para moderação manual
+          whatsapp: phone?.trim() || undefined,
+          source: 'review',
+          reviewData: {
+            rating: parseInt(rating),
+            comment: comment.trim(),
+            reviewDate: new Date().toISOString(),
+            verified: false,
+            approved: true
+          }
+        })
+
+        if (!contactResult.success) {
+          return NextResponse.json(
+            { success: false, message: contactResult.message },
+            { status: 400 }
+          )
         }
 
-        // Adicionar nova avaliação
-        data.reviews.push(newReview)
-
-        // Recalcular estatísticas
-        data.stats = calculateStats(data.reviews)
-
-        // Salvar dados
-        saveReviews(data)
+        // Criar objeto review para resposta
+        const newReview: Review = {
+          id: contactResult.contact.id,
+          patientName: contactResult.contact.name,
+          email: contactResult.contact.email!,
+          phone: contactResult.contact.whatsapp || '',
+          rating: contactResult.contact.reviewData!.rating,
+          comment: contactResult.contact.reviewData!.comment,
+          date: contactResult.contact.reviewData!.reviewDate,
+          verified: contactResult.contact.reviewData!.verified || false,
+          approved: contactResult.contact.reviewData!.approved || true
+        }
 
         // Enviar para Telegram (não bloquear a resposta)
         sendToTelegram(newReview).catch(error => {

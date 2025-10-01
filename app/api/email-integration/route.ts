@@ -1,30 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import fs from 'fs'
-import path from 'path'
-import { getAllPatients } from '@/lib/unified-appointment-system'
+import { getAllPatients, createOrUpdatePatient } from '@/lib/unified-data-service'
 
-// Interfaces
-interface Subscriber {
-  id: string
-  email: string
-  name: string
-  whatsapp?: string
-  birthDate?: string
-  subscribed: boolean
-  subscribedAt: string
-  source: 'newsletter' | 'appointment' | 'integrated'
-  preferences: {
-    healthTips: boolean
-    appointments: boolean
-    promotions: boolean
-  }
-}
-
-interface NewsletterData {
-  subscribers: Subscriber[]
-  newsletters: any[]
-}
-
+// Interface para compatibilidade com o sistema antigo
 export interface IntegratedEmailData {
   email: string
   name: string
@@ -42,62 +19,50 @@ export interface IntegratedEmailData {
   }
 }
 
-// Caminhos dos arquivos
-const NEWSLETTER_FILE = path.join(process.cwd(), 'data', 'newsletter.json')
-const INTEGRATED_EMAILS_FILE = path.join(process.cwd(), 'data', 'integrated-emails.json')
-
-// Função para ler dados da newsletter
-function readNewsletterData(): NewsletterData {
+// Função para obter dados integrados de emails do sistema unificado
+function getIntegratedEmailData(): IntegratedEmailData[] {
   try {
-    if (!fs.existsSync(NEWSLETTER_FILE)) {
-      return { subscribers: [], newsletters: [] }
-    }
-    const data = fs.readFileSync(NEWSLETTER_FILE, 'utf8')
-    return JSON.parse(data)
+    const patients = getAllPatients()
+    
+    return patients
+      .filter(patient => patient.email) // Apenas pacientes com email
+      .map(patient => ({
+        email: patient.email!,
+        name: patient.name,
+        whatsapp: patient.whatsapp,
+        birthDate: patient.birthDate,
+        source: determineSource(patient.registrationSources || []),
+        subscribed: isSubscribed(patient.emailPreferences),
+        subscribedAt: patient.createdAt || new Date().toISOString(),
+        patientId: patient.id,
+        registrationSources: patient.registrationSources,
+        preferences: {
+          healthTips: patient.emailPreferences?.healthTips || false,
+          appointments: patient.emailPreferences?.appointments || false,
+          promotions: patient.emailPreferences?.promotions || false
+        }
+      }))
   } catch (error) {
-    console.error('❌ Erro ao ler dados da newsletter:', error)
-    return { subscribers: [], newsletters: [] }
-  }
-}
-
-// Função para salvar dados da newsletter
-function saveNewsletterData(data: NewsletterData): void {
-  try {
-    const dataDir = path.dirname(NEWSLETTER_FILE)
-    if (!fs.existsSync(dataDir)) {
-      fs.mkdirSync(dataDir, { recursive: true })
-    }
-    fs.writeFileSync(NEWSLETTER_FILE, JSON.stringify(data, null, 2))
-  } catch (error) {
-    console.error('❌ Erro ao salvar dados da newsletter:', error)
-  }
-}
-
-// Função para ler dados integrados de emails
-function readIntegratedEmailData(): IntegratedEmailData[] {
-  try {
-    if (!fs.existsSync(INTEGRATED_EMAILS_FILE)) {
-      return []
-    }
-    const data = fs.readFileSync(INTEGRATED_EMAILS_FILE, 'utf8')
-    return JSON.parse(data)
-  } catch (error) {
-    console.error('❌ Erro ao ler dados integrados de emails:', error)
+    console.error('❌ Erro ao obter dados integrados de emails:', error)
     return []
   }
 }
 
-// Função para salvar dados integrados de emails
-function saveIntegratedEmailData(data: IntegratedEmailData[]): void {
-  try {
-    const dataDir = path.dirname(INTEGRATED_EMAILS_FILE)
-    if (!fs.existsSync(dataDir)) {
-      fs.mkdirSync(dataDir, { recursive: true })
-    }
-    fs.writeFileSync(INTEGRATED_EMAILS_FILE, JSON.stringify(data, null, 2))
-  } catch (error) {
-    console.error('❌ Erro ao salvar dados integrados de emails:', error)
-  }
+// Função auxiliar para determinar a fonte principal
+function determineSource(sources: string[]): 'newsletter' | 'appointment' | 'both' {
+  const hasNewsletter = sources.includes('newsletter')
+  const hasAppointment = sources.some(s => ['public_scheduling', 'doctor_area', 'appointment'].includes(s))
+  
+  if (hasNewsletter && hasAppointment) return 'both'
+  if (hasNewsletter) return 'newsletter'
+  if (hasAppointment) return 'appointment'
+  return 'appointment' // default
+}
+
+// Função auxiliar para verificar se está inscrito
+function isSubscribed(preferences: any): boolean {
+  if (!preferences) return false
+  return preferences.healthTips || preferences.appointments || preferences.promotions
 }
 
 // Função para normalizar email
@@ -118,11 +83,11 @@ export async function GET(request: NextRequest) {
 
     switch (action) {
       case 'read':
-        const data = readIntegratedEmailData()
+        const data = getIntegratedEmailData()
         return NextResponse.json({ success: true, data })
 
       case 'birthdays':
-        const allEmails = readIntegratedEmailData()
+        const allEmails = getIntegratedEmailData()
         const birthdayEmails = allEmails.filter(email => {
           if (!email.birthDate) return false
           
@@ -134,42 +99,62 @@ export async function GET(request: NextRequest) {
             birthDate.getDate() === today.getDate()
           )
         })
-        return NextResponse.json({ success: true, data: birthdayEmails })
+        
+        return NextResponse.json({ 
+          success: true, 
+          birthdayEmails,
+          count: birthdayEmails.length 
+        })
 
       case 'check':
-        const emailToCheck = searchParams.get('email')
-        if (!emailToCheck) {
-          return NextResponse.json({ success: false, message: 'Email é obrigatório' }, { status: 400 })
+        const email = searchParams.get('email')
+        if (!email) {
+          return NextResponse.json(
+            { success: false, message: 'Email é obrigatório' },
+            { status: 400 }
+          )
         }
         
-        const integratedData = readIntegratedEmailData()
-        const normalizedEmail = normalizeEmail(emailToCheck)
-        const existingEmail = integratedData.find(item => normalizeEmail(item.email) === normalizedEmail)
+        const normalizedEmail = normalizeEmail(email)
+        const allData = getIntegratedEmailData()
+        const exists = allData.some(item => normalizeEmail(item.email) === normalizedEmail)
         
-        if (existingEmail) {
-          return NextResponse.json({
-            success: true,
-            exists: true,
-            source: existingEmail.source,
-            data: existingEmail
-          })
-        } else {
-          return NextResponse.json({
-            success: true,
-            exists: false
-          })
-        }
+        return NextResponse.json({ 
+          success: true, 
+          exists,
+          email: normalizedEmail
+        })
 
       default:
-        return NextResponse.json({ success: false, message: 'Ação não reconhecida' }, { status: 400 })
+        const integratedData = getIntegratedEmailData()
+        return NextResponse.json({
+          success: true,
+          data: integratedData,
+          stats: {
+            total: integratedData.length,
+            subscribed: integratedData.filter(item => item.subscribed).length,
+            sources: {
+              newsletter: integratedData.filter(item => item.source === 'newsletter').length,
+              appointment: integratedData.filter(item => item.source === 'appointment').length,
+              both: integratedData.filter(item => item.source === 'both').length
+            }
+          }
+        })
     }
   } catch (error) {
     console.error('❌ Erro na API de integração de emails:', error)
-    return NextResponse.json({ success: false, message: 'Erro interno do servidor' }, { status: 500 })
+    return NextResponse.json(
+      { 
+        success: false, 
+        message: 'Erro interno do servidor',
+        error: error instanceof Error ? error.message : 'Unknown error'
+      },
+      { status: 500 }
+    )
   }
 }
 
-// POST - Adicionar email ou integrar sistemas
+// POST - Integrar dados de emails
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
@@ -177,113 +162,28 @@ export async function POST(request: NextRequest) {
 
     switch (action) {
       case 'integrate':
-        // Integração completa dos sistemas
-        const newsletterData = readNewsletterData()
-        const patients = await getAllPatients()
-        const existingIntegrated = readIntegratedEmailData()
-
-        const integratedMap = new Map<string, IntegratedEmailData>()
-        existingIntegrated.forEach(item => {
-          integratedMap.set(normalizeEmail(item.email), item)
-        })
-
-        let duplicatesFound = 0
-        let newIntegrations = 0
-
-        // Processar subscribers da newsletter
-        newsletterData.subscribers.forEach(subscriber => {
-          if (!subscriber.email) return
-
-          const normalizedEmail = normalizeEmail(subscriber.email)
-          const existing = integratedMap.get(normalizedEmail)
-
-          if (existing) {
-            duplicatesFound++
-            if (existing.source === 'appointment') {
-              existing.source = 'both'
-              existing.registrationSources = existing.registrationSources || []
-              if (!existing.registrationSources.includes('newsletter')) {
-                existing.registrationSources.push('newsletter')
-              }
-            }
-          } else {
-            newIntegrations++
-            const newIntegration: IntegratedEmailData = {
-              email: subscriber.email,
-              name: subscriber.name || 'Nome não informado',
-              whatsapp: subscriber.whatsapp,
-              birthDate: subscriber.birthDate,
-              source: 'newsletter',
-              subscribed: subscriber.subscribed,
-              subscribedAt: subscriber.subscribedAt || new Date().toISOString(),
-              registrationSources: ['newsletter'],
-              preferences: subscriber.preferences || {
-                healthTips: true,
-                appointments: true,
-                promotions: true
-              }
-            }
-            integratedMap.set(normalizedEmail, newIntegration)
-          }
-        })
-
-        // Processar pacientes
-        patients.forEach(patient => {
-          if (!patient.email) return
-
-          const normalizedEmail = normalizeEmail(patient.email)
-          const existing = integratedMap.get(normalizedEmail)
-
-          if (existing) {
-            duplicatesFound++
-            if (existing.source === 'newsletter') {
-              existing.source = 'both'
-            }
-            existing.patientId = patient.id
-            existing.registrationSources = existing.registrationSources || []
-            if (!existing.registrationSources.includes('appointment')) {
-              existing.registrationSources.push('appointment')
-            }
-          } else {
-            newIntegrations++
-            const newIntegration: IntegratedEmailData = {
-              email: patient.email,
-              name: patient.name,
-              whatsapp: patient.whatsapp,
-              birthDate: patient.birthDate,
-              source: 'appointment',
-              subscribed: true,
-              subscribedAt: new Date().toISOString(),
-              patientId: patient.id,
-              registrationSources: ['appointment'],
-              preferences: {
-                healthTips: true,
-                appointments: true,
-                promotions: false
-              }
-            }
-            integratedMap.set(normalizedEmail, newIntegration)
-          }
-        })
-
-        // Salvar dados integrados
-        const finalIntegratedData = Array.from(integratedMap.values())
-        saveIntegratedEmailData(finalIntegratedData)
-
+        // A integração agora é feita automaticamente pelo sistema unificado
+        // Esta ação retorna apenas estatísticas do sistema atual
+        const integratedData = getIntegratedEmailData()
+        const patients = getAllPatients()
+        
         return NextResponse.json({
           success: true,
           stats: {
-            newsletterSubscribers: newsletterData.subscribers.length,
-            appointmentPatients: patients.length,
-            totalIntegrated: finalIntegratedData.length,
-            duplicatesFound,
-            newIntegrations
+            totalPatients: patients.length,
+            patientsWithEmail: patients.filter(p => p.email).length,
+            subscribedPatients: integratedData.filter(item => item.subscribed).length,
+            sources: {
+              newsletter: integratedData.filter(item => item.source === 'newsletter').length,
+              appointment: integratedData.filter(item => item.source === 'appointment').length,
+              both: integratedData.filter(item => item.source === 'both').length
+            }
           },
-          message: `✅ Integração concluída! ${finalIntegratedData.length} emails integrados.`
+          message: `✅ Sistema unificado ativo! ${integratedData.length} emails integrados.`
         })
 
       case 'add':
-        // Adicionar email individual
+        // Adicionar email individual ao sistema unificado
         const { email, name, source, additionalData } = body
         
         if (!email || !name || !source) {
@@ -293,61 +193,87 @@ export async function POST(request: NextRequest) {
           }, { status: 400 })
         }
 
-        const currentData = readIntegratedEmailData()
-        const normalizedNewEmail = normalizeEmail(email)
-        const existingIndex = currentData.findIndex(item => normalizeEmail(item.email) === normalizedNewEmail)
+        const allPatients = getAllPatients()
+        const existingPatient = allPatients.find(p => p.email?.toLowerCase() === email.toLowerCase())
 
-        if (existingIndex >= 0) {
-          // Atualizar existente
-          const existing = currentData[existingIndex]
-          existing.registrationSources = existing.registrationSources || []
-          
-          if (!existing.registrationSources.includes(source)) {
-            existing.registrationSources.push(source)
+        if (existingPatient) {
+          // Atualizar paciente existente
+          const updatedSources = existingPatient.registrationSources || []
+          if (!updatedSources.includes(source)) {
+            updatedSources.push(source)
           }
 
-          if (existing.source !== source) {
-            existing.source = existing.source === 'newsletter' && source === 'appointment' ? 'both' :
-                            existing.source === 'appointment' && source === 'newsletter' ? 'both' : existing.source
-          }
-
-          if (additionalData) {
-            if (additionalData.whatsapp) existing.whatsapp = additionalData.whatsapp
-            if (additionalData.birthDate) existing.birthDate = additionalData.birthDate
-            if (additionalData.patientId) existing.patientId = additionalData.patientId
-            if (additionalData.preferences) existing.preferences = { ...existing.preferences, ...additionalData.preferences }
-          }
-
-          currentData[existingIndex] = existing
-        } else {
-          // Adicionar novo
-          const newEmail: IntegratedEmailData = {
-            email,
-            name,
-            whatsapp: additionalData?.whatsapp,
-            birthDate: additionalData?.birthDate,
-            source: source as 'newsletter' | 'appointment',
-            subscribed: true,
-            subscribedAt: new Date().toISOString(),
-            patientId: additionalData?.patientId,
-            registrationSources: [source],
-            preferences: additionalData?.preferences || {
-              healthTips: true,
-              appointments: true,
-              promotions: source === 'newsletter'
+          const updatedPatient = {
+            ...existingPatient,
+            registrationSources: updatedSources,
+            whatsapp: additionalData?.whatsapp || existingPatient.whatsapp,
+            birthDate: additionalData?.birthDate || existingPatient.birthDate,
+            emailPreferences: {
+              ...existingPatient.emailPreferences,
+              ...additionalData?.preferences
             }
           }
-          currentData.push(newEmail)
+
+          const result = createOrUpdatePatient(updatedPatient)
+          
+          if (!result.success) {
+            return NextResponse.json({ 
+              success: false, 
+              message: result.message 
+            }, { status: 400 })
+          }
+
+          return NextResponse.json({
+            success: true,
+            message: 'Email atualizado com sucesso',
+            patientId: result.patient?.id,
+            updated: true
+          })
+        } else {
+          // Criar novo paciente
+          const newPatient = {
+            id: `patient_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+            name,
+            email,
+            whatsapp: additionalData?.whatsapp,
+            birthDate: additionalData?.birthDate,
+            registrationSources: [source],
+            emailPreferences: additionalData?.preferences || {
+              healthTips: true,
+              appointments: true,
+              promotions: false
+            },
+            createdAt: new Date().toISOString()
+          }
+
+          const result = createOrUpdatePatient(newPatient)
+          
+          if (!result.success) {
+            return NextResponse.json({ 
+              success: false, 
+              message: result.message 
+            }, { status: 400 })
+          }
+
+          return NextResponse.json({
+            success: true,
+            message: 'Email adicionado com sucesso',
+            patientId: result.patient?.id,
+            created: true
+          })
         }
 
-        saveIntegratedEmailData(currentData)
-        return NextResponse.json({ success: true, message: 'Email adicionado com sucesso!' })
-
       default:
-        return NextResponse.json({ success: false, message: 'Ação não reconhecida' }, { status: 400 })
+        return NextResponse.json({ 
+          success: false, 
+          message: 'Ação não reconhecida' 
+        }, { status: 400 })
     }
   } catch (error) {
     console.error('❌ Erro na API de integração de emails:', error)
-    return NextResponse.json({ success: false, message: 'Erro interno do servidor' }, { status: 500 })
+    return NextResponse.json({ 
+      success: false, 
+      message: 'Erro interno do servidor' 
+    }, { status: 500 })
   }
 }

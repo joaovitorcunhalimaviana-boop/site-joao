@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import MigrationPanel from '../../../components/migration-panel'
-import BackgroundPattern from '../../../components/ui/background-pattern'
+import MigrationPanel from '@/components/migration-panel'
+import BackgroundPattern from '@/components/ui/background-pattern'
 
 export default function MigrationPage() {
   const router = useRouter()

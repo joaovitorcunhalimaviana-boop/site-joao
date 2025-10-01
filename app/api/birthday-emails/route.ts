@@ -1,88 +1,49 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getAllBirthdayEmails } from '@/lib/email-integration'
+import { getAllPatients, saveAllPatients } from '@/lib/unified-data-service'
 import fs from 'fs'
 import path from 'path'
 
-interface Subscriber {
-  id: string
-  email: string
-  name: string
-  whatsapp?: string
-  birthDate?: string
-  subscribed: boolean
-  subscribedAt: string
-  preferences: {
-    healthTips: boolean
-    appointments: boolean
-    promotions: boolean
-  }
-}
-
-interface NewsletterData {
-  subscribers: Subscriber[]
-  newsletters: any[]
-}
-
 interface BirthdayEmailLog {
-  subscriberId: string
+  patientId: string
   email: string
   name: string
   sentAt: string
   year: number
 }
 
-interface BirthdayEmailData {
-  logs: BirthdayEmailLog[]
-  lastCheck: string
-}
-
-const NEWSLETTER_FILE = path.join(process.cwd(), 'data', 'newsletter.json')
-const BIRTHDAY_LOGS_FILE = path.join(process.cwd(), 'data', 'birthday-emails.json')
-
-// Função para ler dados da newsletter
-function readNewsletterData(): NewsletterData {
-  try {
-    if (!fs.existsSync(NEWSLETTER_FILE)) {
-      return { subscribers: [], newsletters: [] }
+// Função para ler logs de emails de aniversário do sistema unificado
+function getBirthdayLogs(): BirthdayEmailLog[] {
+  const patients = getAllPatients()
+  const logs: BirthdayEmailLog[] = []
+  
+  patients.forEach(patient => {
+    if (patient.birthdayEmailLogs) {
+      patient.birthdayEmailLogs.forEach(log => {
+        logs.push({
+          patientId: patient.id,
+          email: patient.email || '',
+          name: patient.name,
+          sentAt: log.sentAt,
+          year: log.year
+        })
+      })
     }
-    const data = fs.readFileSync(NEWSLETTER_FILE, 'utf8')
-    return JSON.parse(data)
-  } catch (error) {
-    console.error('Erro ao ler dados da newsletter:', error)
-    return { subscribers: [], newsletters: [] }
-  }
+  })
+  
+  return logs
 }
 
-// Função para ler logs de emails de aniversário
-function readBirthdayLogs(): BirthdayEmailData {
-  try {
-    if (!fs.existsSync(BIRTHDAY_LOGS_FILE)) {
-      const initialData: BirthdayEmailData = {
-        logs: [],
-        lastCheck: new Date().toISOString()
-      }
-      // Criar diretório se não existir
-      const dataDir = path.dirname(BIRTHDAY_LOGS_FILE)
-      if (!fs.existsSync(dataDir)) {
-        fs.mkdirSync(dataDir, { recursive: true })
-      }
-      fs.writeFileSync(BIRTHDAY_LOGS_FILE, JSON.stringify(initialData, null, 2))
-      return initialData
+// Função para salvar log de email de aniversário no sistema unificado
+function saveBirthdayLog(patientId: string, log: { sentAt: string, year: number }) {
+  const patients = getAllPatients()
+  const patientIndex = patients.findIndex(p => p.id === patientId)
+  
+  if (patientIndex !== -1) {
+    if (!patients[patientIndex].birthdayEmailLogs) {
+      patients[patientIndex].birthdayEmailLogs = []
     }
-    const data = fs.readFileSync(BIRTHDAY_LOGS_FILE, 'utf8')
-    return JSON.parse(data)
-  } catch (error) {
-    console.error('Erro ao ler logs de aniversário:', error)
-    return { logs: [], lastCheck: new Date().toISOString() }
-  }
-}
-
-// Função para salvar logs de emails de aniversário
-function saveBirthdayLogs(data: BirthdayEmailData) {
-  try {
-    fs.writeFileSync(BIRTHDAY_LOGS_FILE, JSON.stringify(data, null, 2))
-  } catch (error) {
-    console.error('Erro ao salvar logs de aniversário:', error)
+    patients[patientIndex].birthdayEmailLogs.push(log)
+    saveAllPatients(patients)
   }
 }
 
@@ -97,13 +58,34 @@ function isBirthdayToday(birthDate: string): boolean {
   )
 }
 
+// Função para obter pacientes com aniversário hoje do sistema unificado
+function getTodayBirthdayPatients() {
+  const patients = getAllPatients()
+  
+  return patients.filter(patient => {
+    // Verificar se tem email, data de nascimento e está inscrito
+    if (!patient.email || !patient.birthDate) return false
+    
+    // Verificar se está inscrito em algum tipo de email
+    const isSubscribed = patient.emailPreferences?.healthTips || 
+                        patient.emailPreferences?.appointments || 
+                        patient.emailPreferences?.promotions
+    
+    if (!isSubscribed) return false
+    
+    // Verificar se é aniversário hoje
+    return isBirthdayToday(patient.birthDate)
+  })
+}
 // Função para verificar se já foi enviado email este ano
-function alreadySentThisYear(emailId: string, logs: BirthdayEmailLog[]): boolean {
+function alreadySentThisYear(patientId: string): boolean {
+  const patients = getAllPatients()
+  const patient = patients.find(p => p.id === patientId)
+  
+  if (!patient || !patient.birthdayEmailLogs) return false
+  
   const currentYear = new Date().getFullYear()
-  return logs.some(log => 
-    (log.subscriberId === emailId || log.email === emailId) && 
-    log.year === currentYear
-  )
+  return patient.birthdayEmailLogs.some(log => log.year === currentYear)
 }
 
 // Função para calcular idade
@@ -121,13 +103,13 @@ function calculateAge(birthDate: string): number {
 }
 
 // Função para enviar email de aniversário
-async function sendBirthdayEmail(subscriber: Subscriber): Promise<boolean> {
+async function sendBirthdayEmail(patient: any): Promise<boolean> {
   try {
-    const age = calculateAge(subscriber.birthDate!)
+    const age = calculateAge(patient.birthDate!)
     
     const emailData = {
-      to: subscriber.email,
-      subject: `🎂 Feliz Aniversário, ${subscriber.name}! - Dr. João Vítor Viana`,
+      to: patient.email,
+      subject: `🎂 Feliz Aniversário, ${patient.name}! - Dr. João Vítor Viana`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #f8f9fa; padding: 20px;">
           <div style="background-color: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
@@ -141,7 +123,7 @@ async function sendBirthdayEmail(subscriber: Subscriber): Promise<boolean> {
             <!-- Mensagem principal -->
             <div style="text-align: center; margin-bottom: 30px;">
               <h2 style="color: #1f2937; margin-bottom: 20px; font-size: 28px;">
-                Parabéns, ${subscriber.name}! 🎂
+                Parabéns, ${patient.name}! 🎂
               </h2>
               <p style="color: #374151; font-size: 18px; line-height: 1.6; margin-bottom: 20px;">
                 Hoje é um dia muito especial - você está completando <strong>${age} anos</strong>!
@@ -232,84 +214,62 @@ async function sendBirthdayEmail(subscriber: Subscriber): Promise<boolean> {
 // POST - Verificar e enviar emails de aniversário
 export async function POST(request: NextRequest) {
   try {
-    // Usar o sistema integrado de emails
-    const integratedEmails = await getAllBirthdayEmails()
-    const birthdayLogs = readBirthdayLogs()
+    // Usar o sistema unificado de pacientes
+    const birthdayPatients = getTodayBirthdayPatients()
     
     const today = new Date()
     const currentYear = today.getFullYear()
     
-    // Filtrar emails que fazem aniversário hoje
-    const birthdaySubscribers = integratedEmails.filter(emailData => 
-      emailData.subscribed && 
-      emailData.birthDate && 
-      isBirthdayToday(emailData.birthDate) &&
-      !alreadySentThisYear(emailData.email, birthdayLogs.logs)
+    // Filtrar pacientes que ainda não receberam email este ano
+    const patientsToSendEmail = birthdayPatients.filter(patient => 
+      !alreadySentThisYear(patient.id)
     )
     
     console.log(`🎂 Verificando aniversários para ${today.toDateString()}`)
-    console.log(`📧 Encontrados ${birthdaySubscribers.length} aniversariantes no sistema integrado`)
+    console.log(`📧 Encontrados ${patientsToSendEmail.length} aniversariantes no sistema unificado`)
     
     const results = []
     
-    for (const emailData of birthdaySubscribers) {
-      console.log(`🎉 Enviando email de aniversário para: ${emailData.name} (${emailData.email})`)
+    for (const patient of patientsToSendEmail) {
+      console.log(`🎉 Enviando email de aniversário para: ${patient.name} (${patient.email})`)
       
-      // Converter para formato compatível com a função existente
-      const subscriber = {
-        id: emailData.email, // Usar email como ID único
-        email: emailData.email,
-        name: emailData.name,
-        birthDate: emailData.birthDate,
-        subscribed: emailData.subscribed
-      }
-      
-      const emailSent = await sendBirthdayEmail(subscriber)
+      const emailSent = await sendBirthdayEmail(patient)
       
       if (emailSent) {
-        // Registrar no log
-        const logEntry: BirthdayEmailLog = {
-          subscriberId: emailData.email,
-          email: emailData.email,
-          name: emailData.name,
+        // Registrar no sistema unificado
+        saveBirthdayLog(patient.id, {
           sentAt: new Date().toISOString(),
           year: currentYear
-        }
-        
-        birthdayLogs.logs.push(logEntry)
+        })
         
         results.push({
           success: true,
-          subscriber: emailData.name,
-          email: emailData.email,
-          source: emailData.source
+          subscriber: patient.name,
+          email: patient.email,
+          source: 'unified-system'
         })
         
-        console.log(`✅ Email de aniversário enviado com sucesso para: ${emailData.name} (fonte: ${emailData.source})`)
+        console.log(`✅ Email de aniversário enviado com sucesso para: ${patient.name}`)
       } else {
         results.push({
           success: false,
-          subscriber: subscriber.name,
-          email: subscriber.email,
+          subscriber: patient.name,
+          email: patient.email,
           error: 'Falha no envio'
         })
         
-        console.log(`❌ Falha ao enviar email de aniversário para: ${subscriber.name}`)
+        console.log(`❌ Falha ao enviar email de aniversário para: ${patient.name}`)
       }
       
       // Pequena pausa entre envios para evitar sobrecarga
       await new Promise(resolve => setTimeout(resolve, 1000))
     }
     
-    // Atualizar logs
-    birthdayLogs.lastCheck = new Date().toISOString()
-    saveBirthdayLogs(birthdayLogs)
-    
     return NextResponse.json({
       success: true,
       message: `Verificação de aniversários concluída`,
-      totalChecked: integratedEmails.length,
-      birthdaySubscribers: birthdaySubscribers.length,
+      totalChecked: birthdayPatients.length,
+      birthdaySubscribers: patientsToSendEmail.length,
       emailsSent: results.filter(r => r.success).length,
       results
     })
@@ -330,20 +290,25 @@ export async function POST(request: NextRequest) {
 // GET - Obter estatísticas de emails de aniversário
 export async function GET(request: NextRequest) {
   try {
-    const birthdayLogs = readBirthdayLogs()
-    const integratedEmails = await getAllBirthdayEmails()
+    const birthdayLogs = getBirthdayLogs()
+    const allPatients = getAllPatients()
     
     const currentYear = new Date().getFullYear()
-    const currentYearLogs = birthdayLogs.logs.filter(log => log.year === currentYear)
+    const currentYearLogs = birthdayLogs.filter(log => log.year === currentYear)
     
     // Próximos aniversários (próximos 30 dias)
     const today = new Date()
     const next30Days = new Date(today.getTime() + (30 * 24 * 60 * 60 * 1000))
     
-    const upcomingBirthdays = integratedEmails
-      .filter(emailData => emailData.subscribed && emailData.birthDate)
-      .map(emailData => {
-        const birthDate = new Date(emailData.birthDate!)
+    const upcomingBirthdays = allPatients
+      .filter(patient => 
+        patient.birthDate && 
+        (patient.emailPreferences?.newsletter || 
+         patient.emailPreferences?.appointments || 
+         patient.emailPreferences?.healthTips)
+      )
+      .map(patient => {
+        const birthDate = new Date(patient.birthDate!)
         const thisYearBirthday = new Date(currentYear, birthDate.getMonth(), birthDate.getDate())
         
         // Se já passou este ano, considerar o próximo ano
@@ -352,9 +317,9 @@ export async function GET(request: NextRequest) {
         }
         
         return {
-          name: emailData.name,
-          email: emailData.email,
-          birthDate: emailData.birthDate,
+          name: patient.name,
+          email: patient.email,
+          birthDate: patient.birthDate,
           nextBirthday: thisYearBirthday.toISOString(),
           daysUntil: Math.ceil((thisYearBirthday.getTime() - today.getTime()) / (24 * 60 * 60 * 1000))
         }
@@ -369,10 +334,13 @@ export async function GET(request: NextRequest) {
       success: true,
       stats: {
         totalEmailsSentThisYear: currentYearLogs.length,
-        lastCheck: birthdayLogs.lastCheck,
+        lastCheck: new Date().toISOString(), // Current timestamp since we don't track lastCheck in unified system
         upcomingBirthdays: upcomingBirthdays.slice(0, 10), // Próximos 10
-        totalSubscribersWithBirthdate: integratedEmails.filter(
-          emailData => emailData.subscribed && emailData.birthDate
+        totalSubscribersWithBirthdate: allPatients.filter(
+          patient => patient.birthDate && 
+          (patient.emailPreferences?.newsletter || 
+           patient.emailPreferences?.appointments || 
+           patient.emailPreferences?.healthTips)
         ).length
       }
     })

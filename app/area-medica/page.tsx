@@ -140,7 +140,7 @@ export default function AreaMedicaPage() {
     if (userData) {
       const user = JSON.parse(userData)
       setDoctor({
-        name: user.name || 'João Vítor da Cunha Lima Viana',
+        name: user.name || 'João Vitor Viana',
         email: user.email || 'joao.viana@clinica.com',
         specialty: 'Coloproctologista e Cirurgião Geral',
         crm: 'CRMPB 12831',
@@ -148,7 +148,7 @@ export default function AreaMedicaPage() {
     } else {
       // Definir dados padrão se não houver usuário logado
       setDoctor({
-        name: 'João Vítor da Cunha Lima Viana',
+        name: 'João Vitor Viana',
         email: 'joao.viana@clinica.com',
         specialty: 'Coloproctologista e Cirurgião Geral',
         crm: 'CRMPB 12831',

@@ -259,7 +259,7 @@ export default function NewsletterEditor({
           
           <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e2e8f0; color: #64748b; font-size: 14px;">
             <p>Dr. João Vitor Viana - Coloproctologista</p>
-            <p>📍 João Pessoa/PB | 📞 (83) 99866-3089</p>
+            <p>📍 João Pessoa/PB | 📞 (83) 99122-1599</p>
             <p>🌐 <a href="https://www.joaovitorviana.com.br" style="color: #3b82f6;">www.joaovitorviana.com.br</a></p>
           </div>
         </div>

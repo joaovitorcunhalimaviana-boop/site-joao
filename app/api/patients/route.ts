@@ -1,6 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server'
-import fs from 'fs'
-import path from 'path'
 import { InputValidator, logSecurityEvent } from '@/lib/security-audit'
 import {
   sanitizeMedicalFormData,
@@ -8,8 +6,16 @@ import {
   isValidPhone,
 } from '@/lib/security'
 import { getTodayISO, getTimestampISO } from '@/lib/date-utils'
+import { 
+  getAllMedicalPatients,
+  createMedicalPatient,
+  updateMedicalPatient,
+  deleteMedicalPatient,
+  MedicalPatient,
+  getCommunicationContactById
+} from '@/lib/unified-patient-system'
 
-// Interface para dados do paciente
+// Interface para compatibilidade com o sistema antigo
 interface Patient {
   id: string
   name: string
@@ -24,6 +30,33 @@ interface Patient {
   status?: 'aguardando' | 'atendido' | 'cancelado'
   createdAt: string
   updatedAt: string
+}
+
+// Função para converter pacientes médicos em formato antigo (compatibilidade)
+async function convertMedicalPatientsToOldFormat(medicalPatients: MedicalPatient[]): Promise<Patient[]> {
+  const patients: Patient[] = []
+  
+  for (const mp of medicalPatients) {
+    const communicationContact = await getCommunicationContactById(mp.communicationContactId)
+    
+    patients.push({
+      id: mp.id,
+      name: mp.fullName,
+      email: communicationContact?.email,
+      phone: communicationContact?.whatsapp || '(00) 00000-0000',
+      whatsapp: communicationContact?.whatsapp || '(00) 00000-0000',
+      birthDate: communicationContact?.birthDate || '',
+      insurance: {
+        type: mp.insurance?.type as 'particular' | 'unimed' | 'outro' || 'particular',
+        plan: mp.insurance?.plan
+      },
+      status: 'aguardando',
+      createdAt: mp.createdAt,
+      updatedAt: mp.updatedAt
+    })
+  }
+  
+  return patients
 }
 
 // Função para limpar dados antigos automaticamente
@@ -161,25 +194,17 @@ export async function GET(request: NextRequest) {
     const date = searchParams.get('date')
     const id = searchParams.get('id')
 
-    // Combinar pacientes do arquivo JSON com pacientes em memória
-    const filePatients = loadPatientsFromFile()
-    const allPatients = [...filePatients, ...memoryPatients]
+    // Obter pacientes médicos do sistema unificado
+    const medicalPatients = await getAllMedicalPatients()
+    const patients = await convertMedicalPatientsToOldFormat(medicalPatients)
 
-    // Remover duplicatas baseado no ID
-    const uniquePatients = allPatients.filter(
-      (patient, index, self) =>
-        index === self.findIndex(p => p.id === patient.id)
-    )
+    console.log(`📊 Total de pacientes médicos: ${patients.length}`)
 
-    console.log(
-      `📊 Total de pacientes: ${uniquePatients.length} (${filePatients.length} do arquivo + ${memoryPatients.length} em memória)`
-    )
-
-    let filteredPatients = uniquePatients
+    let filteredPatients = patients
 
     // Se solicitado um paciente específico por ID
     if (id) {
-      const patient = uniquePatients.find(p => p.id === id)
+      const patient = patients.find(p => p.id === id)
       if (!patient) {
         return NextResponse.json(
           { error: 'Paciente não encontrado' },
@@ -320,14 +345,36 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Telefone inválido' }, { status: 400 })
     }
 
-    const newPatient: Patient = {
-      id: Date.now().toString(),
-      ...(sanitizedData as Omit<Patient, 'id' | 'createdAt' | 'updatedAt'>),
-      createdAt: getTimestampISO(),
-      updatedAt: getTimestampISO(),
+    // Criar paciente no sistema unificado
+    const medicalPatientData = {
+      fullName: sanitizedData['name'],
+      communicationContactId: '', // Será criado automaticamente
+      insurance: {
+        type: sanitizedData['insurance']?.type || 'particular',
+        plan: sanitizedData['insurance']?.plan
+      },
+      createdBy: 'api-patients'
     }
 
-    memoryPatients.push(newPatient)
+    // Dados do contato de comunicação
+    const communicationData = {
+      email: sanitizedData['email'],
+      whatsapp: sanitizedData['phone'] || sanitizedData['whatsapp'],
+      birthDate: sanitizedData['birthDate']
+    }
+
+    const result = await createMedicalPatient(medicalPatientData, communicationData)
+
+    if (!result.success) {
+      return NextResponse.json(
+        { error: result.error },
+        { status: 400 }
+      )
+    }
+
+    // Converter para formato antigo para compatibilidade
+    const patients = await convertMedicalPatientsToOldFormat([result.patient!])
+    const newPatient = patients[0]
 
     return NextResponse.json({
       success: true,
@@ -362,42 +409,32 @@ export async function PUT(request: NextRequest) {
 
     const updateData = await request.json()
 
-    // Primeiro tentar encontrar em memoryPatients
-    let patientIndex = memoryPatients.findIndex(p => p.id === patientId)
-
-    if (patientIndex !== -1) {
-      memoryPatients[patientIndex] = {
-        ...memoryPatients[patientIndex],
-        ...updateData,
-        updatedAt: getTimestampISO(),
+    // Preparar dados para atualização no sistema unificado
+    const medicalPatientUpdate: Partial<MedicalPatient> = {}
+    
+    if (updateData.name) {
+      medicalPatientUpdate.fullName = updateData.name
+    }
+    
+    if (updateData.insurance) {
+      medicalPatientUpdate.insurance = {
+        type: updateData.insurance.type,
+        plan: updateData.insurance.plan
       }
-
-      return NextResponse.json({
-        success: true,
-        message: 'Paciente atualizado com sucesso',
-        patient: memoryPatients[patientIndex],
-      })
     }
 
-    // Se não encontrou em memória, verificar se existe no arquivo
-    const filePatients = loadPatientsFromFile()
-    const filePatientIndex = filePatients.findIndex(p => p.id === patientId)
+    const result = await updateMedicalPatient(patientId, medicalPatientUpdate)
 
-    if (filePatientIndex === -1) {
+    if (!result.success) {
       return NextResponse.json(
-        { error: 'Paciente não encontrado' },
-        { status: 404 }
+        { error: result.error },
+        { status: result.error === 'Paciente médico não encontrado' ? 404 : 400 }
       )
     }
 
-    // Atualizar paciente do arquivo movendo para memória
-    const updatedPatient = {
-      ...filePatients[filePatientIndex],
-      ...updateData,
-      updatedAt: getTimestampISO(),
-    }
-
-    memoryPatients.push(updatedPatient)
+    // Converter para formato antigo para compatibilidade
+    const patients = await convertMedicalPatientsToOldFormat([result.patient!])
+    const updatedPatient = patients[0]
 
     return NextResponse.json({
       success: true,
@@ -430,35 +467,19 @@ export async function DELETE(request: NextRequest) {
       )
     }
 
-    // Tentar remover de memoryPatients primeiro
-    const memoryPatientIndex = memoryPatients.findIndex(p => p.id === patientId)
+    const result = await deleteMedicalPatient(patientId)
 
-    if (memoryPatientIndex !== -1) {
-      const deletedPatient = memoryPatients.splice(memoryPatientIndex, 1)[0]
-      return NextResponse.json({
-        success: true,
-        message: 'Paciente removido com sucesso',
-        patient: deletedPatient,
-      })
-    }
-
-    // Se não encontrou em memória, verificar se existe no arquivo
-    const filePatients = loadPatientsFromFile()
-    const filePatientExists = filePatients.some(p => p.id === patientId)
-
-    if (!filePatientExists) {
+    if (!result.success) {
       return NextResponse.json(
-        { error: 'Paciente não encontrado' },
-        { status: 404 }
+        { error: result.error },
+        { status: result.error === 'Paciente médico não encontrado' ? 404 : 400 }
       )
     }
 
-    // Paciente existe no arquivo mas não pode ser removido diretamente
-    // Em um sistema real, você implementaria a remoção do arquivo aqui
-    return NextResponse.json(
-      { error: 'Paciente do arquivo não pode ser removido via API' },
-      { status: 400 }
-    )
+    return NextResponse.json({
+      success: true,
+      message: 'Paciente removido com sucesso',
+    })
   } catch (error) {
     console.error('Erro ao remover paciente:', error)
     return NextResponse.json(

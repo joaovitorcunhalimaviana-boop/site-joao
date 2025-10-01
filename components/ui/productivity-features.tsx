@@ -29,7 +29,7 @@ import {
   Pause,
   RotateCcw
 } from 'lucide-react';
-import { MEDICAL_TERMS_AUTOCOMPLETE, COLONOSCOPY_SNIPPETS } from '@/lib/colonoscopy-templates';
+// Colonoscopy imports removed
 
 interface ProductivityFeaturesProps {
   editorContent: string;
@@ -152,7 +152,7 @@ export default function ProductivityFeatures({
     );
 
     if (hasContextKeyword) {
-      const relevantSnippets = COLONOSCOPY_SNIPPETS.filter(snippet =>
+      const relevantSnippets = [].filter(snippet =>
         contextKeywords.some(keyword => 
           snippet.content.toLowerCase().includes(keyword) ||
           snippet.category?.toLowerCase().includes(keyword)

@@ -1,66 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import fs from 'fs'
-import path from 'path'
-
-const DATA_DIR = path.join(process.cwd(), 'data')
-const SURGERIES_FILE = path.join(DATA_DIR, 'surgeries.json')
-
-interface Surgery {
-  id: string
-  patientName: string
-  surgeryType: string
-  date: string
-  time: string
-  hospital: string
-  paymentType: 'particular' | 'plano'
-  // Campos para particulares
-  totalValue?: number
-  hospitalValue?: number
-  anesthesiologistValue?: number
-  instrumentalistValue?: number
-  auxiliaryValue?: number
-  doctorValue?: number
-  // Campos para planos
-  procedureCodes?: string
-  insurancePlan?: string
-  status: 'agendada' | 'realizada' | 'cancelada'
-}
-
-// Garantir que o diretório existe
-function ensureDataDirectory() {
-  if (!fs.existsSync(DATA_DIR)) {
-    fs.mkdirSync(DATA_DIR, { recursive: true })
-  }
-}
-
-// Carregar cirurgias do arquivo
-function loadSurgeries(): Surgery[] {
-  ensureDataDirectory()
-
-  if (!fs.existsSync(SURGERIES_FILE)) {
-    return []
-  }
-
-  try {
-    const data = fs.readFileSync(SURGERIES_FILE, 'utf8')
-    return JSON.parse(data)
-  } catch (error) {
-    console.error('Erro ao carregar cirurgias:', error)
-    return []
-  }
-}
-
-// Salvar cirurgias no arquivo
-function saveSurgeries(surgeries: Surgery[]) {
-  ensureDataDirectory()
-
-  try {
-    fs.writeFileSync(SURGERIES_FILE, JSON.stringify(surgeries, null, 2))
-  } catch (error) {
-    console.error('Erro ao salvar cirurgias:', error)
-    throw error
-  }
-}
+import { getSurgeryById, updateSurgery, deleteSurgery, type Surgery } from '@/lib/unified-patient-system'
 
 // GET - Buscar cirurgia específica por ID
 export async function GET(
@@ -69,8 +8,7 @@ export async function GET(
 ) {
   try {
     const { id } = await params
-    const surgeries = loadSurgeries()
-    const surgery = surgeries.find(s => s.id === id)
+    const surgery = getSurgeryById(id)
 
     if (!surgery) {
       return NextResponse.json(
@@ -100,31 +38,20 @@ export async function PUT(
   try {
     const { id } = await params
     const body = await request.json()
-    const surgeries = loadSurgeries()
-    const surgeryIndex = surgeries.findIndex(s => s.id === id)
+    
+    const result = updateSurgery(id, body)
 
-    if (surgeryIndex === -1) {
+    if (!result.success) {
       return NextResponse.json(
-        { success: false, error: 'Cirurgia não encontrada' },
-        { status: 404 }
+        { success: false, error: result.message },
+        { status: result.message === 'Cirurgia não encontrada' ? 404 : 400 }
       )
     }
 
-    // Atualizar cirurgia mantendo dados existentes
-    const updatedSurgery: Surgery = {
-      ...surgeries[surgeryIndex],
-      ...body,
-      id: id, // Garantir que o ID não seja alterado
-      updatedAt: new Date().toISOString(),
-    }
-
-    surgeries[surgeryIndex] = updatedSurgery
-    saveSurgeries(surgeries)
-
     return NextResponse.json({
       success: true,
-      surgery: updatedSurgery,
-      message: 'Cirurgia atualizada com sucesso',
+      surgery: result.surgery,
+      message: result.message,
     })
   } catch (error) {
     console.error('Erro ao atualizar cirurgia:', error)
@@ -142,23 +69,19 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params
-    const surgeries = loadSurgeries()
-    const surgeryIndex = surgeries.findIndex(s => s.id === id)
+    
+    const result = deleteSurgery(id)
 
-    if (surgeryIndex === -1) {
+    if (!result.success) {
       return NextResponse.json(
-        { success: false, error: 'Cirurgia não encontrada' },
-        { status: 404 }
+        { success: false, error: result.message },
+        { status: result.message === 'Cirurgia não encontrada' ? 404 : 400 }
       )
     }
 
-    const deletedSurgery = surgeries.splice(surgeryIndex, 1)[0]
-    saveSurgeries(surgeries)
-
     return NextResponse.json({
       success: true,
-      surgery: deletedSurgery,
-      message: 'Cirurgia excluída com sucesso',
+      message: result.message,
     })
   } catch (error) {
     console.error('Erro ao excluir cirurgia:', error)

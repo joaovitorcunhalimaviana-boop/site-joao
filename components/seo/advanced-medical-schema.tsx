@@ -1,113 +1,119 @@
-'use client'
+﻿import Script from 'next/script'
 
-import Script from 'next/script'
+interface MedicalConditionData {
+  name: string
+  description: string
+  codeValue: string
+  treatment: string
+  riskFactors: string[]
+  testName: string
+  anatomy: string
+}
 
-interface MedicalSchemaProps {
-  type: 'specialty' | 'condition' | 'procedure' | 'faq'
-  data: any
+interface MedicalProcedureData {
+  description: string
+  type: string
+  bodyLocation: string
+  preparation: string[]
+  howPerformed: string
+  followup: string
+}
+
+interface MedicalFAQData {
+  questions: Array<{ question: string; answer: string }>
+}
+
+type MedicalSchemaData = MedicalConditionData | MedicalProcedureData | MedicalFAQData
+
+interface AdvancedMedicalSchemaProps {
+  type: 'condition' | 'procedure' | 'faq'
+  data: MedicalSchemaData
 }
 
 export default function AdvancedMedicalSchema({
   type,
   data,
-}: MedicalSchemaProps) {
+}: AdvancedMedicalSchemaProps) {
   const getStructuredData = () => {
-    switch (type) {
-      case 'specialty':
-        return {
-          '@context': 'https://schema.org',
+    const baseData = {
+      '@context': 'https://schema.org',
+      '@type': 'MedicalWebPage',
+      mainEntity: {
+        '@type': 'MedicalCondition',
+        name: 'Consulta Médica Especializada',
+        description:
+          'Informações médicas especializadas em coloproctologia e cirurgia geral',
+        medicalSpecialty: {
           '@type': 'MedicalSpecialty',
           name: 'Coloproctologia',
-          description:
-            'Especialidade médica focada no diagnóstico e tratamento de doenças do intestino grosso, reto e ânus',
-          associatedAnatomy: {
-            '@type': 'AnatomicalStructure',
-            name: 'Sistema Digestivo Baixo',
-          },
-          relevantSpecialty: [
-            'Gastroenterologia',
-            'Cirurgia Geral',
-            'Oncologia',
-          ],
-          practitioner: {
-            '@type': 'Person',
-            name: 'Dr. João Vitor Viana',
-            jobTitle: 'Coloproctologista',
-            address: {
-              '@type': 'PostalAddress',
-              addressLocality: 'João Pessoa',
-              addressRegion: 'PB',
-              addressCountry: 'BR',
+        },
+      },
+    }
+
+    switch (type) {
+      case 'condition':
+        const conditionData = data as MedicalConditionData
+        return {
+          ...baseData,
+          mainEntity: {
+            '@type': 'MedicalCondition',
+            name: conditionData.name,
+            description: conditionData.description,
+            code: {
+              '@type': 'MedicalCode',
+              code: conditionData.codeValue,
+              codingSystem: 'ICD-10',
+            },
+            possibleTreatment: {
+              '@type': 'MedicalTherapy',
+              name: conditionData.treatment,
+            },
+            riskFactor: conditionData.riskFactors.map((factor) => ({
+              '@type': 'MedicalRiskFactor',
+              name: factor,
+            })),
+            associatedAnatomy: {
+              '@type': 'AnatomicalStructure',
+              name: conditionData.anatomy,
             },
           },
         }
 
-      case 'condition':
-        return {
-          '@context': 'https://schema.org',
-          '@type': 'MedicalCondition',
-          name: data.name,
-          description: data.description,
-          code: {
-            '@type': 'MedicalCode',
-            codeValue: data.codeValue,
-            codingSystem: 'ICD-10',
-          },
-          possibleTreatment: {
-            '@type': 'MedicalTherapy',
-            name: data.treatment,
-          },
-          riskFactor: data.riskFactors,
-          typicalTest: {
-            '@type': 'MedicalTest',
-            name: data.testName,
-          },
-          associatedAnatomy: {
-            '@type': 'AnatomicalStructure',
-            name: data.anatomy,
-          },
-        }
-
       case 'procedure':
+        const procedureData = data as MedicalProcedureData
         return {
-          '@context': 'https://schema.org',
-          '@type': 'MedicalProcedure',
-          name: data.name,
-          description: data.description,
-          procedureType: {
-            '@type': 'MedicalProcedureType',
-            name: data.type,
-          },
-          bodyLocation: {
-            '@type': 'AnatomicalStructure',
-            name: data.bodyLocation,
-          },
-          preparation: data.preparation,
-          howPerformed: data.howPerformed,
-          followup: data.followup,
-          performer: {
-            '@type': 'Person',
-            name: 'Dr. João Vitor Viana',
-            jobTitle: 'Coloproctologista',
+          ...baseData,
+          mainEntity: {
+            '@type': 'MedicalProcedure',
+            name: procedureData.type,
+            description: procedureData.description,
+            bodyLocation: {
+              '@type': 'AnatomicalStructure',
+              name: procedureData.bodyLocation,
+            },
+            preparation: procedureData.preparation.join(', '),
+            howPerformed: procedureData.howPerformed,
+            followup: procedureData.followup,
           },
         }
 
       case 'faq':
+        const faqData = data as MedicalFAQData
         return {
           '@context': 'https://schema.org',
           '@type': 'FAQPage',
-          mainEntity: data.questions.map((q: any) => ({
+          mainEntity: faqData.questions.map((item) => ({
             '@type': 'Question',
-            name: q.question,
+            name: item.question,
             acceptedAnswer: {
               '@type': 'Answer',
-              text: q.answer,
+              text: item.answer,
             },
           })),
         }
 
       default:
-        return {}
+        return baseData
     }
   }
 
@@ -123,53 +129,31 @@ export default function AdvancedMedicalSchema({
   )
 }
 
-// Componentes específicos para condições médicas
 export function HemorroidsSchema() {
   const data = {
     name: 'Hemorroidas',
-    description:
-      'Veias dilatadas e inflamadas na região anal que causam dor, coceira e sangramento',
+    description: 'Veias dilatadas e inflamadas na região anal',
     codeValue: 'K64',
-    treatment:
-      'Tratamento clínico conservador, procedimentos minimamente invasivos ou cirurgia',
-    riskFactors: [
-      'Constipação crônica',
-      'Gravidez',
-      'Obesidade',
-      'Sedentarismo',
-      'Idade avançada',
-    ],
+    treatment: 'Tratamento clínico conservador ou cirurgia',
+    riskFactors: ['Constipação crônica', 'Gravidez', 'Obesidade'],
     testName: 'Exame Proctológico',
     anatomy: 'Ânus e Reto',
   }
-
   return <AdvancedMedicalSchema type='condition' data={data} />
 }
 
 export function ColonoscopySchema() {
   const data = {
-    name: 'Colonoscopia',
-    description:
-      'Exame endoscópico para visualização completa do intestino grosso',
+    description: 'Exame endoscópico do intestino grosso',
     type: 'Procedimento Diagnóstico',
     bodyLocation: 'Intestino Grosso',
-    preparation: [
-      'Jejum de 12 horas',
-      'Preparo intestinal com laxantes',
-      'Suspensão de medicamentos específicos',
-    ],
-    howPerformed:
-      'Inserção de endoscópio flexível através do ânus para visualização completa do cólon',
-    followup: 'Acompanhamento médico conforme achados do exame',
+    preparation: ['Jejum de 12 horas', 'Preparo intestinal'],
+    howPerformed: 'Inserção de endoscópio flexível',
+    followup: 'Acompanhamento médico',
   }
-
   return <AdvancedMedicalSchema type='procedure' data={data} />
 }
 
-export function MedicalFAQSchema({
-  questions,
-}: {
-  questions: Array<{ question: string; answer: string }>
-}) {
+export function MedicalFAQSchema({ questions }: { questions: Array<{ question: string; answer: string }> }) {
   return <AdvancedMedicalSchema type='faq' data={{ questions }} />
 }

@@ -46,7 +46,6 @@ export const SECURITY_CONFIG = {
     'img-src': ["'self'", 'data:', 'https:', 'blob:'],
     'connect-src': [
       "'self'",
-      'https://vercel.live',
       'https://www.google-analytics.com',
     ],
     'frame-ancestors': ["'none'"],

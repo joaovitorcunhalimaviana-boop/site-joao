@@ -65,7 +65,7 @@ export default function ProtecaoDadosPage() {
                   Proteção de Dados
                 </h1>
                 <p className="text-gray-400">
-                  Sistema de monitoramento e proteção de dados da clínica - Dr. {doctor.name}
+                  Sistema de monitoramento e proteção de dados da clínica - {doctor.name}
                 </p>
               </div>
 

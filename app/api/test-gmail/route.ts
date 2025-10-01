@@ -6,13 +6,13 @@ export async function GET(request: NextRequest) {
     console.log('🧪 Iniciando teste das configurações do Gmail...')
     
     // Verificar se as credenciais estão configuradas
-    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASSWORD) {
+    if (!process.env['EMAIL_USER'] || !process.env['EMAIL_PASSWORD']) {
       return NextResponse.json({
         success: false,
         error: 'Credenciais do Gmail não configuradas',
         details: {
-          EMAIL_USER: !!process.env.EMAIL_USER,
-          EMAIL_PASSWORD: !!process.env.EMAIL_PASSWORD
+          EMAIL_USER: !!process.env['EMAIL_USER'],
+          EMAIL_PASSWORD: !!process.env['EMAIL_PASSWORD']
         }
       }, { status: 400 })
     }
@@ -71,8 +71,8 @@ export async function GET(request: NextRequest) {
       results,
       status,
       environment: {
-        EMAIL_USER: process.env.EMAIL_USER ? `${process.env.EMAIL_USER.substring(0, 3)}***` : 'não configurado',
-        EMAIL_PASSWORD: process.env.EMAIL_PASSWORD ? '***configurado***' : 'não configurado'
+        EMAIL_USER: process.env['EMAIL_USER'] ? `${process.env['EMAIL_USER'].substring(0, 3)}***` : 'não configurado',
+        EMAIL_PASSWORD: process.env['EMAIL_PASSWORD'] ? '***configurado***' : 'não configurado'
       }
     })
 

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import HeroSection from '../components/ui/hero-section'
 import Header from '../components/ui/header'
@@ -29,3 +29,4 @@ export default function Home() {
     </>
   )
 }
+

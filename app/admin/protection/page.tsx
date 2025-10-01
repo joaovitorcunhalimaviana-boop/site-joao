@@ -59,7 +59,7 @@ export default function AdminProtectionPage() {
             Proteção de Dados
           </h1>
           <p className="text-gray-400 text-lg">
-            Sistema de monitoramento e proteção de dados da clínica - Dr. João Vítor da Cunha Lima Viana
+            Sistema de monitoramento e proteção de dados da clínica - Dr. João Vitor Viana
           </p>
           <div className="mt-4 p-4 bg-gray-900/50 rounded-lg border border-gray-700">
             <p className="text-sm text-gray-300">

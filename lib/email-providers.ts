@@ -15,22 +15,22 @@ export const EMAIL_PROVIDERS: EmailProvider[] = [
   // 1. Mailtrap - Principal (3500 emails grátis/mês)
   {
     name: 'mailtrap',
-    priority: 1,
+    priority: 5,
     config: {
       host: 'live.smtp.mailtrap.io',
       port: 587,
       secure: false,
       requireTLS: true,
       auth: {
-        user: process.env.MAILTRAP_API_TOKEN,
-        pass: process.env.MAILTRAP_API_TOKEN,
+        user: process.env['MAILTRAP_API_TOKEN'],
+        pass: process.env['MAILTRAP_API_TOKEN'],
       },
       connectionTimeout: 60000,
       greetingTimeout: 30000,
       socketTimeout: 60000,
     },
     testConnection: async function() {
-      if (!process.env.MAILTRAP_API_TOKEN) return false
+      if (!process.env['MAILTRAP_API_TOKEN']) return false
       try {
         const transporter = nodemailer.createTransporter(this.config)
         await transporter.verify()
@@ -44,22 +44,22 @@ export const EMAIL_PROVIDERS: EmailProvider[] = [
   // 2. Postmark - Alternativa confiável
   {
     name: 'postmark',
-    priority: 2,
+    priority: 5,
     config: {
       host: 'smtp.postmarkapp.com',
       port: 587,
       secure: false,
       requireTLS: true,
       auth: {
-        user: process.env.POSTMARK_SERVER_TOKEN,
-        pass: process.env.POSTMARK_SERVER_TOKEN,
+        user: process.env['POSTMARK_SERVER_TOKEN'],
+        pass: process.env['POSTMARK_SERVER_TOKEN'],
       },
       connectionTimeout: 60000,
       greetingTimeout: 30000,
       socketTimeout: 60000,
     },
     testConnection: async function() {
-      if (!process.env.POSTMARK_SERVER_TOKEN) return false
+      if (!process.env['POSTMARK_SERVER_TOKEN']) return false
       try {
         const transporter = nodemailer.createTransporter(this.config)
         await transporter.verify()
@@ -73,22 +73,22 @@ export const EMAIL_PROVIDERS: EmailProvider[] = [
   // 3. Mailgun - Alternativa confiável
   {
     name: 'mailgun',
-    priority: 3,
+    priority: 5,
     config: {
       host: 'smtp.mailgun.org',
       port: 587,
       secure: false,
       requireTLS: true,
       auth: {
-        user: process.env.MAILGUN_SMTP_LOGIN,
-        pass: process.env.MAILGUN_SMTP_PASSWORD,
+        user: process.env['MAILGUN_SMTP_LOGIN'],
+        pass: process.env['MAILGUN_SMTP_PASSWORD'],
       },
       connectionTimeout: 60000,
       greetingTimeout: 30000,
       socketTimeout: 60000,
     },
     testConnection: async function() {
-      if (!process.env.MAILGUN_SMTP_LOGIN || !process.env.MAILGUN_SMTP_PASSWORD) return false
+      if (!process.env['MAILGUN_SMTP_LOGIN'] || !process.env['MAILGUN_SMTP_PASSWORD']) return false
       try {
         const transporter = nodemailer.createTransport(this.config)
         await transporter.verify()
@@ -102,7 +102,7 @@ export const EMAIL_PROVIDERS: EmailProvider[] = [
   // 4. SendGrid - Backup option
   {
     name: 'sendgrid',
-    priority: 4,
+    priority: 5,
     config: {
       host: 'smtp.sendgrid.net',
       port: 587,
@@ -110,14 +110,14 @@ export const EMAIL_PROVIDERS: EmailProvider[] = [
       requireTLS: true,
       auth: {
         user: 'apikey',
-        pass: process.env.SENDGRID_API_KEY,
+        pass: process.env['SENDGRID_API_KEY'],
       },
       connectionTimeout: 60000,
       greetingTimeout: 30000,
       socketTimeout: 60000,
     },
     testConnection: async function() {
-      if (!process.env.SENDGRID_API_KEY) return false
+      if (!process.env['SENDGRID_API_KEY']) return false
       try {
         const transporter = nodemailer.createTransport(this.config)
         await transporter.verify()
@@ -138,8 +138,8 @@ export const EMAIL_PROVIDERS: EmailProvider[] = [
       secure: false,
       requireTLS: true,
       auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASSWORD,
+        user: process.env['EMAIL_USER'],
+        pass: process.env['EMAIL_PASSWORD'],
       },
       // Configurações otimizadas para Railway e ambientes de produção
       connectionTimeout: 30000,     // 30 segundos (reduzido)
@@ -162,7 +162,7 @@ export const EMAIL_PROVIDERS: EmailProvider[] = [
       }
     },
     testConnection: async function() {
-      if (!process.env.EMAIL_USER || !process.env.EMAIL_PASSWORD) return false
+      if (!process.env['EMAIL_USER'] || !process.env['EMAIL_PASSWORD']) return false
       try {
         const transporter = nodemailer.createTransport(this.config)
         await transporter.verify()
@@ -268,15 +268,15 @@ export class EmailProviderManager {
   private isProviderConfigured(provider: EmailProvider): boolean {
     switch (provider.name) {
       case 'mailtrap':
-        return !!process.env.MAILTRAP_API_TOKEN
+        return !!process.env['MAILTRAP_API_TOKEN']
       case 'postmark':
-        return !!process.env.POSTMARK_SERVER_TOKEN
+        return !!process.env['POSTMARK_SERVER_TOKEN']
       case 'mailgun':
-        return !!(process.env.MAILGUN_SMTP_LOGIN && process.env.MAILGUN_SMTP_PASSWORD)
+        return !!(process.env['MAILGUN_SMTP_LOGIN'] && process.env['MAILGUN_SMTP_PASSWORD'])
       case 'sendgrid':
-        return !!process.env.SENDGRID_API_KEY
+        return !!process.env['SENDGRID_API_KEY']
       case 'gmail':
-        return !!(process.env.EMAIL_USER && process.env.EMAIL_PASSWORD)
+        return !!(process.env['EMAIL_USER'] && process.env['EMAIL_PASSWORD'])
       default:
         return false
     }
