@@ -685,19 +685,19 @@ export default function AreaMedicaPage() {
           {/* Acesso Rápido */}
           <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8'>
             <button
-              onClick={() => router.push('/area-medica/emails')}
-              className='bg-gray-900/50 backdrop-blur-sm rounded-2xl shadow-xl p-6 border border-gray-700 hover:border-blue-500/50 hover:bg-gray-800/50 transition-all duration-200 group'
+              onClick={() => router.push('/newsletter')}
+              className='bg-gray-900/50 backdrop-blur-sm rounded-2xl shadow-xl p-6 border border-gray-700 hover:border-purple-500/50 hover:bg-gray-800/50 transition-all duration-200 group'
             >
               <div className='flex items-center'>
-                <div className='p-3 bg-blue-900/20 rounded-xl group-hover:bg-blue-900/30 transition-colors duration-200'>
-                  <EnvelopeIcon className='h-6 w-6 text-blue-400' />
+                <div className='p-3 bg-purple-900/20 rounded-xl group-hover:bg-purple-900/30 transition-colors duration-200'>
+                  <DocumentTextIcon className='h-6 w-6 text-purple-400' />
                 </div>
                 <div className='ml-4 text-left'>
                   <p className='text-sm font-medium text-white'>
-                    E-mails
+                    Newsletter
                   </p>
                   <p className='text-xs text-gray-400'>
-                    Sistema de comunicação
+                    Informações médicas
                   </p>
                 </div>
               </div>
