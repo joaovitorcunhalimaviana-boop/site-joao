@@ -76,15 +76,8 @@ export async function POST(request: NextRequest) {
     // Log otimizado (menos verboso)
     console.log(`🩺 WhatsApp confirmação: ${fullName} - ${selectedDate} ${selectedTime}`)
 
-    // Enviar notificação via Telegram
-    await sendTelegramNotification({
-      fullName,
-      selectedDate,
-      selectedTime,
-      whatsapp,
-      patientWhatsAppLink,
-      doctorWhatsAppLink,
-    })
+    // Notificação via Telegram removida para evitar duplicação
+    // A notificação principal já é enviada pelo sistema unificado
 
     const response = {
       success: true,
@@ -178,47 +171,5 @@ function generateDoctorNotificationMessage(data: {
   )
 }
 
-async function sendTelegramNotification(data: {
-  fullName: string
-  selectedDate: string
-  selectedTime: string
-  whatsapp: string
-  patientWhatsAppLink: string
-  doctorWhatsAppLink: string
-}) {
-  const telegramToken = process.env['TELEGRAM_BOT_TOKEN']
-  const telegramChatId = process.env['TELEGRAM_CHAT_ID']
-
-  if (!telegramToken || !telegramChatId) {
-    console.log('ℹ️ Telegram não configurado - pulando notificação')
-    return
-  }
-
-  try {
-    const telegramMessage =
-      `🩺 *NOVA CONSULTA AGENDADA*\n\n` +
-      `👤 *Paciente:* ${data.fullName}\n` +
-      `📅 *Data:* ${data.selectedDate}\n` +
-      `⏰ *Horário:* ${data.selectedTime}\n` +
-      `📱 *WhatsApp:* ${data.whatsapp}\n\n` +
-      `🔗 *Links de ação:*\n` +
-      `[📤 Confirmar com paciente](${data.patientWhatsAppLink})\n` +
-      `[👨‍⚕️ Ver detalhes completos](${data.doctorWhatsAppLink})`
-
-    await fetch(`https://api.telegram.org/bot${telegramToken}/sendMessage`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        chat_id: telegramChatId,
-        text: telegramMessage,
-        parse_mode: 'Markdown',
-      }),
-    })
-
-    console.log('✅ Notificação Telegram enviada com sucesso!')
-  } catch (error) {
-    console.log('❌ Erro no Telegram:', error)
-  }
-}
+// Função sendTelegramNotification removida para evitar mensagens duplicadas
+// A notificação principal já é enviada pelo sistema unificado de pacientes
