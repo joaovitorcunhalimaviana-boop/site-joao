@@ -29,7 +29,7 @@ const PUBLIC_ROUTES = [
 const ROLE_PERMISSIONS = {
   ADMIN: ['*'], // Acesso total
   DOCTOR: [
-    '/api/patients',
+    '/api/unified-system/patients',
     '/api/appointments',
     '/api/consultations',
     '/api/medical-records',
@@ -38,7 +38,7 @@ const ROLE_PERMISSIONS = {
     '/api/reports',
   ],
   SECRETARY: [
-    '/api/patients',
+    '/api/unified-system/patients',
     '/api/appointments',
     '/api/agenda',
     '/api/reports/basic',
@@ -228,7 +228,7 @@ export class AuthMiddleware {
    */
   private static isSensitiveRoute(pathname: string): boolean {
     const sensitiveRoutes = [
-      '/api/patients',
+      '/api/unified-system/patients',
       '/api/medical-records',
       '/api/medical-attachments',
       '/api/prescriptions',

@@ -109,7 +109,7 @@ export default function ProntuarioPage() {
       }
 
       // Fallback para API antiga
-      const response = await fetch(`/api/patients/${patientId}`)
+      const response = await fetch(`/api/unified-system/medical-patients/${patientId}`)
       if (response.ok) {
         const data = await response.json()
         setPatient(data.patient || data)

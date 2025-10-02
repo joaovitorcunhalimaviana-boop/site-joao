@@ -58,7 +58,7 @@ export default function PatientsListPage() {
 
   const fetchPatients = async () => {
     try {
-      const response = await fetch('/api/patients')
+      const response = await fetch('/api/unified-system/patients')
       if (response.ok) {
         const data = await response.json()
         setPatients(data.patients || [])
@@ -90,7 +90,7 @@ export default function PatientsListPage() {
   const savePatient = async (patientId: string) => {
     setSaving(true)
     try {
-      const response = await fetch(`/api/patients/${patientId}`, {
+      const response = await fetch(`/api/unified-system/medical-patients/${patientId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

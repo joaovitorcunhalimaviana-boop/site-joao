@@ -28,7 +28,7 @@ interface Patient {
 // Função para buscar pacientes da API principal
 async function getMainPatients(): Promise<Patient[]> {
   try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'https://www.joaovitorviana.com.br'}/api/patients`)
+    const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'https://www.joaovitorviana.com.br'}/api/unified-system/patients`)
     if (response.ok) {
       const data = await response.json()
       return data.patients || []

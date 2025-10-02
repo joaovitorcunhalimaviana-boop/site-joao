@@ -15,7 +15,7 @@ const STATIC_ASSETS = [
 
 // Recursos para cache dinâmico
 const DYNAMIC_ASSETS = [
-  '/api/patients',
+  '/api/unified-system/patients',
   '/api/appointments',
   '/api/unified-appointments'
 ]

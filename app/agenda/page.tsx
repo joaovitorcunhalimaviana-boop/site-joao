@@ -82,7 +82,7 @@ export default function AgendaPage() {
 
   const loadPatients = async () => {
     try {
-      const response = await fetch('/api/patients')
+      const response = await fetch('/api/unified-system/patients')
       if (response.ok) {
         const data = await response.json()
         // A API retorna {patients: [...], total: number}

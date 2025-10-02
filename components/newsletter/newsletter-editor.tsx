@@ -133,7 +133,7 @@ export default function NewsletterEditor({
 
   const loadPatients = async () => {
     try {
-      const response = await fetch('/api/patients')
+      const response = await fetch('/api/unified-system/patients')
       if (response.ok) {
         const data = await response.json()
         // A API retorna um objeto com {patients: array, total: number}

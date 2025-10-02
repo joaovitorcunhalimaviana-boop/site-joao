@@ -402,7 +402,7 @@ export default function AreaMedicaPage() {
     try {
       console.log('🗑️ Excluindo paciente:', patientId)
 
-      const deleteResponse = await fetch(`/api/patients?id=${patientId}`, {
+      const deleteResponse = await fetch(`/api/unified-system/medical-patients/${patientId}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',

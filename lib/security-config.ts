@@ -1,4 +1,4 @@
-﻿// Configurações centralizadas de segurança
+// Configurações centralizadas de segurança
 
 export const SECURITY_CONFIG = {
   // Rate Limiting
@@ -187,7 +187,7 @@ export const SECURITY_CONFIG = {
   SENSITIVE_ENDPOINTS: [
     '/api/auth/login',
     '/api/auth/register',
-    '/api/patients',
+    '/api/unified-system/patients',
     '/api/appointments',
     '/api/users',
     '/api/reports',
