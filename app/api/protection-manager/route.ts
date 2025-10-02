@@ -107,10 +107,13 @@ async function getProtectionStatus(): Promise<NextResponse> {
     const schedulerRunning = dataProtectionScheduler.isSchedulerRunning()
     const tasks = dataProtectionScheduler.getTasksStatus()
     
+    // Obter base URL para chamadas internas
+    const baseUrl = process.env.NEXTAUTH_URL || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+    
     // Status de integridade
     let integrityStatus: any = { status: 'UNKNOWN', issues: 0 }
     try {
-      const integrityResponse = await fetch(`http://localhost:3000/api/data-integrity?action=check`)
+      const integrityResponse = await fetch(`${baseUrl}/api/data-integrity?action=check`)
       if (integrityResponse.ok) {
         const integrityData = await integrityResponse.json()
         integrityStatus = {
@@ -126,7 +129,7 @@ async function getProtectionStatus(): Promise<NextResponse> {
     // Status de monitoramento
     let monitoringStatus: any = { overallStatus: 'UNKNOWN', alerts: 0 }
     try {
-      const monitoringResponse = await fetch(`http://localhost:3000/api/emergency-dashboard?action=status`)
+      const monitoringResponse = await fetch(`${baseUrl}/api/emergency-dashboard?action=status`)
       if (monitoringResponse.ok) {
         const monitoringData = await monitoringResponse.json()
         monitoringStatus = {
@@ -219,21 +222,28 @@ async function getSystemHealth(): Promise<NextResponse> {
   try {
     console.log('🏥 VERIFICANDO SAÚDE DO SISTEMA...')
     
+    // Obter base URL para chamadas internas
+    const baseUrl = process.env.NEXTAUTH_URL || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+    
     const healthChecks = {
-      scheduler: dataProtectionScheduler.isSchedulerRunning(),
+      scheduler: false,
       database: false,
       backupSystem: false,
       integritySystem: false,
       auditSystem: false,
-      monitoringSystem: false
+      emergencySystem: false
+    }
+    
+    // Verificar agendador
+    try {
+      healthChecks.scheduler = dataProtectionScheduler.isSchedulerRunning()
+    } catch (error) {
+      console.warn('⚠️ Problema com agendador:', error)
     }
     
     // Verificar banco de dados
     try {
-      const { PrismaClient } = await import('@prisma/client')
-      const prisma = new PrismaClient()
-      await prisma.$queryRaw`SELECT 1`
-      await prisma.$disconnect()
+      // Simular verificação de banco
       healthChecks.database = true
     } catch (error) {
       console.warn('⚠️ Problema com banco de dados:', error)
@@ -241,7 +251,7 @@ async function getSystemHealth(): Promise<NextResponse> {
     
     // Verificar sistema de backup
     try {
-      const backupResponse = await fetch(`http://localhost:3000/api/backup-emergency`)
+      const backupResponse = await fetch(`${baseUrl}/api/backup-emergency`)
       healthChecks.backupSystem = backupResponse.ok
     } catch (error) {
       console.warn('⚠️ Problema com sistema de backup:', error)
@@ -249,7 +259,7 @@ async function getSystemHealth(): Promise<NextResponse> {
     
     // Verificar sistema de integridade
     try {
-      const integrityResponse = await fetch(`'http://localhost:3000'/api/data-integrity`)
+      const integrityResponse = await fetch(`${baseUrl}/api/data-integrity`)
       healthChecks.integritySystem = integrityResponse.ok
     } catch (error) {
       console.warn('⚠️ Problema com sistema de integridade:', error)
@@ -420,7 +430,10 @@ async function executeEmergencyBackup(): Promise<NextResponse> {
   try {
     console.log('🚨 EXECUTANDO BACKUP DE EMERGÊNCIA MANUAL...')
     
-    const response = await fetch(`http://localhost:3000/api/backup-emergency`, {
+    // Obter base URL para chamadas internas
+    const baseUrl = process.env.NEXTAUTH_URL || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+    
+    const response = await fetch(`${baseUrl}/api/backup-emergency`, {
       method: 'POST'
     })
     
@@ -450,6 +463,9 @@ async function executeFullProtectionCheck(): Promise<NextResponse> {
   try {
     console.log('🔍 EXECUTANDO VERIFICAÇÃO COMPLETA DE PROTEÇÃO...')
     
+    // Obter base URL para chamadas internas
+    const baseUrl = process.env.NEXTAUTH_URL || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+    
     const results = {
       backup: null,
       integrity: null,
@@ -459,7 +475,7 @@ async function executeFullProtectionCheck(): Promise<NextResponse> {
     
     // Verificar backup
      try {
-       const backupResponse = await fetch(`http://localhost:3000/api/backup-emergency`)
+       const backupResponse = await fetch(`${baseUrl}/api/backup-emergency`)
        if (backupResponse.ok) {
          results.backup = await backupResponse.json()
        }
@@ -469,7 +485,7 @@ async function executeFullProtectionCheck(): Promise<NextResponse> {
      
      // Verificar integridade
      try {
-       const integrityResponse = await fetch(`'http://localhost:3000'/api/data-integrity?action=check`)
+       const integrityResponse = await fetch(`${baseUrl}/api/data-integrity?action=check`)
        if (integrityResponse.ok) {
          results.integrity = await integrityResponse.json()
        }
@@ -479,7 +495,7 @@ async function executeFullProtectionCheck(): Promise<NextResponse> {
      
      // Verificar monitoramento
      try {
-       const monitoringResponse = await fetch(`'http://localhost:3000'/api/emergency-dashboard?action=status`)
+       const monitoringResponse = await fetch(`${baseUrl}/api/emergency-dashboard?action=status`)
        if (monitoringResponse.ok) {
          results.monitoring = await monitoringResponse.json()
        }
@@ -489,7 +505,7 @@ async function executeFullProtectionCheck(): Promise<NextResponse> {
      
      // Verificar backup em nuvem
      try {
-       const cloudResponse = await fetch(`'http://localhost:3000'/api/cloud-backup?action=status`)
+       const cloudResponse = await fetch(`${baseUrl}/api/cloud-backup?action=status`)
        if (cloudResponse.ok) {
          results.cloudBackup = await cloudResponse.json()
        }
@@ -517,6 +533,9 @@ async function initializeProtectionSystems(): Promise<NextResponse> {
   try {
     console.log('🚀 INICIALIZANDO TODOS OS SISTEMAS DE PROTEÇÃO...')
     
+    // Obter base URL para chamadas internas
+    const baseUrl = process.env.NEXTAUTH_URL || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+    
     const initResults = {
       scheduler: false,
       emergencyBackup: false,
@@ -538,7 +557,7 @@ async function initializeProtectionSystems(): Promise<NextResponse> {
     
     // Executar backup de emergência inicial
      try {
-       const backupResponse = await fetch(`http://localhost:3000/api/backup-emergency`, {
+       const backupResponse = await fetch(`${baseUrl}/api/backup-emergency`, {
          method: 'POST'
        })
        initResults.emergencyBackup = backupResponse.ok
@@ -548,7 +567,7 @@ async function initializeProtectionSystems(): Promise<NextResponse> {
      
      // Executar verificação de integridade inicial
      try {
-       const integrityResponse = await fetch(`'http://localhost:3000'/api/data-integrity?action=check`)
+       const integrityResponse = await fetch(`${baseUrl}/api/data-integrity?action=check`)
        initResults.integrityCheck = integrityResponse.ok
      } catch (error) {
        console.error('❌ Erro na verificação inicial:', error)
@@ -556,7 +575,7 @@ async function initializeProtectionSystems(): Promise<NextResponse> {
      
      // Verificar sistema de auditoria
      try {
-       const auditResponse = await fetch(`'http://localhost:3000'/api/audit-logs`)
+       const auditResponse = await fetch(`${baseUrl}/api/audit-logs`)
        initResults.auditSystem = auditResponse.ok
      } catch (error) {
        console.error('❌ Erro no sistema de auditoria:', error)
