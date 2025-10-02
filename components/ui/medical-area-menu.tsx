@@ -107,11 +107,6 @@ export default function MedicalAreaMenu({ currentPage }: MedicalAreaMenuProps) {
       icon: DocumentTextIcon,
     },
     {
-      href: '/area-medica/emails',
-      label: 'Sistema de E-mails',
-      icon: EnvelopeIcon,
-    },
-    {
       href: '/area-medica/newsletter',
       label: 'Newsletter',
       icon: EnvelopeIcon,

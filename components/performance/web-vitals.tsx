@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useEffect } from 'react'
 import { onCLS, onFCP, onLCP, onTTFB, onINP } from 'web-vitals'
@@ -30,7 +30,7 @@ function sendToAnalytics(metric: WebVitalsMetric) {
   }
 
   // Console log para desenvolvimento
-  if (process.env.NODE_ENV === 'development') {
+  if (process.env['NODE_ENV'] === 'development') {
     console.log('Web Vitals:', {
       name: metric.name,
       value: metric.value,
@@ -198,7 +198,7 @@ export default function WebVitals() {
 export function WebVitalsDebug() {
   useWebVitals()
 
-  if (process.env.NODE_ENV !== 'development') {
+  if (process.env['NODE_ENV'] !== 'development') {
     return null
   }
 
@@ -250,3 +250,4 @@ export function useComponentPerformance(componentName: string) {
     }
   }, [])
 }
+

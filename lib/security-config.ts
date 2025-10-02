@@ -1,4 +1,4 @@
-// Configurações centralizadas de segurança
+﻿// Configurações centralizadas de segurança
 
 export const SECURITY_CONFIG = {
   // Rate Limiting
@@ -164,7 +164,7 @@ export const SECURITY_CONFIG = {
     // Configurações de cookie
     COOKIE_OPTIONS: {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: process.env['NODE_ENV'] === 'production',
       sameSite: 'strict' as const,
       path: '/',
     },
@@ -215,12 +215,12 @@ export const SECURITY_CONFIG = {
 
   // Configurações de ambiente
   ENVIRONMENT: {
-    IS_PRODUCTION: process.env.NODE_ENV === 'production',
-    IS_DEVELOPMENT: process.env.NODE_ENV === 'development',
+    IS_PRODUCTION: process.env['NODE_ENV'] === 'production',
+    IS_DEVELOPMENT: process.env['NODE_ENV'] === 'development',
 
     // Features habilitadas por ambiente
     FEATURES: {
-      DETAILED_ERROR_MESSAGES: process.env.NODE_ENV === 'development',
+      DETAILED_ERROR_MESSAGES: process.env['NODE_ENV'] === 'development',
       SECURITY_LOGGING: true,
       RATE_LIMITING: true,
       INPUT_VALIDATION: true,
@@ -278,3 +278,4 @@ export function isBlockedUserAgent(userAgent: string): boolean {
 }
 
 export default SECURITY_CONFIG
+

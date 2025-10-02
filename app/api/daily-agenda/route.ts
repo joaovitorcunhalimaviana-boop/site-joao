@@ -3,7 +3,7 @@ import {
   sendTelegramDailyAgenda,
   type AppointmentNotificationData,
 } from '../../../lib/telegram-notifications'
-import { getSurgeriesByDate } from '../../../lib/unified-appointment-system'
+import { getSurgeriesByDate } from '../../../lib/unified-patient-system'
 import {
   getDailyBibleVerse,
   formatBibleVerseForTelegram,

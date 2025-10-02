@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useEffect, memo, lazy, Suspense } from 'react'
 import { useRouter } from 'next/navigation'
@@ -104,7 +104,7 @@ const PerformanceOptimizer = memo(() => {
 
     // 7. Service Worker para cache
     const registerServiceWorker = async () => {
-      if ('serviceWorker' in navigator && process.env.NODE_ENV === 'production') {
+      if ('serviceWorker' in navigator && process.env['NODE_ENV'] === 'production') {
         try {
           await navigator.serviceWorker.register('/sw.js')
           console.log('Service Worker registrado com sucesso')

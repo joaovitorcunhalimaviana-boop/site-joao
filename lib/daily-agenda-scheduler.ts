@@ -85,7 +85,7 @@ export async function sendDailyAgendaImmediately(targetDate: string) {
     }
 
     // Enviar para a API de agenda diária
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://www.joaovitorviana.com.br'
+    const baseUrl = process.env['NEXT_PUBLIC_BASE_URL'] || 'https://www.joaovitorviana.com.br'
     const response = await fetch(
       `${baseUrl}/api/daily-agenda`,
       {
@@ -228,4 +228,5 @@ export async function checkPendingDailyAgendas() {
   console.log('🔍'.repeat(15) + '\n')
 }
 
-import { getDailyAgendaWithSurgeries } from './unified-appointment-system'
+import { getDailyAgendaWithSurgeries } from './unified-patient-system-client'
+

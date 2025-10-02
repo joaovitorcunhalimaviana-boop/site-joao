@@ -1,8 +1,8 @@
 // Serviço Unificado de Dados
 // Centraliza todas as operações de pacientes e e-mails em um só lugar
 
-import fs from 'fs'
-import path from 'path'
+import * as fs from 'fs'
+import * as path from 'path'
 
 // Interfaces unificadas
 export interface UnifiedPatient {

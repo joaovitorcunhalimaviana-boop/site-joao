@@ -93,11 +93,10 @@ export async function sendTelegramAppointmentNotification(
 }
 
 /**
- * Envia lembrete de consulta via Telegram (um dia antes)
+ * Envia lembrete de consulta via Telegram (24 horas antes)
  */
 export async function sendTelegramReminderNotification(
-  appointmentData: AppointmentNotificationData,
-  reminderType: 'day_before' | 'hour_before' = 'day_before'
+  appointmentData: AppointmentNotificationData
 ): Promise<{ success: boolean; error?: string }> {
   const telegramToken = process.env['TELEGRAM_BOT_TOKEN']
   const telegramChatId = process.env['TELEGRAM_CHAT_ID']
@@ -109,8 +108,6 @@ export async function sendTelegramReminderNotification(
 
   try {
     const formattedDate = formatDateForDisplay(appointmentData.appointmentDate)
-    const reminderEmoji = reminderType === 'day_before' ? '📅' : '⏰'
-    const reminderText = reminderType === 'day_before' ? 'AMANHÃ' : 'EM 1 HORA'
 
     const whatsappReminderLink = generateWhatsAppReminderLink(
       appointmentData.patientWhatsapp,
@@ -120,7 +117,7 @@ export async function sendTelegramReminderNotification(
     )
 
     const telegramMessage =
-      `${reminderEmoji} *LEMBRETE DE CONSULTA - ${reminderText}*\n\n` +
+      `📅 *LEMBRETE DE CONSULTA - AMANHÃ*\n\n` +
       `👤 *Paciente:* ${appointmentData.patientName}\n` +
       `📱 *WhatsApp:* ${appointmentData.patientWhatsapp}\n` +
       `📅 *Data:* ${formattedDate}\n` +

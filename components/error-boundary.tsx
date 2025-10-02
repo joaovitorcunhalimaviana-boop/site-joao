@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import React, { Component, ErrorInfo, ReactNode } from 'react'
 import { AlertTriangle, RefreshCw } from 'lucide-react'
@@ -53,7 +53,7 @@ class ErrorBoundary extends Component<Props, State> {
               <p className='text-gray-600'>
                 Ocorreu um erro inesperado. Por favor, tente novamente.
               </p>
-              {process.env.NODE_ENV === 'development' && this.state.error && (
+              {process.env['NODE_ENV'] === 'development' && this.state.error && (
                 <div className='text-left'>
                   <details className='mt-4'>
                     <summary className='cursor-pointer text-sm font-medium text-gray-700'>
@@ -85,3 +85,4 @@ class ErrorBoundary extends Component<Props, State> {
 }
 
 export default ErrorBoundary
+

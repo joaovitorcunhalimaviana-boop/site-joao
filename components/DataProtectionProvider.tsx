@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // Provedor de Proteção de Dados
 // Inicializa automaticamente todos os sistemas de backup e proteção
@@ -216,7 +216,7 @@ export function DataProtectionProvider({ children }: DataProtectionProviderProps
       {children}
       
       {/* Indicador visual do status de proteção - apenas em desenvolvimento */}
-      {process.env.NODE_ENV === 'development' && (
+      {process.env['NODE_ENV'] === 'development' && (
         <div className="fixed bottom-4 right-4 z-50">
           <div className={`
             px-3 py-2 rounded-lg text-xs font-medium shadow-lg transition-all duration-300

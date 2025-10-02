@@ -5,14 +5,14 @@
  * do backup quando não estiverem disponíveis no localStorage.
  */
 
-import { Patient, UnifiedAppointment } from './unified-appointment-system'
+import { MedicalPatient, UnifiedAppointment } from './unified-patient-system'
 
 const PATIENTS_KEY = 'unified-patients'
 const APPOINTMENTS_KEY = 'unified-appointments'
 
 interface BackupResponse {
   success: boolean
-  patients?: Patient[]
+  patients?: MedicalPatient[]
   appointments?: UnifiedAppointment[]
   count?: number
 }

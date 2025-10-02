@@ -175,12 +175,10 @@ async function sendEmailNotification(): Promise<any> {
     throw new Error('Email do médico não configurado')
   }
 
-  // Aqui você implementaria o envio de email usando nodemailer ou outro serviço
-  // Por enquanto, apenas simular
+  // Email removido - sistema agora usa apenas Telegram e WhatsApp
   return {
-    status: 'simulated',
-    message: 'Email seria enviado em produção',
-    to: doctorEmail,
+    status: 'disabled',
+    message: 'Email foi removido do sistema',
   }
 }
 

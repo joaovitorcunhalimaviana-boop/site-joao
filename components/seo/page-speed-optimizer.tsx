@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useEffect } from 'react'
 import Head from 'next/head'
@@ -157,7 +157,7 @@ export function usePageSpeedOptimization() {
     optimizeFonts()
 
     // Service Worker para cache
-    if ('serviceWorker' in navigator && process.env.NODE_ENV === 'production') {
+    if ('serviceWorker' in navigator && process.env['NODE_ENV'] === 'production') {
       navigator.serviceWorker.register('/sw.js').catch(error => {
         console.log('Service Worker registration failed:', error)
       })
@@ -246,3 +246,4 @@ export function LazyImage({
     />
   )
 }
+

@@ -13,7 +13,7 @@ interface AppointmentData {
 
 interface ScheduledReminder {
   appointmentId: string
-  reminderType: '24h' | '2h' | '30min'
+  reminderType: '24h'
   scheduledTime: Date
   patientData: AppointmentData
   status: 'pending' | 'sent' | 'failed'
@@ -139,9 +139,6 @@ export function getReminderStats(): {
     failed: scheduledReminders.filter(r => r.status === 'failed').length,
     byType: {
       '24h': scheduledReminders.filter(r => r.reminderType === '24h').length,
-      '2h': scheduledReminders.filter(r => r.reminderType === '2h').length,
-      '30min': scheduledReminders.filter(r => r.reminderType === '30min')
-        .length,
     },
   }
 
@@ -229,7 +226,7 @@ export function scheduleTestAppointment(): AppointmentData {
 }
 
 // Exportar dados para debugging (apenas em desenvolvimento)
-if (process.env.NODE_ENV === 'development') {
+if (process.env['NODE_ENV'] === 'development') {
   ;(global as any).reminderDebug = {
     scheduledReminders: () => scheduledReminders,
     appointments: () => appointments,
@@ -238,3 +235,4 @@ if (process.env.NODE_ENV === 'development') {
     scheduleTest: scheduleTestAppointment,
   }
 }
+

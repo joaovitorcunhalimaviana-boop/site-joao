@@ -26,7 +26,7 @@ my-shadcn-app/
 ├── components/
 │   └── ui/                   # Componentes reutilizáveis
 ├── lib/
-│   ├── unified-appointment-system.ts  # Sistema unificado
+│   ├── unified-patient-system.ts     # Sistema unificado de pacientes
 │   ├── reminder-scheduler.ts          # Agendador de lembretes
 │   └── daily-agenda-scheduler.ts      # Agenda diária
 └── data/

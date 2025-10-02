@@ -63,11 +63,13 @@ export async function POST(request: NextRequest) {
           (insuranceType as 'unimed' | 'particular' | 'outro') || 'particular',
       }
 
-      await sendTelegramReminderNotification(
-        reminderData,
-        reminderType === '24h' ? 'day_before' : 'hour_before'
-      )
-      console.log('✅ Lembrete Telegram enviado via nova função!')
+      // Apenas lembretes de 24h são suportados agora
+      if (reminderType === '24h') {
+        await sendTelegramReminderNotification(reminderData)
+        console.log('✅ Lembrete Telegram enviado via nova função!')
+      } else {
+        console.log('ℹ️ Lembrete de 1 hora removido - apenas 24h suportado')
+      }
     } catch (telegramError) {
       console.warn('⚠️ Erro ao enviar lembrete Telegram:', telegramError)
     }

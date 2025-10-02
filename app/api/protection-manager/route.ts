@@ -110,7 +110,7 @@ async function getProtectionStatus(): Promise<NextResponse> {
     // Status de integridade
     let integrityStatus: any = { status: 'UNKNOWN', issues: 0 }
     try {
-      const integrityResponse = await fetch(`'http://localhost:3000'/api/data-integrity?action=check`)
+      const integrityResponse = await fetch(`http://localhost:3000/api/data-integrity?action=check`)
       if (integrityResponse.ok) {
         const integrityData = await integrityResponse.json()
         integrityStatus = {
@@ -126,7 +126,7 @@ async function getProtectionStatus(): Promise<NextResponse> {
     // Status de monitoramento
     let monitoringStatus: any = { overallStatus: 'UNKNOWN', alerts: 0 }
     try {
-      const monitoringResponse = await fetch(`'http://localhost:3000'/api/emergency-dashboard?action=status`)
+      const monitoringResponse = await fetch(`http://localhost:3000/api/emergency-dashboard?action=status`)
       if (monitoringResponse.ok) {
         const monitoringData = await monitoringResponse.json()
         monitoringStatus = {

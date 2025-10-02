@@ -8,44 +8,33 @@ export async function GET() {
   try {
     // Verificar variáveis críticas sem expor valores sensíveis
     const envStatus = {
-      email: {
-        host: !!process.env.EMAIL_HOST,
-        port: !!process.env.EMAIL_PORT,
-        user: !!process.env.EMAIL_USER,
-        password: !!process.env.EMAIL_PASSWORD,
-        from: !!process.env.EMAIL_FROM,
-      },
       telegram: {
-        botToken: !!process.env.TELEGRAM_BOT_TOKEN,
-        chatId: !!process.env.TELEGRAM_CHAT_ID,
+        botToken: !!process.env['TELEGRAM_BOT_TOKEN'],
+        chatId: !!process.env['TELEGRAM_CHAT_ID'],
       },
       other: {
-        nodeEnv: process.env.NODE_ENV || 'not-set',
-        appUrl: process.env.NEXT_PUBLIC_APP_URL || 'not-set',
-        doctorWhatsapp: !!process.env.DOCTOR_WHATSAPP,
+        nodeEnv: process.env['NODE_ENV'] || 'not-set',
+        appUrl: process.env['NEXT_PUBLIC_APP_URL'] || 'not-set',
+        doctorWhatsapp: !!process.env['DOCTOR_WHATSAPP'],
       }
     }
 
     // Calcular status geral
-    const emailConfigured = Object.values(envStatus.email).every(Boolean)
     const telegramConfigured = Object.values(envStatus.telegram).every(Boolean)
-    const allConfigured = emailConfigured && telegramConfigured
 
     return NextResponse.json({
       success: true,
       timestamp: new Date().toISOString(),
-      environment: process.env.NODE_ENV || 'development',
+      environment: process.env['NODE_ENV'] || 'development',
       status: {
-        overall: allConfigured ? 'configured' : 'incomplete',
-        email: emailConfigured ? 'configured' : 'incomplete',
+        overall: telegramConfigured ? 'configured' : 'incomplete',
         telegram: telegramConfigured ? 'configured' : 'incomplete',
       },
       details: envStatus,
-      message: allConfigured 
+      message: telegramConfigured 
         ? '✅ Todas as variáveis críticas estão configuradas!'
         : '⚠️ Algumas variáveis críticas não estão configuradas.',
-      recommendations: allConfigured ? [] : [
-        !emailConfigured && 'Configure as variáveis de email (EMAIL_HOST, EMAIL_PORT, EMAIL_USER, EMAIL_PASSWORD, EMAIL_FROM)',
+      recommendations: telegramConfigured ? [] : [
         !telegramConfigured && 'Configure as variáveis do Telegram (TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID)',
       ].filter(Boolean)
     })

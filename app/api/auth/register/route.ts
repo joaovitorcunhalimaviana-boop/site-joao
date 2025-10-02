@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { AuthService, AuditService, prisma } from '@/lib/database'
 import { RegisterSchema, validateData } from '@/lib/validation-schemas'
 import { z } from 'zod'
@@ -133,7 +133,7 @@ export async function POST(request: NextRequest) {
     // Configurar cookie do refresh token
     const cookieOptions = {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: process.env['NODE_ENV'] === 'production',
       sameSite: 'strict' as const,
       maxAge: 7 * 24 * 60 * 60, // 7 dias
       path: '/',
@@ -166,3 +166,4 @@ export async function POST(request: NextRequest) {
     )
   }
 }
+

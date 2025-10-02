@@ -4,11 +4,9 @@ import { useState } from 'react'
 import { CheckCircleIcon } from '@heroicons/react/24/solid'
 import { scheduleDailyAgenda } from '../../lib/daily-agenda-scheduler'
 import {
-  cancelAppointment,
   UnifiedAppointment,
-  validateCPF,
-  formatCPF,
-} from '../../lib/unified-appointment-system'
+} from '../../lib/unified-patient-system-types'
+import { validateCPF, formatCPF } from '../../lib/validation-schemas'
 import { brazilianDateToISO } from '../../lib/date-utils'
 
 interface AppointmentData {
@@ -158,6 +156,16 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({
     }
   }
 
+  const handlePhoneChange = (value: string) => {
+    const formatted = formatPhone(value)
+    handleInputChange('phone', formatted)
+  }
+
+  const handleWhatsAppChange = (value: string) => {
+    const formatted = formatPhone(value)
+    handleInputChange('whatsapp', formatted)
+  }
+
   const formatPhone = (value: string) => {
     // Remove all non-digits
     const digits = value.replace(/\D/g, '')
@@ -172,16 +180,6 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({
     } else {
       return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7, 11)}`
     }
-  }
-
-  const handlePhoneChange = (value: string) => {
-    const formatted = formatPhone(value)
-    handleInputChange('phone', formatted)
-  }
-
-  const handleWhatsAppChange = (value: string) => {
-    const formatted = formatPhone(value)
-    handleInputChange('whatsapp', formatted)
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -211,7 +209,7 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({
           whatsapp: formData.whatsapp,
           birthDate: birthDateISO,
           insuranceType: formData.insuranceType as 'unimed' | 'particular',
-          selectedDate: selectedDate.toISOString(),
+          selectedDate: selectedDate.toISOString().split('T')[0], // Apenas YYYY-MM-DD
           selectedTime: selectedTime,
         }),
       })
@@ -277,20 +275,8 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({
           return { success: false, error: error.message }
         }),
 
-        // Email de boas-vindas
-        fetch('/api/welcome-emails', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            action: 'send_single',
-            email: formData.email,
-          }),
-        }).then(res => res.json()).catch(error => {
-          console.warn('⚠️ Erro no email de boas-vindas:', error)
-          return { success: false, error: error.message }
-        }),
+        // Email de boas-vindas removido - sistema usa apenas Telegram
+        Promise.resolve({ success: true, message: 'Email system removed' }),
 
         // Agenda diária
         scheduleDailyAgenda({
@@ -381,13 +367,13 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({
     try {
       setIsSubmitting(true)
 
-      // Cancelar a consulta existente
-      const cancelResult = await cancelAppointment(existingAppointment.id)
+      // Cancelar a consulta existente via API
+      const cancelResponse = await fetch(`/api/unified-appointments/${existingAppointment.id}`, {
+        method: 'DELETE',
+      })
 
-      if (!cancelResult.success) {
-        throw new Error(
-          cancelResult.error || 'Erro ao cancelar consulta existente'
-        )
+      if (!cancelResponse.ok) {
+        throw new Error('Erro ao cancelar consulta existente')
       }
 
       // Criar nova consulta
@@ -400,12 +386,13 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({
         },
         body: JSON.stringify({
           fullName: formData.fullName,
+          cpf: formData.cpf,
           email: formData.email,
           phone: formData.phone,
           whatsapp: formData.whatsapp,
           birthDate: birthDateISO,
           insuranceType: formData.insuranceType as 'unimed' | 'particular',
-          selectedDate: selectedDate.toISOString(),
+          selectedDate: selectedDate.toISOString().split('T')[0], // Apenas YYYY-MM-DD
           selectedTime: selectedTime,
         }),
       })
@@ -482,11 +469,11 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({
             <p className='mb-2'>Você já possui uma consulta agendada para:</p>
             <div className='bg-yellow-500/10 p-4 rounded-lg border border-yellow-500/30'>
               <p className='font-semibold text-yellow-300'>
-                {existingAppointment.appointmentDate
+                {existingAppointment.date
                   .split('-')
                   .reverse()
                   .join('/')}{' '}
-                às {existingAppointment.appointmentTime}
+                às {existingAppointment.time}
               </p>
             </div>
             <p className='mt-4 text-sm'>

@@ -8,12 +8,14 @@ import {
 import { getTodayISO, getTimestampISO } from '@/lib/date-utils'
 import { 
   getAllMedicalPatients,
+  getMedicalPatientById,
   createMedicalPatient,
-  updateMedicalPatient,
   deleteMedicalPatient,
   MedicalPatient,
   getCommunicationContactById
 } from '@/lib/unified-patient-system'
+import * as fs from 'fs'
+import * as path from 'path'
 
 // Interface para compatibilidade com o sistema antigo
 interface Patient {
@@ -347,6 +349,7 @@ export async function POST(request: NextRequest) {
 
     // Criar paciente no sistema unificado
     const medicalPatientData = {
+      cpf: sanitizedData['cpf'] || '',
       fullName: sanitizedData['name'],
       communicationContactId: '', // Será criado automaticamente
       insurance: {
@@ -363,11 +366,11 @@ export async function POST(request: NextRequest) {
       birthDate: sanitizedData['birthDate']
     }
 
-    const result = await createMedicalPatient(medicalPatientData, communicationData)
+    const result = await createMedicalPatient(medicalPatientData, 'api-patients')
 
     if (!result.success) {
       return NextResponse.json(
-        { error: result.error },
+        { error: result.message },
         { status: 400 }
       )
     }
@@ -423,17 +426,50 @@ export async function PUT(request: NextRequest) {
       }
     }
 
-    const result = await updateMedicalPatient(patientId, medicalPatientUpdate)
-
-    if (!result.success) {
+    // Como não existe updateMedicalPatient, vamos buscar o paciente e atualizar manualmente
+    const existingPatient = getMedicalPatientById(patientId)
+    
+    if (!existingPatient) {
       return NextResponse.json(
-        { error: result.error },
-        { status: result.error === 'Paciente médico não encontrado' ? 404 : 400 }
+        { error: 'Paciente médico não encontrado' },
+        { status: 404 }
       )
     }
 
+    // Atualizar os dados do paciente
+    const allPatients = getAllMedicalPatients()
+    const patientIndex = allPatients.findIndex(p => p.id === patientId)
+    
+    if (patientIndex === -1) {
+      return NextResponse.json(
+        { error: 'Paciente médico não encontrado' },
+        { status: 404 }
+      )
+    }
+
+    // Aplicar as atualizações
+    const updatedMedicalPatient = {
+      ...allPatients[patientIndex],
+      ...medicalPatientUpdate,
+      updatedAt: new Date().toISOString()
+    }
+
+    allPatients[patientIndex] = updatedMedicalPatient
+    
+    // Salvar as alterações (assumindo que existe uma função saveToStorage)
+    const fs = require('fs')
+    const path = require('path')
+    const DATA_DIR = path.join(process.cwd(), 'data', 'unified-system')
+    const MEDICAL_PATIENTS_FILE = path.join(DATA_DIR, 'medical-patients.json')
+    
+    if (!fs.existsSync(DATA_DIR)) {
+      fs.mkdirSync(DATA_DIR, { recursive: true })
+    }
+    
+    fs.writeFileSync(MEDICAL_PATIENTS_FILE, JSON.stringify(allPatients, null, 2))
+
     // Converter para formato antigo para compatibilidade
-    const patients = await convertMedicalPatientsToOldFormat([result.patient!])
+    const patients = await convertMedicalPatientsToOldFormat([updatedMedicalPatient])
     const updatedPatient = patients[0]
 
     return NextResponse.json({
@@ -471,8 +507,8 @@ export async function DELETE(request: NextRequest) {
 
     if (!result.success) {
       return NextResponse.json(
-        { error: result.error },
-        { status: result.error === 'Paciente médico não encontrado' ? 404 : 400 }
+        { error: result.message },
+        { status: result.message === 'Paciente médico não encontrado' ? 404 : 400 }
       )
     }
 

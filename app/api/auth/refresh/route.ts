@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { AuthService, AuditService, prisma } from '@/lib/database'
 
 function getClientIP(request: NextRequest): string {
@@ -129,7 +129,7 @@ export async function POST(request: NextRequest) {
     // Configurar novo cookie do refresh token
     const cookieOptions = {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: process.env['NODE_ENV'] === 'production',
       sameSite: 'strict' as const,
       maxAge: 7 * 24 * 60 * 60, // 7 dias
       path: '/',
@@ -206,7 +206,7 @@ export async function DELETE(request: NextRequest) {
     // Remover cookie do refresh token
     response.cookies.set('refreshToken', '', {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: process.env['NODE_ENV'] === 'production',
       sameSite: 'strict' as const,
       maxAge: 0,
       path: '/',
@@ -226,3 +226,4 @@ export async function DELETE(request: NextRequest) {
     )
   }
 }
+

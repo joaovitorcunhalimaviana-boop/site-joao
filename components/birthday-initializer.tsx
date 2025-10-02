@@ -1,4 +1,4 @@
-// Este componente foi desabilitado para evitar problemas com nodemailer no cliente
+// Este componente foi desabilitado - sistema de email foi removido
 // A inicialização do scheduler de aniversários agora é feita via API routes
 
 export default function BirthdayInitializer() {

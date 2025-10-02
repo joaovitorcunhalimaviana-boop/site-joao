@@ -2,15 +2,12 @@ import { NextRequest, NextResponse } from 'next/server'
 import {
   getAllAppointments,
   getAppointmentsByDate,
-  getDailyAgenda,
-  updateAppointmentStatus,
   updateAppointment,
   createAppointment,
-  getAllPatients,
-  getPatientById,
-  createOrUpdatePatient,
-  getSystemStats,
-} from '../../../lib/unified-appointment-system'
+  getAllMedicalPatients,
+  getMedicalPatientById,
+  createMedicalPatient,
+} from '../../../lib/unified-patient-system'
 
 // GET - Obter agendamentos, agenda diária ou estatísticas
 export async function GET(request: NextRequest) {
@@ -48,11 +45,11 @@ export async function GET(request: NextRequest) {
             { status: 400 }
           )
         }
-        const dailyAgenda = await getDailyAgenda(date)
-        return NextResponse.json({ success: true, agenda: dailyAgenda })
+        const dailyAppointments = await getAppointmentsByDate(date)
+        return NextResponse.json({ success: true, agenda: dailyAppointments })
 
       case 'all-patients':
-        const allPatients = await getAllPatients()
+        const allPatients = await getAllMedicalPatients()
         return NextResponse.json({ success: true, patients: allPatients })
 
       case 'appointment-by-id':
@@ -82,7 +79,7 @@ export async function GET(request: NextRequest) {
             { status: 400 }
           )
         }
-        const patient = await getPatientById(patientId)
+        const patient = await getMedicalPatientById(patientId)
         if (!patient) {
           return NextResponse.json(
             { success: false, error: 'Paciente não encontrado' },
@@ -92,7 +89,18 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ success: true, patient })
 
       case 'stats':
-        const stats = await getSystemStats()
+        const statsAppointments = await getAllAppointments()
+        const statsPatients = await getAllMedicalPatients()
+        const stats = {
+          totalAppointments: statsAppointments.length,
+          totalPatients: statsPatients.length,
+          appointmentsByStatus: {
+            agendada: statsAppointments.filter(apt => apt.status === 'agendada').length,
+            confirmada: statsAppointments.filter(apt => apt.status === 'confirmada').length,
+            cancelada: statsAppointments.filter(apt => apt.status === 'cancelada').length,
+            realizada: statsAppointments.filter(apt => apt.status === 'concluida').length
+          }
+        }
         return NextResponse.json({ success: true, stats })
 
       case 'get-patient':
@@ -104,7 +112,7 @@ export async function GET(request: NextRequest) {
           )
         }
 
-        const getPatient = await getPatientById(getPatientId)
+        const getPatient = await getMedicalPatientById(getPatientId)
         if (!getPatient) {
           return NextResponse.json(
             { success: false, error: 'Paciente não encontrado' },
@@ -148,8 +156,8 @@ export async function DELETE(request: NextRequest) {
           )
         }
 
-        const allAppointments = await getAllAppointments()
-        const appointmentExists = allAppointments.find(
+        const deleteAppointments = await getAllAppointments()
+        const appointmentExists = deleteAppointments.find(
           apt => apt.id === appointmentId
         )
 
@@ -160,13 +168,16 @@ export async function DELETE(request: NextRequest) {
           )
         }
 
-        const filteredAppointments = allAppointments.filter(
+        const allAppointments2 = await getAllAppointments()
+        const filteredAppointments = allAppointments2.filter(
           apt => apt.id !== appointmentId
         )
 
         // Salvar os agendamentos sem o excluído
         const fs = require('fs').promises
         const path = require('path')
+        
+        // Remover de unified-appointments.json
         const appointmentsPath = path.join(
           process.cwd(),
           'data',
@@ -178,7 +189,34 @@ export async function DELETE(request: NextRequest) {
           JSON.stringify(filteredAppointments, null, 2)
         )
 
-        console.log(`🗑️ Agendamento ${appointmentId} foi excluído`)
+        // Remover também de unified-system/appointments.json
+        const unifiedSystemAppointmentsPath = path.join(
+          process.cwd(),
+          'data',
+          'unified-system',
+          'appointments.json'
+        )
+
+        try {
+          // Ler o arquivo do sistema unificado
+          const unifiedSystemData = await fs.readFile(unifiedSystemAppointmentsPath, 'utf8')
+          const unifiedSystemAppointments = JSON.parse(unifiedSystemData)
+          
+          // Filtrar o agendamento excluído
+          const filteredUnifiedSystemAppointments = unifiedSystemAppointments.filter(
+            apt => apt.id !== appointmentId
+          )
+          
+          // Salvar o arquivo atualizado
+          await fs.writeFile(
+            unifiedSystemAppointmentsPath,
+            JSON.stringify(filteredUnifiedSystemAppointments, null, 2)
+          )
+          
+          console.log(`🗑️ Agendamento ${appointmentId} foi excluído de ambos os arquivos`)
+        } catch (error) {
+          console.log(`⚠️ Erro ao remover do sistema unificado: ${error}`)
+        }
 
         return NextResponse.json({
           success: true,
@@ -186,11 +224,11 @@ export async function DELETE(request: NextRequest) {
         })
 
       case 'remove-cancelled-appointments':
-        const allAppointments2 = await getAllAppointments()
-        const cancelledAppointments = allAppointments2.filter(
+        const allAppointments3 = await getAllAppointments()
+        const cancelledAppointments = allAppointments3.filter(
           apt => apt.status === 'cancelada'
         )
-        const activeAppointments = allAppointments2.filter(
+        const activeAppointments = allAppointments3.filter(
           apt => apt.status !== 'cancelada'
         )
 
@@ -280,24 +318,13 @@ export async function POST(request: NextRequest) {
         }
 
         const appointmentResult = await createAppointment({
-          patientId,
-          patientName,
-          patientCpf: '',
-          patientMedicalRecordNumber: 0,
-          patientPhone,
-          patientWhatsapp: patientWhatsapp || patientPhone,
-          patientEmail,
-          patientBirthDate,
-          insuranceType: insuranceType || 'particular',
-          insurancePlan,
+          communicationContactId: patientId,
           appointmentDate,
           appointmentTime,
           appointmentType: appointmentType || 'consulta',
-          status: 'agendada',
           source: source || 'doctor_area',
           notes,
-          createdBy,
-        })
+        }, createdBy)
 
         return NextResponse.json(appointmentResult)
 
@@ -322,16 +349,10 @@ export async function POST(request: NextRequest) {
           )
         }
 
-        const patientResult = await createOrUpdatePatient({
-          name,
-          phone,
-          whatsapp: whatsapp || phone,
-          email,
-          birthDate,
+        const patientResult = await createMedicalPatient({
           cpf: cpf || '',
-          medicalRecordNumber: 0,
-          insurance: insurance || { type: 'particular' },
-          medicalRecord,
+          fullName: name,
+          communicationContactId: phone, // This should be a valid communication contact ID
         })
 
         return NextResponse.json(patientResult)
@@ -349,10 +370,9 @@ export async function POST(request: NextRequest) {
           )
         }
 
-        const updateResult = await updateAppointmentStatus(
+        const updateResult = await updateAppointment(
           appointmentId,
-          status,
-          statusNotes
+          { status: status, notes: statusNotes }
         )
         return NextResponse.json(updateResult)
 
@@ -395,10 +415,9 @@ export async function PUT(request: NextRequest) {
           )
         }
 
-        const result = await updateAppointmentStatus(
+        const result = await updateAppointment(
           appointmentId,
-          status,
-          notes
+          { status: status, notes: notes }
         )
         return NextResponse.json(result)
 
@@ -428,9 +447,9 @@ export async function PUT(request: NextRequest) {
         }
 
         const updateResult = await updateAppointment(updateId, {
-          date: appointmentDate,
-          time: appointmentTime,
-          type: appointmentType,
+          appointmentDate: appointmentDate,
+          appointmentTime: appointmentTime,
+          appointmentType: appointmentType,
           notes: updateNotes,
         })
         return NextResponse.json(updateResult)

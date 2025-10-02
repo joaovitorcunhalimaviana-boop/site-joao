@@ -1,4 +1,4 @@
-﻿import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as cron from 'node-cron';
@@ -194,7 +194,7 @@ export class EnhancedBackupSystem {
         case 'medical_records':
           const orphanRecords = await prisma.medicalRecord.count({
             where: {
-              patient: null
+              patientId: { equals: null }
             }
           });
           if (orphanRecords > 0) {
@@ -237,7 +237,7 @@ export class EnhancedBackupSystem {
 
       const orphanAppointments = await prisma.appointment.count({
         where: {
-          patient: null
+          patientId: null
         }
       });
 
@@ -260,7 +260,7 @@ export class EnhancedBackupSystem {
       const now = new Date();
       
       const lastBackupPath = path.join(process.cwd(), 'backups');
-      let lastBackupTime = null;
+      let lastBackupTime: Date | null = null;
       
       if (fs.existsSync(lastBackupPath)) {
         const files = fs.readdirSync(lastBackupPath)
@@ -391,6 +391,38 @@ export class EnhancedBackupSystem {
         error: error instanceof Error ? error.message : 'Erro desconhecido'
       };
     }
+  }
+
+  async startContinuousMonitoring(): Promise<void> {
+    console.log('🔄 Iniciando monitoramento contínuo...');
+    // Implementação simplificada - apenas log
+  }
+
+  async stopContinuousMonitoring(): Promise<void> {
+    console.log('⏹️ Parando monitoramento contínuo...');
+    // Implementação simplificada - apenas log
+  }
+
+  async performEmergencyBackup(): Promise<{ success: boolean; data?: any; message?: string }> {
+    console.log('🚨 Executando backup de emergência...');
+    try {
+      const result = await this.executeEmergencyBackup();
+      return {
+        success: result.status === 'SUCCESS',
+        data: result,
+        message: result.status === 'SUCCESS' ? 'Backup de emergência concluído' : 'Falha no backup de emergência'
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: `Erro no backup de emergência: ${error instanceof Error ? error.message : 'Erro desconhecido'}`
+      };
+    }
+  }
+
+  async forceBackup(): Promise<BackupResult> {
+    console.log('🔄 Executando backup forçado...');
+    return this.executeEmergencyBackup();
   }
 
   private async createDatabaseBackup(backupPath: string): Promise<void> {

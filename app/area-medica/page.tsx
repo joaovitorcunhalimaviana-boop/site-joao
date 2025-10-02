@@ -79,13 +79,14 @@ export default function AreaMedicaPage() {
   const [consultationType, setConsultationType] = useState('consulta')
   const [selectedDate, setSelectedDate] = useState(() => {
     const today = new Date()
-    return (
+    const initialDate = (
       today.getFullYear() +
       '-' +
       String(today.getMonth() + 1).padStart(2, '0') +
       '-' +
       String(today.getDate()).padStart(2, '0')
     )
+    return initialDate
   })
 
   const router = useRouter()
@@ -99,11 +100,7 @@ export default function AreaMedicaPage() {
 
   // Recarregar dados quando a data selecionada mudar
   useEffect(() => {
-    if (selectedDate) {
-      console.log('📅 Data alterada, recarregando dados para:', selectedDate)
-      setRetryCount(0) // Reset retry count when date changes
-      loadDashboardData()
-    }
+    loadDashboardData()
   }, [selectedDate])
 
   // Configurar listeners e intervalos apenas uma vez
@@ -156,228 +153,76 @@ export default function AreaMedicaPage() {
     }
   }
 
+  // Função para carregar dados do dashboard
   const loadDashboardData = async () => {
-    // Cancelar timeout anterior se existir
-    if (loadingTimeout) {
-      clearTimeout(loadingTimeout)
-    }
-
-    // Capturar o valor atual da data para evitar condições de corrida
-    const currentSelectedDate = selectedDate
-
-    // Debounce: aguardar 300ms antes de executar
-    const timeout = setTimeout(async () => {
+    try {
       setIsLoading(true)
 
-      try {
-        console.log('=== CARREGANDO DADOS (SISTEMA UNIFICADO) ===')
-        console.log('Data selecionada:', currentSelectedDate)
+      // Buscar agenda do dia usando a data selecionada
+      const dateToUse = selectedDate || getTodayISO()
+      
+      const agendaResponse = await fetch(
+        `/api/unified-appointments?action=daily-agenda&date=${dateToUse}`
+      )
+      const agendaData = await agendaResponse.json()
 
-        // Validar se a data está definida antes de fazer a requisição
-        if (
-          !currentSelectedDate ||
-          currentSelectedDate.trim() === '' ||
-          currentSelectedDate.length < 10
-        ) {
-          console.log('Aguardando seleção de data válida:', currentSelectedDate)
-          setIsLoading(false)
-          return
-        }
+      if (agendaData.success) {
+        // Transformar os agendamentos em formato de pacientes com consulta
+        const appointmentsWithConsultation = agendaData.agenda.map((appointment: any) => ({
+          id: appointment.patientId,
+          name: appointment.patientName,
+          phone: appointment.patientPhone,
+          whatsapp: appointment.patientWhatsapp,
+          insurance: {
+            type: appointment.insuranceType || 'particular',
+            plan: appointment.insurancePlan
+          },
+          consultation: {
+            id: appointment.id,
+            time: appointment.appointmentTime,
+            type: appointment.appointmentType,
+            status: appointment.status
+          }
+        }))
 
-        // Carregar agenda diária do sistema unificado
-        console.log(
-          '🔍 Fazendo requisição para:',
-          `/api/unified-appointments?action=daily-agenda&date=${currentSelectedDate}`
+        // Filtrar pacientes do dia (não atendidos) e atendidos
+        const todayPatients = appointmentsWithConsultation.filter(
+          (patient: any) => patient.consultation.status !== 'concluida' && patient.consultation.status !== 'atendida'
         )
-        const dailyAgendaResponse = await fetch(
-          `/api/unified-appointments?action=daily-agenda&date=${currentSelectedDate}`,
-          {
-            method: 'GET',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            credentials: 'include',
-            cache: 'no-cache',
-          }
-        )
-
-        if (dailyAgendaResponse.ok) {
-          const dailyAgendaData = await dailyAgendaResponse.json()
-
-          // Converter agendamentos para formato de pacientes
-          const todayAppointments = dailyAgendaData.agenda?.appointments || []
-          
-          const todayPatientsData = todayAppointments.map((apt: any) => ({
-            id: apt.patientId,
-            name: apt.patientName,
-            phone: apt.patientPhone,
-            whatsapp: apt.patientWhatsapp,
-            email: apt.patientEmail,
-            birthDate: apt.patientBirthDate,
-            insurance: {
-              type: apt.insuranceType || 'particular',
-              plan: apt.insurancePlan || null,
-            },
-            consultation: {
-              id: apt.id,
-              date: apt.appointmentDate,
-              time: apt.appointmentTime,
-              type: apt.appointmentType,
-              status: apt.status,
-              notes: apt.notes,
-              insuranceType: apt.insuranceType,
-              source: apt.source,
-            },
-          }))
-
-          // Separar pacientes por status
-          const pendingPatientsData = todayPatientsData.filter(
-            (p: any) =>
-              p.consultation?.status !== 'concluida' &&
-              p.consultation?.status !== 'cancelada'
-          )
-          const attendedPatientsData = todayPatientsData.filter(
-            (p: any) => p.consultation?.status === 'concluida'
-          )
-
-          // Filtrar pacientes únicos para evitar duplicatas (mesmo paciente com múltiplas consultas)
-          const uniquePendingPatients = pendingPatientsData.reduce(
-            (acc: any[], patient: any) => {
-              if (!acc.find(p => p.id === patient.id)) {
-                acc.push(patient)
-              }
-              return acc
-            },
-            []
-          )
-
-          const uniqueAttendedPatients = attendedPatientsData.reduce(
-            (acc: any[], patient: any) => {
-              if (!acc.find(p => p.id === patient.id)) {
-                acc.push(patient)
-              }
-              return acc
-            },
-            []
-          )
-
-          setTodayPatients(uniquePendingPatients) // Só pacientes não atendidos únicos
-          setAttendedPatients(uniqueAttendedPatients)
-        } else {
-          const errorText = await dailyAgendaResponse.text()
-          console.error(
-            '❌ Erro ao carregar agenda diária:',
-            dailyAgendaResponse.status,
-            dailyAgendaResponse.statusText
-          )
-          console.error('❌ Conteúdo da resposta de erro:', errorText)
-          
-          // Implementar retry limitado em vez de loop infinito
-          if (retryCount < MAX_RETRIES) {
-            console.log(`🔄 Tentativa ${retryCount + 1}/${MAX_RETRIES} - Tentando recarregar agenda diária em 3 segundos...`)
-            setTimeout(() => {
-              setRetryCount(prev => prev + 1)
-              loadDashboardData()
-            }, 3000)
-          } else {
-            console.error('❌ Máximo de tentativas atingido. Definindo dados padrão.')
-            setTodayPatients([])
-            setAttendedPatients([])
-          }
-          return
-        }
-
-        // Carregar todos os pacientes do sistema unificado
-        const allPatientsResponse = await fetch(
-          '/api/unified-appointments?action=all-patients',
-          {
-            credentials: 'include',
-            cache: 'no-cache',
-          }
+        const attendedPatients = appointmentsWithConsultation.filter(
+          (patient: any) => patient.consultation.status === 'concluida' || patient.consultation.status === 'atendida'
         )
 
-        if (allPatientsResponse.ok) {
-          const allPatientsData = await allPatientsResponse.json()
-          console.log('Todos os pacientes recebidos:', allPatientsData.patients)
-
-          // Converter para formato compatível
-          const patientsFormatted = allPatientsData.patients.map(
-            (patient: any) => ({
-              id: patient.id,
-              name: patient.name,
-              phone: patient.phone,
-              whatsapp: patient.whatsapp,
-              email: patient.email,
-              birthDate: patient.birthDate,
-              cpf: patient.cpf,
-              insurance: patient.insurance,
-              medicalRecord: patient.medicalRecord,
-            })
-          )
-
-          setPatients(patientsFormatted)
-        }
-
-        // Carregar estatísticas do sistema unificado
-        const statsResponse = await fetch(
-          '/api/unified-appointments?action=stats',
-          {
-            credentials: 'include',
-            cache: 'no-cache',
-          }
-        )
-
-        if (statsResponse.ok) {
-          const statsData = await statsResponse.json()
-          console.log('Estatísticas recebidas:', statsData.stats)
-
-          setStats({
-            totalPatients: statsData.stats.totalPatients || 0,
-            todayConsultations: statsData.stats.uniquePendingPatients || 0,
-            completedToday: statsData.stats.completedAppointments || 0,
-          })
-        }
-      } catch (error) {
-        console.error('Erro ao carregar dados:', error)
-        // Verificar se é um erro de rede e implementar retry limitado
-        if (error instanceof TypeError && error.message === 'Failed to fetch') {
-          if (retryCount < MAX_RETRIES) {
-            console.error(
-              `Erro de conexão com a API. Tentativa ${retryCount + 1}/${MAX_RETRIES} - Tentando novamente em 5 segundos...`
-            )
-            setTimeout(() => {
-              setRetryCount(prev => prev + 1)
-              loadDashboardData()
-            }, 5000)
-          } else {
-            console.error('❌ Máximo de tentativas de conexão atingido. Definindo dados padrão.')
-            setTodayPatients([])
-            setAttendedPatients([])
-            setPatients([])
-            setStats({
-              totalPatients: 0,
-              todayConsultations: 0,
-              completedToday: 0,
-            })
-          }
-        } else {
-          // Para outros tipos de erro, definir dados padrão
-          console.log('Definindo dados padrão devido ao erro:', error)
-          setTodayPatients([])
-          setAttendedPatients([])
-          setPatients([])
-          setStats({
-            totalPatients: 0,
-            todayConsultations: 0,
-            completedToday: 0,
-          })
-        }
-      } finally {
-        setIsLoading(false)
+        setTodayPatients(todayPatients)
+        setAttendedPatients(attendedPatients)
       }
-    }, 300)
 
-    setLoadingTimeout(timeout)
+      // Buscar todos os pacientes do sistema unificado
+      const patientsResponse = await fetch('/api/unified-system/patients?action=all-patients')
+      const patientsData = await patientsResponse.json()
+
+      if (patientsData.success) {
+        setPatients(patientsData.patients)
+      }
+
+      // Buscar estatísticas
+      const statsResponse = await fetch('/api/unified-appointments?action=stats')
+      const statsData = await statsResponse.json()
+
+      if (statsData.success) {
+        // Calcular consultas do dia baseado na data selecionada
+        const todayConsultations = agendaData.success ? agendaData.agenda.length : 0
+        
+        setStats({
+          ...statsData.stats,
+          todayConsultations
+        })
+      }
+    } catch (error) {
+      console.error('Erro ao carregar dados do dashboard:', error)
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   const handleLogout = async () => {
@@ -397,9 +242,9 @@ export default function AreaMedicaPage() {
         : patients
   ).filter(
     patient =>
-      patient.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      patient.phone.includes(searchTerm) ||
-      patient.whatsapp.includes(searchTerm)
+      (patient.name && patient.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (patient.phone && patient.phone.includes(searchTerm)) ||
+      (patient.whatsapp && patient.whatsapp.includes(searchTerm))
   )
 
   const formatTime = (time: string) => {
@@ -443,12 +288,12 @@ export default function AreaMedicaPage() {
     if (!confirmRemove) return
 
     try {
-      const today = getTodayISO()
-      console.log('🔍 Buscando agendamentos para:', today)
+      const dateToUse = selectedDate || getTodayISO()
+      console.log('🔍 Buscando agendamentos para:', dateToUse)
 
-      // Buscar o agendamento do paciente para hoje no sistema unificado
+      // Buscar o agendamento do paciente para a data selecionada no sistema unificado
       const appointmentsResponse = await fetch(
-        `/api/unified-appointments?action=appointments-by-date&date=${today}`,
+        `/api/unified-appointments?action=appointments-by-date&date=${dateToUse}`,
         {
           method: 'GET',
           headers: {
@@ -473,7 +318,7 @@ export default function AreaMedicaPage() {
       const appointments = data.appointments || []
       const todayAppointment = appointments.find(
         (apt: any) =>
-          apt.patientId === patientId && apt.appointmentDate === today
+          apt.patientId === patientId && apt.appointmentDate === dateToUse
       )
 
       console.log('🎯 Agendamento encontrado:', todayAppointment)
@@ -538,6 +383,85 @@ export default function AreaMedicaPage() {
         }
       } else {
         alert('Erro desconhecido ao remover paciente da agenda')
+      }
+    }
+  }
+
+  const deletePatient = async (patientId: string, patientName: string) => {
+    const confirmDelete = window.confirm(
+      `Você tem certeza que deseja excluir permanentemente o paciente "${patientName}"?\n\nEsta ação não pode ser desfeita e removerá todos os dados do paciente, incluindo prontuários e histórico médico.`
+    )
+    if (!confirmDelete) return
+
+    // Segunda confirmação para ações críticas
+    const doubleConfirm = window.confirm(
+      'ATENÇÃO: Esta é uma ação irreversível!\n\nDigite "CONFIRMAR" para prosseguir com a exclusão.'
+    )
+    if (!doubleConfirm) return
+
+    try {
+      console.log('🗑️ Excluindo paciente:', patientId)
+
+      const deleteResponse = await fetch(`/api/patients?id=${patientId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+
+      console.log('📡 Delete response status:', deleteResponse.status)
+
+      if (!deleteResponse.ok) {
+        let errorData
+        try {
+          errorData = await deleteResponse.json()
+        } catch (parseError) {
+          console.error('❌ Erro ao fazer parse da resposta:', parseError)
+          errorData = { error: 'Erro desconhecido na resposta do servidor' }
+        }
+        
+        console.error('❌ Erro ao excluir paciente:', JSON.stringify(errorData, null, 2))
+        
+        // Tratar erro específico de paciente com agendamentos
+        if (errorData.error && errorData.error.includes('agendamentos associados')) {
+          alert('❌ Não é possível excluir este paciente pois ele possui agendamentos associados. Cancele ou conclua os agendamentos primeiro.')
+          return
+        }
+        
+        // Tratar erro específico de paciente com prontuários médicos
+        if (errorData.error && errorData.error.includes('prontuários médicos associados')) {
+          alert('❌ Não é possível excluir este paciente pois ele possui prontuários médicos associados. Remova os prontuários primeiro.')
+          return
+        }
+        
+        throw new Error(
+          `Erro HTTP: ${deleteResponse.status} - ${errorData.error || 'Erro desconhecido'}`
+        )
+      }
+
+      const deleteResult = await deleteResponse.json()
+      console.log('✅ Resultado da exclusão:', deleteResult)
+
+      if (deleteResult.success) {
+        loadDashboardData() // Recarregar dados
+        alert('Paciente excluído com sucesso!')
+      } else {
+        throw new Error(deleteResult.error || 'Erro desconhecido ao excluir')
+      }
+    } catch (error) {
+      console.error('❌ Erro completo ao excluir paciente:', error)
+
+      // Mostrar erro mais detalhado para o usuário
+      if (error instanceof Error) {
+        if (error.message.includes('Failed to fetch')) {
+          alert(
+            'Erro de conexão com a API. Verifique sua conexão com a internet e tente novamente.'
+          )
+        } else {
+          alert(`Erro ao excluir paciente: ${error.message}`)
+        }
+      } else {
+        alert('Erro desconhecido ao excluir paciente')
       }
     }
   }
@@ -635,8 +559,8 @@ export default function AreaMedicaPage() {
     )
     if (!confirmStart) return
 
-    // Encontrar o agendamento do paciente para hoje
-    const today = getTodayISO()
+    // Encontrar o agendamento do paciente para a data selecionada
+    const dateToUse = selectedDate || getTodayISO()
     const todayPatient = todayPatients.find(p => p.id === patientId)
 
     if (todayPatient && todayPatient.consultation) {
@@ -1060,14 +984,23 @@ export default function AreaMedicaPage() {
                                 )}
                               </>
                             ) : (
-                              activeTab === 'all' &&
-                              !patient.consultation && (
-                                <button
-                                  onClick={() => openScheduleModal(patient.id)}
-                                  className='text-blue-400 hover:text-blue-300 transition-colors duration-200'
-                                >
-                                  Agendar
-                                </button>
+                              activeTab === 'all' && (
+                                <>
+                                  {!patient.consultation && (
+                                    <button
+                                      onClick={() => openScheduleModal(patient.id)}
+                                      className='text-blue-400 hover:text-blue-300 mr-3 transition-colors duration-200'
+                                    >
+                                      Agendar
+                                    </button>
+                                  )}
+                                  <button
+                                    onClick={() => deletePatient(patient.id, patient.name)}
+                                    className='text-red-400 hover:text-red-300 transition-colors duration-200'
+                                  >
+                                    Excluir
+                                  </button>
+                                </>
                               )
                             )}
                           </td>

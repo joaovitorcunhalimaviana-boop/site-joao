@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server'
+﻿import { NextResponse } from 'next/server'
 
 export async function GET() {
   try {
@@ -7,8 +7,8 @@ export async function GET() {
       status: 'healthy',
       timestamp: new Date().toISOString(),
       uptime: process.uptime(),
-      environment: process.env.NODE_ENV || 'development',
-      version: process.env.npm_package_version || '1.0.0',
+      environment: process.env['NODE_ENV'] || 'development',
+      version: process.env['npm_package_version'] || '1.0.0',
       services: {
         database: 'connected', // Será atualizado quando conectar o banco
         api: 'operational',
@@ -27,3 +27,4 @@ export async function GET() {
     )
   }
 }
+

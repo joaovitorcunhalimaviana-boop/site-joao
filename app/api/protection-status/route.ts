@@ -1,7 +1,6 @@
 // API para Status do Sistema de Proteção de Dados
 import { NextRequest, NextResponse } from 'next/server'
 import { enhancedBackupSystem } from '@/lib/enhanced-backup-system'
-import { automatedEmailService } from '@/lib/automated-email-service'
 
 export async function GET(request: NextRequest) {
   try {
@@ -45,7 +44,6 @@ export async function POST(request: NextRequest) {
     switch (action) {
       case 'start_monitoring':
         await enhancedBackupSystem.startContinuousMonitoring()
-        await automatedEmailService.startBirthdayMonitoring()
         
         return NextResponse.json({
           success: true,
@@ -70,15 +68,6 @@ export async function POST(request: NextRequest) {
           success: true,
           data: integrityResult,
           message: `Verificação concluída: ${integrityResult.status}`
-        })
-
-      case 'check_birthdays':
-        const birthdayResult = await automatedEmailService.checkAndSendBirthdayEmails()
-        
-        return NextResponse.json({
-          success: true,
-          data: birthdayResult,
-          message: `E-mails de aniversário: ${birthdayResult.sent} enviados, ${birthdayResult.failed} falharam`
         })
 
       default:

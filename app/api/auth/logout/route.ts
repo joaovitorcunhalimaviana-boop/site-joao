@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server'
+﻿import { NextResponse } from 'next/server'
 
 export async function POST() {
   try {
@@ -11,7 +11,7 @@ export async function POST() {
     // Remover cookie de autenticação
     response.cookies.set('auth-token', '', {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: process.env['NODE_ENV'] === 'production',
       sameSite: 'strict',
       maxAge: 0, // Remove o cookie
     })
@@ -25,3 +25,4 @@ export async function POST() {
     )
   }
 }
+

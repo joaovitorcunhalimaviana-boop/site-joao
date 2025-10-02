@@ -22,7 +22,8 @@ class EmergencyBackupScheduler {
     try {
       console.log('🚨 EXECUTANDO BACKUP AUTOMÁTICO DE EMERGÊNCIA...')
       
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'https://www.joaovitorviana.com.br'}/api/backup-emergency`, {
+      const baseUrl = process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : (process.env['NEXT_PUBLIC_BASE_URL'] || 'https://www.joaovitorviana.com.br')
+      const response = await fetch(`${baseUrl}/api/backup-emergency`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -166,7 +167,7 @@ class EmergencyBackupScheduler {
 const backupScheduler = EmergencyBackupScheduler.getInstance()
 
 // Iniciar sistema na primeira execução
-if (process.env.NODE_ENV === 'production') {
+if (process.env['NODE_ENV'] === 'production') {
   console.log('🚨 MODO PRODUÇÃO - INICIANDO BACKUP AUTOMÁTICO...')
   backupScheduler.startAutomaticBackup()
 }

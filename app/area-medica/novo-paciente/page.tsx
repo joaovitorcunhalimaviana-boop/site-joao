@@ -17,7 +17,6 @@ import Header from '../../../components/ui/header'
 import Footer from '../../../components/ui/footer'
 import MedicalAreaMenu from '../../../components/ui/medical-area-menu'
 import { BrazilianDateInput } from '../../../components/ui/brazilian-date-input'
-import { sendWelcomeEmailClient } from '../../../lib/welcome-email-service'
 
 interface PatientData {
   name: string

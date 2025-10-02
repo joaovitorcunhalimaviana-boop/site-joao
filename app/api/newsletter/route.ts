@@ -1,11 +1,26 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { sendWelcomeEmail } from '@/lib/email-service'
-import { sendWelcomeEmailToPatient } from '@/lib/welcome-email-service'
 import { 
   getAllCommunicationContacts,
   createOrUpdateCommunicationContact,
   CommunicationContact
 } from '@/lib/unified-patient-system'
+
+// Mock functions para compatibilidade (newsletter system foi removido)
+function readNewslettersData(): Newsletter[] {
+  return []
+}
+
+function saveNewslettersData(newsletters: Newsletter[]): void {
+  // Newsletter system foi removido - função desabilitada
+}
+
+function getAllPatients(): any[] {
+  return []
+}
+
+function createOrUpdatePatient(patient: any): { success: boolean; message: string } {
+  return { success: false, message: 'Patient system migrated to unified system' }
+}
 
 // Interfaces para compatibilidade com o sistema antigo
 interface Subscriber {
@@ -68,6 +83,90 @@ function generateId(): string {
   return Date.now().toString(36) + Math.random().toString(36).substr(2)
 }
 
+// Função para enviar notificação via Telegram para nova inscrição na newsletter
+async function sendTelegramNewsletterNotification(subscriberData: {
+  name: string
+  email: string
+  whatsapp?: string
+  birthDate?: string
+}): Promise<{ success: boolean; error?: string }> {
+  const telegramToken = process.env['TELEGRAM_BOT_TOKEN']
+  const telegramChatId = process.env['TELEGRAM_CHAT_ID']
+
+  if (!telegramToken || !telegramChatId) {
+    console.log('ℹ️ Telegram não configurado - notificação de newsletter não enviada')
+    return { success: false, error: 'Telegram não configurado' }
+  }
+
+  try {
+    // Gerar link do WhatsApp para enviar mensagem de boas-vindas
+    const whatsappMessage = encodeURIComponent(
+      `Olá ${subscriberData.name}! 🎉\n\n` +
+      `Parabéns por se inscrever na nossa newsletter! 📧\n\n` +
+      `Você receberá:\n` +
+      `• Dicas de saúde exclusivas 💡\n` +
+      `• Novidades sobre nossos serviços 🏥\n` +
+      `• Informações importantes sobre cuidados médicos 👨‍⚕️\n\n` +
+      `Obrigado pela confiança! 🙏\n\n` +
+      `Dr. João Vítor Viana\n` +
+      `Coloproctologista`
+    )
+
+    const whatsappLink = subscriberData.whatsapp 
+      ? `https://wa.me/55${subscriberData.whatsapp.replace(/\D/g, '')}?text=${whatsappMessage}`
+      : 'WhatsApp não informado'
+
+    // Formatar data de nascimento para exibição
+    const formattedBirthDate = subscriberData.birthDate 
+      ? new Date(subscriberData.birthDate).toLocaleDateString('pt-BR')
+      : 'Não informada'
+
+    // Criar mensagem do Telegram
+    const telegramMessage =
+      `📧 *NOVA INSCRIÇÃO NA NEWSLETTER*\n\n` +
+      `👤 *Nome:* ${subscriberData.name}\n` +
+      `📧 *Email:* ${subscriberData.email}\n` +
+      `🎂 *Data de Nascimento:* ${formattedBirthDate}\n` +
+      `📱 *WhatsApp:* ${subscriberData.whatsapp || 'Não informado'}\n\n` +
+      (subscriberData.whatsapp 
+        ? `🔗 [📱 Enviar mensagem de boas-vindas](${whatsappLink})`
+        : `⚠️ *WhatsApp não informado - contato apenas por email*`)
+
+    // Enviar mensagem via API do Telegram
+    const response = await fetch(
+      `https://api.telegram.org/bot${telegramToken}/sendMessage`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json; charset=utf-8',
+        },
+        body: JSON.stringify({
+          chat_id: telegramChatId,
+          text: telegramMessage,
+          parse_mode: 'Markdown',
+          disable_web_page_preview: false,
+        }),
+      }
+    )
+
+    if (!response.ok) {
+      const errorData = await response.json()
+      throw new Error(
+        `Erro na API do Telegram: ${response.status} - ${JSON.stringify(errorData)}`
+      )
+    }
+
+    console.log('✅ Notificação Telegram de newsletter enviada com sucesso!')
+    return { success: true }
+  } catch (error) {
+    console.error('❌ Erro ao enviar notificação Telegram de newsletter:', error)
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Erro desconhecido',
+    }
+  }
+}
+
 // GET - Obter subscribers e newsletters
 export async function GET(request: NextRequest) {
   try {
@@ -95,7 +194,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Retornar estatísticas gerais
-    const subscribers = getSubscribers()
+    const subscribers = await getSubscribers()
     const newsletters = readNewslettersData()
 
     return NextResponse.json({
@@ -182,26 +281,17 @@ export async function POST(request: NextRequest) {
         )
       }
 
-      // Enviar email de boas-vindas
+      // Enviar notificação via Telegram para nova inscrição na newsletter
       try {
-        await sendWelcomeEmailToPatient({
-          email: contactResult.contact.email!,
+        await sendTelegramNewsletterNotification({
           name: contactResult.contact.name,
+          email: contactResult.contact.email!,
           whatsapp: contactResult.contact.whatsapp,
-          birthDate: contactResult.contact.birthDate,
-          source: 'newsletter',
-          subscribed: true,
-          subscribedAt: contactResult.contact.emailPreferences.subscribedAt!,
-          patientId: contactResult.contact.id,
-          registrationSources: contactResult.contact.registrationSources,
-          preferences: {
-            healthTips: contactResult.contact.emailPreferences.healthTips,
-            appointments: contactResult.contact.emailPreferences.appointments,
-            promotions: contactResult.contact.emailPreferences.promotions
-          }
+          birthDate: contactResult.contact.birthDate
         })
-      } catch (emailError) {
-        console.error('❌ Erro ao enviar email de boas-vindas:', emailError)
+      } catch (telegramError) {
+        console.error('❌ Erro ao enviar notificação Telegram de newsletter:', telegramError)
+        // Não falha a inscrição se o Telegram falhar
       }
 
       return NextResponse.json({
@@ -224,7 +314,7 @@ export async function POST(request: NextRequest) {
       }
 
       // Obter subscribers do sistema unificado
-      const subscribers = getSubscribers()
+      const subscribers = await getSubscribers()
 
       // Criar newsletter
       const newsletter: Newsletter = {

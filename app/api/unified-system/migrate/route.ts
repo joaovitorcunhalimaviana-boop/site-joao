@@ -1,15 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { 
-  createOrUpdateCommunicationContact,
+  getAllMedicalPatients, 
+  getAllCommunicationContacts, 
   createMedicalPatient,
-  createAppointment,
-  createMedicalRecord,
-  validateDataIntegrity
-} from '@/lib/unified-patient-system'
-import { getAllPatients as getOldPatients } from '@/lib/unified-data-service'
-import { getAllAppointments as getOldAppointments } from '@/lib/unified-appointment-system'
-import fs from 'fs'
-import path from 'path'
+  createOrUpdateCommunicationContact,
+  validateDataIntegrity,
+  type MedicalPatient,
+  type CommunicationContact
+} from '../../../../lib/unified-patient-system'
+import { 
+  getAllPatients as readPatientsData, 
+  getAllAppointments as readAppointmentsData,
+  readNewslettersData 
+} from '../../../../lib/unified-data-service'
+import * as fs from 'fs'
+import * as path from 'path'
 
 interface MigrationStats {
   communicationContacts: {
@@ -82,49 +87,10 @@ async function migrateNewsletterData(): Promise<{ contacts: number; errors: stri
   return { contacts: contactsCreated, errors }
 }
 
-// Função para migrar dados de email integration
+// Função para migrar dados de email integration (desabilitada - email removido)
 async function migrateEmailIntegrationData(): Promise<{ contacts: number; errors: string[] }> {
-  const errors: string[] = []
-  let contactsCreated = 0
-  
-  try {
-    const emailIntegrationPath = path.join(process.cwd(), 'data', 'email-integration.json')
-    
-    if (fs.existsSync(emailIntegrationPath)) {
-      const emailData = JSON.parse(fs.readFileSync(emailIntegrationPath, 'utf8'))
-      
-      if (Array.isArray(emailData)) {
-        for (const emailEntry of emailData) {
-          if (emailEntry.email && emailEntry.name) {
-            const result = createOrUpdateCommunicationContact({
-              name: emailEntry.name,
-              email: emailEntry.email,
-              whatsapp: emailEntry.whatsapp,
-              birthDate: emailEntry.birthDate,
-              source: emailEntry.source || 'public_appointment',
-              emailPreferences: {
-                newsletter: false,
-                healthTips: true,
-                appointments: true,
-                promotions: false,
-                subscribed: true
-              }
-            })
-            
-            if (result.success) {
-              contactsCreated++
-            } else {
-              errors.push(`Erro ao migrar email ${emailEntry.email}: ${result.message}`)
-            }
-          }
-        }
-      }
-    }
-  } catch (error) {
-    errors.push(`Erro ao migrar dados de email integration: ${error}`)
-  }
-  
-  return { contacts: contactsCreated, errors }
+  // Email integration foi removido do sistema
+  return { contacts: 0, errors: [] }
 }
 
 // Função para migrar pacientes antigos
@@ -138,7 +104,7 @@ async function migrateOldPatients(): Promise<{
   let medicalPatientsCreated = 0
   
   try {
-    const oldPatients = getOldPatients()
+    const oldPatients = readPatientsData()
     
     for (const oldPatient of oldPatients) {
       // Primeiro, criar ou atualizar contato de comunicação
@@ -170,25 +136,25 @@ async function migrateOldPatients(): Promise<{
           communicationContactId: contactResult.contact.id,
           cpf: oldPatient.cpf,
           fullName: oldPatient.name,
-          rg: oldPatient.rg,
-          address: oldPatient.address,
-          city: oldPatient.city,
-          state: oldPatient.state,
-          zipCode: oldPatient.zipCode,
+          rg: (oldPatient as any).rg, // Legacy property
+          address: (oldPatient as any).address, // Legacy property
+          city: (oldPatient as any).city, // Legacy property
+          state: (oldPatient as any).state, // Legacy property
+          zipCode: (oldPatient as any).zipCode, // Legacy property
           insurance: {
             type: oldPatient.insurance?.type || 'particular',
             plan: oldPatient.insurance?.plan,
-            cardNumber: oldPatient.insurance?.cardNumber,
-            validUntil: oldPatient.insurance?.validUntil
+            cardNumber: (oldPatient.insurance as any)?.cardNumber,
+            validUntil: (oldPatient.insurance as any)?.validUntil
           },
           medicalInfo: {
-            allergies: oldPatient.allergies || [],
-            medications: oldPatient.medications || [],
-            conditions: oldPatient.conditions || [],
-            emergencyContact: oldPatient.emergencyContact,
-            emergencyPhone: oldPatient.emergencyPhone,
-            bloodType: oldPatient.bloodType,
-            notes: oldPatient.notes
+            allergies: (oldPatient as any).allergies || [],
+            medications: (oldPatient as any).medications || [],
+            conditions: (oldPatient as any).conditions || [],
+            emergencyContact: (oldPatient as any).emergencyContact,
+            emergencyPhone: (oldPatient as any).emergencyPhone,
+            bloodType: (oldPatient as any).bloodType,
+            notes: (oldPatient as any).notes
           },
           consents: {
             dataProcessing: true,
@@ -223,7 +189,7 @@ async function migrateOldAppointments(): Promise<{ appointments: number; errors:
   let appointmentsMigrated = 0
   
   try {
-    const oldAppointments = getOldAppointments()
+    const oldAppointments = readAppointmentsData()
     
     for (const oldAppointment of oldAppointments) {
       // Buscar contato de comunicação pelo email ou nome

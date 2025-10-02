@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import jwt from 'jsonwebtoken'
 
 const JWT_SECRET = process.env['JWT_SECRET'] || 'your-secret-key'
@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
     // Definir cookie de autenticação
     response.cookies.set('auth-token', token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: process.env['NODE_ENV'] === 'production',
       sameSite: 'lax',
       maxAge: 24 * 60 * 60, // 24 horas
     })
@@ -77,3 +77,4 @@ export async function POST(request: NextRequest) {
     )
   }
 }
+

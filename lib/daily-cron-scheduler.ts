@@ -1,5 +1,5 @@
 // Sistema de agendamento automático diário às 20:00
-import { getDailyAgendaWithSurgeries } from './unified-appointment-system'
+import { getDailyAgendaWithSurgeries } from './unified-patient-system'
 import {
   getBrasiliaDate,
   getTodayISO,
@@ -113,7 +113,7 @@ async function sendDailyAgendaForDate(targetDate: string): Promise<void> {
     console.log(`🏥 Cirurgias encontradas: ${dailyAgenda.surgeries.length}`)
 
     // Enviar para a API de agenda diária
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://www.joaovitorviana.com.br'
+    const baseUrl = process.env['NEXT_PUBLIC_BASE_URL'] || 'https://www.joaovitorviana.com.br'
     const response = await fetch(
       `${baseUrl}/api/daily-agenda`,
       {
@@ -210,3 +210,4 @@ if (typeof window === 'undefined') {
   // Limpeza automática a cada 24 horas
   setInterval(cleanupOldCronJobs, 24 * 60 * 60 * 1000)
 }
+

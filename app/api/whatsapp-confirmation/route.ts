@@ -76,6 +76,16 @@ export async function POST(request: NextRequest) {
     // Log otimizado (menos verboso)
     console.log(`🩺 WhatsApp confirmação: ${fullName} - ${selectedDate} ${selectedTime}`)
 
+    // Enviar notificação via Telegram
+    await sendTelegramNotification({
+      fullName,
+      selectedDate,
+      selectedTime,
+      whatsapp,
+      patientWhatsAppLink,
+      doctorWhatsAppLink,
+    })
+
     const response = {
       success: true,
       message: 'Sistema de confirmação WhatsApp ativado',

@@ -1,10 +1,10 @@
-﻿// Sistema Unificado de Pacientes e ComunicaÃ§Ã£o
+// Sistema Unificado de Pacientes e ComunicaÃ§Ã£o
 // Integra todos os cadastros em duas camadas: ComunicaÃ§Ã£o e Pacientes MÃ©dicos
 
-import fs from 'fs'
-import path from 'path'
+import * as fs from 'fs'
+import * as path from 'path'
 import { getBrasiliaTimestamp } from './date-utils'
-import { integrateWelcomeEmailInCommunicationSystem } from './auto-welcome-email-integration'
+import { sendTelegramAppointmentNotification, AppointmentNotificationData } from './telegram-notifications'
 
 // ==================== INTERFACES UNIFICADAS ====================
 
@@ -276,6 +276,31 @@ function ensureDataDirectory() {
   }
 }
 
+// Função para obter agenda diária com cirurgias
+export async function getDailyAgendaWithSurgeries(date: string): Promise<{
+  appointments: UnifiedAppointment[]
+  surgeries: Surgery[]
+  totalItems: number
+}> {
+  try {
+    const appointments = getAppointmentsByDate(date)
+    const surgeries = getSurgeriesByDate(date)
+    
+    return {
+      appointments,
+      surgeries,
+      totalItems: appointments.length + surgeries.length
+    }
+  } catch (error) {
+    console.error('⚠ Erro ao obter agenda diária com cirurgias:', error)
+    return {
+      appointments: [],
+      surgeries: [],
+      totalItems: 0
+    }
+  }
+}
+
 function generateId(prefix: string): string {
   return `${prefix}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
 }
@@ -347,7 +372,7 @@ export function createOrUpdateCommunicationContact(
     
     if (existingContact) {
       // Atualizar contato existente
-      const updatedSources = [...new Set([...existingContact.registrationSources, contactData.source])]
+      const updatedSources = Array.from(new Set([...existingContact.registrationSources, contactData.source]))
       
       const updatedContact: CommunicationContact = {
         ...existingContact,
@@ -414,16 +439,7 @@ export function createOrUpdateCommunicationContact(
       contacts.push(newContact)
       saveToStorage(COMMUNICATION_CONTACTS_FILE, contacts)
 
-      // Integrar envio automático de e-mail de boas-vindas
-      integrateWelcomeEmailInCommunicationSystem({
-        name: newContact.name,
-        email: newContact.email,
-        source: contactData.source,
-        whatsapp: newContact.whatsapp,
-        birthDate: newContact.birthDate,
-        patientId: newContact.id,
-        emailPreferences: newContact.emailPreferences
-      });
+      // Email de boas-vindas removido - sistema agora usa apenas Telegram
       
       return {
         success: true,
@@ -567,7 +583,7 @@ export function getAppointmentsByDate(date: string): UnifiedAppointment[] {
   return appointments.filter(apt => apt.appointmentDate === date)
 }
 
-export function createAppointment(
+  export function createAppointment(
   appointmentData: Partial<UnifiedAppointment> & {
     communicationContactId: string
     appointmentDate: string
@@ -634,13 +650,48 @@ export function createAppointment(
     appointments.push(newAppointment)
     saveToStorage(APPOINTMENTS_FILE, appointments)
     
+    console.log(
+      `✅ Agendamento criado: ${newAppointment.patientName} - ${newAppointment.appointmentDate} ${newAppointment.appointmentTime}`
+    )
+
+    // Enviar notificação via Telegram
+    try {
+      const notificationData: AppointmentNotificationData = {
+        patientName: newAppointment.patientName,
+        patientEmail: newAppointment.patientEmail,
+        patientPhone: newAppointment.patientPhone,
+        patientWhatsapp: newAppointment.patientWhatsapp || newAppointment.patientPhone,
+        appointmentDate: newAppointment.appointmentDate,
+        appointmentTime: newAppointment.appointmentTime,
+        insuranceType: (newAppointment.insuranceType as 'unimed' | 'particular' | 'outro') || 'particular',
+        appointmentType: newAppointment.appointmentType,
+        source: newAppointment.source,
+        notes: newAppointment.notes,
+      }
+
+      // Enviar notificação de forma assíncrona para não bloquear o agendamento
+      sendTelegramAppointmentNotification(notificationData)
+        .then(() => {
+          console.log('✅ Notificação Telegram enviada com sucesso')
+        })
+        .catch((telegramError) => {
+          console.warn('⚠️ Erro ao enviar notificação Telegram:', telegramError)
+          // Não falhar o agendamento por causa da notificação
+        })
+    } catch (telegramError) {
+      console.warn('⚠️ Erro ao preparar notificação Telegram:', telegramError)
+      // Não falhar o agendamento por causa da notificação
+    }
+
+    // Email de boas-vindas removido - sistema agora usa apenas Telegram
+    
     return {
       success: true,
       appointment: newAppointment,
       message: 'Agendamento criado com sucesso'
     }
   } catch (error) {
-    console.error('âŒ Erro ao criar agendamento:', error)
+    console.error('❌ Erro ao criar agendamento:', error)
     return {
       success: false,
       appointment: {} as UnifiedAppointment,
@@ -1158,8 +1209,7 @@ export function updateMedicalRecord(
       calculatorResults: updateData.calculatorResults ?? currentRecord.calculatorResults,
       diagnosticHypotheses: updateData.diagnosticHypotheses ?? currentRecord.diagnosticHypotheses,
       digitalSignature: updateData.digitalSignature ?? currentRecord.digitalSignature,
-      signedAt: updateData.signedAt ?? currentRecord.signedAt,
-      updatedAt: now
+      signedAt: updateData.signedAt ?? currentRecord.signedAt
     }
     
     // Recalcular checksum se dados crÃ­ticos foram alterados
@@ -1366,8 +1416,16 @@ export function deleteMedicalPatient(patientId: string): { success: boolean; mes
     
     // Verificar se existem agendamentos associados
     const appointments = getAllAppointments()
-    const associatedAppointments = appointments.filter(apt => apt.medicalPatientId === patientId)
+    const associatedAppointments = appointments.filter(apt => 
+      apt.medicalPatientId === patientId || apt.patientId === patientId
+    )
     if (associatedAppointments.length > 0) {
+      console.log('🔍 Agendamentos associados encontrados:', associatedAppointments.map(apt => ({
+        id: apt.id,
+        patientName: apt.patientName,
+        date: apt.appointmentDate,
+        status: apt.status
+      })))
       return {
         success: false,
         message: 'NÃ£o Ã© possÃ­vel deletar paciente com agendamentos associados'
