@@ -54,17 +54,36 @@ export default function WhatsAppPage() {
   useEffect(() => {
     const loadPatients = async () => {
       try {
-        const response = await fetch('/api/unified-system/communication-contacts')
+        console.log('🚀 Iniciando carregamento de todos os contatos para WhatsApp...')
+        const response = await fetch('/api/unified-system/communication')
+        console.log('📡 Response status:', response.status)
+        
         const data = await response.json()
+        console.log('🔍 WhatsApp Debug - Dados da API:', data)
         
         if (data.success && data.contacts) {
-          const contactsWithWhatsApp = data.contacts.filter((c: Patient) => c.whatsapp && c.whatsappPreferences?.whatsappSubscribed)
-          setPatients(contactsWithWhatsApp)
-          setFilteredPatients(contactsWithWhatsApp)
+          console.log('📊 Total de contatos recebidos:', data.contacts.length)
+          
+          // Mostrar TODOS os contatos cadastrados no sistema
+          // Não filtrar por WhatsApp - mostrar todos para que o usuário possa ver todos os contatos
+          const allContacts = data.contacts.map((c: Patient) => ({
+            ...c,
+            // Se não tem WhatsApp, marcar como "Não informado" para exibição
+            displayWhatsApp: c.whatsapp && c.whatsapp.trim() !== '' ? c.whatsapp : 'Não informado'
+          }))
+          
+          console.log('✅ Todos os contatos carregados:', allContacts.length)
+          console.log('📋 Lista completa de contatos:', allContacts)
+          
+          setPatients(allContacts)
+          setFilteredPatients(allContacts)
+        } else {
+          console.error('❌ Erro na estrutura da resposta:', data)
         }
       } catch (error) {
-        console.error('Erro ao carregar contatos:', error)
+        console.error('❌ Erro ao carregar contatos:', error)
       } finally {
+        console.log('🏁 Finalizando carregamento...')
         setLoading(false)
       }
     }
@@ -344,42 +363,56 @@ export default function WhatsAppPage() {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-2 max-h-96 overflow-y-auto">
-                      {filteredPatients.map((patient) => (
-                        <div
-                          key={patient.id}
-                          className={`p-3 rounded-lg border cursor-pointer transition-colors ${
-                            selectedPatients.includes(patient.id)
-                              ? 'bg-blue-900/30 border-blue-500'
-                              : 'bg-gray-800/50 border-gray-600 hover:bg-gray-700/50'
-                          }`}
-                          onClick={() => togglePatientSelection(patient.id)}
-                        >
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center space-x-3">
-                              <div className="flex-shrink-0">
-                                <UserIcon className="h-5 w-5 text-gray-400" />
+                      {filteredPatients.length === 0 ? (
+                        <div className="text-center py-8">
+                          <UserIcon className="h-12 w-12 text-gray-500 mx-auto mb-4" />
+                          <p className="text-gray-400 text-lg">Nenhum paciente encontrado</p>
+                          <p className="text-gray-500 text-sm mt-2">
+                            Verifique se há pacientes cadastrados com WhatsApp ativo
+                          </p>
+                        </div>
+                      ) : (
+                        filteredPatients.map((patient) => (
+                          <div
+                            key={patient.id}
+                            className={`p-3 rounded-lg border cursor-pointer transition-colors ${
+                              selectedPatients.includes(patient.id)
+                                ? 'bg-blue-900/30 border-blue-500'
+                                : 'bg-gray-800/50 border-gray-600 hover:bg-gray-700/50'
+                            }`}
+                            onClick={() => togglePatientSelection(patient.id)}
+                          >
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center space-x-3">
+                                <div className="flex-shrink-0">
+                                  <UserIcon className="h-5 w-5 text-gray-400" />
+                                </div>
+                                <div>
+                                  <p className="font-medium text-white">{patient.name}</p>
+                                  <p className="text-sm text-gray-400">
+                                    {patient.birthDate ? `${new Date().getFullYear() - new Date(patient.birthDate).getFullYear()} anos` : 'Idade não informada'} • {patient.email || 'Email não informado'}
+                                  </p>
+                                </div>
                               </div>
-                              <div>
-                                <p className="font-medium text-white">{patient.name}</p>
-                                <p className="text-sm text-gray-400">
-                                  {patient.birthDate ? `${new Date().getFullYear() - new Date(patient.birthDate).getFullYear()} anos` : 'Idade não informada'} • {patient.email || 'Email não informado'}
-                                </p>
-                              </div>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                              {patient.whatsapp && (
-                                <Badge variant="secondary" className="bg-green-900/30 text-green-400 border-green-700">
+                              <div className="flex items-center space-x-2">
+                                <Badge 
+                                  variant={patient.whatsapp && patient.whatsapp.trim() !== '' ? "secondary" : "outline"} 
+                                  className={patient.whatsapp && patient.whatsapp.trim() !== '' 
+                                    ? "bg-green-900/30 text-green-400 border-green-700" 
+                                    : "bg-gray-900/30 text-gray-400 border-gray-600"
+                                  }
+                                >
                                   <PhoneIcon className="h-3 w-3 mr-1" />
-                                  {patient.whatsapp}
+                                  {patient.whatsapp && patient.whatsapp.trim() !== '' ? patient.whatsapp : 'Não informado'}
                                 </Badge>
-                              )}
-                              {selectedPatients.includes(patient.id) && (
-                                <CheckIcon className="h-5 w-5 text-blue-400" />
-                              )}
+                                {selectedPatients.includes(patient.id) && (
+                                  <CheckIcon className="h-5 w-5 text-blue-400" />
+                                )}
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      ))}
+                        ))
+                      )}
                     </div>
                   </CardContent>
                 </Card>

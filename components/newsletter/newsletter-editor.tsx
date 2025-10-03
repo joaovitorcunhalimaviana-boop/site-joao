@@ -133,20 +133,38 @@ export default function NewsletterEditor({
 
   const loadPatients = async () => {
     try {
-      const response = await fetch('/api/unified-system/communication-contacts')
+      console.log('🚀 Iniciando carregamento de todos os contatos para Newsletter...')
+      const response = await fetch('/api/unified-system/communication')
+      console.log('📡 Response status:', response.status)
+      
       if (response.ok) {
         const data = await response.json()
+        console.log('🔍 Newsletter Debug - Dados da API:', data)
+        
         // A API retorna um objeto com {contacts: array, total: number}
         const contactsList = data.contacts || data // Fallback para compatibilidade
-        const contactsWithEmail = contactsList.filter(
-          (contact: any) => contact.email && contact.emailPreferences?.newsletter
-        )
-        setPatients(contactsWithEmail)
+        
+        console.log('📊 Total de contatos recebidos:', contactsList.length)
+        
+        // Mostrar TODOS os contatos cadastrados no sistema
+        // Não filtrar por email - mostrar todos para que o usuário possa ver todos os contatos
+        const allContacts = contactsList.map((contact: any) => ({
+          ...contact,
+          // Se não tem email, marcar como "Não informado" para exibição
+          displayEmail: contact.email && contact.email.trim() !== '' ? contact.email : 'Não informado'
+        }))
+        
+        console.log('✅ Todos os contatos carregados:', allContacts.length)
+        console.log('📋 Lista completa de contatos:', allContacts)
+        
+        setPatients(allContacts)
         // Selecionar todos os contatos por padrão
-        setSelectedPatients(contactsWithEmail.map((c: any) => c.id))
+        setSelectedPatients(allContacts.map((c: any) => c.id))
+      } else {
+        console.error('❌ Erro na resposta da API:', response.status)
       }
     } catch (error) {
-      console.error('Erro ao carregar contatos:', error)
+      console.error('❌ Erro ao carregar contatos:', error)
     }
   }
 
@@ -584,7 +602,7 @@ export default function NewsletterEditor({
                         {patient.name}
                       </div>
                       <div className='text-sm text-gray-400'>
-                        {patient.email}
+                        {patient.email && patient.email.trim() !== '' ? patient.email : 'Não informado'}
                       </div>
                     </div>
                   </label>
