@@ -1,5 +1,5 @@
-// Sistema Unificado de Pacientes e ComunicaÃ§Ã£o
-// Integra todos os cadastros em duas camadas: ComunicaÃ§Ã£o e Pacientes MÃ©dicos
+﻿// Sistema Unificado de PacienteS e Comunicação
+// Integra todos os cadastros em duas camadas: Comunicação e PacienteS MÃ©dicos
 
 import * as fs from 'fs'
 import * as path from 'path'
@@ -8,7 +8,7 @@ import { sendTelegramAppointmentNotification, AppointmentNotificationData } from
 
 // ==================== INTERFACES UNIFICADAS ====================
 
-// CAMADA 1: Sistema de ComunicaÃ§Ã£o (mais amplo)
+// CAMADA 1: Sistema de Comunicação (mais amplo)
 export interface CommunicationContact {
   id: string
   name: string
@@ -19,7 +19,7 @@ export interface CommunicationContact {
   // Rastreamento de fontes de cadastro
   registrationSources: ('newsletter' | 'public_appointment' | 'doctor_area' | 'secretary_area' | 'review')[]
   
-  // PreferÃªncias de comunicaÃ§Ã£o
+  // Preferências de Comunicação
   emailPreferences: {
     newsletter: boolean
     healthTips: boolean
@@ -39,7 +39,7 @@ export interface CommunicationContact {
     subscribedAt?: string
   }
   
-  // Dados de avaliaÃ§Ã£o/review (opcional)
+  // Dados de avaliação/review (opcional)
   reviewData?: {
     rating: number // 1-5 estrelas
     comment: string
@@ -54,26 +54,26 @@ export interface CommunicationContact {
   lastContactAt?: string
 }
 
-// CAMADA 2: Sistema de Pacientes MÃ©dicos (restrito - com CPF)
+// CAMADA 2: Sistema de PacienteS MÃ©dicos (restrito - com CPF)
 export interface MedicalPatient {
   id: string
   
-  // Dados bÃ¡sicos (herda do sistema de comunicaÃ§Ã£o)
-  communicationContactId: string // ReferÃªncia ao contato de comunicaÃ§Ã£o
+  // Dados bÃ¡sicos (herda do sistema de Comunicação)
+  communicationContactId: string // Referência ao contato de Comunicação
   
   // Dados mÃ©dicos obrigatÃ³rios
-  cpf: string // OBRIGATÃ“RIO para pacientes mÃ©dicos
-  medicalRecordNumber: number // NÃºmero do prontuÃ¡rio (sequencial)
+  cpf: string // OBRIGATÃ“RIO para PacienteS mÃ©dicos
+  medicalRecordNumber: number // Número do prontuÃ¡rio (sequencial)
   
   // Dados complementares
-  fullName: string // Nome completo (pode ser diferente do nome de comunicaÃ§Ã£o)
+  fullName: string // Nome completo (pode ser diferente do nome de Comunicação)
   rg?: string
   address?: string
   city?: string
   state?: string
   zipCode?: string
   
-  // Plano de saÃºde
+  // Plano de saúde
   insurance: {
     type: 'unimed' | 'particular' | 'outro'
     plan?: string
@@ -113,9 +113,9 @@ export interface MedicalPatient {
 export interface UnifiedAppointment {
   id: string
   
-  // ReferÃªncias aos sistemas unificados
+  // Referências aos sistemas unificados
   communicationContactId: string
-  medicalPatientId?: string // Opcional - pode ser apenas contato de comunicaÃ§Ã£o
+  medicalPatientId?: string // Opcional - pode ser apenas contato de Comunicação
   
   // Backward compatibility - deprecated but maintained for existing code
   patientId?: string // Deprecated: use communicationContactId instead
@@ -133,14 +133,14 @@ export interface UnifiedAppointment {
   patientPhone: string
   patientWhatsapp: string
   patientEmail?: string
-  patientCpf?: string // Apenas se for paciente mÃ©dico
-  patientMedicalRecordNumber?: number // NÃºmero do prontuÃ¡rio se for paciente mÃ©dico
+  patientCpf?: string // Apenas se for Paciente mÃ©dico
+  patientMedicalRecordNumber?: number // Número do prontuÃ¡rio se for Paciente mÃ©dico
   
   // Insurance information for backward compatibility
   insuranceType?: 'unimed' | 'particular' | 'outro'
   insurancePlan?: string
   
-  // InformaÃ§Ãµes do agendamento
+  // Informações do agendamento
   notes?: string
   duration?: number // em minutos
   
@@ -151,7 +151,7 @@ export interface UnifiedAppointment {
 }
 
 // Interface para Slots de HorÃ¡rios
-export interface ScheduleSlot {
+export interface SCHEDULESlot {
   id: string
   date: string // YYYY-MM-DD format
   time: string // HH:MM format
@@ -164,13 +164,13 @@ export interface ScheduleSlot {
 // Interface para ProntuÃ¡rios MÃ©dicos (dados crÃ­ticos - armazenamento permanente)
 export interface MedicalRecord {
   id: string
-  medicalPatientId: string // OBRIGATÃ“RIO - apenas pacientes mÃ©dicos tÃªm prontuÃ¡rios
+  medicalPatientId: string // OBRIGATÃ“RIO - apenas PacienteS mÃ©dicos tÃªm prontuÃ¡rios
   
   // Dados da consulta
   consultationDate: string
   consultationTime: string
   
-  // ConteÃºdo mÃ©dico (dados crÃ­ticos)
+  // Conteúdo mÃ©dico (dados crÃ­ticos)
   anamnesis: string
   physicalExamination: string
   diagnosis: string
@@ -202,33 +202,33 @@ export interface MedicalRecord {
   
   diagnosticHypotheses?: string[]
   
-  // Assinatura digital e seguranÃ§a
+  // Assinatura digital e segurança
   digitalSignature?: string
   signedAt?: string
   checksum: string // Para verificar integridade
   
-  // Metadados (NUNCA podem ser alterados apÃ³s criaÃ§Ã£o)
+  // Metadados (NUNCA podem ser alterados após criação)
   createdAt: string
-  readonly: boolean // ProntuÃ¡rios sÃ£o readonly apÃ³s criaÃ§Ã£o
+  readonly: boolean // ProntuÃ¡rios são readonly após criação
 }
 
 // Interface para Cirurgias
 export interface Surgery {
   id: string
   
-  // ReferÃªncias aos sistemas unificados
+  // Referências aos sistemas unificados
   communicationContactId: string
-  medicalPatientId?: string // Opcional - pode ser apenas contato de comunicaÃ§Ã£o
+  medicalPatientId?: string // Opcional - pode ser apenas contato de Comunicação
   
   // Dados bÃ¡sicos da cirurgia
-  patientName: string // Copiado no momento da criaÃ§Ã£o
-  patientCpf?: string // Apenas se for paciente mÃ©dico
+  patientName: string // Copiado no momento da criação
+  patientCpf?: string // Apenas se for Paciente mÃ©dico
   surgeryType: string
   date: string // YYYY-MM-DD
   time: string // HH:MM
   hospital: string
   
-  // InformaÃ§Ãµes de pagamento
+  // Informações de pagamento
   paymentType: 'particular' | 'plano'
   insurancePlan?: string
   
@@ -245,10 +245,10 @@ export interface Surgery {
   assistantAmount?: number
   expectedAmount?: number
   
-  // CÃ³digos para planos
+  // Códigos para planos
   procedureCodes?: string
   
-  // Status e observaÃ§Ãµes
+  // Status e observações
   status: 'agendada' | 'confirmada' | 'concluida' | 'cancelada'
   notes?: string
   
@@ -264,7 +264,7 @@ const DATA_DIR = path.join(process.cwd(), 'data', 'unified-system')
 const COMMUNICATION_CONTACTS_FILE = path.join(DATA_DIR, 'communication-contacts.json')
 const MEDICAL_PATIENTS_FILE = path.join(DATA_DIR, 'medical-patients.json')
 const APPOINTMENTS_FILE = path.join(DATA_DIR, 'appointments.json')
-const SCHEDULE_SLOTS_FILE = path.join(DATA_DIR, 'schedule-slots.json')
+const SCHEDULE_SLOTS_FILE = path.join(DATA_DIR, 'SCHEDULE-slots.json')
 const MEDICAL_RECORDS_FILE = path.join(DATA_DIR, 'medical-records.json')
 const SURGERIES_FILE = path.join(DATA_DIR, 'surgeries.json')
 
@@ -407,7 +407,7 @@ export function createOrUpdateCommunicationContact(
       return {
         success: true,
         contact: updatedContact,
-        message: 'Contato de comunicaÃ§Ã£o atualizado com sucesso'
+        message: 'Contato de Comunicação atualizado com sucesso'
       }
     } else {
       // Criar novo contato
@@ -449,11 +449,11 @@ export function createOrUpdateCommunicationContact(
       return {
         success: true,
         contact: newContact,
-        message: 'Novo contato de comunicaÃ§Ã£o criado com sucesso'
+        message: 'Novo contato de Comunicação criado com sucesso'
       }
     }
   } catch (error) {
-    console.error('âŒ Erro ao criar/atualizar contato de comunicaÃ§Ã£o:', error)
+    console.error('âŒ Erro ao criar/atualizar contato de Comunicação:', error)
     return {
       success: false,
       contact: {} as CommunicationContact,
@@ -462,7 +462,7 @@ export function createOrUpdateCommunicationContact(
   }
 }
 
-// ==================== FUNÃ‡Ã•ES DO SISTEMA DE PACIENTES MÃ‰DICOS ====================
+// ==================== FUNÃ‡Ã•ES DO SISTEMA DE PacienteS MÃ‰DICOS ====================
 
 export function getAllMedicalPatients(): MedicalPatient[] {
   return loadFromStorage<MedicalPatient>(MEDICAL_PATIENTS_FILE)
@@ -506,23 +506,23 @@ export function createMedicalPatient(
     const patients = getAllMedicalPatients()
     const now = getBrasiliaTimestamp()
     
-    // Verificar se CPF jÃ¡ existe
+    // Verificar se CPF já¡ existe
     const existingPatient = getMedicalPatientByCpf(patientData.cpf)
     if (existingPatient) {
       return {
         success: false,
         patient: {} as MedicalPatient,
-        message: 'Paciente com este CPF jÃ¡ existe'
+        message: 'Paciente com este CPF já¡ existe'
       }
     }
     
-    // Verificar se o contato de comunicaÃ§Ã£o existe
+    // Verificar se o contato de Comunicação existe
     const communicationContact = getCommunicationContactById(patientData.communicationContactId)
     if (!communicationContact) {
       return {
         success: false,
         patient: {} as MedicalPatient,
-        message: 'Contato de comunicaÃ§Ã£o nÃ£o encontrado'
+        message: 'Contato de Comunicação não encontrado'
       }
     }
     
@@ -568,7 +568,7 @@ export function createMedicalPatient(
       message: 'Paciente mÃ©dico criado com sucesso'
     }
   } catch (error) {
-    console.error('âŒ Erro ao criar paciente mÃ©dico:', error)
+    console.error('âŒ Erro ao criar Paciente mÃ©dico:', error)
     return {
       success: false,
       patient: {} as MedicalPatient,
@@ -608,11 +608,11 @@ export function getAppointmentsByDate(date: string): UnifiedAppointment[] {
       return {
         success: false,
         appointment: {} as UnifiedAppointment,
-        message: 'Contato nÃ£o encontrado'
+        message: 'Contato não encontrado'
       }
     }
     
-    // Buscar paciente mÃ©dico se existir
+    // Buscar Paciente mÃ©dico se existir
     let medicalPatient: MedicalPatient | null = null
     if (appointmentData.medicalPatientId) {
       medicalPatient = getMedicalPatientById(appointmentData.medicalPatientId)
@@ -707,27 +707,27 @@ export function getAppointmentsByDate(date: string): UnifiedAppointment[] {
 
 // ==================== FUNÃ‡Ã•ES DE SCHEDULE SLOTS ====================
 
-export function getAllScheduleSlots(): ScheduleSlot[] {
-  return loadFromStorage<ScheduleSlot>(SCHEDULE_SLOTS_FILE)
+export function getAllSCHEDULESlots(): SCHEDULESlot[] {
+  return loadFromStorage<SCHEDULESlot>(SCHEDULE_SLOTS_FILE)
 }
 
-export function getScheduleSlotsByDate(date: string): ScheduleSlot[] {
-  const slots = getAllScheduleSlots()
+export function getSCHEDULESlotsByDate(date: string): SCHEDULESlot[] {
+  const slots = getAllSCHEDULESlots()
   return slots.filter(slot => slot.date === date && slot.isActive)
 }
 
-export function createScheduleSlot(
-  slotData: Partial<ScheduleSlot> & {
+export function createSCHEDULESlot(
+  slotData: Partial<SCHEDULESlot> & {
     date: string
     time: string
   },
   createdBy?: string
-): { success: boolean; slot: ScheduleSlot; message: string } {
+): { success: boolean; slot: SCHEDULESlot; message: string } {
   try {
-    const slots = getAllScheduleSlots()
+    const slots = getAllSCHEDULESlots()
     const now = getBrasiliaTimestamp()
     
-    // Verificar se jÃ¡ existe slot para a mesma data e horÃ¡rio
+    // Verificar se já¡ existe slot para a mesma data e horÃ¡rio
     const existingSlot = slots.find(
       slot => slot.date === slotData.date && slot.time === slotData.time
     )
@@ -735,12 +735,12 @@ export function createScheduleSlot(
     if (existingSlot) {
       return {
         success: false,
-        slot: {} as ScheduleSlot,
-        message: 'JÃ¡ existe um slot para esta data e horÃ¡rio'
+        slot: {} as SCHEDULESlot,
+        message: 'já¡ existe um slot para esta data e horÃ¡rio'
       }
     }
     
-    const newSlot: ScheduleSlot = {
+    const newSlot: SCHEDULESlot = {
       id: generateId('slot'),
       date: slotData.date,
       time: slotData.time,
@@ -762,29 +762,29 @@ export function createScheduleSlot(
     console.error('âŒ Erro ao criar slot de horÃ¡rio:', error)
     return {
       success: false,
-      slot: {} as ScheduleSlot,
+      slot: {} as SCHEDULESlot,
       message: 'Erro interno do servidor'
     }
   }
 }
 
-export function updateScheduleSlot(
+export function updateSCHEDULESlot(
   slotId: string,
-  updateData: Partial<ScheduleSlot>
-): { success: boolean; slot: ScheduleSlot; message: string } {
+  updateData: Partial<SCHEDULESlot>
+): { success: boolean; slot: SCHEDULESlot; message: string } {
   try {
-    const slots = getAllScheduleSlots()
+    const slots = getAllSCHEDULESlots()
     const slotIndex = slots.findIndex(slot => slot.id === slotId)
     
     if (slotIndex === -1) {
       return {
         success: false,
-        slot: {} as ScheduleSlot,
-        message: 'Slot nÃ£o encontrado'
+        slot: {} as SCHEDULESlot,
+        message: 'Slot não encontrado'
       }
     }
     
-    const updatedSlot: ScheduleSlot = {
+    const updatedSlot: SCHEDULESlot = {
       ...slots[slotIndex],
       ...updateData,
       updatedAt: getBrasiliaTimestamp()
@@ -802,21 +802,21 @@ export function updateScheduleSlot(
     console.error('âŒ Erro ao atualizar slot:', error)
     return {
       success: false,
-      slot: {} as ScheduleSlot,
+      slot: {} as SCHEDULESlot,
       message: 'Erro interno do servidor'
     }
   }
 }
 
-export function deleteScheduleSlot(slotId: string): { success: boolean; message: string } {
+export function deleteSCHEDULESlot(slotId: string): { success: boolean; message: string } {
   try {
-    const slots = getAllScheduleSlots()
+    const slots = getAllSCHEDULESlots()
     const slotIndex = slots.findIndex(slot => slot.id === slotId)
     
     if (slotIndex === -1) {
       return {
         success: false,
-        message: 'Slot nÃ£o encontrado'
+        message: 'Slot não encontrado'
       }
     }
     
@@ -841,11 +841,11 @@ export function getAllMedicalRecords(): MedicalRecord[] {
 }
 
 export function getMedicalRecordsByPatient(medicalPatientId: string): MedicalRecord[] {
-  console.log(`🔍 Buscando prontuários para paciente: ${medicalPatientId}`)
+  console.log(`🔍 Buscando prontuários para Paciente: ${medicalPatientId}`)
   const records = getAllMedicalRecords()
   console.log(`🔍 Total de prontuários encontrados: ${records.length}`)
   const filteredRecords = records.filter(record => record.medicalPatientId === medicalPatientId)
-  console.log(`🔍 Prontuários filtrados para o paciente: ${filteredRecords.length}`)
+  console.log(`🔍 Prontuários filtrados para o Paciente: ${filteredRecords.length}`)
   return filteredRecords
 }
 
@@ -866,13 +866,13 @@ export function createMedicalRecord(
     const records = getAllMedicalRecords()
     const now = getBrasiliaTimestamp()
     
-    // Verificar se o paciente mÃ©dico existe
+    // Verificar se o Paciente mÃ©dico existe
     const patient = getMedicalPatientById(recordData.medicalPatientId)
     if (!patient) {
       return {
         success: false,
         record: {} as MedicalRecord,
-        message: 'Paciente mÃ©dico nÃ£o encontrado'
+        message: 'Paciente mÃ©dico não encontrado'
       }
     }
     
@@ -912,7 +912,7 @@ export function createMedicalRecord(
       signedAt: recordData.signedAt,
       checksum,
       createdAt: now,
-      readonly: true // ProntuÃ¡rios sÃ£o sempre readonly
+      readonly: true // ProntuÃ¡rios são sempre readonly
     }
     
     records.push(newRecord)
@@ -971,11 +971,11 @@ export function createSurgery(
       return {
         success: false,
         surgery: {} as Surgery,
-        message: 'Contato nÃ£o encontrado'
+        message: 'Contato não encontrado'
       }
     }
     
-    // Buscar paciente mÃ©dico se existir
+    // Buscar Paciente mÃ©dico se existir
     let medicalPatient: MedicalPatient | null = null
     if (surgeryData.medicalPatientId) {
       medicalPatient = getMedicalPatientById(surgeryData.medicalPatientId)
@@ -1042,7 +1042,7 @@ export function updateSurgery(
       return {
         success: false,
         surgery: {} as Surgery,
-        message: 'Cirurgia nÃ£o encontrada'
+        message: 'Cirurgia não encontrada'
       }
     }
     
@@ -1078,7 +1078,7 @@ export function deleteSurgery(surgeryId: string): { success: boolean; message: s
     if (surgeryIndex === -1) {
       return {
         success: false,
-        message: 'Cirurgia nÃ£o encontrada'
+        message: 'Cirurgia não encontrada'
       }
     }
     
@@ -1110,7 +1110,7 @@ export function migrateFromOldSystems(): {
   }
   message: string
 } {
-  // Esta funÃ§Ã£o serÃ¡ implementada para migrar dados dos sistemas antigos
+  // Esta Função serÃ¡ implementada para migrar dados dos sistemas antigos
   // para o novo sistema unificado
   
   return {
@@ -1121,7 +1121,7 @@ export function migrateFromOldSystems(): {
       appointments: 0,
       medicalRecords: 0
     },
-    message: 'MigraÃ§Ã£o serÃ¡ implementada'
+    message: 'Migração serÃ¡ implementada'
   }
 }
 
@@ -1133,17 +1133,17 @@ export function validateDataIntegrity(): {
   const issues: string[] = []
   
   try {
-    // Verificar integridade dos contatos de comunicaÃ§Ã£o
+    // Verificar integridade dos contatos de Comunicação
     const contacts = getAllCommunicationContacts()
     
-    // Verificar integridade dos pacientes mÃ©dicos
+    // Verificar integridade dos PacienteS mÃ©dicos
     const patients = getAllMedicalPatients()
     
-    // Verificar se todos os pacientes mÃ©dicos tÃªm contatos de comunicaÃ§Ã£o vÃ¡lidos
+    // Verificar se todos os PacienteS mÃ©dicos tÃªm contatos de Comunicação vÃ¡lidos
     for (const patient of patients) {
       const contact = getCommunicationContactById(patient.communicationContactId)
       if (!contact) {
-        issues.push(`Paciente mÃ©dico ${patient.id} nÃ£o tem contato de comunicaÃ§Ã£o vÃ¡lido`)
+        issues.push(`Paciente mÃ©dico ${patient.id} não tem contato de Comunicação vÃ¡lido`)
       }
     }
     
@@ -1153,13 +1153,13 @@ export function validateDataIntegrity(): {
     for (const appointment of appointments) {
       const contact = getCommunicationContactById(appointment.communicationContactId)
       if (!contact) {
-        issues.push(`Agendamento ${appointment.id} nÃ£o tem contato de comunicaÃ§Ã£o vÃ¡lido`)
+        issues.push(`Agendamento ${appointment.id} não tem contato de Comunicação vÃ¡lido`)
       }
       
       if (appointment.medicalPatientId) {
         const patient = getMedicalPatientById(appointment.medicalPatientId)
         if (!patient) {
-          issues.push(`Agendamento ${appointment.id} referencia paciente mÃ©dico inexistente`)
+          issues.push(`Agendamento ${appointment.id} referencia Paciente mÃ©dico inexistente`)
         }
       }
     }
@@ -1170,7 +1170,7 @@ export function validateDataIntegrity(): {
     for (const record of records) {
       const patient = getMedicalPatientById(record.medicalPatientId)
       if (!patient) {
-        issues.push(`ProntuÃ¡rio ${record.id} referencia paciente mÃ©dico inexistente`)
+        issues.push(`ProntuÃ¡rio ${record.id} referencia Paciente mÃ©dico inexistente`)
       }
     }
     
@@ -1201,11 +1201,11 @@ export function updateMedicalRecord(
     if (recordIndex === -1) {
       return {
         success: false,
-        message: 'ProntuÃ¡rio mÃ©dico nÃ£o encontrado'
+        message: 'ProntuÃ¡rio mÃ©dico não encontrado'
       }
     }
     
-    // ProntuÃ¡rios sÃ£o readonly por padrÃ£o, mas permitir atualizaÃ§Ãµes especÃ­ficas
+    // ProntuÃ¡rios são readonly por padrão, mas permitir atualizações especÃ­ficas
     const currentRecord = records[recordIndex]
     const now = getBrasiliaTimestamp()
     
@@ -1266,7 +1266,7 @@ export function deleteMedicalRecord(recordId: string): { success: boolean; messa
     if (recordIndex === -1) {
       return {
         success: false,
-        message: 'ProntuÃ¡rio mÃ©dico nÃ£o encontrado'
+        message: 'ProntuÃ¡rio mÃ©dico não encontrado'
       }
     }
     
@@ -1298,7 +1298,7 @@ export function updateAppointment(
     if (appointmentIndex === -1) {
       return {
         success: false,
-        message: 'Agendamento nÃ£o encontrado'
+        message: 'Agendamento não encontrado'
       }
     }
     
@@ -1312,7 +1312,7 @@ export function updateAppointment(
       if (!contact) {
         return {
           success: false,
-          message: 'Contato nÃ£o encontrado'
+          message: 'Contato não encontrado'
         }
       }
       
@@ -1326,7 +1326,7 @@ export function updateAppointment(
       }
     }
     
-    // Se mudou o paciente mÃ©dico, atualizar dados mÃ©dicos
+    // Se mudou o Paciente mÃ©dico, atualizar dados mÃ©dicos
     let updatedPatientData = {}
     if (updateData.medicalPatientId !== undefined) {
       if (updateData.medicalPatientId) {
@@ -1382,7 +1382,7 @@ export function deleteAppointment(appointmentId: string): { success: boolean; me
     if (appointmentIndex === -1) {
       return {
         success: false,
-        message: 'Agendamento nÃ£o encontrado'
+        message: 'Agendamento não encontrado'
       }
     }
     
@@ -1410,14 +1410,14 @@ export function deleteMedicalPatient(patientId: string): { success: boolean; mes
     if (patientIndex === -1) {
       return {
         success: false,
-        message: 'Paciente mÃ©dico nÃ£o encontrado'
+        message: 'Paciente mÃ©dico não encontrado'
       }
     }
     
     // Verificar se existem prontuÃ¡rios mÃ©dicos associados (excluir em cascata)
     const medicalRecords = getMedicalRecordsByPatient(patientId)
     if (medicalRecords.length > 0) {
-      console.log('🗑️ Excluindo prontuÃ¡rios mÃ©dicos associados ao paciente:', medicalRecords.map(record => ({
+      console.log('🗑️ Excluindo prontuÃ¡rios mÃ©dicos associados ao Paciente:', medicalRecords.map(record => ({
         id: record.id,
         consultationDate: record.consultationDate,
         doctorName: record.doctorName
@@ -1431,13 +1431,13 @@ export function deleteMedicalPatient(patientId: string): { success: boolean; mes
       saveToStorage(MEDICAL_RECORDS_FILE, remainingMedicalRecords)
     }
     
-    // Excluir cirurgias associadas ao paciente
+    // Excluir cirurgias associadas ao Paciente
     const surgeries = getAllSurgeries()
     const associatedSurgeries = surgeries.filter(surgery => 
       surgery.medicalPatientId === patientId
     )
     if (associatedSurgeries.length > 0) {
-      console.log('🗑️ Excluindo cirurgias associadas ao paciente:', associatedSurgeries.map(surgery => ({
+      console.log('🗑️ Excluindo cirurgias associadas ao Paciente:', associatedSurgeries.map(surgery => ({
         id: surgery.id,
         surgeryType: surgery.surgeryType,
         date: surgery.date,
@@ -1451,13 +1451,13 @@ export function deleteMedicalPatient(patientId: string): { success: boolean; mes
       saveToStorage(SURGERIES_FILE, remainingSurgeries)
     }
     
-    // Excluir agendamentos associados ao paciente
+    // Excluir agendamentos associados ao Paciente
     const appointments = getAllAppointments()
     const associatedAppointments = appointments.filter(apt => 
       apt.medicalPatientId === patientId || apt.patientId === patientId
     )
     if (associatedAppointments.length > 0) {
-      console.log('🗑️ Excluindo agendamentos associados ao paciente:', associatedAppointments.map(apt => ({
+      console.log('🗑️ Excluindo agendamentos associados ao Paciente:', associatedAppointments.map(apt => ({
         id: apt.id,
         patientName: apt.patientName,
         date: apt.appointmentDate,
@@ -1471,7 +1471,7 @@ export function deleteMedicalPatient(patientId: string): { success: boolean; mes
       saveToStorage(APPOINTMENTS_FILE, remainingAppointments)
     }
     
-    // Remover o paciente mÃ©dico
+    // Remover o Paciente mÃ©dico
     patients.splice(patientIndex, 1)
     saveToStorage(MEDICAL_PATIENTS_FILE, patients)
     
@@ -1480,13 +1480,14 @@ export function deleteMedicalPatient(patientId: string): { success: boolean; mes
       message: 'Paciente mÃ©dico deletado com sucesso'
     }
   } catch (error) {
-    console.error('âŒ Erro ao deletar paciente mÃ©dico:', error)
+    console.error('âŒ Erro ao deletar Paciente mÃ©dico:', error)
     return {
       success: false,
       message: 'Erro interno do servidor'
     }
   }
 }
+
 
 
 

@@ -1,5 +1,5 @@
-// Sistema de Notificações do Telegram
-// Função utilitária para enviar notificações de agendamentos via Telegram
+﻿// Sistema de Notificações do Telegram
+// Função utilitária para enviar Notificações de agendamentos via Telegram
 
 export interface AppointmentNotificationData {
   patientName: string
@@ -15,7 +15,7 @@ export interface AppointmentNotificationData {
 }
 
 /**
- * Envia notificação de nova consulta via Telegram
+ * Envia Notificação de nova consulta via Telegram
  */
 export async function sendTelegramAppointmentNotification(
   appointmentData: AppointmentNotificationData
@@ -24,15 +24,15 @@ export async function sendTelegramAppointmentNotification(
   const telegramChatId = process.env['TELEGRAM_CHAT_ID']
 
   if (!telegramToken || !telegramChatId) {
-    console.log('ℹ️ Telegram não configurado - notificação não enviada')
-    return { success: false, error: 'Telegram não configurado' }
+    console.log('ℹ️ Telegram Não configurado - Notificação Não enviada')
+    return { success: false, error: 'Telegram Não configurado' }
   }
 
   try {
     // Formatar data para exibição
     const formattedDate = formatDateForDisplay(appointmentData.appointmentDate)
 
-    // Gerar link do WhatsApp para confirmação
+    // Gerar link do WhatsApp para Confirmação
     const whatsappLink = generateWhatsAppConfirmationLink(
       appointmentData.patientWhatsapp,
       appointmentData.patientName,
@@ -42,7 +42,7 @@ export async function sendTelegramAppointmentNotification(
 
     // Criar mensagem do Telegram
     const telegramMessage =
-      `🩺 *NOVA CONSULTA AGENDADA*\n\n` +
+      `🩺 *NOVA consulta agendada*\n\n` +
       `👤 *Paciente:* ${appointmentData.patientName}\n` +
       `📧 *Email:* ${appointmentData.patientEmail || 'Não informado'}\n` +
       `📞 *Telefone:* ${appointmentData.patientPhone}\n` +
@@ -50,7 +50,7 @@ export async function sendTelegramAppointmentNotification(
       `🏥 *Plano:* ${getInsuranceDisplayName(appointmentData.insuranceType)}\n` +
       `📅 *Data:* ${formattedDate}\n` +
       `⏰ *Horário:* ${appointmentData.appointmentTime}\n` +
-      `🏷️ *Tipo:* ${appointmentData.appointmentType || 'Consulta'}\n` +
+      `🏷️ *Tipo:* ${appointmentData.appointmentType || 'consulta'}\n` +
       `📋 *Origem:* ${getSourceDisplayName(appointmentData.source)}\n` +
       (appointmentData.notes
         ? `📝 *Observações:* ${appointmentData.notes}\n`
@@ -84,7 +84,7 @@ export async function sendTelegramAppointmentNotification(
     console.log('✅ Notificação Telegram enviada com sucesso!')
     return { success: true }
   } catch (error) {
-    console.error('❌ Erro ao enviar notificação Telegram:', error)
+    console.error('❌ Erro ao enviar Notificação Telegram:', error)
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Erro desconhecido',
@@ -102,8 +102,8 @@ export async function sendTelegramReminderNotification(
   const telegramChatId = process.env['TELEGRAM_CHAT_ID']
 
   if (!telegramToken || !telegramChatId) {
-    console.log('ℹ️ Telegram não configurado - lembrete não enviado')
-    return { success: false, error: 'Telegram não configurado' }
+    console.log('ℹ️ Telegram Não configurado - lembrete Não enviado')
+    return { success: false, error: 'Telegram Não configurado' }
   }
 
   try {
@@ -117,7 +117,7 @@ export async function sendTelegramReminderNotification(
     )
 
     const telegramMessage =
-      `📅 *LEMBRETE DE CONSULTA - AMANHÃ*\n\n` +
+      `📅 *lembrete DE consulta - AMANHÃ*\n\n` +
       `👤 *Paciente:* ${appointmentData.patientName}\n` +
       `📱 *WhatsApp:* ${appointmentData.patientWhatsapp}\n` +
       `📅 *Data:* ${formattedDate}\n` +
@@ -148,7 +148,7 @@ export async function sendTelegramReminderNotification(
       )
     }
 
-    console.log(`✅ Lembrete Telegram (${reminderType}) enviado com sucesso!`)
+    console.log(`✅ lembrete Telegram (${reminderType}) enviado com sucesso!`)
     return { success: true }
   } catch (error) {
     console.error(
@@ -173,8 +173,8 @@ export async function sendTelegramDailyAgenda(
   const telegramChatId = process.env['TELEGRAM_CHAT_ID']
 
   if (!telegramToken || !telegramChatId) {
-    console.log('ℹ️ Telegram não configurado - agenda diária não enviada')
-    return { success: false, error: 'Telegram não configurado' }
+    console.log('ℹ️ Telegram Não configurado - agenda diária Não enviada')
+    return { success: false, error: 'Telegram Não configurado' }
   }
 
   try {
@@ -316,7 +316,7 @@ function generateWhatsAppConfirmationLink(
   const cleanPatientWhatsApp = whatsapp.replace(/\D/g, '')
 
   const message =
-    `🏥 Confirmação de Consulta\n\n` +
+    `🏥 Confirmação de consulta\n\n` +
     `Olá ${patientName}!\n\n` +
     `Sua consulta foi agendada com sucesso:\n` +
     `📅 Data: ${date}\n` +
@@ -337,7 +337,7 @@ function generateWhatsAppReminderLink(
   const cleanPatientWhatsApp = patientWhatsapp.replace(/\D/g, '')
 
   const message =
-    `🏥 Lembrete de Consulta\n\n` +
+    `🏥 lembrete de consulta\n\n` +
     `Olá ${patientName}!\n\n` +
     `Lembramos que você tem consulta marcada:\n` +
     `📅 Data: ${date}\n` +
@@ -348,3 +348,4 @@ function generateWhatsAppReminderLink(
 
   return `https://wa.me/55${cleanPatientWhatsApp}?text=${encodeURIComponent(message)}`
 }
+

@@ -1,4 +1,4 @@
-import { z } from 'zod'
+﻿import { z } from 'zod'
 
 // Schema para validação de pacientes
 export const PatientSchema = z.object({
@@ -9,7 +9,7 @@ export const PatientSchema = z.object({
     .max(100, 'Nome muito longo'),
   phone: z
     .string()
-    .regex(/^\(?\d{2}\)?\s?\d{4,5}-?\d{4}$/, 'Formato de telefone inválido'),
+    .regex(/^\(?\d{2}\)?\s?\d{4,5}-?\d{4}$/, 'Formato de Telefone inválido'),
   whatsapp: z
     .string()
     .regex(/^\(?\d{2}\)?\s?\d{4,5}-?\d{4}$/, 'Formato de WhatsApp inválido'),
@@ -170,7 +170,7 @@ export const RegisterSchema = z
     specialties: z.array(z.string()).optional(),
     phone: z
       .string()
-      .regex(/^\(?\d{2}\)?\s?\d{4,5}-?\d{4}$/, 'Formato de telefone inválido')
+      .regex(/^\(?\d{2}\)?\s?\d{4,5}-?\d{4}$/, 'Formato de Telefone inválido')
       .optional(),
   })
   .refine(data => data.password === data.confirmPassword, {
@@ -344,3 +344,4 @@ export function formatCPF(cpf: string): string {
 
   return cpf
 }
+
