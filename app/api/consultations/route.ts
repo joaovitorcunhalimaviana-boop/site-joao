@@ -7,6 +7,7 @@ import {
   updateAppointment,
   UnifiedAppointment 
 } from '@/lib/unified-patient-system'
+import { ApiRedisCache } from '@/lib/redis-cache'
 
 const JWT_SECRET = process.env['JWT_SECRET'] || 'your-secret-key'
 
@@ -51,7 +52,7 @@ async function verifyAuth() {
 function convertAppointmentToConsultation(appointment: UnifiedAppointment): Consultation {
   return {
     id: appointment.id,
-    patientId: appointment.patientId,
+    patientId: appointment.patientId || appointment.communicationContactId,
     patientName: appointment.patientName,
     date: appointment.appointmentDate,
     time: appointment.appointmentTime,
@@ -76,6 +77,13 @@ export async function GET() {
       )
     }
 
+    // Tentar buscar do cache primeiro
+    const cacheKey = 'consultations:all'
+    const cachedResult = await ApiRedisCache.get(cacheKey)
+    if (cachedResult) {
+      return NextResponse.json(cachedResult)
+    }
+
     // Buscar agendamentos do sistema unificado
     const appointments = await getAllAppointments()
     
@@ -97,10 +105,18 @@ export async function GET() {
     })))
     console.log('===============================')
 
-    return NextResponse.json({
+    const result = {
       success: true,
       consultations: allConsultations,
+    }
+
+    // Cache por 2 minutos
+    await ApiRedisCache.set(cacheKey, result, { 
+      ttl: 2 * 60 * 1000, 
+      tags: ['consultations', 'appointments'] 
     })
+
+    return NextResponse.json(result)
   } catch (error) {
     console.error('Erro ao listar consultas:', error)
     return NextResponse.json(
@@ -134,11 +150,13 @@ export async function POST(request: NextRequest) {
 
     // Criar agendamento no sistema unificado
     const appointmentData = {
+      communicationContactId: patientId,
       patientId,
       patientName,
       appointmentDate: date,
       appointmentTime: time,
       appointmentType: type,
+      source: 'doctor_area' as const,
       status: 'agendada' as const,
       notes: notes || '',
       createdBy: auth.username || 'system'
@@ -148,10 +166,13 @@ export async function POST(request: NextRequest) {
 
     if (!result.success) {
       return NextResponse.json(
-        { success: false, error: result.error },
+        { success: false, error: result.message },
         { status: 400 }
       )
     }
+
+    // Invalidar cache de consultas e agendamentos
+    await ApiRedisCache.invalidateByTags(['consultations', 'appointments'])
 
     // Converter para formato de consulta
     const consultation = convertAppointmentToConsultation(result.appointment!)
@@ -208,10 +229,13 @@ export async function PUT(request: NextRequest) {
 
     if (!result.success) {
       return NextResponse.json(
-        { success: false, error: result.error },
-        { status: result.error === 'Agendamento não encontrado' ? 404 : 400 }
+        { success: false, error: result.message },
+        { status: result.message === 'Agendamento não encontrado' ? 404 : 400 }
       )
     }
+
+    // Invalidar cache de consultas e agendamentos
+    await ApiRedisCache.invalidateByTags(['consultations', 'appointments'])
 
     // Converter para formato de consulta
     const consultation = convertAppointmentToConsultation(result.appointment!)
@@ -256,10 +280,13 @@ export async function DELETE(request: NextRequest) {
 
     if (!result.success) {
       return NextResponse.json(
-        { success: false, error: result.error },
-        { status: result.error === 'Agendamento não encontrado' ? 404 : 400 }
+        { success: false, error: result.message },
+        { status: result.message === 'Agendamento não encontrado' ? 404 : 400 }
       )
     }
+
+    // Invalidar cache de consultas e agendamentos
+    await ApiRedisCache.invalidateByTags(['consultations', 'appointments'])
 
     // Converter para formato de consulta
     const consultation = convertAppointmentToConsultation(result.appointment!)

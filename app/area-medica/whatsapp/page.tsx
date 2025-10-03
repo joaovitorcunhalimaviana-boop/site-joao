@@ -31,6 +31,13 @@ interface Patient {
   insurancePlan?: string
   createdAt: string
   updatedAt: string
+  whatsappPreferences?: {
+    appointments: boolean
+    reminders: boolean
+    promotions: boolean
+    subscribed: boolean
+    subscribedAt?: string
+  }
 }
 
 export default function WhatsAppPage() {
@@ -47,16 +54,16 @@ export default function WhatsAppPage() {
   useEffect(() => {
     const loadPatients = async () => {
       try {
-        const response = await fetch('/api/unified-appointments?action=all-patients')
+        const response = await fetch('/api/unified-system/communication-contacts')
         const data = await response.json()
         
-        if (data.success && data.patients) {
-          const patientsWithWhatsApp = data.patients.filter((p: Patient) => p.whatsapp)
-          setPatients(patientsWithWhatsApp)
-          setFilteredPatients(patientsWithWhatsApp)
+        if (data.success && data.contacts) {
+          const contactsWithWhatsApp = data.contacts.filter((c: Patient) => c.whatsapp && c.whatsappPreferences?.whatsappSubscribed)
+          setPatients(contactsWithWhatsApp)
+          setFilteredPatients(contactsWithWhatsApp)
         }
       } catch (error) {
-        console.error('Erro ao carregar pacientes:', error)
+        console.error('Erro ao carregar contatos:', error)
       } finally {
         setLoading(false)
       }

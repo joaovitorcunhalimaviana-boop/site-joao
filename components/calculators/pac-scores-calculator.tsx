@@ -279,13 +279,22 @@ export default function PACScoresCalculator({
   const qolInterpretation = getQolInterpretation(qolScore)
 
   const calculatorData = {
+    calculatorName: 'PAC-SYM & PAC-QOL (Constipação)',
+    calculatorType: 'pac-scores',
     type: 'pac-scores',
     symAnswers,
     qolAnswers,
     symScore: Number(symScore.toFixed(2)),
     qolScore: Number(qolScore.toFixed(2)),
+    result: {
+      symScore: Number(symScore.toFixed(2)),
+      qolScore: Number(qolScore.toFixed(2)),
+      symInterpretation: symInterpretation.text,
+      qolInterpretation: qolInterpretation.text,
+    },
     symInterpretation: symInterpretation.text,
     qolInterpretation: qolInterpretation.text,
+    interpretation: `PAC-SYM: ${symInterpretation.text}, PAC-QOL: ${qolInterpretation.text}`,
     notes,
     date: new Date().toISOString(),
   }

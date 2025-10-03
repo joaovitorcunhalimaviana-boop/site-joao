@@ -1,8 +1,8 @@
 'use client'
 
-// Sistema de otimização de bundle e code splitting
+// Sistema de otimização de bundle e code splitting - Versão Otimizada
 
-import { lazy, ComponentType, LazyExoticComponent } from 'react'
+import { lazy, ComponentType, LazyExoticComponent, Suspense } from 'react'
 import { cacheManager } from './cache-manager'
 
 // Tipos para otimização de bundle
@@ -29,12 +29,14 @@ interface ChunkLoadOptions {
   cache?: boolean
 }
 
-// Gerenciador de analytics de bundle
-class BundleAnalyticsManager {
+// Gerenciador de analytics de bundle otimizado
+class OptimizedBundleAnalyticsManager {
   private analytics = new Map<string, BundleAnalytics>()
   private observers: ((analytics: BundleAnalytics) => void)[] = []
+  private preloadQueue = new Set<string>()
+  private loadingPromises = new Map<string, Promise<any>>()
 
-  // Registrar carregamento de chunk
+  // Registrar carregamento de chunk com otimizações
   recordChunkLoad(chunkName: string, loadTime: number, success: boolean) {
     const existing = this.analytics.get(chunkName) || {
       chunkName,
@@ -47,9 +49,9 @@ class BundleAnalyticsManager {
 
     const updated: BundleAnalytics = {
       ...existing,
-      loadTime:
-        (existing.loadTime + loadTime) /
-        (success ? existing.successCount + 1 : existing.successCount || 1),
+      loadTime: success 
+        ? (existing.loadTime * existing.successCount + loadTime) / (existing.successCount + 1)
+        : existing.loadTime,
       errorCount: success ? existing.errorCount : existing.errorCount + 1,
       successCount: success ? existing.successCount + 1 : existing.successCount,
       lastLoaded: Date.now(),
@@ -57,6 +59,33 @@ class BundleAnalyticsManager {
 
     this.analytics.set(chunkName, updated)
     this.notifyObservers(updated)
+  }
+
+  // Preload inteligente baseado em analytics
+  async intelligentPreload(chunkName: string, importFn: () => Promise<any>) {
+    if (this.preloadQueue.has(chunkName) || this.loadingPromises.has(chunkName)) {
+      return this.loadingPromises.get(chunkName)
+    }
+
+    this.preloadQueue.add(chunkName)
+    const startTime = performance.now()
+
+    try {
+      const promise = importFn()
+      this.loadingPromises.set(chunkName, promise)
+      
+      const result = await promise
+      const loadTime = performance.now() - startTime
+      
+      this.recordChunkLoad(chunkName, loadTime, true)
+      return result
+    } catch (error) {
+      const loadTime = performance.now() - startTime
+      this.recordChunkLoad(chunkName, loadTime, false)
+      throw error
+    } finally {
+      this.preloadQueue.delete(chunkName)
+    }
   }
 
   // Obter analytics de um chunk
@@ -81,7 +110,10 @@ class BundleAnalyticsManager {
   }
 
   private notifyObservers(analytics: BundleAnalytics) {
-    this.observers.forEach(observer => observer(analytics))
+    // Throttle notifications para evitar spam
+    requestIdleCallback(() => {
+      this.observers.forEach(observer => observer(analytics))
+    })
   }
 
   // Obter chunks com pior performance
@@ -97,13 +129,24 @@ class BundleAnalyticsManager {
 
   // Limpar analytics antigas
   cleanup(maxAge = 7 * 24 * 60 * 60 * 1000) {
-    // 7 dias
     const now = Date.now()
-    for (const [chunkName, analytics] of this.analytics) {
+    for (const [chunkName, analytics] of this.analytics.entries()) {
       if (now - analytics.lastLoaded > maxAge) {
         this.analytics.delete(chunkName)
       }
     }
+  }
+
+  // Otimizar ordem de carregamento baseado em prioridade
+  getPriorityLoadOrder(): string[] {
+    return Array.from(this.analytics.values())
+      .sort((a, b) => {
+        // Priorizar chunks com maior taxa de sucesso e menor tempo de carregamento
+        const aScore = (a.successCount / (a.successCount + a.errorCount)) / a.loadTime
+        const bScore = (b.successCount / (b.successCount + b.errorCount)) / b.loadTime
+        return bScore - aScore
+      })
+      .map(analytics => analytics.chunkName)
   }
 }
 
@@ -204,11 +247,11 @@ class PreloadManager {
   }
 }
 
-// Instâncias globais
-const bundleAnalytics = new BundleAnalyticsManager()
+// Instâncias globais otimizadas
+const bundleAnalytics = new OptimizedBundleAnalyticsManager()
 const preloadManager = new PreloadManager()
 
-// Função para criar componentes lazy com otimizações
+// Função para criar componentes lazy com otimizações avançadas
 export function createOptimizedLazy<T extends ComponentType<any>>(
   importFn: () => Promise<{ default: T }>,
   chunkName: string,
@@ -228,12 +271,12 @@ export function createOptimizedLazy<T extends ComponentType<any>>(
     preloadManager.addToQueue(chunkName, priority)
   }
 
-  // Wrapper para importação com retry e analytics
+  // Wrapper para importação com retry e analytics otimizado
   const wrappedImport = async (): Promise<{ default: T }> => {
-    const startTime = Date.now()
+    const startTime = performance.now()
     let lastError: Error | null = null
 
-    // Tentar cache primeiro
+    // Tentar cache primeiro com verificação otimizada
     if (cache) {
       const cached = cacheManager.memory.get<{ default: T }>(
         `chunk_${chunkName}`
@@ -242,7 +285,7 @@ export function createOptimizedLazy<T extends ComponentType<any>>(
         if (analytics) {
           bundleAnalytics.recordChunkLoad(
             chunkName,
-            Date.now() - startTime,
+            performance.now() - startTime,
             true
           )
         }
@@ -250,54 +293,68 @@ export function createOptimizedLazy<T extends ComponentType<any>>(
       }
     }
 
-    // Tentar carregar com retry
-    for (let attempt = 0; attempt <= retries; attempt++) {
-      try {
-        const timeoutPromise = new Promise<never>((_, reject) => {
-          setTimeout(() => reject(new Error('Timeout')), timeout)
+    // Usar preload inteligente se disponível
+    try {
+      const result = await bundleAnalytics.intelligentPreload(chunkName, importFn)
+      
+      // Cachear resultado com TTL otimizado
+      if (cache) {
+        cacheManager.memory.set(`chunk_${chunkName}`, result, {
+          ttl: 30 * 60 * 1000, // 30 minutos
+          tags: ['chunks', `chunk_${chunkName}`],
         })
+      }
 
-        const result = await Promise.race([importFn(), timeoutPromise])
-
-        const loadTime = Date.now() - startTime
-
-        // Cachear resultado
-        if (cache) {
-          cacheManager.memory.set(`chunk_${chunkName}`, result, {
-            ttl: 30 * 60 * 1000, // 30 minutos
-            tags: ['chunks'],
+      return result
+    } catch (error) {
+      // Fallback para carregamento com retry
+      for (let attempt = 0; attempt <= retries; attempt++) {
+        try {
+          const timeoutPromise = new Promise<never>((_, reject) => {
+            setTimeout(() => reject(new Error('Timeout')), timeout)
           })
-        }
 
-        // Registrar analytics
-        if (analytics) {
-          bundleAnalytics.recordChunkLoad(chunkName, loadTime, true)
-        }
+          const result = await Promise.race([importFn(), timeoutPromise])
+          const loadTime = performance.now() - startTime
 
-        return result
-      } catch (error) {
-        lastError = error as Error
+          // Cachear resultado
+          if (cache) {
+            cacheManager.memory.set(`chunk_${chunkName}`, result, {
+              ttl: 30 * 60 * 1000,
+              tags: ['chunks', `chunk_${chunkName}`],
+            })
+          }
 
-        if (attempt < retries) {
-          // Esperar antes de tentar novamente (backoff exponencial)
-          await new Promise(resolve =>
-            setTimeout(resolve, Math.pow(2, attempt) * 1000)
-          )
+          // Registrar analytics
+          if (analytics) {
+            bundleAnalytics.recordChunkLoad(chunkName, loadTime, true)
+          }
+
+          return result
+        } catch (error) {
+          lastError = error as Error
+
+          if (attempt < retries) {
+            // Esperar antes de tentar novamente (backoff exponencial)
+            await new Promise(resolve =>
+              setTimeout(resolve, Math.pow(2, attempt) * 1000)
+            )
+          }
         }
       }
-    }
 
-    // Registrar falha nas analytics
-    if (analytics) {
-      bundleAnalytics.recordChunkLoad(chunkName, Date.now() - startTime, false)
-    }
+      // Registrar falha nas analytics
+      if (analytics) {
+        bundleAnalytics.recordChunkLoad(chunkName, performance.now() - startTime, false)
+      }
 
-    throw (
-      lastError ||
-      new Error(
-        `Failed to load chunk ${chunkName} after ${retries + 1} attempts`
+      throw (
+        lastError ||
+        new Error(
+          `Failed to load chunk ${chunkName} after ${retries + 1} attempts`
+        )
       )
-    )
+    }
   }
 
   return lazy(wrappedImport)
@@ -515,7 +572,7 @@ export function setupBundleOptimization() {
 export {
   bundleAnalytics,
   preloadManager,
-  BundleAnalyticsManager,
+  OptimizedBundleAnalyticsManager as BundleAnalyticsManager,
   PreloadManager,
 }
 

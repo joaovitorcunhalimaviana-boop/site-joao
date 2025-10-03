@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { PrismaClient } from '@prisma/client'
+import { prisma } from '@/lib/database'
 import * as fs from 'fs'
 import * as path from 'path'
-
-const prisma = new PrismaClient()
+import crypto from 'crypto'
 
 interface BackupData {
   timestamp: string
@@ -21,7 +20,6 @@ interface BackupData {
 
 // Função para gerar checksum dos dados
 function generateChecksum(data: any): string {
-  const crypto = require('crypto')
   return crypto.createHash('sha256').update(JSON.stringify(data)).digest('hex')
 }
 

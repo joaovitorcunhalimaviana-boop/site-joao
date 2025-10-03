@@ -1,31 +1,74 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { 
   getAllAppointments,
-  createAppointment,
   getAppointmentsByDate,
-  UnifiedAppointment
+  createAppointment
 } from '@/lib/unified-patient-system'
+import { ApiRedisCache } from '@/lib/redis-cache'
 
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const date = searchParams.get('date')
+    const status = searchParams.get('status')
+    const patientName = searchParams.get('patientName')
+    const page = parseInt(searchParams.get('page') || '1')
+    const limit = parseInt(searchParams.get('limit') || '20')
 
-    if (date) {
-      const appointments = getAppointmentsByDate(date)
-      return NextResponse.json({
-        success: true,
-        appointments,
-        count: appointments.length
-      })
+    // Tentar buscar do cache primeiro
+    const cachedResult = await ApiRedisCache.appointments.get(date || undefined, page, limit)
+    if (cachedResult) {
+      return NextResponse.json(cachedResult)
     }
 
-    const appointments = getAllAppointments()
-    return NextResponse.json({
-      success: true,
-      appointments,
-      count: appointments.length
+    // Buscar agendamentos
+    let appointments = date ? getAppointmentsByDate(date) : getAllAppointments()
+
+    // Aplicar filtros
+    if (status) {
+      appointments = appointments.filter(appointment => 
+        appointment.status === status
+      )
+    }
+
+    if (patientName) {
+      const searchTerm = patientName.toLowerCase()
+      appointments = appointments.filter(appointment => 
+        appointment.patientName.toLowerCase().includes(searchTerm)
+      )
+    }
+
+    // Ordenar por data e hora
+    appointments.sort((a, b) => {
+      const dateA = new Date(`${a.appointmentDate} ${a.appointmentTime}`)
+      const dateB = new Date(`${b.appointmentDate} ${b.appointmentTime}`)
+      return dateA.getTime() - dateB.getTime()
     })
+
+    // Aplicar paginação
+    const total = appointments.length
+    const totalPages = Math.ceil(total / limit)
+    const startIndex = (page - 1) * limit
+    const endIndex = startIndex + limit
+    const paginatedAppointments = appointments.slice(startIndex, endIndex)
+
+    const result = {
+      success: true,
+      appointments: paginatedAppointments,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages,
+        hasNext: page < totalPages,
+        hasPrev: page > 1
+      }
+    }
+
+    // Cache por 2 minutos
+    await ApiRedisCache.appointments.set(date || undefined, page, limit, result)
+
+    return NextResponse.json(result)
   } catch (error) {
     console.error('❌ Erro ao buscar agendamentos:', error)
     return NextResponse.json(

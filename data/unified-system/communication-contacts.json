@@ -104,5 +104,32 @@
     "createdAt": "2025-10-01T04:47:10.000Z",
     "updatedAt": "2025-10-01T04:47:10.000Z",
     "lastContactAt": "2025-10-01T04:47:10.000Z"
+  },
+  {
+    "id": "comm_1759447627039_ltvdko2zs",
+    "name": "João Vítor da Cunha Lima Viana",
+    "email": "joaovitorcunhalimaviana@gmail.com",
+    "whatsapp": "(83) 99866-3089",
+    "birthDate": "1997-01-02",
+    "registrationSources": [
+      "public_appointment"
+    ],
+    "emailPreferences": {
+      "newsletter": false,
+      "healthTips": false,
+      "appointments": true,
+      "promotions": false,
+      "subscribed": false
+    },
+    "whatsappPreferences": {
+      "appointments": true,
+      "reminders": true,
+      "promotions": false,
+      "subscribed": true,
+      "subscribedAt": "2025-10-02T23:27:07.000Z"
+    },
+    "createdAt": "2025-10-02T23:27:07.000Z",
+    "updatedAt": "2025-10-03T14:07:41.000Z",
+    "lastContactAt": "2025-10-03T14:07:41.000Z"
   }
 ]

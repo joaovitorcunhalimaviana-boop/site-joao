@@ -182,9 +182,17 @@ export default function ConstipacaoCalculator({
   const interpretation = getScoreInterpretation(score)
 
   const calculatorData = {
+    calculatorName: 'Score de Constipação',
+    calculatorType: 'Constipacao',
     type: 'Constipacao',
     score,
     severity: interpretation.level,
+    result: {
+      score,
+      severity: interpretation.level,
+      interpretation: interpretation.description,
+    },
+    interpretation: interpretation.description,
     answers,
     timestamp: new Date().toISOString(),
   }

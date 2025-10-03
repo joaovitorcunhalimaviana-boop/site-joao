@@ -178,6 +178,7 @@ export default function HarveyBradshawCalculator({
       calculatorData={
         isComplete
           ? {
+              calculatorName: 'Harvey-Bradshaw Index',
               calculatorType: 'Harvey-Bradshaw Index',
               parameters: answers,
               result: {

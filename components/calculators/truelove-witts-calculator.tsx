@@ -226,6 +226,7 @@ export default function TrueloveWittsCalculator({
       calculatorData={
         isComplete && classification
           ? {
+              calculatorName: 'Truelove-Witts (Retocolite Ulcerativa)',
               calculatorType: 'Truelove-Witts',
               parameters: answers,
               result: {
@@ -233,6 +234,7 @@ export default function TrueloveWittsCalculator({
                 description: classification.description,
                 recommendation: classification.recommendation,
                 risk: classification.risk,
+                interpretation: classification.description,
               },
               notes,
               timestamp: new Date().toISOString(),

@@ -110,9 +110,16 @@ export default function WexnerCalculator({
   const interpretation = getScoreInterpretation(score)
 
   const calculatorData = {
+    calculatorName: 'Score de Wexner',
+    calculatorType: 'wexner',
     type: 'wexner',
     answers,
     score,
+    result: {
+      score,
+      interpretation: interpretation.text,
+      category: interpretation.category,
+    },
     interpretation: interpretation.text,
     notes,
     date: new Date().toISOString(),

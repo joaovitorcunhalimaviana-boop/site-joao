@@ -7,6 +7,7 @@ import {
   getAllMedicalPatients,
   getMedicalPatientById,
   createMedicalPatient,
+  getCommunicationContactById,
 } from '../../../lib/unified-patient-system'
 
 // GET - Obter agendamentos, agenda diária ou estatísticas
@@ -50,7 +51,27 @@ export async function GET(request: NextRequest) {
 
       case 'all-patients':
         const allPatients = await getAllMedicalPatients()
-        return NextResponse.json({ success: true, patients: allPatients })
+        
+        // Combinar dados de pacientes médicos com contatos de comunicação
+        const patientsWithContactData = allPatients.map(patient => {
+          const contact = getCommunicationContactById(patient.communicationContactId)
+          return {
+            id: patient.id,
+            name: patient.fullName,
+            cpf: patient.cpf,
+            medicalRecordNumber: patient.medicalRecordNumber,
+            phone: contact?.whatsapp || '',
+            whatsapp: contact?.whatsapp || '',
+            email: contact?.email,
+            birthDate: contact?.birthDate,
+            insuranceType: patient.insurance.type,
+            insurancePlan: patient.insurance.plan,
+            createdAt: patient.createdAt,
+            updatedAt: patient.updatedAt
+          }
+        })
+        
+        return NextResponse.json({ success: true, patients: patientsWithContactData })
 
       case 'appointment-by-id':
         const appointmentId = searchParams.get('appointmentId')
@@ -79,14 +100,40 @@ export async function GET(request: NextRequest) {
             { status: 400 }
           )
         }
-        const patient = await getMedicalPatientById(patientId)
-        if (!patient) {
+        const medicalPatient = await getMedicalPatientById(patientId)
+        if (!medicalPatient) {
           return NextResponse.json(
             { success: false, error: 'Paciente não encontrado' },
             { status: 404 }
           )
         }
-        return NextResponse.json({ success: true, patient })
+        
+        // Buscar dados de comunicação para incluir informações de contato
+        const communicationContact = getCommunicationContactById(medicalPatient.communicationContactId)
+        
+        // Formato unificado com todos os dados necessários
+        const unifiedPatient = {
+          id: medicalPatient.id,
+          name: medicalPatient.fullName,
+          fullName: medicalPatient.fullName,
+          cpf: medicalPatient.cpf,
+          medicalRecordNumber: medicalPatient.medicalRecordNumber,
+          phone: communicationContact?.whatsapp || '',
+          whatsapp: communicationContact?.whatsapp || '',
+          email: communicationContact?.email || '',
+          birthDate: communicationContact?.birthDate || '',
+          insuranceType: medicalPatient.insurance.type,
+          insurancePlan: medicalPatient.insurance.plan,
+          createdAt: medicalPatient.createdAt,
+          updatedAt: medicalPatient.updatedAt,
+          isActive: medicalPatient.isActive,
+          // Dados médicos originais
+          insurance: medicalPatient.insurance,
+          medicalInfo: medicalPatient.medicalInfo,
+          consents: medicalPatient.consents
+        }
+        
+        return NextResponse.json({ success: true, patient: unifiedPatient })
 
       case 'stats':
         const statsAppointments = await getAllAppointments()
@@ -120,7 +167,22 @@ export async function GET(request: NextRequest) {
           )
         }
 
-        return NextResponse.json({ success: true, patient: getPatient })
+        // Incluir dados do contato de comunicação
+        const patientCommunicationContact = getCommunicationContactById(getPatient.communicationContactId)
+        
+        // Combinar dados do paciente médico com dados de comunicação para compatibilidade com o frontend
+        const combinedPatientData = {
+          ...getPatient,
+          // Campos esperados pelo frontend vindos do CommunicationContact
+          name: patientCommunicationContact?.name || getPatient.fullName,
+          phone: patientCommunicationContact?.whatsapp || '',
+          whatsapp: patientCommunicationContact?.whatsapp || '',
+          birthDate: patientCommunicationContact?.birthDate || '',
+          // Manter dados originais também
+          communicationContact: patientCommunicationContact
+        }
+
+        return NextResponse.json({ success: true, patient: combinedPatientData })
 
       default:
         return NextResponse.json(

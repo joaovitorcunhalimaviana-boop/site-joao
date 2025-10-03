@@ -88,17 +88,14 @@ export default function NovoPackiente() {
     setIsLoading(true)
 
     try {
-      const response = await fetch('/api/unified-appointments', {
+      const response = await fetch('/api/unified-system/medical-patients', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          action: 'create_patient',
-          patientData: {
-            ...formData,
-            source: 'medical_area',
-          },
+          ...formData,
+          source: 'doctor_area',
         }),
       })
 
@@ -108,11 +105,11 @@ export default function NovoPackiente() {
           alert('Paciente cadastrado com sucesso!')
           router.push('/area-medica')
         } else {
-          alert(result.error || 'Erro ao cadastrar paciente')
+          alert(result.message || 'Erro ao cadastrar paciente')
         }
       } else {
         const error = await response.json()
-        alert(error.error || 'Erro ao cadastrar paciente')
+        alert(error.message || 'Erro ao cadastrar paciente')
       }
     } catch (error) {
       console.error('Erro:', error)

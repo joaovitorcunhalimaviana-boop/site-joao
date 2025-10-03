@@ -196,9 +196,9 @@ export default function AppointmentPage() {
 
       const appointment = appointmentData.appointment
 
-      // Agora buscar os dados completos do paciente
+      // Agora buscar os dados completos do paciente usando o medicalPatientId
       const patientResponse = await fetch(
-        `/api/unified-appointments?action=patient-by-id&patientId=${appointment.patientId}`
+        `/api/unified-appointments?action=patient-by-id&patientId=${appointment.medicalPatientId}`
       )
 
       if (patientResponse.ok) {
@@ -231,9 +231,9 @@ export default function AppointmentPage() {
         return
       }
 
-      // Carregar histórico de consultas anteriores reais usando o patientId correto
+      // Carregar histórico de consultas anteriores reais usando o medicalPatientId correto
       const medicalRecordsResponse = await fetch(
-        `/api/medical-records?patientId=${appointment.patientId}`
+        `/api/medical-records?patientId=${appointment.medicalPatientId}`
       )
       if (medicalRecordsResponse.ok) {
         const patientRecords = await medicalRecordsResponse.json()
@@ -404,11 +404,18 @@ export default function AppointmentPage() {
   }
 
   const handleSaveCalculatorResult = (calculatorName: string, result: any) => {
+    console.log('🔍 Page - handleSaveCalculatorResult chamado com:', {
+      calculatorName,
+      result
+    })
+    
     const calculatorResult = {
       calculatorName,
       result,
       timestamp: new Date().toISOString(),
     }
+
+    console.log('🔍 Page - Objeto calculatorResult criado:', calculatorResult)
 
     setCalculatorResults(prev => {
       // Verificar se já existe uma calculadora com o mesmo nome E resultado
@@ -420,15 +427,16 @@ export default function AppointmentPage() {
 
       // Se já existe exatamente o mesmo resultado, não adicionar duplicata
       if (existingIndex !== -1) {
-        console.log('Resultado idêntico já existe, não adicionando duplicata')
+        console.log('🔍 Page - Resultado duplicado, não adicionando')
         return prev
       }
 
+      console.log('🔍 Page - Adicionando resultado ao estado (não é duplicata)')
       // Caso contrário, adicionar o novo resultado (permite múltiplas calculadoras diferentes)
       return [...prev, calculatorResult]
     })
 
-    console.log('Resultado da calculadora salvo:', calculatorResult)
+    console.log('🔍 Page - Estado atual de calculatorResults:', calculatorResults)
   }
 
   const handleFinishConsultation = async () => {
@@ -454,9 +462,9 @@ export default function AppointmentPage() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          patientId: patient.id,
+          medicalPatientId: patient.id, // Corrigido: usar medicalPatientId em vez de patientId
           anamnesis: anamnesis,
-          examination: '',
+          physicalExamination: '', // Adicionado campo esperado pela API
           diagnosis: '',
           treatment: '',
           prescription: '',
@@ -465,6 +473,7 @@ export default function AppointmentPage() {
               ? formatCalculatorResults(calculatorResults)
               : '',
           doctorName: 'Dr. João Vitor Viana',
+          doctorCrm: '', // Adicionado campo esperado pela API
           calculatorResults: calculatorResults,
           attachments: currentConsultationAttachments,
           diagnosticHypotheses: diagnosticHypotheses,

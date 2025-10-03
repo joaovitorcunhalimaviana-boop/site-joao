@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import Header from '../../components/ui/header'
 import BackgroundPattern from '../../components/ui/background-pattern'
@@ -8,6 +8,7 @@ import BrazilianDatePicker from '../../components/ui/brazilian-date-picker'
 import { TimePicker } from '../../components/ui/time-picker'
 import MedicalAreaMenu from '../../components/ui/medical-area-menu'
 import { getTodayISO } from '../../lib/date-utils'
+import { format } from 'date-fns'
 import {
   UserGroupIcon,
   CalendarDaysIcon,
@@ -77,17 +78,8 @@ export default function AreaMedicaPage() {
   const [scheduleDate, setScheduleDate] = useState('')
   const [scheduleTime, setScheduleTime] = useState('09:00')
   const [consultationType, setConsultationType] = useState('consulta')
-  const [selectedDate, setSelectedDate] = useState(() => {
-    const today = new Date()
-    const initialDate = (
-      today.getFullYear() +
-      '-' +
-      String(today.getMonth() + 1).padStart(2, '0') +
-      '-' +
-      String(today.getDate()).padStart(2, '0')
-    )
-    return initialDate
-  })
+  // Estados do componente
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date())
 
   const router = useRouter()
 
@@ -153,105 +145,180 @@ export default function AreaMedicaPage() {
     }
   }
 
-  // Função para carregar dados do dashboard
-  const loadDashboardData = async () => {
+  // Função para carregar dados do dashboard - otimizada com useCallback
+  const loadDashboardData = useCallback(async () => {
+    setIsLoading(true)
     try {
-      setIsLoading(true)
-
-      // Buscar agenda do dia usando a data selecionada
-      const dateToUse = selectedDate || getTodayISO()
+      console.log('🔍 [DEBUG] Iniciando carregamento de dados do dashboard...')
+      console.log('🔍 [DEBUG] Data selecionada:', selectedDate)
       
+      const formattedDate = format(selectedDate, 'yyyy-MM-dd')
+      console.log('🔍 [DEBUG] Data formatada:', formattedDate)
+
+      // Carregar agenda do dia
       const agendaResponse = await fetch(
-        `/api/unified-appointments?action=daily-agenda&date=${dateToUse}`
+        `/api/unified-appointments?action=daily-agenda&date=${formattedDate}`
       )
       const agendaData = await agendaResponse.json()
+      console.log('🔍 [DEBUG] Resposta da agenda:', agendaData)
 
-      if (agendaData.success) {
-        // Transformar os agendamentos em formato de pacientes com consulta
-        const appointmentsWithConsultation = agendaData.agenda.map((appointment: any) => ({
-          id: appointment.patientId,
-          name: appointment.patientName,
-          phone: appointment.patientPhone,
-          whatsapp: appointment.patientWhatsapp,
-          insurance: {
-            type: appointment.insuranceType || 'particular',
-            plan: appointment.insurancePlan
-          },
-          consultation: {
-            id: appointment.id,
-            time: appointment.appointmentTime,
-            type: appointment.appointmentType,
-            status: appointment.status
+      // Carregar todos os pacientes médicos
+      const patientsResponse = await fetch(
+        '/api/unified-system/medical-patients'
+      )
+      const patientsData = await patientsResponse.json()
+      console.log('🔍 [DEBUG] Resposta dos pacientes:', patientsData)
+      console.log('🔍 [DEBUG] Número de pacientes retornados:', patientsData.patients?.length || 0)
+
+      // Carregar estatísticas
+      const statsResponse = await fetch(
+        `/api/unified-appointments?action=stats&date=${formattedDate}`
+      )
+      const statsData = await statsResponse.json()
+      console.log('🔍 [DEBUG] Resposta das estatísticas:', statsData)
+
+      if (agendaData.success && patientsData.success && statsData.success) {
+        const todayAppointments = agendaData.agenda || []
+        const allPatients = patientsData.patients || []
+        
+        console.log('🔍 [DEBUG] Consultas de hoje:', todayAppointments)
+        console.log('🔍 [DEBUG] Todos os pacientes:', allPatients)
+
+        // Processar pacientes do dia - corrigindo o mapeamento
+        const todayPatientsData = todayAppointments.map((appointment: any) => {
+          // Buscar paciente pelos IDs disponíveis
+          let patient = allPatients.find((p: any) => 
+            p.id === appointment.patientId || 
+            p.id === appointment.communicationContactId ||
+            p.id === appointment.medicalPatientId
+          )
+          
+          // Se não encontrou pelo ID, buscar pelo nome
+          if (!patient) {
+            patient = allPatients.find((p: any) => 
+              p.name === appointment.patientName || 
+              p.fullName === appointment.patientName
+            )
           }
+          
+          console.log('🔍 [DEBUG] Processando consulta:', appointment)
+          console.log('🔍 [DEBUG] Paciente encontrado:', patient)
+          
+          // Se ainda não encontrou, criar um objeto paciente com os dados do agendamento
+          if (!patient) {
+            patient = {
+              id: appointment.patientId || appointment.communicationContactId,
+              name: appointment.patientName,
+              fullName: appointment.patientName,
+              phone: appointment.patientPhone,
+              whatsapp: appointment.patientWhatsapp,
+              email: appointment.patientEmail,
+              cpf: appointment.patientCpf,
+              insurance: {
+                type: appointment.insuranceType || 'particular'
+              }
+            }
+          }
+          
+          return {
+            ...patient,
+            // Garantir que o nome esteja sempre disponível
+            name: patient.name || patient.fullName || appointment.patientName,
+            consultation: {
+              id: appointment.id,
+              time: appointment.appointmentTime,
+              type: appointment.appointmentType,
+              status: appointment.status,
+              notes: appointment.notes
+            }
+          }
+        }).filter(Boolean)
+
+        console.log('🔍 [DEBUG] Pacientes do dia processados:', todayPatientsData)
+
+        // Processar pacientes atendidos
+        const attendedPatientsData = todayPatientsData.filter(
+          (patient: any) => patient.consultation?.status === 'concluida'
+        )
+
+        console.log('🔍 [DEBUG] Pacientes atendidos:', attendedPatientsData)
+
+        // Processar todos os pacientes - garantir que tenham a estrutura correta
+        const processedAllPatients = allPatients.map((patient: any) => ({
+          ...patient,
+          name: patient.name || patient.fullName,
+          phone: patient.phone || patient.whatsapp,
+          whatsapp: patient.whatsapp || patient.phone
         }))
 
-        // Filtrar pacientes do dia (não atendidos) e atendidos
-        const todayPatients = appointmentsWithConsultation.filter(
-          (patient: any) => patient.consultation.status !== 'concluida' && patient.consultation.status !== 'atendida'
-        )
-        const attendedPatients = appointmentsWithConsultation.filter(
-          (patient: any) => patient.consultation.status === 'concluida' || patient.consultation.status === 'atendida'
-        )
+        // Atualizar estados
+        setTodayPatients(todayPatientsData)
+        setAttendedPatients(attendedPatientsData)
+        setPatients(processedAllPatients)
+        setStats(statsData.stats)
 
-        setTodayPatients(todayPatients)
-        setAttendedPatients(attendedPatients)
-      }
-
-      // Buscar todos os pacientes do sistema unificado
-      const patientsResponse = await fetch('/api/unified-system/patients?action=all-patients')
-      const patientsData = await patientsResponse.json()
-
-      if (patientsData.success) {
-        setPatients(patientsData.patients)
-      }
-
-      // Buscar estatísticas
-      const statsResponse = await fetch('/api/unified-appointments?action=stats')
-      const statsData = await statsResponse.json()
-
-      if (statsData.success) {
-        // Calcular consultas do dia baseado na data selecionada
-        const todayConsultations = agendaData.success ? agendaData.agenda.length : 0
-        
-        setStats({
-          ...statsData.stats,
-          todayConsultations
-        })
+        console.log('🔍 [DEBUG] Estados atualizados:')
+        console.log('  - todayPatients:', todayPatientsData.length)
+        console.log('  - attendedPatients:', attendedPatientsData.length)
+        console.log('  - patients:', processedAllPatients.length)
+        console.log('  - stats:', statsData.stats)
+      } else {
+        console.error('❌ [DEBUG] Erro nas respostas das APIs:')
+        console.error('  - agenda success:', agendaData.success)
+        console.error('  - patients success:', patientsData.success)
+        console.error('  - stats success:', statsData.stats)
       }
     } catch (error) {
-      console.error('Erro ao carregar dados do dashboard:', error)
+      console.error('❌ [DEBUG] Erro ao carregar dados do dashboard:', error)
     } finally {
       setIsLoading(false)
+      console.log('🔍 [DEBUG] Carregamento finalizado')
     }
-  }
+  }, [selectedDate])
 
-  const handleLogout = async () => {
+  const handleLogout = useCallback(async () => {
     try {
       await fetch('/api/auth/logout', { method: 'POST' })
       router.push('/login-medico')
     } catch (error) {
       console.error('Erro no logout:', error)
     }
-  }
+  }, [router])
 
-  const filteredPatients = (
-    activeTab === 'today'
+  // Memoização da filtragem de pacientes para evitar recálculos desnecessários
+  const filteredPatients = useMemo(() => {
+    console.log('🔍 [DEBUG] Filtrando pacientes...')
+    console.log('🔍 [DEBUG] Tab ativa:', activeTab)
+    console.log('🔍 [DEBUG] Termo de busca:', searchTerm)
+    
+    const patientsToFilter = activeTab === 'today'
       ? todayPatients
       : activeTab === 'attended'
         ? attendedPatients
         : patients
-  ).filter(
-    patient =>
-      (patient.name && patient.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
-      (patient.phone && patient.phone.includes(searchTerm)) ||
-      (patient.whatsapp && patient.whatsapp.includes(searchTerm))
-  )
 
-  const formatTime = (time: string) => {
+    console.log('🔍 [DEBUG] Pacientes para filtrar:', patientsToFilter)
+    console.log('🔍 [DEBUG] Quantidade de pacientes para filtrar:', patientsToFilter.length)
+
+    const filtered = patientsToFilter.filter(
+      patient =>
+        (patient.name && patient.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (patient.phone && patient.phone.includes(searchTerm)) ||
+        (patient.whatsapp && patient.whatsapp.includes(searchTerm))
+    )
+
+    console.log('🔍 [DEBUG] Pacientes filtrados:', filtered)
+    console.log('🔍 [DEBUG] Quantidade de pacientes filtrados:', filtered.length)
+
+    return filtered
+  }, [activeTab, todayPatients, attendedPatients, patients, searchTerm])
+
+  // Memoização das funções de formatação
+  const formatTime = useCallback((time: string) => {
     return time.substring(0, 5) // HH:MM
-  }
+  }, [])
 
-  const getStatusColor = (status: string) => {
+  const getStatusColor = useCallback((status: string) => {
     switch (status) {
       case 'agendada':
         return 'bg-blue-100 text-blue-800'
@@ -264,9 +331,9 @@ export default function AreaMedicaPage() {
       default:
         return 'bg-gray-100 text-gray-800'
     }
-  }
+  }, [])
 
-  const getTypeColor = (type: string) => {
+  const getTypeColor = useCallback((type: string) => {
     switch (type) {
       case 'consulta':
         return 'bg-blue-50 text-blue-700'
@@ -279,7 +346,7 @@ export default function AreaMedicaPage() {
       default:
         return 'bg-gray-50 text-gray-700'
     }
-  }
+  }, [])
 
   const removeFromAgenda = async (patientId: string) => {
     const confirmRemove = window.confirm(
@@ -685,7 +752,7 @@ export default function AreaMedicaPage() {
           {/* Acesso Rápido */}
           <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8'>
             <button
-              onClick={() => router.push('/newsletter')}
+              onClick={() => router.push('/area-medica/newsletter')}
               className='bg-gray-900/50 backdrop-blur-sm rounded-2xl shadow-xl p-6 border border-gray-700 hover:border-purple-500/50 hover:bg-gray-800/50 transition-all duration-200 group'
             >
               <div className='flex items-center'>
@@ -773,16 +840,22 @@ export default function AreaMedicaPage() {
                 </p>
               </div>
               <div className='flex items-center space-x-4'>
-                <label className='text-sm font-medium text-gray-300'>
-                  Data:
-                </label>
-                <BrazilianDatePicker
-                  value={selectedDate}
-                  onChange={setSelectedDate}
-                  className='px-4 py-2 bg-gray-800/50 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-blue-400 focus:border-transparent backdrop-blur-sm'
-                  placeholder='DD/MM/AAAA'
-                />
-              </div>
+                  <label className='text-sm font-medium text-gray-300'>
+                    Data:
+                  </label>
+                  <input
+                    type='date'
+                    value={selectedDate ? format(selectedDate, 'yyyy-MM-dd') : ''}
+                    onChange={e => {
+                      if (e.target.value) {
+                        // Criar data local para evitar problemas de timezone
+                        const [year, month, day] = e.target.value.split('-').map(Number)
+                        setSelectedDate(new Date(year, month - 1, day))
+                      }
+                    }}
+                    className='px-3 py-2 bg-gray-800/50 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent backdrop-blur-sm'
+                  />
+                </div>
             </div>
           </div>
 

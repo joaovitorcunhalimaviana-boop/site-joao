@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import BackgroundPattern from '../../components/ui/background-pattern'
 import { BrazilianDateInput } from '../../components/ui/brazilian-date-input'
@@ -169,9 +169,9 @@ export default function AreaSecretaria() {
       // Primeiro, tentar sincronizar dados do backup
       await syncDataFromBackup()
 
-      // Carregar pacientes
+      // Carregar pacientes médicos
       const patientsResponse = await fetch(
-        '/api/unified-appointments?action=all-patients'
+        '/api/unified-system/medical-patients'
       )
       if (patientsResponse.ok) {
         const patientsResult = await patientsResponse.json()

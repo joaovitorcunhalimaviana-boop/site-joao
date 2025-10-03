@@ -133,20 +133,20 @@ export default function NewsletterEditor({
 
   const loadPatients = async () => {
     try {
-      const response = await fetch('/api/unified-system/patients')
+      const response = await fetch('/api/unified-system/communication-contacts')
       if (response.ok) {
         const data = await response.json()
-        // A API retorna um objeto com {patients: array, total: number}
-        const patientsList = data.patients || data // Fallback para compatibilidade
-        const patientsWithEmail = patientsList.filter(
-          (patient: any) => patient.email
+        // A API retorna um objeto com {contacts: array, total: number}
+        const contactsList = data.contacts || data // Fallback para compatibilidade
+        const contactsWithEmail = contactsList.filter(
+          (contact: any) => contact.email && contact.emailPreferences?.newsletter
         )
-        setPatients(patientsWithEmail)
-        // Selecionar todos os pacientes por padrão
-        setSelectedPatients(patientsWithEmail.map((p: any) => p.id))
+        setPatients(contactsWithEmail)
+        // Selecionar todos os contatos por padrão
+        setSelectedPatients(contactsWithEmail.map((c: any) => c.id))
       }
     } catch (error) {
-      console.error('Erro ao carregar pacientes:', error)
+      console.error('Erro ao carregar contatos:', error)
     }
   }
 

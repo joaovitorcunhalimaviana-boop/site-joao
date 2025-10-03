@@ -114,9 +114,16 @@ export default function StMarksCalculator({
   const interpretation = getScoreInterpretation(score)
 
   const calculatorData = {
+    calculatorName: "Escala de Incontinência de St. Mark's",
+    calculatorType: 'st-marks',
     type: 'st-marks',
     answers,
     score,
+    result: {
+      score,
+      interpretation: interpretation.text,
+      category: interpretation.category,
+    },
     interpretation: interpretation.text,
     notes,
     date: new Date().toISOString(),

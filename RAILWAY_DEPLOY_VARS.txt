@@ -1,0 +1,64 @@
+# VARIÁVEIS DE AMBIENTE PARA RAILWAY - DEPLOY COMPLETO
+# Copie e cole estas variáveis no Railway Dashboard > Variables > Raw Editor
+
+# ================================
+# CONFIGURAÇÕES ESSENCIAIS
+# ================================
+NODE_ENV=production
+NEXTAUTH_SECRET=/2Rlko=hH1>(4P^s@Sn&Xqh]JE=pASY1
+NEXTAUTH_URL=https://consultorio-dr-joao-vitor-production.up.railway.app
+NEXT_PUBLIC_APP_URL=https://consultorio-dr-joao-vitor-production.up.railway.app
+ENCRYPTION_KEY=pS7tpq6+!vkhb;+kA5/Hrg>YZO]T8Xw[
+JWT_SECRET=bbtIx#u[hqN[0Gv>9}^&i^el8w_[D2Rx
+JWT_REFRESH_SECRET=dev-refresh-secret-key-change-in-production
+LGPD_ENCRYPTION_KEY=8b>&K!B{)|Z)-0T:#}Lq}q0MN)3CCor>
+
+# ================================
+# CONFIGURAÇÕES LGPD E SEGURANÇA
+# ================================
+ENCRYPTION_KEY_V1=dev-encryption-key-v1-change-in-production-64-chars-hex
+ENCRYPTION_KEY_V2=dev-encryption-key-v2-change-in-production-64-chars-hex
+CURRENT_KEY_VERSION=v1
+SEARCH_SALT=dev-search-salt-change-in-production
+PSEUDONYMIZATION_KEY=dev-pseudonymization-key-change-in-production
+ENCRYPTION_MAX_AGE_DAYS=365
+DATA_RETENTION_DAYS=-1
+MEDICAL_DATA_PERMANENT=true
+
+# ================================
+# CONFIGURAÇÕES JWT E SESSÃO
+# ================================
+JWT_ACCESS_TOKEN_EXPIRY=15m
+JWT_MEDICAL_SESSION_EXPIRY=6h
+JWT_REFRESH_TOKEN_EXPIRY=7d
+AUTO_LOGOUT_DISABLED_FOR_DOCTORS=true
+
+# ================================
+# NOTIFICAÇÕES TELEGRAM (NOVO!)
+# ================================
+TELEGRAM_BOT_TOKEN=8380812457:AAFsjqlvgQr4XAP7C39t5eqFq6eWbrR90T4
+TELEGRAM_CHAT_ID=8432481593
+
+# ================================
+# CONFIGURAÇÕES DE EMAIL (OPCIONAL)
+# ================================
+# GMAIL_USER=seu-email@gmail.com
+# GMAIL_PASS=sua-senha-de-app
+# MAILTRAP_API_TOKEN=seu-token-mailtrap
+# MAILTRAP_INBOX_ID=seu-inbox-id
+
+# ================================
+# CONFIGURAÇÕES OPCIONAIS
+# ================================
+MAX_FILE_SIZE=10485760
+ALLOWED_FILE_TYPES=pdf,doc,docx,jpg,jpeg,png
+SESSION_MAX_AGE=2592000
+RATE_LIMIT_MAX=100
+RATE_LIMIT_WINDOW=900000
+AUDIT_LOG_RETENTION_DAYS=90
+
+# ================================
+# NOTA IMPORTANTE
+# ================================
+# DATABASE_URL será fornecida automaticamente pelo Railway PostgreSQL
+# Não adicione DATABASE_URL manualmente - o Railway gerencia isso automaticamente

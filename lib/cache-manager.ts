@@ -1,5 +1,3 @@
-'use client'
-
 // Sistema de cache inteligente para otimização de performance
 
 // Tipos para o sistema de cache
@@ -499,6 +497,27 @@ class CacheManager {
       }),
     delete: (key: string): boolean => this.persistentCache.delete(key),
     clear: (): void => this.persistentCache.clear(),
+  }
+
+  // Métodos principais do cache (delegam para memory cache por padrão)
+  get<T>(key: string): T | null {
+    return this.memory.get<T>(key)
+  }
+
+  set<T>(key: string, data: T, options?: CacheOptions): boolean {
+    return this.memory.set(key, data, options)
+  }
+
+  delete(key: string): boolean {
+    return this.memory.delete(key)
+  }
+
+  clear(): void {
+    this.memory.clear()
+  }
+
+  has(key: string): boolean {
+    return this.memory.has(key)
   }
 
   // Invalidar por tags

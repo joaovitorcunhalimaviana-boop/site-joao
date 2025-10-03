@@ -57,6 +57,11 @@ interface MedicalRecord {
   observations: string
   doctorName: string
   attachments?: MedicalAttachment[]
+  calculatorResults?: {
+    calculatorName: string
+    result: any
+    timestamp: string
+  }[]
   createdAt: string
 }
 
@@ -71,7 +76,8 @@ export default function ProntuarioPage() {
   const params = useParams()
   const patientId = params['id'] as string
 
-  const calculateAge = (birthDate: string): number => {
+  const calculateAge = (birthDate: string | undefined): number => {
+    if (!birthDate) return 0
     const birth = new Date(birthDate)
     const today = new Date()
     let age = today.getFullYear() - birth.getFullYear()
@@ -96,12 +102,15 @@ export default function ProntuarioPage() {
 
   const loadPatientData = async () => {
     try {
+      console.log('🔍 Carregando dados do paciente:', patientId)
+      
       // Primeiro tenta buscar no sistema unificado
       const unifiedResponse = await fetch(
         `/api/unified-appointments?action=get-patient&patientId=${patientId}`
       )
       if (unifiedResponse.ok) {
         const unifiedData = await unifiedResponse.json()
+        console.log('🔍 Resposta unified-appointments:', unifiedData)
         if (unifiedData.success && unifiedData.patient) {
           setPatient(unifiedData.patient)
           return
@@ -109,12 +118,17 @@ export default function ProntuarioPage() {
       }
 
       // Fallback para API antiga
-      const response = await fetch(`/api/unified-system/medical-patients/${patientId}`)
+      const response = await fetch(`/api/unified-system/medical-patients?id=${patientId}`)
       if (response.ok) {
         const data = await response.json()
-        setPatient(data.patient || data)
+        console.log('🔍 Resposta unified-system/medical-patients:', data)
+        if (data.success && data.patient) {
+          setPatient(data.patient)
+        } else {
+          console.error('Paciente não encontrado na resposta:', data)
+        }
       } else {
-        console.error('Paciente não encontrado')
+        console.error('Erro na resposta da API:', response.status, response.statusText)
       }
     } catch (error) {
       console.error('Erro ao carregar dados do paciente:', error)
@@ -126,10 +140,16 @@ export default function ProntuarioPage() {
 
   const loadMedicalRecords = async () => {
     try {
-      const response = await fetch(`/api/medical-records/${patientId}`)
+      console.log('🔍 Carregando registros médicos para paciente:', patientId)
+      const response = await fetch(`/api/medical-records?patientId=${patientId}`)
       if (response.ok) {
         const data = await response.json()
-        setMedicalRecords(data.records || [])
+        console.log('🔍 Dados recebidos da API medical-records:', data)
+        // A API retorna os registros diretamente, não em data.records
+        setMedicalRecords(Array.isArray(data) ? data : [])
+      } else {
+        console.error('Erro na resposta da API:', response.status, response.statusText)
+        setMedicalRecords([])
       }
     } catch (error) {
       console.error('Erro ao carregar prontuários:', error)
@@ -137,11 +157,13 @@ export default function ProntuarioPage() {
     }
   }
 
-  const formatDate = (dateString: string) => {
+  const formatDate = (dateString: string | undefined) => {
+    if (!dateString) return 'Data não informada'
     return dateString.split('-').reverse().join('/')
   }
 
-  const formatTime = (timeString: string) => {
+  const formatTime = (timeString: string | undefined) => {
+    if (!timeString) return 'Horário não informado'
     return timeString.substring(0, 5)
   }
 
@@ -384,6 +406,68 @@ export default function ProntuarioPage() {
                               </p>
                             </div>
                           )}
+
+                          {/* Calculadoras Utilizadas */}
+                          {record.calculatorResults &&
+                            record.calculatorResults.length > 0 && (
+                              <div>
+                                <p className='text-white font-medium text-sm mb-2 flex items-center'>
+                                  <svg className='h-4 w-4 mr-1' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                                    <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z' />
+                                  </svg>
+                                  Calculadoras Utilizadas ({record.calculatorResults.length})
+                                </p>
+                                <div className='space-y-3'>
+                                  {record.calculatorResults.map((result, index) => (
+                                    <div
+                                      key={index}
+                                      className='bg-gray-700 rounded-lg p-3 border border-gray-600'
+                                    >
+                                      <div className='flex items-center justify-between mb-2'>
+                                        <h4 className='text-white font-medium text-sm'>
+                                          {result.calculatorName}
+                                        </h4>
+                                        <span className='text-xs text-gray-400'>
+                                          {formatDate(result.timestamp)}
+                                        </span>
+                                      </div>
+                                      
+                                      <div className='space-y-2'>
+                                        <div>
+                                          <p className='text-xs text-gray-300 mb-1'>Resultado:</p>
+                                          <p className='text-sm text-white font-medium'>
+                                            {result.result}
+                                          </p>
+                                        </div>
+                                        
+                                        {result.interpretation && (
+                                          <div>
+                                            <p className='text-xs text-gray-300 mb-1'>Interpretação:</p>
+                                            <p className='text-sm text-gray-200'>
+                                              {result.interpretation}
+                                            </p>
+                                          </div>
+                                        )}
+                                        
+                                        {result.parameters && Object.keys(result.parameters).length > 0 && (
+                                          <div>
+                                            <p className='text-xs text-gray-300 mb-1'>Parâmetros:</p>
+                                            <div className='grid grid-cols-2 gap-2'>
+                                              {Object.entries(result.parameters).map(([key, value]) => (
+                                                <div key={key} className='text-xs'>
+                                                  <span className='text-gray-400'>{key}:</span>
+                                                  <span className='text-white ml-1'>{String(value)}</span>
+                                                </div>
+                                              ))}
+                                            </div>
+                                          </div>
+                                        )}
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
 
                           {/* Anexos Médicos */}
                           {record.attachments &&

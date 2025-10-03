@@ -280,9 +280,17 @@ export default function IBDQCalculator({
   const socialScore = calculateDomainScore('social')
 
   const calculatorData = {
+    calculatorName: 'IBDQ (Qualidade de Vida na DII)',
+    calculatorType: 'IBDQ',
     type: 'IBDQ',
     totalScore,
     qualityOfLife: qualityOfLife.level,
+    result: {
+      totalScore,
+      qualityOfLife: qualityOfLife.level,
+      interpretation: qualityOfLife.description,
+    },
+    interpretation: qualityOfLife.description,
     domainScores: {
       bowel: bowelScore,
       systemic: systemicScore,

@@ -94,9 +94,16 @@ export default function BaronCalculator({
   const interpretation = getScoreInterpretation(score)
 
   const calculatorData = {
+    calculatorName: 'Baron Score',
+    calculatorType: 'baron',
     type: 'baron',
     answers,
     score,
+    result: {
+      score,
+      interpretation: interpretation.text,
+      category: interpretation.category,
+    },
     interpretation: interpretation.text,
     notes,
     date: new Date().toISOString(),

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { redisCache } from '@/lib/redis-cache'
 import {
   getAllMedicalRecords,
   getMedicalRecordsByPatient,
@@ -11,39 +12,102 @@ import {
 // GET - Buscar prontuários por paciente
 export async function GET(request: NextRequest) {
   try {
+    console.log('🔍 API medical-records GET iniciada')
     const { searchParams } = new URL(request.url)
     const patientId = searchParams.get('patientId')
     const recordId = searchParams.get('id')
+    
+    console.log('🔍 Parâmetros recebidos:', { patientId, recordId })
 
     if (recordId) {
+      console.log('🔍 Buscando registro específico:', recordId)
+      // Cache individual de prontuário
+      const cacheKey = `medical-record:${recordId}`
+      const cachedRecord = await redisCache.get(cacheKey)
+      if (cachedRecord) {
+        console.log('🔍 Registro encontrado no cache')
+        return NextResponse.json(cachedRecord)
+      }
+
+      console.log('🔍 Carregando todos os registros para buscar específico')
       const records = getAllMedicalRecords()
+      console.log('🔍 Total de registros carregados:', records.length)
+      
       const record = records.find(r => r.id === recordId)
       if (!record) {
+        console.log('🔍 Registro não encontrado')
         return NextResponse.json(
           { error: 'Prontuário não encontrado' },
           { status: 404 }
         )
       }
+
+      // Cache por 10 minutos
+      await redisCache.set(cacheKey, record, {
+        ttl: 5 * 60 * 1000, // 5 minutos
+        tags: ['medical-records', `patient:${record.medicalPatientId}`]
+      })
+
+      console.log('🔍 Registro específico encontrado e retornado')
       return NextResponse.json(record)
     }
 
     if (patientId) {
+      console.log('🔍 Buscando registros por paciente:', patientId)
+      // Cache de prontuários por paciente
+      const cacheKey = `medical-records:patient:${patientId}`
+      const cachedRecords = await redisCache.get(cacheKey)
+      if (cachedRecords && Array.isArray(cachedRecords)) {
+        console.log('🔍 Registros do paciente encontrados no cache:', cachedRecords.length)
+        return NextResponse.json(cachedRecords)
+      }
+
+      console.log('🔍 Carregando registros do paciente do arquivo')
       const patientRecords = getMedicalRecordsByPatient(patientId)
+      console.log('🔍 Registros encontrados para o paciente:', patientRecords.length)
+      
       // Ordenar por data mais recente primeiro
       patientRecords.sort(
         (a, b) =>
-          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          new Date(b.consultationDate).getTime() - new Date(a.consultationDate).getTime()
       )
+
+      // Cache por 5 minutos
+      await redisCache.set(cacheKey, patientRecords, {
+        ttl: 5 * 60 * 1000, // 5 minutos
+        tags: ['medical-records', `patient:${patientId}`]
+      })
+
+      console.log('🔍 Retornando registros do paciente:', patientRecords.length)
       return NextResponse.json(patientRecords)
+    }
+
+    console.log('🔍 Buscando todos os registros')
+    // Cache de todos os prontuários
+    const cacheKey = 'medical-records:all'
+    const cachedAllRecords = await redisCache.get(cacheKey)
+    if (cachedAllRecords) {
+      console.log('🔍 Todos os registros encontrados no cache')
+      return NextResponse.json(cachedAllRecords)
     }
 
     // Retornar todos os prontuários se não houver filtro
     const allRecords = getAllMedicalRecords()
+    console.log('🔍 Total de registros carregados:', allRecords.length)
+
+    // Cache por 3 minutos
+    await redisCache.set(cacheKey, allRecords, { 
+      ttl: 3 * 60 * 1000, 
+      tags: ['medical-records'] 
+    })
+
+    console.log('🔍 Retornando todos os registros')
     return NextResponse.json(allRecords)
   } catch (error) {
-    console.error('Erro ao buscar prontuários:', error)
+    console.error('❌ Erro detalhado na API medical-records:', error)
+    console.error('❌ Stack trace:', error instanceof Error ? error.stack : 'Stack não disponível')
     return NextResponse.json(
-      { error: 'Erro interno do servidor' },
+      { error: 'Erro interno do servidor', details: error instanceof Error ? error.message : 'Erro desconhecido' },
       { status: 500 }
     )
   }
@@ -53,6 +117,8 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
+    console.log('🔍 API medical-records POST - Dados recebidos:', body)
+    
     const { 
       medicalPatientId, 
       consultationDate, 
@@ -64,11 +130,15 @@ export async function POST(request: NextRequest) {
       prescription, 
       observations, 
       doctorName, 
-      doctorCrm 
+      doctorCrm,
+      calculatorResults,
+      attachments,
+      diagnosticHypotheses
     } = body
 
     // Validação básica
     if (!medicalPatientId || !anamnesis) {
+      console.log('🔍 API medical-records POST - Erro de validação:', { medicalPatientId, anamnesis })
       return NextResponse.json(
         { error: 'medicalPatientId e anamnesis são obrigatórios' },
         { status: 400 }
@@ -90,10 +160,17 @@ export async function POST(request: NextRequest) {
       prescription: prescription || '',
       observations: observations || '',
       doctorName: doctorName || '',
-      doctorCrm: doctorCrm || ''
+      doctorCrm: doctorCrm || '',
+      calculatorResults: calculatorResults || [],
+      attachments: attachments || [],
+      diagnosticHypotheses: diagnosticHypotheses || []
     }
 
+    console.log('🔍 API medical-records POST - Dados para createMedicalRecord:', recordData)
+
     const result = createMedicalRecord(recordData)
+
+    console.log('🔍 API medical-records POST - Resultado de createMedicalRecord:', result)
 
     if (!result.success) {
       return NextResponse.json(
@@ -102,9 +179,15 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Invalidar cache relacionado aos prontuários médicos
+    await redisCache.invalidateByTags([
+      'medical-records', 
+      `patient:${medicalPatientId}`
+    ])
+
     return NextResponse.json(result.record, { status: 201 })
   } catch (error) {
-    console.error('Erro ao criar prontuário médico:', error)
+    console.error('🔍 API medical-records POST - Erro:', error)
     return NextResponse.json(
       { error: 'Erro interno do servidor' },
       { status: 500 }
@@ -135,6 +218,13 @@ export async function PUT(request: Request) {
         { status: result.message === 'Prontuário médico não encontrado' ? 404 : 400 }
       )
     }
+
+    // Invalidar cache relacionado aos prontuários médicos
+    await redisCache.invalidateByTags([
+      'medical-records', 
+      `patient:${result.record?.medicalPatientId}`,
+      `medical-record:${id}`
+    ])
 
     return NextResponse.json(result.record)
   } catch (error) {
@@ -167,6 +257,12 @@ export async function DELETE(request: NextRequest) {
         { status: result.message === 'Prontuário médico não encontrado' ? 404 : 400 }
       )
     }
+
+    // Invalidar cache relacionado aos prontuários médicos
+    await redisCache.invalidateByTags([
+      'medical-records', 
+      `medical-record:${id}`
+    ])
 
     return NextResponse.json({ message: result.message })
   } catch (error) {

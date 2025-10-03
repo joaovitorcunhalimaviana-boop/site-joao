@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { ApiRedisCache } from '@/lib/redis-cache'
 import { getTodayISO, getTimestampISO } from '@/lib/date-utils'
 import { 
   getAllAppointments,
@@ -24,7 +25,7 @@ interface AgendaItem {
 function convertUnifiedToAgenda(unifiedAppointment: UnifiedAppointment): AgendaItem {
   return {
     id: unifiedAppointment.id,
-    patientId: unifiedAppointment.patientId,
+    patientId: unifiedAppointment.patientId || unifiedAppointment.communicationContactId,
     patientName: unifiedAppointment.patientName,
     date: unifiedAppointment.appointmentDate,
     time: unifiedAppointment.appointmentTime,
@@ -37,7 +38,9 @@ function convertUnifiedToAgenda(unifiedAppointment: UnifiedAppointment): AgendaI
 }
 
 // Função para mapear status do sistema unificado para agenda
-function mapUnifiedStatus(unifiedStatus: string): 'pending' | 'accepted' | 'rejected' | 'completed' {
+function mapUnifiedStatus(unifiedStatus: string | undefined): 'pending' | 'accepted' | 'rejected' | 'completed' {
+  if (!unifiedStatus) return 'pending'
+  
   switch (unifiedStatus) {
     case 'agendada':
       return 'pending'
@@ -53,7 +56,7 @@ function mapUnifiedStatus(unifiedStatus: string): 'pending' | 'accepted' | 'reje
 }
 
 // Função para mapear status da agenda para sistema unificado
-function mapAgendaStatus(agendaStatus: string): string {
+function mapAgendaStatus(agendaStatus: string): 'agendada' | 'confirmada' | 'em_andamento' | 'concluida' | 'cancelada' | 'reagendada' {
   switch (agendaStatus) {
     case 'pending':
       return 'agendada'
@@ -79,6 +82,13 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Data é obrigatória' }, { status: 400 })
     }
 
+    // Tentar buscar do cache primeiro
+    const cacheKey = `agenda:${date}${status ? `:${status}` : ''}`
+    const cachedResult = await ApiRedisCache.get(cacheKey)
+    if (cachedResult) {
+      return NextResponse.json(cachedResult)
+    }
+
     // Buscar todos os agendamentos do sistema unificado
     const allAppointments = await getAllAppointments()
     
@@ -98,7 +108,20 @@ export async function GET(request: NextRequest) {
     // Ordenar por horário
     agendaItems.sort((a, b) => a.time.localeCompare(b.time))
 
-    return NextResponse.json(agendaItems)
+    const result = {
+      success: true,
+      agenda: agendaItems,
+      date,
+      total: agendaItems.length
+    }
+
+    // Cache por 2 minutos (dados da agenda mudam frequentemente)
+    await ApiRedisCache.set(cacheKey, result, { 
+      ttl: 2 * 60 * 1000, 
+      tags: ['agenda', 'appointments', `date:${date}`] 
+    })
+
+    return NextResponse.json(result)
   } catch (error) {
     console.error('Erro ao buscar agenda:', error)
     return NextResponse.json({ error: 'Erro interno do servidor' }, { status: 500 })
@@ -136,24 +159,30 @@ export async function POST(request: NextRequest) {
 
     // Criar novo agendamento no sistema unificado
     const newAppointment = await createAppointment({
-      patientId,
-      patientName,
+      communicationContactId: patientId,
       appointmentDate: date,
       appointmentTime: time,
-      status: 'agendada',
-      source: 'manual',
+      appointmentType: 'consulta',
+      source: 'secretary_area',
       notes: notes || ''
     })
 
     if (!newAppointment.success) {
       return NextResponse.json(
-        { error: newAppointment.error || 'Erro ao criar agendamento' },
+        { error: newAppointment.message || 'Erro ao criar agendamento' },
         { status: 400 }
       )
     }
 
     // Converter para formato da agenda
     const agendaItem = convertUnifiedToAgenda(newAppointment.appointment!)
+
+    // Invalidar cache da agenda para a data específica
+    await ApiRedisCache.invalidateByTags([
+      'agenda', 
+      'appointments', 
+      `date:${date}`
+    ])
 
     return NextResponse.json(agendaItem, { status: 201 })
   } catch (error) {
@@ -192,13 +221,20 @@ export async function PUT(request: NextRequest) {
     
     if (!updateResult.success) {
       return NextResponse.json(
-        { error: updateResult.error || 'Erro ao atualizar agendamento' },
-        { status: updateResult.error === 'Agendamento não encontrado' ? 404 : 400 }
+        { error: updateResult.message || 'Erro ao atualizar agendamento' },
+        { status: updateResult.message === 'Agendamento não encontrado' ? 404 : 400 }
       )
     }
 
     // Converter para formato da agenda
     const agendaItem = convertUnifiedToAgenda(updateResult.appointment!)
+    
+    // Invalidar cache da agenda para a data específica
+    await ApiRedisCache.invalidateByTags([
+      'agenda', 
+      'appointments', 
+      `date:${updateResult.appointment!.appointmentDate}`
+    ])
     
     return NextResponse.json({
       message: 'Item atualizado com sucesso',
@@ -225,12 +261,21 @@ export async function DELETE(request: NextRequest) {
     
     if (!cancelResult.success) {
       return NextResponse.json(
-        { error: cancelResult.error || 'Erro ao cancelar agendamento' },
-        { status: cancelResult.error === 'Agendamento não encontrado' ? 404 : 400 }
+        { error: cancelResult.message || 'Erro ao cancelar agendamento' },
+        { status: cancelResult.message === 'Agendamento não encontrado' ? 404 : 400 }
       )
     }
 
-    return NextResponse.json({ message: 'Item removido com sucesso' })
+    // Invalidar cache da agenda para a data específica
+    await ApiRedisCache.invalidateByTags([
+      'agenda', 
+      'appointments', 
+      `date:${cancelResult.appointment!.appointmentDate}`
+    ])
+
+    return NextResponse.json({
+      message: 'Item removido com sucesso'
+    })
   } catch (error) {
     console.error('Erro ao remover item da agenda:', error)
     return NextResponse.json({ error: 'Erro interno do servidor' }, { status: 500 })

@@ -1,54 +1,25 @@
 [
   {
-    "id": "patient-001",
-    "name": "João Silva Santos",
-    "birthDate": "1985-03-15",
-    "cpf": "123.456.789-00",
-    "rg": "12.345.678-9",
-    "contact": {
-      "phone": "(11) 99999-1234",
-      "email": "joao.silva@email.com",
-      "address": {
-        "street": "Rua das Flores, 123",
-        "neighborhood": "Centro",
-        "city": "São Paulo",
-        "state": "SP",
-        "zipCode": "01234-567"
-      }
-    },
-    "medicalInfo": {
-      "allergies": ["Penicilina"],
-      "medications": ["Losartana 50mg"],
-      "conditions": ["Hipertensão"],
-      "bloodType": "O+"
-    },
-    "createdAt": "2024-01-15T10:00:00.000Z",
-    "updatedAt": "2024-01-15T10:00:00.000Z"
-  },
-  {
-    "id": "patient-002", 
-    "name": "Maria Oliveira Costa",
-    "birthDate": "1990-07-22",
-    "cpf": "987.654.321-00",
-    "rg": "98.765.432-1",
-    "contact": {
-      "phone": "(11) 88888-5678",
-      "email": "maria.oliveira@email.com",
-      "address": {
-        "street": "Av. Paulista, 456",
-        "neighborhood": "Bela Vista",
-        "city": "São Paulo",
-        "state": "SP",
-        "zipCode": "01310-100"
-      }
+    "id": "med_1759500461452_n9pd3hzb9",
+    "communicationContactId": "comm_1759447627039_ltvdko2zs",
+    "cpf": "051.660.834-74",
+    "medicalRecordNumber": 1,
+    "fullName": "João Vítor da Cunha Lima Viana",
+    "insurance": {
+      "type": "unimed"
     },
     "medicalInfo": {
       "allergies": [],
       "medications": [],
-      "conditions": [],
-      "bloodType": "A+"
+      "conditions": []
     },
-    "createdAt": "2024-01-16T14:30:00.000Z",
-    "updatedAt": "2024-01-16T14:30:00.000Z"
+    "consents": {
+      "dataProcessing": true,
+      "medicalTreatment": true,
+      "imageUse": true
+    },
+    "createdAt": "2025-10-03T14:07:41.000Z",
+    "updatedAt": "2025-10-03T14:07:41.000Z",
+    "isActive": true
   }
 ]

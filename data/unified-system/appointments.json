@@ -1,26 +1,23 @@
 [
   {
-    "id": "appointment-001",
-    "patientId": "patient-001",
-    "patientName": "João Silva Santos",
-    "date": "2024-10-02",
-    "time": "09:00",
-    "type": "Consulta",
-    "status": "agendado",
-    "notes": "Consulta de rotina",
-    "createdAt": "2024-01-15T10:00:00.000Z",
-    "updatedAt": "2024-01-15T10:00:00.000Z"
-  },
-  {
-    "id": "appointment-002",
-    "patientId": "patient-002", 
-    "patientName": "Maria Oliveira Costa",
-    "date": "2024-10-02",
-    "time": "10:30",
-    "type": "Consulta",
-    "status": "agendado",
-    "notes": "Primeira consulta",
-    "createdAt": "2024-01-16T14:30:00.000Z",
-    "updatedAt": "2024-01-16T14:30:00.000Z"
+    "id": "apt_1759500461459_0qg63phn5",
+    "communicationContactId": "comm_1759447627039_ltvdko2zs",
+    "medicalPatientId": "med_1759500461452_n9pd3hzb9",
+    "patientId": "comm_1759447627039_ltvdko2zs",
+    "appointmentDate": "2025-10-06",
+    "appointmentTime": "15:00",
+    "appointmentType": "consulta",
+    "status": "agendada",
+    "source": "public_appointment",
+    "patientName": "João Vítor da Cunha Lima Viana",
+    "patientPhone": "(83) 99866-3089",
+    "patientWhatsapp": "(83) 99866-3089",
+    "patientEmail": "joaovitorcunhalimaviana@gmail.com",
+    "patientCpf": "051.660.834-74",
+    "patientMedicalRecordNumber": 1,
+    "insuranceType": "unimed",
+    "duration": 30,
+    "createdAt": "2025-10-03T14:07:41.000Z",
+    "updatedAt": "2025-10-03T14:07:41.000Z"
   }
 ]

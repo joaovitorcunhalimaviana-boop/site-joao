@@ -58,7 +58,7 @@ export default function PatientsListPage() {
 
   const fetchPatients = async () => {
     try {
-      const response = await fetch('/api/unified-system/patients')
+      const response = await fetch('/api/unified-system/medical-patients')
       if (response.ok) {
         const data = await response.json()
         setPatients(data.patients || [])

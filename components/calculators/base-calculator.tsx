@@ -188,12 +188,16 @@ export function CalculatorResult({
     red: 'text-red-400 bg-red-900/20 border-red-700',
   }
 
+  // Verificar se a cor existe no objeto colorClasses
+  const selectedColorClass = colorClasses[color] || colorClasses.blue
+  const textColorClass = selectedColorClass.split(' ')[0] || 'text-blue-400'
+
   return (
-    <div className={`p-4 rounded-lg border ${colorClasses[color]}`}>
+    <div className={`p-4 rounded-lg border ${selectedColorClass}`}>
       <div className='flex items-center justify-between mb-2'>
         <span className='text-white font-medium'>{label}</span>
         <span
-          className={`text-2xl font-bold ${colorClasses[color].split(' ')[0]}`}
+          className={`text-2xl font-bold ${textColorClass}`}
         >
           {value}
         </span>

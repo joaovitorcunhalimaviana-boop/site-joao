@@ -337,11 +337,22 @@ export default function MedicalCalculators({
   const [savedResults, setSavedResults] = useState<any[]>([])
 
   const handleSaveResult = (result: any) => {
+    console.log('🔍 MedicalCalculators - handleSaveResult chamado com:', result)
+    
     setSavedResults(prev => [...prev, result])
-    onSaveToRecord?.(result.calculatorName, result)
+    
+    // Extrair o nome da calculadora corretamente
+    const calculatorName = result.calculatorName || result.calculatorType || 'Calculadora Médica'
+    
+    console.log('🔍 MedicalCalculators - Chamando onSaveToRecord com:', {
+      calculatorName,
+      result
+    })
+    
+    onSaveToRecord?.(calculatorName, result)
 
     // Show success message
-    alert(`${result.calculatorName} salvo no prontuário de ${patientName}!`)
+    alert(`${calculatorName} salvo no prontuário de ${patientName}!`)
   }
 
   const renderCalculator = () => {

@@ -1,4 +1,4 @@
-﻿import { PrismaClient } from '@prisma/client'
+import { PrismaClient } from '@prisma/client'
 import { hash, compare } from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 import crypto from 'crypto'
@@ -264,7 +264,17 @@ export class PatientService {
         skip,
         take: limit,
         orderBy: { createdAt: 'desc' },
-        include: {
+        select: {
+          id: true,
+          name: true,
+          cpf: true,
+          email: true,
+          phone: true,
+          whatsapp: true,
+          birthDate: true,
+          gender: true,
+          createdAt: true,
+          updatedAt: true,
           _count: {
             select: {
               appointments: true,
@@ -476,12 +486,69 @@ export class ConsultationService {
   static async getConsultation(id: string) {
     return await prisma.consultation.findUnique({
       where: { id },
-      include: {
-        patient: true,
-        doctor: true,
-        medicalRecord: true,
-        prescriptions: true,
-        medicalAttachments: true,
+      select: {
+        id: true,
+        patientId: true,
+        doctorId: true,
+        startTime: true,
+        endTime: true,
+        type: true,
+        status: true,
+        notes: true,
+        diagnosis: true,
+        treatment: true,
+        createdAt: true,
+        updatedAt: true,
+        patient: {
+          select: {
+            id: true,
+            name: true,
+            cpf: true,
+            email: true,
+            phone: true,
+            birthDate: true,
+            gender: true,
+          },
+        },
+        doctor: {
+          select: {
+            id: true,
+            name: true,
+            crm: true,
+            specialties: true,
+          },
+        },
+        medicalRecord: {
+          select: {
+            id: true,
+            recordNumber: true,
+            allergies: true,
+            medications: true,
+            medicalHistory: true,
+            familyHistory: true,
+          },
+        },
+        prescriptions: {
+          select: {
+            id: true,
+            medication: true,
+            dosage: true,
+            frequency: true,
+            duration: true,
+            instructions: true,
+            createdAt: true,
+          },
+        },
+        medicalAttachments: {
+          select: {
+            id: true,
+            fileName: true,
+            fileType: true,
+            fileSize: true,
+            description: true,
+            createdAt: true,
+          },
+        },
       },
     })
   }
@@ -490,10 +557,42 @@ export class ConsultationService {
     return await prisma.consultation.findMany({
       where: { patientId },
       orderBy: { startTime: 'desc' },
-      include: {
-        doctor: true,
-        medicalRecord: true,
-        prescriptions: true,
+      select: {
+        id: true,
+        startTime: true,
+        endTime: true,
+        type: true,
+        status: true,
+        notes: true,
+        diagnosis: true,
+        treatment: true,
+        createdAt: true,
+        doctor: {
+          select: {
+            id: true,
+            name: true,
+            crm: true,
+            specialties: true,
+          },
+        },
+        medicalRecord: {
+          select: {
+            id: true,
+            recordNumber: true,
+            allergies: true,
+            medications: true,
+          },
+        },
+        prescriptions: {
+          select: {
+            id: true,
+            medication: true,
+            dosage: true,
+            frequency: true,
+            duration: true,
+            instructions: true,
+          },
+        },
       },
     })
   }

@@ -92,9 +92,16 @@ export default function MayoCalculator({
   const interpretation = getScoreInterpretation(score)
 
   const calculatorData = {
+    calculatorName: 'Mayo Endoscopic Score',
+    calculatorType: 'mayo',
     type: 'mayo',
     answers,
     score,
+    result: {
+      score,
+      interpretation: interpretation.text,
+      category: interpretation.category,
+    },
     interpretation: interpretation.text,
     notes,
     date: new Date().toISOString(),

@@ -209,9 +209,17 @@ export default function CDAICalculator({
   const activity = getActivityLevel(score)
 
   const calculatorData = {
+    calculatorName: 'CDAI (Atividade da Doença de Crohn)',
+    calculatorType: 'CDAI',
     type: 'CDAI',
     score,
+    result: {
+      score,
+      activity: activity.level,
+      interpretation: activity.description,
+    },
     activity: activity.level,
+    interpretation: activity.description,
     values,
     timestamp: new Date().toISOString(),
   }

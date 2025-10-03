@@ -103,11 +103,19 @@ export default function BMICalculator({
   const category = getBMICategory(bmi)
 
   const calculatorData = {
+    calculatorName: 'Calculadora de IMC',
+    calculatorType: 'bmi',
     type: 'bmi',
     weight: parseFloat(weight) || 0,
     height: parseFloat(height) || 0,
     bmi: bmi.toFixed(1),
+    result: {
+      bmi: bmi.toFixed(1),
+      category: category.category,
+      interpretation: category.description,
+    },
     category: category.category,
+    interpretation: category.description,
     notes,
     date: new Date().toISOString(),
   }

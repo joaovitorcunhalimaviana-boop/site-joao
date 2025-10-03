@@ -309,15 +309,20 @@ function loadFromStorage<T>(filePath: string): T[] {
   ensureDataDirectory()
   
   if (!fs.existsSync(filePath)) {
+    console.log(`📁 Arquivo não existe, criando: ${filePath}`)
     fs.writeFileSync(filePath, JSON.stringify([], null, 2))
     return []
   }
   
   try {
+    console.log(`📁 Carregando dados de: ${filePath}`)
     const data = fs.readFileSync(filePath, 'utf8')
-    return JSON.parse(data)
+    const parsedData = JSON.parse(data)
+    console.log(`📁 Dados carregados com sucesso: ${parsedData.length} registros`)
+    return parsedData
   } catch (error) {
-    console.error(`âŒ Erro ao carregar dados de ${filePath}:`, error)
+    console.error(`❌ Erro ao carregar dados de ${filePath}:`, error)
+    console.error(`❌ Stack trace:`, error instanceof Error ? error.stack : 'Stack não disponível')
     return []
   }
 }
@@ -836,8 +841,12 @@ export function getAllMedicalRecords(): MedicalRecord[] {
 }
 
 export function getMedicalRecordsByPatient(medicalPatientId: string): MedicalRecord[] {
+  console.log(`🔍 Buscando prontuários para paciente: ${medicalPatientId}`)
   const records = getAllMedicalRecords()
-  return records.filter(record => record.medicalPatientId === medicalPatientId)
+  console.log(`🔍 Total de prontuários encontrados: ${records.length}`)
+  const filteredRecords = records.filter(record => record.medicalPatientId === medicalPatientId)
+  console.log(`🔍 Prontuários filtrados para o paciente: ${filteredRecords.length}`)
+  return filteredRecords
 }
 
 export function createMedicalRecord(
@@ -1405,31 +1414,61 @@ export function deleteMedicalPatient(patientId: string): { success: boolean; mes
       }
     }
     
-    // Verificar se existem prontuÃ¡rios mÃ©dicos associados
+    // Verificar se existem prontuÃ¡rios mÃ©dicos associados (excluir em cascata)
     const medicalRecords = getMedicalRecordsByPatient(patientId)
     if (medicalRecords.length > 0) {
-      return {
-        success: false,
-        message: 'NÃ£o Ã© possÃ­vel deletar paciente com prontuÃ¡rios mÃ©dicos associados'
-      }
+      console.log('🗑️ Excluindo prontuÃ¡rios mÃ©dicos associados ao paciente:', medicalRecords.map(record => ({
+        id: record.id,
+        consultationDate: record.consultationDate,
+        doctorName: record.doctorName
+      })))
+      
+      // Remover os prontuÃ¡rios mÃ©dicos associados
+      const allMedicalRecords = getAllMedicalRecords()
+      const remainingMedicalRecords = allMedicalRecords.filter(record => 
+        record.medicalPatientId !== patientId
+      )
+      saveToStorage(MEDICAL_RECORDS_FILE, remainingMedicalRecords)
     }
     
-    // Verificar se existem agendamentos associados
+    // Excluir cirurgias associadas ao paciente
+    const surgeries = getAllSurgeries()
+    const associatedSurgeries = surgeries.filter(surgery => 
+      surgery.medicalPatientId === patientId
+    )
+    if (associatedSurgeries.length > 0) {
+      console.log('🗑️ Excluindo cirurgias associadas ao paciente:', associatedSurgeries.map(surgery => ({
+        id: surgery.id,
+        surgeryType: surgery.surgeryType,
+        date: surgery.date,
+        hospital: surgery.hospital
+      })))
+      
+      // Remover as cirurgias associadas
+      const remainingSurgeries = surgeries.filter(surgery => 
+        surgery.medicalPatientId !== patientId
+      )
+      saveToStorage(SURGERIES_FILE, remainingSurgeries)
+    }
+    
+    // Excluir agendamentos associados ao paciente
     const appointments = getAllAppointments()
     const associatedAppointments = appointments.filter(apt => 
       apt.medicalPatientId === patientId || apt.patientId === patientId
     )
     if (associatedAppointments.length > 0) {
-      console.log('🔍 Agendamentos associados encontrados:', associatedAppointments.map(apt => ({
+      console.log('🗑️ Excluindo agendamentos associados ao paciente:', associatedAppointments.map(apt => ({
         id: apt.id,
         patientName: apt.patientName,
         date: apt.appointmentDate,
         status: apt.status
       })))
-      return {
-        success: false,
-        message: 'NÃ£o Ã© possÃ­vel deletar paciente com agendamentos associados'
-      }
+      
+      // Remover os agendamentos associados
+      const remainingAppointments = appointments.filter(apt => 
+        apt.medicalPatientId !== patientId && apt.patientId !== patientId
+      )
+      saveToStorage(APPOINTMENTS_FILE, remainingAppointments)
     }
     
     // Remover o paciente mÃ©dico
