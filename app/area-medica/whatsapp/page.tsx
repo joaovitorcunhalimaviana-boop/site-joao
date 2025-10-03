@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import Header from '../../../components/ui/header'
@@ -470,8 +470,8 @@ export default function WhatsAppPage() {
                           placeholder="A lista de números aparecerá aqui..."
                         />
                         <p className="text-xs text-gray-400">
-                          �'� <strong>Como usar:</strong> Copie esta lista, abra o WhatsApp Web, 
-                          vá em "Nova conversa" �' "Nova lista de transmissão", cole os números e crie sua lista.
+                          �'� <strong>Como usar:</strong> Copie esta lista, abra o WhatsApp Web, 
+                          vá em "Nova conversa" �' "Nova lista de transmissão", cole os números e crie sua lista.
                         </p>
                       </div>
                     )}
@@ -485,3 +485,4 @@ export default function WhatsAppPage() {
     </div>
   )
 }
+
