@@ -94,5 +94,101 @@
       "📊 Continue monitoramento regular",
       "🔄 Mantenha backups atualizados"
     ]
+  },
+  {
+    "timestamp": "2025-10-04T00:32:29.723Z",
+    "overallStatus": "HEALTHY",
+    "alerts": [],
+    "systemHealth": {
+      "database": "ONLINE",
+      "api": "ONLINE",
+      "backupSystem": "ONLINE",
+      "auditSystem": "ONLINE",
+      "lastCheck": "2025-10-04T00:32:29.695Z",
+      "uptime": 21115.5236322,
+      "responseTime": 7
+    },
+    "dataIntegrity": {
+      "status": "HEALTHY",
+      "lastCheck": "2025-10-04T00:32:29.718Z",
+      "issues": 0,
+      "criticalIssues": 0,
+      "recordCount": 0,
+      "orphanedRecords": 0
+    },
+    "backupStatus": {
+      "status": "HEALTHY",
+      "lastBackup": "2025-10-04T00:27:35.626Z",
+      "nextScheduled": "2025-10-04T05:00:00.000Z",
+      "successRate": 100,
+      "totalBackups": 279,
+      "failedBackups": 0,
+      "cloudProviders": {
+        "github": true,
+        "dropbox": false,
+        "googleDrive": false
+      }
+    },
+    "securityStatus": {
+      "status": "SECURE",
+      "lastSecurityCheck": "2025-10-04T00:32:29.722Z",
+      "suspiciousActivity": 0,
+      "failedLogins": 0,
+      "dataAccess": 0,
+      "encryptionStatus": true
+    },
+    "recommendations": [
+      "✅ Sistema funcionando normalmente",
+      "📊 Continue monitoramento regular",
+      "🔄 Mantenha backups atualizados"
+    ]
+  },
+  {
+    "timestamp": "2025-10-04T01:06:56.274Z",
+    "overallStatus": "HEALTHY",
+    "alerts": [],
+    "systemHealth": {
+      "database": "ONLINE",
+      "api": "ONLINE",
+      "backupSystem": "ONLINE",
+      "auditSystem": "ONLINE",
+      "lastCheck": "2025-10-04T01:06:56.251Z",
+      "uptime": 268.0337167,
+      "responseTime": 7
+    },
+    "dataIntegrity": {
+      "status": "HEALTHY",
+      "lastCheck": "2025-10-04T01:06:56.271Z",
+      "issues": 0,
+      "criticalIssues": 0,
+      "recordCount": 0,
+      "orphanedRecords": 0
+    },
+    "backupStatus": {
+      "status": "HEALTHY",
+      "lastBackup": "2025-10-04T01:06:51.558Z",
+      "nextScheduled": "2025-10-04T05:00:00.000Z",
+      "successRate": 100,
+      "totalBackups": 282,
+      "failedBackups": 0,
+      "cloudProviders": {
+        "github": true,
+        "dropbox": false,
+        "googleDrive": false
+      }
+    },
+    "securityStatus": {
+      "status": "SECURE",
+      "lastSecurityCheck": "2025-10-04T01:06:56.274Z",
+      "suspiciousActivity": 0,
+      "failedLogins": 0,
+      "dataAccess": 0,
+      "encryptionStatus": true
+    },
+    "recommendations": [
+      "✅ Sistema funcionando normalmente",
+      "📊 Continue monitoramento regular",
+      "🔄 Mantenha backups atualizados"
+    ]
   }
 ]

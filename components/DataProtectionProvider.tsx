@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 // Provedor de Proteção de Dados
 // Inicializa automaticamente todos os sistemas de backup e proteção
@@ -33,7 +33,10 @@ export function DataProtectionProvider({ children }: DataProtectionProviderProps
     
     // Verificar status periodicamente (a cada 5 minutos)
     const statusInterval = setInterval(() => {
-      checkProtectionStatus()
+      // Só executar se o componente ainda estiver montado
+      checkProtectionStatus().catch(error => {
+        console.warn('⚠️ Erro silencioso na verificação periódica de status:', error)
+      })
     }, 5 * 60 * 1000)
     
     return () => {
@@ -108,7 +111,19 @@ export function DataProtectionProvider({ children }: DataProtectionProviderProps
   // Verificar status dos sistemas
   const checkProtectionStatus = async () => {
     try {
-      const response = await fetch('/api/protection-manager?action=status')
+      // Adicionar timeout e configurações de fetch mais robustas
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 10000) // 10 segundos de timeout
+      
+      const response = await fetch('/api/protection-manager?action=status', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        signal: controller.signal
+      })
+      
+      clearTimeout(timeoutId)
       
       if (response.ok) {
         const result = await response.json()
@@ -145,11 +160,23 @@ export function DataProtectionProvider({ children }: DataProtectionProviderProps
         }
         
       } else {
-        console.warn('⚠️ Não foi possível verificar status de proteção')
+        console.warn(`⚠️ Não foi possível verificar status de proteção - Status: ${response.status}`)
+        // Não alterar o status se a resposta não for ok
       }
       
     } catch (error) {
-      console.error('❌ Erro ao verificar status:', error)
+      // Tratamento específico para diferentes tipos de erro
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        console.warn('⚠️ Erro de conectividade ao verificar status de proteção. Tentando novamente em 30 segundos...')
+        // Não alterar o status em caso de erro de rede
+      } else if (error instanceof DOMException && error.name === 'AbortError') {
+        console.warn('⚠️ Timeout ao verificar status de proteção')
+      } else {
+        console.error('❌ Erro inesperado ao verificar status:', error)
+      }
+      
+      // Em caso de erro, manter o status atual e tentar novamente mais tarde
+      // Não definir como 'error' imediatamente para evitar alarmes falsos
     }
   }
 

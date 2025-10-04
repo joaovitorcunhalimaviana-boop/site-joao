@@ -272,5 +272,74 @@
     },
     "severity": "HIGH",
     "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759538020274_11gosiwtt",
+    "timestamp": "2025-10-04T00:33:40.274Z",
+    "action": "emergency_backup_success",
+    "resource": "system",
+    "details": {
+      "taskId": "emergency_backup",
+      "timestamp": "2025-10-04T00:33:40.273Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759538025076_p6vcu9hib",
+    "timestamp": "2025-10-04T00:33:45.076Z",
+    "action": "emergency_backup_success",
+    "resource": "system",
+    "details": {
+      "taskId": "emergency_backup",
+      "timestamp": "2025-10-04T00:33:45.075Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759540009524_vhrtoreww",
+    "timestamp": "2025-10-04T01:06:49.524Z",
+    "action": "scheduler_initialized",
+    "resource": "system",
+    "details": {
+      "tasksCount": 5,
+      "config": {
+        "backups": {
+          "emergency": {
+            "enabled": true,
+            "interval": 60
+          },
+          "daily": {
+            "enabled": true,
+            "time": "02:00"
+          },
+          "weekly": {
+            "enabled": true,
+            "day": 0,
+            "time": "03:00"
+          },
+          "monthly": {
+            "enabled": true,
+            "day": 1,
+            "time": "04:00"
+          }
+        },
+        "integrity": {
+          "enabled": true,
+          "interval": 6
+        },
+        "cloudBackup": {
+          "enabled": true,
+          "interval": 12
+        },
+        "monitoring": {
+          "enabled": true,
+          "interval": 15
+        }
+      }
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
   }
 ]
