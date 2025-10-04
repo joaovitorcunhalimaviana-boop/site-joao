@@ -88,14 +88,21 @@ export default function NovoPackiente() {
     setIsLoading(true)
 
     try {
-      const response = await fetch('/api/unified-system/medical-patients', {
+      // Usar a API unificada que já cria o contato de comunicação e o paciente médico
+      const response = await fetch('/api/unified-appointments', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          ...formData,
-          source: 'doctor_area',
+          action: 'create-patient',
+          name: formData.name,
+          phone: formData.phone,
+          whatsapp: formData.whatsapp || formData.phone,
+          email: formData.email,
+          birthDate: formData.birthDate,
+          cpf: formData.cpf,
+          insurance: formData.insurance,
         }),
       })
 
@@ -228,7 +235,7 @@ export default function NovoPackiente() {
                   </select>
                 </div>
 
-                {formData.insurance.type !== 'particular' && (
+                {formData.insurance.type === 'unimed' && (
                   <div className='space-y-2'>
                     <Label htmlFor='insurancePlan'>Nome do Plano</Label>
                     <Input

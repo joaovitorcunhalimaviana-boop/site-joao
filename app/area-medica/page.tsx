@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
@@ -83,7 +83,7 @@ export default function AreaMedicaPage() {
 
   const router = useRouter()
 
-  // Verificar autenticação e carregar dados iniciais
+  // Verificar autenticaÃ§Ã£o e carregar dados iniciais
   useEffect(() => {
     checkAuth()
     loadDashboardData()
@@ -97,19 +97,19 @@ export default function AreaMedicaPage() {
 
   // Configurar listeners e intervalos apenas uma vez
   useEffect(() => {
-    // Recarregar dados quando a página for focada novamente (com debounce)
+    // Recarregar dados quando a pÃ¡gina for focada novamente (com debounce)
     let focusTimeout: NodeJS.Timeout | null = null
     const handleFocus = () => {
       if (focusTimeout) clearTimeout(focusTimeout)
       focusTimeout = setTimeout(() => {
-        console.log('Página focada, recarregando dados...')
+        console.log('PÃ¡gina focada, recarregando dados...')
         loadDashboardData()
       }, 1000) // Debounce de 1 segundo
     }
 
     // Recarregar dados automaticamente a cada 5 minutos (reduzido de 1 minuto)
     const autoReloadInterval = setInterval(() => {
-      console.log('Recarregamento automático dos dados...')
+      console.log('Recarregamento automÃ¡tico dos dados...')
       loadDashboardData()
     }, 300000) // 5 minutos
 
@@ -123,77 +123,77 @@ export default function AreaMedicaPage() {
   }, [])
 
   const checkAuth = async () => {
-    // Sistema simplificado - verificar apenas se há dados do usuário
+    // Sistema simplificado - verificar apenas se hÃ¡ dados do usuÃ¡rio
     const userData = localStorage.getItem('currentUser')
 
     if (userData) {
       const user = JSON.parse(userData)
       setDoctor({
-        name: user.name || 'João Vitor Viana',
+        name: user.name || 'JoÃ£o Vitor Viana',
         email: user.email || 'joao.viana@clinica.com',
-        specialty: 'Coloproctologista e Cirurgião Geral',
+        specialty: 'Coloproctologista e CirurgiÃ£o Geral',
         crm: 'CRMPB 12831',
       })
     } else {
-      // Definir dados padrão se não houver usuário logado
+      // Definir dados padrÃ£o se nÃ£o houver usuÃ¡rio logado
       setDoctor({
-        name: 'João Vitor Viana',
+        name: 'JoÃ£o Vitor Viana',
         email: 'joao.viana@clinica.com',
-        specialty: 'Coloproctologista e Cirurgião Geral',
+        specialty: 'Coloproctologista e CirurgiÃ£o Geral',
         crm: 'CRMPB 12831',
       })
     }
   }
 
-  // Função para carregar dados do dashboard - otimizada com useCallback
+  // FunÃ§Ã£o para carregar dados do dashboard - otimizada com useCallback
   const loadDashboardData = useCallback(async () => {
     setIsLoading(true)
     try {
-      console.log('🔍 [DEBUG] Iniciando carregamento de dados do dashboard...')
-      console.log('🔍 [DEBUG] Data selecionada:', selectedDate)
+      console.log('ðŸ” [DEBUG] Iniciando carregamento de dados do dashboard...')
+      console.log('ðŸ” [DEBUG] Data selecionada:', selectedDate)
       
       const formattedDate = format(selectedDate, 'yyyy-MM-dd')
-      console.log('🔍 [DEBUG] Data formatada:', formattedDate)
+      console.log('ðŸ” [DEBUG] Data formatada:', formattedDate)
 
       // Carregar agenda do dia
       const agendaResponse = await fetch(
         `/api/unified-appointments?action=daily-agenda&date=${formattedDate}`
       )
       const agendaData = await agendaResponse.json()
-      console.log('🔍 [DEBUG] Resposta da agenda:', agendaData)
+      console.log('ðŸ” [DEBUG] Resposta da agenda:', agendaData)
 
-      // Carregar todos os pacientes médicos
+      // Carregar todos os pacientes mÃ©dicos
       const patientsResponse = await fetch(
         '/api/unified-system/medical-patients'
       )
       const patientsData = await patientsResponse.json()
-      console.log('🔍 [DEBUG] Resposta dos pacientes:', patientsData)
-      console.log('🔍 [DEBUG] Número de pacientes retornados:', patientsData.patients?.length || 0)
+      console.log('ðŸ” [DEBUG] Resposta dos pacientes:', patientsData)
+      console.log('ðŸ” [DEBUG] NÃºmero de pacientes retornados:', patientsData.patients?.length || 0)
 
-      // Carregar estatísticas
+      // Carregar estatÃ­sticas
       const statsResponse = await fetch(
         `/api/unified-appointments?action=stats&date=${formattedDate}`
       )
       const statsData = await statsResponse.json()
-      console.log('🔍 [DEBUG] Resposta das estatísticas:', statsData)
+      console.log('ðŸ” [DEBUG] Resposta das estatÃ­sticas:', statsData)
 
       if (agendaData.success && patientsData.success && statsData.success) {
         const todayAppointments = agendaData.agenda || []
         const allPatients = patientsData.patients || []
         
-        console.log('🔍 [DEBUG] Consultas de hoje:', todayAppointments)
-        console.log('🔍 [DEBUG] Todos os pacientes:', allPatients)
+        console.log('ðŸ” [DEBUG] Consultas de hoje:', todayAppointments)
+        console.log('ðŸ” [DEBUG] Todos os pacientes:', allPatients)
 
         // Processar pacientes do dia - corrigindo o mapeamento
         const todayPatientsData = todayAppointments.map((appointment: any) => {
-          // Buscar paciente pelos IDs disponíveis
+          // Buscar paciente pelos IDs disponÃ­veis
           let patient = allPatients.find((p: any) => 
             p.id === appointment.patientId || 
             p.id === appointment.communicationContactId ||
             p.id === appointment.medicalPatientId
           )
           
-          // Se não encontrou pelo ID, buscar pelo nome
+          // Se nÃ£o encontrou pelo ID, buscar pelo nome
           if (!patient) {
             patient = allPatients.find((p: any) => 
               p.name === appointment.patientName || 
@@ -201,10 +201,10 @@ export default function AreaMedicaPage() {
             )
           }
           
-          console.log('🔍 [DEBUG] Processando consulta:', appointment)
-          console.log('🔍 [DEBUG] Paciente encontrado:', patient)
+          console.log('ðŸ” [DEBUG] Processando consulta:', appointment)
+          console.log('ðŸ” [DEBUG] Paciente encontrado:', patient)
           
-          // Se ainda não encontrou, criar um objeto paciente com os dados do agendamento
+          // Se ainda nÃ£o encontrou, criar um objeto paciente com os dados do agendamento
           if (!patient) {
             patient = {
               id: appointment.patientId || appointment.communicationContactId,
@@ -222,7 +222,7 @@ export default function AreaMedicaPage() {
           
           return {
             ...patient,
-            // Garantir que o nome esteja sempre disponível
+            // Garantir que o nome esteja sempre disponÃ­vel
             name: patient.name || patient.fullName || appointment.patientName,
             consultation: {
               id: appointment.id,
@@ -234,14 +234,14 @@ export default function AreaMedicaPage() {
           }
         }).filter(Boolean)
 
-        console.log('🔍 [DEBUG] Pacientes do dia processados:', todayPatientsData)
+        console.log('ðŸ” [DEBUG] Pacientes do dia processados:', todayPatientsData)
 
         // Processar pacientes atendidos
         const attendedPatientsData = todayPatientsData.filter(
           (patient: any) => patient.consultation?.status === 'concluida'
         )
 
-        console.log('🔍 [DEBUG] Pacientes atendidos:', attendedPatientsData)
+        console.log('ðŸ” [DEBUG] Pacientes atendidos:', attendedPatientsData)
 
         // Processar todos os pacientes - garantir que tenham a estrutura correta
         const processedAllPatients = allPatients.map((patient: any) => ({
@@ -257,22 +257,22 @@ export default function AreaMedicaPage() {
         setPatients(processedAllPatients)
         setStats(statsData.stats)
 
-        console.log('🔍 [DEBUG] Estados atualizados:')
+        console.log('ðŸ” [DEBUG] Estados atualizados:')
         console.log('  - todayPatients:', todayPatientsData.length)
         console.log('  - attendedPatients:', attendedPatientsData.length)
         console.log('  - patients:', processedAllPatients.length)
         console.log('  - stats:', statsData.stats)
       } else {
-        console.error('❌ [DEBUG] Erro nas respostas das APIs:')
+        console.error('âŒ [DEBUG] Erro nas respostas das APIs:')
         console.error('  - agenda success:', agendaData.success)
         console.error('  - patients success:', patientsData.success)
         console.error('  - stats success:', statsData.stats)
       }
     } catch (error) {
-      console.error('❌ [DEBUG] Erro ao carregar dados do dashboard:', error)
+      console.error('âŒ [DEBUG] Erro ao carregar dados do dashboard:', error)
     } finally {
       setIsLoading(false)
-      console.log('🔍 [DEBUG] Carregamento finalizado')
+      console.log('ðŸ” [DEBUG] Carregamento finalizado')
     }
   }, [selectedDate])
 
@@ -285,11 +285,11 @@ export default function AreaMedicaPage() {
     }
   }, [router])
 
-  // Memoização da filtragem de pacientes para evitar recálculos desnecessários
+  // MemoizaÃ§Ã£o da filtragem de pacientes para evitar recÃ¡lculos desnecessÃ¡rios
   const filteredPatients = useMemo(() => {
-    console.log('🔍 [DEBUG] Filtrando pacientes...')
-    console.log('🔍 [DEBUG] Tab ativa:', activeTab)
-    console.log('🔍 [DEBUG] Termo de busca:', searchTerm)
+    console.log('ðŸ” [DEBUG] Filtrando pacientes...')
+    console.log('ðŸ” [DEBUG] Tab ativa:', activeTab)
+    console.log('ðŸ” [DEBUG] Termo de busca:', searchTerm)
     
     const patientsToFilter = activeTab === 'today'
       ? todayPatients
@@ -297,8 +297,8 @@ export default function AreaMedicaPage() {
         ? attendedPatients
         : patients
 
-    console.log('🔍 [DEBUG] Pacientes para filtrar:', patientsToFilter)
-    console.log('🔍 [DEBUG] Quantidade de pacientes para filtrar:', patientsToFilter.length)
+    console.log('ðŸ” [DEBUG] Pacientes para filtrar:', patientsToFilter)
+    console.log('ðŸ” [DEBUG] Quantidade de pacientes para filtrar:', patientsToFilter.length)
 
     const filtered = patientsToFilter.filter(
       patient =>
@@ -307,13 +307,13 @@ export default function AreaMedicaPage() {
         (patient.whatsapp && patient.whatsapp.includes(searchTerm))
     )
 
-    console.log('🔍 [DEBUG] Pacientes filtrados:', filtered)
-    console.log('🔍 [DEBUG] Quantidade de pacientes filtrados:', filtered.length)
+    console.log('ðŸ” [DEBUG] Pacientes filtrados:', filtered)
+    console.log('ðŸ” [DEBUG] Quantidade de pacientes filtrados:', filtered.length)
 
     return filtered
   }, [activeTab, todayPatients, attendedPatients, patients, searchTerm])
 
-  // Memoização das funções de formatação
+  // MemoizaÃ§Ã£o das funÃ§Ãµes de formataÃ§Ã£o
   const formatTime = useCallback((time: string) => {
     return time.substring(0, 5) // HH:MM
   }, [])
@@ -350,13 +350,13 @@ export default function AreaMedicaPage() {
 
   const removeFromAgenda = async (patientId: string) => {
     const confirmRemove = window.confirm(
-      'Você quer realmente remover esse paciente da sua agenda de hoje?'
+      'VocÃª quer realmente remover esse paciente da sua agenda de hoje?'
     )
     if (!confirmRemove) return
 
     try {
       const dateToUse = selectedDate || getTodayISO()
-      console.log('🔍 Buscando agendamentos para:', dateToUse)
+      console.log('ðŸ” Buscando agendamentos para:', dateToUse)
 
       // Buscar o agendamento do paciente para a data selecionada no sistema unificado
       const appointmentsResponse = await fetch(
@@ -369,18 +369,18 @@ export default function AreaMedicaPage() {
         }
       )
 
-      console.log('📡 Response status:', appointmentsResponse.status)
+      console.log('ðŸ“¡ Response status:', appointmentsResponse.status)
 
       if (!appointmentsResponse.ok) {
         const errorText = await appointmentsResponse.text()
-        console.error('❌ Erro na resposta da API:', errorText)
+        console.error('âŒ Erro na resposta da API:', errorText)
         throw new Error(
           `Erro HTTP: ${appointmentsResponse.status} - ${errorText}`
         )
       }
 
       const data = await appointmentsResponse.json()
-      console.log('📋 Dados recebidos:', data)
+      console.log('ðŸ“‹ Dados recebidos:', data)
 
       const appointments = data.appointments || []
       const todayAppointment = appointments.find(
@@ -388,10 +388,10 @@ export default function AreaMedicaPage() {
           apt.patientId === patientId && apt.appointmentDate === dateToUse
       )
 
-      console.log('🎯 Agendamento encontrado:', todayAppointment)
+      console.log('ðŸŽ¯ Agendamento encontrado:', todayAppointment)
 
       if (todayAppointment) {
-        console.log('🔄 Atualizando status para cancelada...')
+        console.log('ðŸ”„ Atualizando status para cancelada...')
 
         // Excluir completamente o agendamento
         const deleteResponse = await fetch('/api/unified-appointments', {
@@ -405,18 +405,18 @@ export default function AreaMedicaPage() {
           }),
         })
 
-        console.log('📡 Delete response status:', deleteResponse.status)
+        console.log('ðŸ“¡ Delete response status:', deleteResponse.status)
 
         if (!deleteResponse.ok) {
           const errorText = await deleteResponse.text()
-          console.error('❌ Erro ao excluir:', errorText)
+          console.error('âŒ Erro ao excluir:', errorText)
           throw new Error(
             `Erro ao excluir: ${deleteResponse.status} - ${errorText}`
           )
         }
 
         const deleteResult = await deleteResponse.json()
-        console.log('✅ Resultado da exclusão:', deleteResult)
+        console.log('âœ… Resultado da exclusÃ£o:', deleteResult)
 
         if (deleteResult.success) {
           loadDashboardData() // Recarregar dados
@@ -425,23 +425,23 @@ export default function AreaMedicaPage() {
           throw new Error(deleteResult.error || 'Erro desconhecido ao excluir')
         }
       } else {
-        console.warn('⚠️ Agendamento não encontrado para hoje')
-        alert('Agendamento não encontrado para hoje')
+        console.warn('âš ï¸ Agendamento nÃ£o encontrado para hoje')
+        alert('Agendamento nÃ£o encontrado para hoje')
       }
     } catch (error) {
-      console.error('❌ Erro completo ao remover da agenda:', error)
+      console.error('âŒ Erro completo ao remover da agenda:', error)
 
-      // Mostrar erro mais detalhado para o usuário
+      // Mostrar erro mais detalhado para o usuÃ¡rio
       if (error instanceof Error) {
         if (error.message.includes('Failed to fetch')) {
           alert(
-            'Erro de conexão com a API. Verifique sua conexão com a internet e tente novamente.'
+            'Erro de conexÃ£o com a API. Verifique sua conexÃ£o com a internet e tente novamente.'
           )
           console.error(
-            'Erro de conexão com a API. Tentando novamente em 3 segundos...'
+            'Erro de conexÃ£o com a API. Tentando novamente em 3 segundos...'
           )
 
-          // Tentar novamente após 3 segundos
+          // Tentar novamente apÃ³s 3 segundos
           setTimeout(() => {
             removeFromAgenda(patientId)
           }, 3000)
@@ -456,18 +456,18 @@ export default function AreaMedicaPage() {
 
   const deletePatient = async (patientId: string, patientName: string) => {
     const confirmDelete = window.confirm(
-      `Você tem certeza que deseja excluir permanentemente o paciente "${patientName}"?\n\nEsta ação não pode ser desfeita e removerá todos os dados do paciente, incluindo prontuários e histórico médico.`
+      `VocÃª tem certeza que deseja excluir permanentemente o paciente "${patientName}"?\n\nEsta aÃ§Ã£o nÃ£o pode ser desfeita e removerÃ¡ todos os dados do paciente, incluindo prontuÃ¡rios e histÃ³rico mÃ©dico.`
     )
     if (!confirmDelete) return
 
-    // Segunda confirmação para ações críticas
+    // Segunda confirmaÃ§Ã£o para aÃ§Ãµes crÃ­ticas
     const doubleConfirm = window.confirm(
-      'ATENÇÃO: Esta é uma ação irreversível!\n\nDigite "CONFIRMAR" para prosseguir com a exclusão.'
+      'ATENÃ‡ÃƒO: Esta Ã© uma aÃ§Ã£o irreversÃ­vel!\n\nDigite "CONFIRMAR" para prosseguir com a exclusÃ£o.'
     )
     if (!doubleConfirm) return
 
     try {
-      console.log('🗑️ Excluindo paciente:', patientId)
+      console.log('ðŸ—‘ï¸ Excluindo paciente:', patientId)
 
       const deleteResponse = await fetch(`/api/unified-system/medical-patients/${patientId}`, {
         method: 'DELETE',
@@ -476,28 +476,28 @@ export default function AreaMedicaPage() {
         },
       })
 
-      console.log('📡 Delete response status:', deleteResponse.status)
+      console.log('ðŸ“¡ Delete response status:', deleteResponse.status)
 
       if (!deleteResponse.ok) {
         let errorData
         try {
           errorData = await deleteResponse.json()
         } catch (parseError) {
-          console.error('❌ Erro ao fazer parse da resposta:', parseError)
+          console.error('âŒ Erro ao fazer parse da resposta:', parseError)
           errorData = { error: 'Erro desconhecido na resposta do servidor' }
         }
         
-        console.error('❌ Erro ao excluir paciente:', JSON.stringify(errorData, null, 2))
+        console.error('âŒ Erro ao excluir paciente:', JSON.stringify(errorData, null, 2))
         
-        // Tratar erro específico de paciente com agendamentos
+        // Tratar erro especÃ­fico de paciente com agendamentos
         if (errorData.error && errorData.error.includes('agendamentos associados')) {
-          alert('❌ Não é possível excluir este paciente pois ele possui agendamentos associados. Cancele ou conclua os agendamentos primeiro.')
+          alert('âŒ NÃ£o Ã© possÃ­vel excluir este paciente pois ele possui agendamentos associados. Cancele ou conclua os agendamentos primeiro.')
           return
         }
         
-        // Tratar erro específico de paciente com prontuários médicos
-        if (errorData.error && errorData.error.includes('prontuários médicos associados')) {
-          alert('❌ Não é possível excluir este paciente pois ele possui prontuários médicos associados. Remova os prontuários primeiro.')
+        // Tratar erro especÃ­fico de paciente com prontuÃ¡rios mÃ©dicos
+        if (errorData.error && errorData.error.includes('prontuÃ¡rios mÃ©dicos associados')) {
+          alert('âŒ NÃ£o Ã© possÃ­vel excluir este paciente pois ele possui prontuÃ¡rios mÃ©dicos associados. Remova os prontuÃ¡rios primeiro.')
           return
         }
         
@@ -507,22 +507,22 @@ export default function AreaMedicaPage() {
       }
 
       const deleteResult = await deleteResponse.json()
-      console.log('✅ Resultado da exclusão:', deleteResult)
+      console.log('âœ… Resultado da exclusÃ£o:', deleteResult)
 
       if (deleteResult.success) {
         loadDashboardData() // Recarregar dados
-        alert('Paciente excluído com sucesso!')
+        alert('Paciente excluÃ­do com sucesso!')
       } else {
         throw new Error(deleteResult.error || 'Erro desconhecido ao excluir')
       }
     } catch (error) {
-      console.error('❌ Erro completo ao excluir paciente:', error)
+      console.error('âŒ Erro completo ao excluir paciente:', error)
 
-      // Mostrar erro mais detalhado para o usuário
+      // Mostrar erro mais detalhado para o usuÃ¡rio
       if (error instanceof Error) {
         if (error.message.includes('Failed to fetch')) {
           alert(
-            'Erro de conexão com a API. Verifique sua conexão com a internet e tente novamente.'
+            'Erro de conexÃ£o com a API. Verifique sua conexÃ£o com a internet e tente novamente.'
           )
         } else {
           alert(`Erro ao excluir paciente: ${error.message}`)
@@ -535,7 +535,7 @@ export default function AreaMedicaPage() {
 
   const openScheduleModal = (patientId: string) => {
     setSelectedPatientId(patientId)
-    // Usar função do date-utils para obter a data no fuso horário de Brasília
+    // Usar funÃ§Ã£o do date-utils para obter a data no fuso horÃ¡rio de BrasÃ­lia
     const today = getTodayISO()
     setScheduleDate(today)
     setShowScheduleModal(true)
@@ -551,14 +551,14 @@ export default function AreaMedicaPage() {
 
   const confirmSchedule = async () => {
     if (!scheduleDate || !scheduleTime) {
-      alert('Por favor, selecione data e horário')
+      alert('Por favor, selecione data e horÃ¡rio')
       return
     }
 
     try {
       console.log('=== DEBUG AGENDAMENTO (SISTEMA UNIFICADO) ===')
       console.log('Data selecionada:', scheduleDate)
-      console.log('Horário selecionado:', scheduleTime)
+      console.log('HorÃ¡rio selecionado:', scheduleTime)
       console.log('Tipo:', consultationType)
       console.log('Paciente ID:', selectedPatientId)
 
@@ -595,7 +595,7 @@ export default function AreaMedicaPage() {
           appointmentTime: scheduleTime,
           appointmentType: consultationType,
           source: 'doctor_area',
-          notes: 'Agendado pelo médico',
+          notes: 'Agendado pelo mÃ©dico',
           createdBy: doctor?.email || 'doctor',
         }),
       })
@@ -615,14 +615,14 @@ export default function AreaMedicaPage() {
         )
       }
     } catch (error) {
-      console.error('Erro ao adicionar à agenda:', error)
+      console.error('Erro ao adicionar Ã  agenda:', error)
       alert('Erro ao agendar paciente')
     }
   }
 
   const startConsultation = (patientId: string) => {
     const confirmStart = window.confirm(
-      'Você quer realmente iniciar esse atendimento?'
+      'VocÃª quer realmente iniciar esse atendimento?'
     )
     if (!confirmStart) return
 
@@ -631,18 +631,18 @@ export default function AreaMedicaPage() {
     const todayPatient = todayPatients.find(p => p.id === patientId)
 
     if (todayPatient && todayPatient.consultation) {
-      // Usar o ID do agendamento, não do paciente
+      // Usar o ID do agendamento, nÃ£o do paciente
       const appointmentId = todayPatient.consultation.id
       console.log(
-        '🚀 Iniciando atendimento - Patient ID:',
+        'ðŸš€ Iniciando atendimento - Patient ID:',
         patientId,
         'Appointment ID:',
         appointmentId
       )
       router.push(`/area-medica/atendimento/${appointmentId}`)
     } else {
-      console.error('❌ Agendamento não encontrado para o paciente:', patientId)
-      alert('Erro: Agendamento não encontrado para este paciente.')
+      console.error('âŒ Agendamento nÃ£o encontrado para o paciente:', patientId)
+      alert('Erro: Agendamento nÃ£o encontrado para este paciente.')
     }
   }
 
@@ -651,7 +651,7 @@ export default function AreaMedicaPage() {
       <div className='min-h-screen bg-black flex items-center justify-center'>
         <div className='text-center'>
           <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-blue-400 mx-auto mb-4'></div>
-          <p className='text-gray-300'>Carregando área médica...</p>
+          <p className='text-gray-300'>Carregando Ã¡rea mÃ©dica...</p>
         </div>
       </div>
     )
@@ -672,7 +672,7 @@ export default function AreaMedicaPage() {
                   <UserIcon className='w-8 h-8 text-blue-400' />
                 </div>
                 <div>
-                  <h1 className='text-4xl font-bold text-white'>Área Médica</h1>
+                  <h1 className='text-4xl font-bold text-white'>Ãrea MÃ©dica</h1>
                   <p className='text-gray-300 text-lg mt-2'>
                     {doctor?.name} - {doctor?.specialty}
                   </p>
@@ -698,7 +698,7 @@ export default function AreaMedicaPage() {
         </div>
 
         <div className='mx-auto max-w-7xl px-6 lg:px-8 pb-8'>
-          {/* Estatísticas Básicas */}
+          {/* EstatÃ­sticas BÃ¡sicas */}
           <div className='grid grid-cols-1 md:grid-cols-3 gap-6 mb-8'>
             <div className='bg-gray-900/50 backdrop-blur-sm rounded-2xl shadow-xl p-6 border border-gray-700'>
               <div className='flex items-center'>
@@ -739,7 +739,7 @@ export default function AreaMedicaPage() {
                 </div>
                 <div className='ml-4'>
                   <p className='text-sm font-medium text-gray-300'>
-                    Concluídas Hoje
+                    ConcluÃ­das Hoje
                   </p>
                   <p className='text-3xl font-bold text-white'>
                     {stats.completedToday}
@@ -749,7 +749,7 @@ export default function AreaMedicaPage() {
             </div>
           </div>
 
-          {/* Acesso Rápido */}
+          {/* Acesso RÃ¡pido */}
           <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8'>
             <button
               onClick={() => router.push('/area-medica/newsletter')}
@@ -764,7 +764,7 @@ export default function AreaMedicaPage() {
                     Newsletter
                   </p>
                   <p className='text-xs text-gray-400'>
-                    Informações médicas
+                    InformaÃ§Ãµes mÃ©dicas
                   </p>
                 </div>
               </div>
@@ -802,7 +802,7 @@ export default function AreaMedicaPage() {
                     Controle de Cirurgias
                   </p>
                   <p className='text-xs text-gray-400'>
-                    Gestão cirúrgica
+                    GestÃ£o cirÃºrgica
                   </p>
                 </div>
               </div>
@@ -818,10 +818,10 @@ export default function AreaMedicaPage() {
                 </div>
                 <div className='ml-4 text-left'>
                   <p className='text-sm font-medium text-white'>
-                    Gestão de Agenda
+                    GestÃ£o de Agenda
                   </p>
                   <p className='text-xs text-gray-400'>
-                    Horários e consultas
+                    HorÃ¡rios e consultas
                   </p>
                 </div>
               </div>
@@ -931,7 +931,7 @@ export default function AreaMedicaPage() {
                         WhatsApp
                       </th>
                       <th className='px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider'>
-                        Convênio
+                        ConvÃªnio
                       </th>
                       {activeTab === 'today' && (
                         <th className='px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider'>
@@ -939,7 +939,7 @@ export default function AreaMedicaPage() {
                         </th>
                       )}
                       <th className='px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider'>
-                        Ações
+                        AÃ§Ãµes
                       </th>
                     </tr>
                   </thead>
@@ -1027,7 +1027,7 @@ export default function AreaMedicaPage() {
                               }
                               className='text-blue-400 hover:text-blue-300 mr-3 transition-colors duration-200'
                             >
-                              Ver Prontuário
+                              Ver ProntuÃ¡rio
                             </button>
                             {activeTab === 'today' && patient.consultation ? (
                               <>
@@ -1052,7 +1052,7 @@ export default function AreaMedicaPage() {
                                   </>
                                 ) : (
                                   <span className='text-green-400 text-sm'>
-                                    Atendimento Concluído
+                                    Atendimento ConcluÃ­do
                                   </span>
                                 )}
                               </>
@@ -1117,7 +1117,7 @@ export default function AreaMedicaPage() {
 
                   <div>
                     <label className='block text-sm font-medium text-gray-300 mb-2'>
-                      Horário
+                      HorÃ¡rio
                     </label>
                     <TimePicker
                       value={scheduleTime}
@@ -1138,7 +1138,7 @@ export default function AreaMedicaPage() {
                     >
                       <option value='consulta'>Consulta</option>
                       <option value='retorno'>Retorno</option>
-                      <option value='urgencia'>Urgência</option>
+                      <option value='urgencia'>UrgÃªncia</option>
                       <option value='teleconsulta'>Teleconsulta</option>
                     </select>
                   </div>
@@ -1166,3 +1166,4 @@ export default function AreaMedicaPage() {
     </div>
   )
 }
+

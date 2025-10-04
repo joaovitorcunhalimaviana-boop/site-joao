@@ -8,6 +8,7 @@ import {
   getMedicalPatientById,
   createMedicalPatient,
   getCommunicationContactById,
+  createOrUpdateCommunicationContact,
 } from '../../../lib/unified-patient-system'
 
 // GET - Obter agendamentos, agenda diária ou estatísticas
@@ -379,8 +380,22 @@ export async function POST(request: NextRequest) {
           )
         }
 
+        // Se patientId é um ID de paciente médico, buscar o communicationContactId
+        let communicationContactId = patientId
+        if (patientId.startsWith('med_')) {
+          const medicalPatient = getMedicalPatientById(patientId)
+          if (!medicalPatient) {
+            return NextResponse.json({
+              success: false,
+              error: 'Paciente médico não encontrado'
+            }, { status: 404 })
+          }
+          communicationContactId = medicalPatient.communicationContactId
+        }
+
         const appointmentResult = await createAppointment({
-          communicationContactId: patientId,
+          communicationContactId: communicationContactId,
+          medicalPatientId: patientId.startsWith('med_') ? patientId : undefined,
           appointmentDate,
           appointmentTime,
           appointmentType: appointmentType || 'consulta',
@@ -392,7 +407,6 @@ export async function POST(request: NextRequest) {
 
       case 'create_patient':
       case 'create-patient':
-        const { patientData } = body
         const {
           name,
           phone,
@@ -402,7 +416,7 @@ export async function POST(request: NextRequest) {
           cpf,
           insurance,
           medicalRecord,
-        } = patientData || body
+        } = body
 
         if (!name || !phone) {
           return NextResponse.json(
@@ -411,10 +425,28 @@ export async function POST(request: NextRequest) {
           )
         }
 
-        const patientResult = await createMedicalPatient({
+        // 1. Primeiro criar ou atualizar o contato de comunicação
+        const communicationContactResult = createOrUpdateCommunicationContact({
+          name: name,
+          email: email,
+          whatsapp: whatsapp || phone,
+          birthDate: birthDate,
+          source: 'secretary_area'
+        })
+
+        if (!communicationContactResult.success) {
+          return NextResponse.json({
+            success: false,
+            error: communicationContactResult.message
+          }, { status: 400 })
+        }
+
+        // 2. Depois criar o paciente médico usando o ID do contato de comunicação
+        const patientResult = createMedicalPatient({
           cpf: cpf || '',
           fullName: name,
-          communicationContactId: phone, // This should be a valid communication contact ID
+          communicationContactId: communicationContactResult.contact.id,
+          insurance: insurance || { type: 'particular' },
         })
 
         return NextResponse.json(patientResult)

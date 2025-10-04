@@ -264,7 +264,7 @@ const DATA_DIR = path.join(process.cwd(), 'data', 'unified-system')
 const COMMUNICATION_CONTACTS_FILE = path.join(DATA_DIR, 'communication-contacts.json')
 const MEDICAL_PATIENTS_FILE = path.join(DATA_DIR, 'medical-patients.json')
 const APPOINTMENTS_FILE = path.join(DATA_DIR, 'appointments.json')
-const SCHEDULE_SLOTS_FILE = path.join(DATA_DIR, 'SCHEDULE-slots.json')
+const SCHEDULE_SLOTS_FILE = path.join(DATA_DIR, 'schedule-slots.json')
 const MEDICAL_RECORDS_FILE = path.join(DATA_DIR, 'medical-records.json')
 const SURGERIES_FILE = path.join(DATA_DIR, 'surgeries.json')
 
@@ -1471,13 +1471,31 @@ export function deleteMedicalPatient(patientId: string): { success: boolean; mes
       saveToStorage(APPOINTMENTS_FILE, remainingAppointments)
     }
     
+    const patientToDelete = patients[patientIndex]
+    
+    // CORREÇÃO: Remover também do sistema de comunicação (newsletter)
+    const communicationContactId = patientToDelete.communicationContactId
+    if (communicationContactId) {
+      console.log('🗑️ Removendo contato de comunicação associado:', communicationContactId)
+      
+      const communicationContacts = getAllCommunicationContacts()
+      const contactIndex = communicationContacts.findIndex(contact => contact.id === communicationContactId)
+      
+      if (contactIndex !== -1) {
+        // Remover o contato de comunicação (isso remove da newsletter também)
+        communicationContacts.splice(contactIndex, 1)
+        saveToStorage(COMMUNICATION_CONTACTS_FILE, communicationContacts)
+        console.log('✅ Contato de comunicação removido da newsletter')
+      }
+    }
+    
     // Remover o Paciente mÃ©dico
     patients.splice(patientIndex, 1)
     saveToStorage(MEDICAL_PATIENTS_FILE, patients)
     
     return {
       success: true,
-      message: 'Paciente mÃ©dico deletado com sucesso'
+      message: 'Paciente mÃ©dico deletado com sucesso (incluindo remoção da newsletter)'
     }
   } catch (error) {
     console.error('âŒ Erro ao deletar Paciente mÃ©dico:', error)
@@ -1487,7 +1505,6 @@ export function deleteMedicalPatient(patientId: string): { success: boolean; mes
     }
   }
 }
-
 
 
 

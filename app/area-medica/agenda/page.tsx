@@ -98,8 +98,11 @@ function AgendaManagementPageContent() {
 
   // Função para converter data brasileira para ISO
   const parseDateBR = (dateStringBR: string): string => {
-    if (!dateStringBR) return ''
+    if (!dateStringBR || dateStringBR.length !== 10) return ''
     const [day, month, year] = dateStringBR.split('/')
+    if (!day || !month || !year || day.length !== 2 || month.length !== 2 || year.length !== 4) {
+      return ''
+    }
     return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`
   }
 
@@ -177,7 +180,10 @@ function AgendaManagementPageContent() {
   }
 
   const handleAddSlot = async () => {
+    console.log('Tentando adicionar slot:', newSlot)
+    
     if (!newSlot.date || !newSlot.time) {
+      console.log('Dados faltando - date:', newSlot.date, 'time:', newSlot.time)
       showMessage('error', 'Por favor, selecione uma data e horário.')
       return
     }
@@ -188,6 +194,7 @@ function AgendaManagementPageContent() {
     today.setHours(0, 0, 0, 0)
     
     if (isNaN(selectedDate.getTime())) {
+      console.log('Data inválida:', newSlot.date)
       showMessage('error', 'Por favor, insira uma data válida no formato DD/MM/AAAA.')
       return
     }
@@ -208,6 +215,8 @@ function AgendaManagementPageContent() {
     }
 
     try {
+      console.log('Enviando para API:', { date: newSlot.date, time: newSlot.time })
+      
       const response = await fetch('/api/schedule-slots', {
         method: 'POST',
         headers: {
@@ -220,8 +229,11 @@ function AgendaManagementPageContent() {
       })
 
       const data = await response.json()
+      console.log('Resposta da API:', data)
+      
       if (data.success) {
-        setScheduleSlots(data.slots)
+        // Recarregar todos os slots da API
+        await loadScheduleSlots()
         setShowAddModal(false)
         setNewSlot({ date: '', time: '09:00', displayDate: '' })
         showMessage('success', 'Horário adicionado com sucesso!')
@@ -230,19 +242,7 @@ function AgendaManagementPageContent() {
       }
     } catch (error) {
       console.error('Erro ao adicionar horário:', error)
-      // Fallback: adicionar localmente
-      const newSlotData: ScheduleSlot = {
-        id: `slot-${Date.now()}`,
-        date: newSlot.date,
-        time: newSlot.time,
-        isActive: true,
-        createdAt: new Date().toISOString(),
-      }
-      
-      setScheduleSlots(prev => [...prev, newSlotData])
-      showMessage('success', 'Horário adicionado com sucesso!')
-      setNewSlot({ date: '', time: '09:00', displayDate: '' })
-      setShowAddModal(false)
+      showMessage('error', 'Erro de conexão. Tente novamente.')
     }
   }
 

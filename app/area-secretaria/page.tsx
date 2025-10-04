@@ -352,11 +352,14 @@ export default function AreaSecretaria() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          action: 'create_patient',
-          patientData: {
-            ...newPatient,
-            source: 'secretary_area',
-          },
+          action: 'create-patient',
+          name: newPatient.name,
+          phone: newPatient.phone,
+          whatsapp: newPatient.whatsapp || newPatient.phone,
+          email: newPatient.email,
+          birthDate: newPatient.birthDate,
+          cpf: newPatient.cpf,
+          insurance: newPatient.insurance,
         }),
       })
 
