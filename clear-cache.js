@@ -1,0 +1,1 @@
+﻿console.log('=== VERIFICANDO LOCALSTORAGE ==='); Object.keys(localStorage).forEach(key => { console.log(key + ':', localStorage.getItem(key)); }); console.log('=== LIMPANDO CACHE ==='); localStorage.clear(); sessionStorage.clear(); console.log('Cache limpo!');

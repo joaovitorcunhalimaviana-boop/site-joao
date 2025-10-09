@@ -1,0 +1,591 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                   String               @id @default(cuid())
+  username             String               @unique
+  email                String               @unique
+  password             String
+  role                 UserRole             @default(DOCTOR)
+  name                 String
+  crm                  String?
+  specialties          String?
+  isActive             Boolean              @default(true)
+  twoFactorEnabled     Boolean              @default(false)
+  twoFactorSecret      String?
+  twoFactorBackupCodes String?
+  twoFactorLastUsed    DateTime?
+  lastLogin            DateTime?
+  loginAttempts        Int                  @default(0)
+  lockedUntil          DateTime?
+  createdAt            DateTime             @default(now())
+  updatedAt            DateTime             @updatedAt
+  appointments         Appointment[]        @relation("AppointmentCreator")
+  auditLogs            AuditLog[]
+  consultations        Consultation[]
+  duplicateResolutions DuplicateDetection[] @relation("DuplicateResolver")
+  medicalPatients      MedicalPatient[]     @relation("MedicalPatientCreator")
+  medicalRecords       MedicalRecord[]
+  newsletterData       NewsletterData[]     @relation("NewsletterDataCreator")
+  refreshTokens        RefreshToken[]
+  scheduleBlocks       ScheduleBlock[]
+  scheduleSlots        ScheduleSlot[]       @relation("ScheduleSlotCreator")
+  twoFactorSetup       TwoFactorSetup?
+
+  @@map("users")
+}
+
+model RefreshToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("refresh_tokens")
+}
+
+model TwoFactorSetup {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  secret      String
+  backupCodes String
+  isVerified  Boolean  @default(false)
+  expiresAt   DateTime
+  createdAt   DateTime @default(now())
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("two_factor_setups")
+}
+
+model Appointment {
+  id                     String                @id @default(cuid())
+  communicationContactId String?
+  medicalPatientId       String?
+  insuranceType          InsuranceType         @default(PARTICULAR)
+  insurancePlan          String?
+  status                 AppointmentStatus     @default(SCHEDULED)
+  notes                  String?
+  duration               Int                   @default(30)
+  reminderSent           Boolean               @default(false)
+  createdAt              DateTime              @default(now())
+  updatedAt              DateTime              @updatedAt
+  createdBy              String?
+  appointmentDate        String
+  appointmentTime        String
+  type                   AppointmentType       @default(CONSULTATION)
+  source                 AppointmentSource     @default(MANUAL)
+  doctorName             String?
+  reason                 String?
+  observations           String?
+  confirmationSent       Boolean               @default(false)
+  specialty              String?
+  communicationContact   CommunicationContact? @relation(fields: [communicationContactId], references: [id])
+  creator                User?                 @relation("AppointmentCreator", fields: [createdBy], references: [id])
+  medicalPatient         MedicalPatient?       @relation(fields: [medicalPatientId], references: [id])
+  consultation           Consultation?
+
+  @@index([appointmentDate])
+  @@index([status])
+  @@index([communicationContactId])
+  @@index([medicalPatientId])
+  @@index([source])
+  @@index([type])
+  @@map("appointments")
+}
+
+model Consultation {
+  id               String              @id @default(cuid())
+  appointmentId    String?             @unique
+  medicalPatientId String?
+  doctorId         String
+  followUpDate     DateTime?
+  status           ConsultationStatus  @default(IN_PROGRESS)
+  startTime        DateTime            @default(now())
+  endTime          DateTime?
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
+  anamnese         String?
+  appointment      Appointment?        @relation(fields: [appointmentId], references: [id])
+  doctor           User                @relation(fields: [doctorId], references: [id])
+  medicalPatient   MedicalPatient?     @relation(fields: [medicalPatientId], references: [id])
+  attachments      MedicalAttachment[]
+  medicalRecords   MedicalRecord?
+  prescriptions    Prescription[]
+
+  @@index([appointmentId])
+  @@index([medicalPatientId])
+  @@index([doctorId])
+  @@index([status])
+  @@map("consultations")
+}
+
+model MedicalRecord {
+  id               String          @id @default(cuid())
+  consultationId   String          @unique
+  medicalPatientId String?
+  doctorId         String
+  content          String
+  summary          String?
+  category         String?
+  tags             String?
+  digitalSignature String?
+  signedAt         DateTime?
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  consultation     Consultation    @relation(fields: [consultationId], references: [id], onDelete: Cascade)
+  doctor           User            @relation(fields: [doctorId], references: [id])
+  medicalPatient   MedicalPatient? @relation(fields: [medicalPatientId], references: [id])
+
+  @@index([medicalPatientId])
+  @@index([doctorId])
+  @@index([createdAt])
+  @@map("medical_records")
+}
+
+model MedicalAttachment {
+  id             String             @id @default(cuid())
+  consultationId String?
+  filename       String
+  originalName   String
+  mimeType       String
+  size           Int
+  path           String
+  category       AttachmentCategory
+  description    String?
+  tags           String?
+  checksum       String
+  encrypted      Boolean            @default(false)
+  uploadedAt     DateTime           @default(now())
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+  consultation   Consultation?      @relation(fields: [consultationId], references: [id])
+
+  @@index([consultationId])
+  @@index([category])
+  @@map("medical_attachments")
+}
+
+model Prescription {
+  id               String       @id @default(cuid())
+  consultationId   String
+  medications      String
+  instructions     String?
+  validUntil       DateTime?
+  digitalSignature String?
+  signedAt         DateTime?
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+  consultation     Consultation @relation(fields: [consultationId], references: [id], onDelete: Cascade)
+
+  @@index([consultationId])
+  @@map("prescriptions")
+}
+
+model CalculatorResult {
+  id               String          @id @default(cuid())
+  medicalPatientId String?
+  calculatorType   String
+  inputData        String
+  results          String
+  notes            String?
+  calculatedAt     DateTime        @default(now())
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  medicalPatient   MedicalPatient? @relation(fields: [medicalPatientId], references: [id])
+
+  @@index([medicalPatientId])
+  @@index([calculatorType])
+  @@index([calculatedAt])
+  @@map("calculator_results")
+}
+
+model AuditLog {
+  id         String      @id @default(cuid())
+  userId     String?
+  action     String
+  resource   String
+  resourceId String?
+  details    String?
+  ipAddress  String?
+  userAgent  String?
+  severity   LogSeverity @default(LOW)
+  createdAt  DateTime    @default(now())
+  user       User?       @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([action])
+  @@index([resource])
+  @@index([createdAt])
+  @@index([severity])
+  @@map("audit_logs")
+}
+
+model RegistrationSource {
+  id        String                 @id @default(cuid())
+  contactId String
+  source    RegistrationSourceType
+  metadata  String?
+  createdAt DateTime               @default(now())
+  contact   CommunicationContact   @relation(fields: [contactId], references: [id], onDelete: Cascade)
+
+  @@index([contactId])
+  @@index([source])
+  @@index([createdAt])
+  @@map("registration_sources")
+}
+
+model Review {
+  id          String               @id @default(cuid())
+  rating      Int
+  comment     String
+  category    String?
+  verified    Boolean              @default(false)
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
+  approved    Boolean              @default(false)
+  contactId   String
+  publishedAt DateTime?
+  contact     CommunicationContact @relation(fields: [contactId], references: [id], onDelete: Cascade)
+
+  @@index([contactId])
+  @@index([rating])
+  @@index([approved])
+  @@index([verified])
+  @@index([createdAt])
+  @@map("reviews")
+}
+
+model SystemConfig {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  value       String
+  description String?
+  category    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([category])
+  @@map("system_config")
+}
+
+model BackupLog {
+  id           String       @id @default(cuid())
+  type         BackupType
+  status       BackupStatus @default(PENDING)
+  filename     String?
+  size         Int?
+  checksum     String?
+  startedAt    DateTime     @default(now())
+  completedAt  DateTime?
+  errorMessage String?
+
+  @@index([type])
+  @@index([status])
+  @@index([startedAt])
+  @@map("backup_logs")
+}
+
+model ScheduleBlock {
+  id               String            @id @default(cuid())
+  title            String
+  description      String?
+  startDate        DateTime
+  endDate          DateTime
+  blockType        BlockType
+  isAllDay         Boolean           @default(true)
+  startTime        String?
+  endTime          String?
+  isRecurring      Boolean           @default(false)
+  recurringPattern RecurringPattern?
+  recurringEndDate DateTime?
+  parentBlockId    String?
+  createdBy        String
+  isActive         Boolean           @default(true)
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  creator          User              @relation(fields: [createdBy], references: [id], onDelete: Cascade)
+
+  @@index([createdBy])
+  @@index([startDate])
+  @@index([endDate])
+  @@index([blockType])
+  @@index([isActive])
+  @@map("schedule_blocks")
+}
+
+model DuplicateDetection {
+  id              String          @id @default(cuid())
+  detectionMethod DetectionMethod
+  confidence      Int
+  matchedFields   String?
+  status          DuplicateStatus @default(PENDING)
+  resolvedBy      String?
+  resolvedAt      DateTime?
+  mergedInto      String?
+  detectedAt      DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  resolver        User?           @relation("DuplicateResolver", fields: [resolvedBy], references: [id])
+
+  @@index([status])
+  @@index([detectedAt])
+  @@map("duplicate_detections")
+}
+
+model CommunicationContact {
+  id                   String               @id @default(cuid())
+  name                 String
+  email                String?
+  whatsapp             String?
+  birthDate            String?
+  emailSubscribed      Boolean              @default(true)
+  emailNewsletter      Boolean              @default(true)
+  emailHealthTips      Boolean              @default(true)
+  emailAppointments    Boolean              @default(true)
+  emailPromotions      Boolean              @default(false)
+  emailSubscribedAt    DateTime?
+  emailUnsubscribedAt  DateTime?
+  whatsappSubscribed   Boolean              @default(true)
+  whatsappAppointments Boolean              @default(true)
+  whatsappReminders    Boolean              @default(true)
+  whatsappPromotions   Boolean              @default(false)
+  whatsappSubscribedAt DateTime?
+  createdAt            DateTime             @default(now())
+  updatedAt            DateTime             @updatedAt
+  lastContactAt        DateTime?
+  appointments         Appointment[]
+  medicalPatients      MedicalPatient[]
+  registrationSources  RegistrationSource[]
+  reviews              Review[]
+
+  @@index([email])
+  @@index([whatsapp])
+  @@index([emailSubscribed])
+  @@index([whatsappSubscribed])
+  @@map("communication_contacts")
+}
+
+model MedicalPatient {
+  id                          String               @id @default(cuid())
+  communicationContactId      String
+  cpf                         String               @unique
+  medicalRecordNumber         Int                  @unique
+  fullName                    String
+  rg                          String?
+  address                     String?
+  city                        String?
+  state                       String?
+  zipCode                     String?
+  insuranceType               InsuranceType        @default(PARTICULAR)
+  insurancePlan               String?
+  insuranceCardNumber         String?
+  insuranceValidUntil         DateTime?
+  allergies                   String?
+  medications                 String?
+  conditions                  String?
+  emergencyContact            String?
+  emergencyPhone              String?
+  bloodType                   String?
+  medicalNotes                String?
+  consentDataProcessing       Boolean              @default(false)
+  consentDataProcessingDate   DateTime?
+  consentMedicalTreatment     Boolean              @default(false)
+  consentMedicalTreatmentDate DateTime?
+  consentImageUse             Boolean              @default(false)
+  consentImageUseDate         DateTime?
+  createdAt                   DateTime             @default(now())
+  updatedAt                   DateTime             @updatedAt
+  createdBy                   String?
+  isActive                    Boolean              @default(true)
+  appointments                Appointment[]
+  calculatorResults           CalculatorResult[]
+  consultations               Consultation[]
+  communicationContact        CommunicationContact @relation(fields: [communicationContactId], references: [id], onDelete: Cascade)
+  creator                     User?                @relation("MedicalPatientCreator", fields: [createdBy], references: [id])
+  medicalRecords              MedicalRecord[]
+
+  @@index([communicationContactId])
+  @@index([cpf])
+  @@index([medicalRecordNumber])
+  @@index([createdBy])
+  @@index([isActive])
+  @@map("medical_patients")
+}
+
+model ScheduleSlot {
+  id        String   @id @default(cuid())
+  date      String
+  time      String
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  createdBy String?
+  creator   User?    @relation("ScheduleSlotCreator", fields: [createdBy], references: [id])
+
+  @@index([date])
+  @@index([time])
+  @@index([isActive])
+  @@index([createdBy])
+  @@map("schedule_slots")
+}
+
+model NewsletterData {
+  id        String    @id @default(cuid())
+  title     String
+  content   String
+  isDraft   Boolean   @default(true)
+  sentAt    DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  createdBy String?
+  creator   User?     @relation("NewsletterDataCreator", fields: [createdBy], references: [id])
+
+  @@index([isDraft])
+  @@index([sentAt])
+  @@index([createdBy])
+  @@map("newsletter_data")
+}
+
+model AvailableTimeSlot {
+  id             String   @id @default(cuid())
+  date           DateTime
+  startTime      String
+  endTime        String
+  available      Boolean  @default(true)
+  consultationId String?  @unique
+  createdBy      String?
+  createdAt      DateTime @default(now())
+
+  @@unique([date, startTime])
+  @@index([date, available])
+}
+
+enum UserRole {
+  DOCTOR
+  SECRETARY
+  ADMIN
+}
+
+enum AppointmentType {
+  CONSULTATION
+  FOLLOW_UP
+  PROCEDURE
+  TELEMEDICINE
+  EMERGENCY
+}
+
+enum AppointmentSource {
+  MANUAL
+  ONLINE
+  PHONE
+  WHATSAPP
+  SYSTEM
+}
+
+enum AppointmentStatus {
+  SCHEDULED
+  CONFIRMED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+}
+
+enum ConsultationStatus {
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum AttachmentCategory {
+  EXAM_RESULT
+  PRESCRIPTION
+  MEDICAL_REPORT
+  IMAGE
+  DOCUMENT
+  OTHER
+}
+
+enum LogSeverity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum BackupType {
+  FULL
+  INCREMENTAL
+  DIFFERENTIAL
+}
+
+enum BackupStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  FAILED
+}
+
+enum BlockType {
+  VACATION
+  CONFERENCE
+  EMERGENCY
+  PERSONAL
+  MAINTENANCE
+  OTHER
+}
+
+enum RecurringPattern {
+  DAILY
+  WEEKLY
+  MONTHLY
+  YEARLY
+}
+
+enum DetectionMethod {
+  CPF
+  EXACT_MATCH
+  SIMILAR_DATA
+  MANUAL
+}
+
+enum DuplicateStatus {
+  PENDING
+  CONFIRMED
+  MERGED
+  DISMISSED
+  FALSE_POSITIVE
+}
+
+enum InsuranceType {
+  UNIMED
+  PARTICULAR
+  OUTRO
+}
+
+enum CommunicationPreference {
+  EMAIL
+  WHATSAPP
+  SMS
+  PHONE
+}
+
+enum RegistrationSourceType {
+  NEWSLETTER
+  PUBLIC_APPOINTMENT
+  DOCTOR_AREA
+  SECRETARY_AREA
+  REVIEW
+  MEDICAL_AREA
+  PUBLIC_SCHEDULING
+  WHATSAPP
+  PHONE
+  REFERRAL
+}

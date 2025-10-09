@@ -1,0 +1,497 @@
+[
+  {
+    "id": "audit_1760048779243_diaihlgq3",
+    "timestamp": "2025-10-09T22:26:19.243Z",
+    "action": "emergency_backup_failure",
+    "resource": "system",
+    "details": {
+      "taskId": "emergency_backup",
+      "error": "fetch failed",
+      "timestamp": "2025-10-09T22:26:19.241Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1760048779415_k00qerg9f",
+    "timestamp": "2025-10-09T22:26:19.415Z",
+    "action": "critical_status_detected",
+    "resource": "system",
+    "details": {
+      "taskId": "monitoring",
+      "status": "CRITICAL",
+      "alerts": 2,
+      "timestamp": "2025-10-09T22:26:19.414Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1760048779437_5fonmm37j",
+    "timestamp": "2025-10-09T22:26:19.437Z",
+    "action": "emergency_backup_failure",
+    "resource": "system",
+    "details": {
+      "taskId": "emergency_backup",
+      "error": "fetch failed",
+      "timestamp": "2025-10-09T22:26:19.436Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1760048779442_42sjx9paj",
+    "timestamp": "2025-10-09T22:26:19.442Z",
+    "action": "critical_status_detected",
+    "resource": "system",
+    "details": {
+      "taskId": "monitoring",
+      "status": "CRITICAL",
+      "alerts": 2,
+      "timestamp": "2025-10-09T22:26:19.442Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1760048779689_ux62h1e8d",
+    "timestamp": "2025-10-09T22:26:19.689Z",
+    "action": "emergency_backup_failure",
+    "resource": "system",
+    "details": {
+      "taskId": "emergency_backup",
+      "error": "fetch failed",
+      "timestamp": "2025-10-09T22:26:19.689Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1760048779701_876912kuu",
+    "timestamp": "2025-10-09T22:26:19.701Z",
+    "action": "critical_status_detected",
+    "resource": "system",
+    "details": {
+      "taskId": "monitoring",
+      "status": "CRITICAL",
+      "alerts": 2,
+      "timestamp": "2025-10-09T22:26:19.701Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1760049439417_2fs5laqvl",
+    "timestamp": "2025-10-09T22:37:19.417Z",
+    "action": "scheduler_initialized",
+    "resource": "system",
+    "details": {
+      "tasksCount": 0,
+      "config": {
+        "backups": {
+          "emergency": {
+            "enabled": false,
+            "interval": 60
+          },
+          "daily": {
+            "enabled": false,
+            "time": "02:00"
+          },
+          "weekly": {
+            "enabled": false,
+            "day": 0,
+            "time": "03:00"
+          },
+          "monthly": {
+            "enabled": false,
+            "day": 1,
+            "time": "04:00"
+          }
+        },
+        "integrity": {
+          "enabled": false,
+          "interval": 6
+        },
+        "cloudBackup": {
+          "enabled": false,
+          "interval": 12
+        },
+        "monitoring": {
+          "enabled": false,
+          "interval": 15
+        }
+      }
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1760049591772_ebvxx187j",
+    "timestamp": "2025-10-09T22:39:51.772Z",
+    "action": "scheduler_initialized",
+    "resource": "system",
+    "details": {
+      "tasksCount": 0,
+      "config": {
+        "backups": {
+          "emergency": {
+            "enabled": false,
+            "interval": 60
+          },
+          "daily": {
+            "enabled": false,
+            "time": "02:00"
+          },
+          "weekly": {
+            "enabled": false,
+            "day": 0,
+            "time": "03:00"
+          },
+          "monthly": {
+            "enabled": false,
+            "day": 1,
+            "time": "04:00"
+          }
+        },
+        "integrity": {
+          "enabled": false,
+          "interval": 6
+        },
+        "cloudBackup": {
+          "enabled": false,
+          "interval": 12
+        },
+        "monitoring": {
+          "enabled": false,
+          "interval": 15
+        }
+      }
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1760049678307_cmqjrh9k7",
+    "timestamp": "2025-10-09T22:41:18.307Z",
+    "action": "emergency_backup_failure",
+    "resource": "system",
+    "details": {
+      "taskId": "emergency_backup",
+      "error": "fetch failed",
+      "timestamp": "2025-10-09T22:41:18.306Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1760049678318_illc1yuxm",
+    "timestamp": "2025-10-09T22:41:18.318Z",
+    "action": "critical_status_detected",
+    "resource": "system",
+    "details": {
+      "taskId": "monitoring",
+      "status": "CRITICAL",
+      "alerts": 2,
+      "timestamp": "2025-10-09T22:41:18.318Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1760049678332_d3bfdbxmh",
+    "timestamp": "2025-10-09T22:41:18.333Z",
+    "action": "emergency_backup_failure",
+    "resource": "system",
+    "details": {
+      "taskId": "emergency_backup",
+      "error": "fetch failed",
+      "timestamp": "2025-10-09T22:41:18.331Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1760049678339_nbusqgb53",
+    "timestamp": "2025-10-09T22:41:18.339Z",
+    "action": "critical_status_detected",
+    "resource": "system",
+    "details": {
+      "taskId": "monitoring",
+      "status": "CRITICAL",
+      "alerts": 2,
+      "timestamp": "2025-10-09T22:41:18.339Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1760049678347_it19s07qq",
+    "timestamp": "2025-10-09T22:41:18.347Z",
+    "action": "emergency_backup_failure",
+    "resource": "system",
+    "details": {
+      "taskId": "emergency_backup",
+      "error": "fetch failed",
+      "timestamp": "2025-10-09T22:41:18.344Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1760049678354_21f0o8fv5",
+    "timestamp": "2025-10-09T22:41:18.354Z",
+    "action": "critical_status_detected",
+    "resource": "system",
+    "details": {
+      "taskId": "monitoring",
+      "status": "CRITICAL",
+      "alerts": 2,
+      "timestamp": "2025-10-09T22:41:18.354Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1760049678404_cbdggsahf",
+    "timestamp": "2025-10-09T22:41:18.404Z",
+    "action": "emergency_backup_failure",
+    "resource": "system",
+    "details": {
+      "taskId": "emergency_backup",
+      "error": "fetch failed",
+      "timestamp": "2025-10-09T22:41:18.403Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1760049678409_nf4lsxxnu",
+    "timestamp": "2025-10-09T22:41:18.409Z",
+    "action": "critical_status_detected",
+    "resource": "system",
+    "details": {
+      "taskId": "monitoring",
+      "status": "CRITICAL",
+      "alerts": 2,
+      "timestamp": "2025-10-09T22:41:18.408Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1760049678813_bh48sq3nf",
+    "timestamp": "2025-10-09T22:41:18.813Z",
+    "action": "emergency_backup_failure",
+    "resource": "system",
+    "details": {
+      "taskId": "emergency_backup",
+      "error": "fetch failed",
+      "timestamp": "2025-10-09T22:41:18.812Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1760049678818_hmzh2ykbr",
+    "timestamp": "2025-10-09T22:41:18.818Z",
+    "action": "critical_status_detected",
+    "resource": "system",
+    "details": {
+      "taskId": "monitoring",
+      "status": "CRITICAL",
+      "alerts": 2,
+      "timestamp": "2025-10-09T22:41:18.816Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1760049678838_oq2orb7u1",
+    "timestamp": "2025-10-09T22:41:18.838Z",
+    "action": "emergency_backup_failure",
+    "resource": "system",
+    "details": {
+      "taskId": "emergency_backup",
+      "error": "fetch failed",
+      "timestamp": "2025-10-09T22:41:18.837Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1760049678840_cdbrns1xk",
+    "timestamp": "2025-10-09T22:41:18.840Z",
+    "action": "critical_status_detected",
+    "resource": "system",
+    "details": {
+      "taskId": "monitoring",
+      "status": "CRITICAL",
+      "alerts": 2,
+      "timestamp": "2025-10-09T22:41:18.840Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1760050578650_pn7rrs89i",
+    "timestamp": "2025-10-09T22:56:18.650Z",
+    "action": "emergency_backup_failure",
+    "resource": "system",
+    "details": {
+      "taskId": "emergency_backup",
+      "error": "fetch failed",
+      "timestamp": "2025-10-09T22:56:18.649Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1760050578657_53eisjtdb",
+    "timestamp": "2025-10-09T22:56:18.657Z",
+    "action": "critical_status_detected",
+    "resource": "system",
+    "details": {
+      "taskId": "monitoring",
+      "status": "CRITICAL",
+      "alerts": 2,
+      "timestamp": "2025-10-09T22:56:18.657Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1760050578675_s5ue7mx6w",
+    "timestamp": "2025-10-09T22:56:18.675Z",
+    "action": "emergency_backup_failure",
+    "resource": "system",
+    "details": {
+      "taskId": "emergency_backup",
+      "error": "fetch failed",
+      "timestamp": "2025-10-09T22:56:18.674Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1760050578678_y7mruilha",
+    "timestamp": "2025-10-09T22:56:18.678Z",
+    "action": "critical_status_detected",
+    "resource": "system",
+    "details": {
+      "taskId": "monitoring",
+      "status": "CRITICAL",
+      "alerts": 2,
+      "timestamp": "2025-10-09T22:56:18.678Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1760050578855_2fdqbawok",
+    "timestamp": "2025-10-09T22:56:18.856Z",
+    "action": "emergency_backup_failure",
+    "resource": "system",
+    "details": {
+      "taskId": "emergency_backup",
+      "error": "fetch failed",
+      "timestamp": "2025-10-09T22:56:18.853Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1760050578863_v8gygk36p",
+    "timestamp": "2025-10-09T22:56:18.863Z",
+    "action": "critical_status_detected",
+    "resource": "system",
+    "details": {
+      "taskId": "monitoring",
+      "status": "CRITICAL",
+      "alerts": 2,
+      "timestamp": "2025-10-09T22:56:18.862Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1760050578908_orhabjhrt",
+    "timestamp": "2025-10-09T22:56:18.908Z",
+    "action": "emergency_backup_failure",
+    "resource": "system",
+    "details": {
+      "taskId": "emergency_backup",
+      "error": "fetch failed",
+      "timestamp": "2025-10-09T22:56:18.908Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1760050578912_7936rtk33",
+    "timestamp": "2025-10-09T22:56:18.912Z",
+    "action": "critical_status_detected",
+    "resource": "system",
+    "details": {
+      "taskId": "monitoring",
+      "status": "CRITICAL",
+      "alerts": 2,
+      "timestamp": "2025-10-09T22:56:18.911Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1760050578944_diyidgynv",
+    "timestamp": "2025-10-09T22:56:18.944Z",
+    "action": "emergency_backup_failure",
+    "resource": "system",
+    "details": {
+      "taskId": "emergency_backup",
+      "error": "fetch failed",
+      "timestamp": "2025-10-09T22:56:18.943Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1760050578949_5zpo0x0j4",
+    "timestamp": "2025-10-09T22:56:18.949Z",
+    "action": "critical_status_detected",
+    "resource": "system",
+    "details": {
+      "taskId": "monitoring",
+      "status": "CRITICAL",
+      "alerts": 2,
+      "timestamp": "2025-10-09T22:56:18.948Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1760050578982_mefmai03s",
+    "timestamp": "2025-10-09T22:56:18.982Z",
+    "action": "emergency_backup_failure",
+    "resource": "system",
+    "details": {
+      "taskId": "emergency_backup",
+      "error": "fetch failed",
+      "timestamp": "2025-10-09T22:56:18.981Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1760050578985_hkmv0fv5h",
+    "timestamp": "2025-10-09T22:56:18.986Z",
+    "action": "critical_status_detected",
+    "resource": "system",
+    "details": {
+      "taskId": "monitoring",
+      "status": "CRITICAL",
+      "alerts": 2,
+      "timestamp": "2025-10-09T22:56:18.985Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  }
+]

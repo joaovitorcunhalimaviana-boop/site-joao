@@ -1,0 +1,49 @@
+[
+  {
+    "id": "med_1759530156276_zjzqn6q9j",
+    "communicationContactId": "comm_1759530156269_xz5dnm7hr",
+    "cpf": "12345678901",
+    "medicalRecordNumber": 1,
+    "fullName": "Jo�o Silva Teste",
+    "insurance": {
+      "type": "particular"
+    },
+    "medicalInfo": {
+      "allergies": [],
+      "medications": [],
+      "conditions": []
+    },
+    "consents": {
+      "dataProcessing": false,
+      "medicalTreatment": false,
+      "imageUse": false
+    },
+    "createdAt": "2025-10-03T22:22:36.000Z",
+    "updatedAt": "2025-10-03T22:22:36.000Z",
+    "isActive": true
+  },
+  {
+    "id": "med_1759530167089_y3zg0lxhs",
+    "communicationContactId": "comm_1759530167083_4nok5228z",
+    "cpf": "98765432100",
+    "medicalRecordNumber": 2,
+    "fullName": "Maria Santos Teste",
+    "insurance": {
+      "type": "unimed",
+      "plan": "Unimed B�sico"
+    },
+    "medicalInfo": {
+      "allergies": [],
+      "medications": [],
+      "conditions": []
+    },
+    "consents": {
+      "dataProcessing": false,
+      "medicalTreatment": false,
+      "imageUse": false
+    },
+    "createdAt": "2025-10-03T22:22:47.000Z",
+    "updatedAt": "2025-10-03T22:22:47.000Z",
+    "isActive": true
+  }
+]

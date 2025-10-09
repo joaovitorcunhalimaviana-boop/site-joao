@@ -1,0 +1,2208 @@
+[
+  {
+    "id": "audit_1759884038475_pw3lqw42g",
+    "timestamp": "2025-10-08T00:40:38.475Z",
+    "action": "integrity_check_failure",
+    "resource": "system",
+    "details": {
+      "taskId": "integrity_check",
+      "error": "fetch failed",
+      "timestamp": "2025-10-08T00:40:38.475Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759884038532_8rk562z09",
+    "timestamp": "2025-10-08T00:40:38.532Z",
+    "action": "integrity_check_failure",
+    "resource": "system",
+    "details": {
+      "taskId": "integrity_check",
+      "error": "fetch failed",
+      "timestamp": "2025-10-08T00:40:38.530Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759884038608_gatd9nl69",
+    "timestamp": "2025-10-08T00:40:38.608Z",
+    "action": "integrity_check_failure",
+    "resource": "system",
+    "details": {
+      "taskId": "integrity_check",
+      "error": "fetch failed",
+      "timestamp": "2025-10-08T00:40:38.606Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759884038679_qxgcgpkc9",
+    "timestamp": "2025-10-08T00:40:38.679Z",
+    "action": "integrity_check_failure",
+    "resource": "system",
+    "details": {
+      "taskId": "integrity_check",
+      "error": "fetch failed",
+      "timestamp": "2025-10-08T00:40:38.678Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759884038754_tp0dnrt3d",
+    "timestamp": "2025-10-08T00:40:38.754Z",
+    "action": "integrity_check_failure",
+    "resource": "system",
+    "details": {
+      "taskId": "integrity_check",
+      "error": "fetch failed",
+      "timestamp": "2025-10-08T00:40:38.751Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759884047602_r9jnv4q3i",
+    "timestamp": "2025-10-08T00:40:47.602Z",
+    "action": "emergency_backup_failure",
+    "resource": "system",
+    "details": {
+      "taskId": "emergency_backup",
+      "error": "Backup falhou: 500",
+      "timestamp": "2025-10-08T00:40:47.601Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759884085954_wk9s1o6ho",
+    "timestamp": "2025-10-08T00:41:25.954Z",
+    "action": "emergency_backup_failure",
+    "resource": "system",
+    "details": {
+      "taskId": "emergency_backup",
+      "error": "Backup falhou: 500",
+      "timestamp": "2025-10-08T00:41:25.953Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759884085977_69wqoia3v",
+    "timestamp": "2025-10-08T00:41:25.977Z",
+    "action": "emergency_backup_failure",
+    "resource": "system",
+    "details": {
+      "taskId": "emergency_backup",
+      "error": "Backup falhou: 500",
+      "timestamp": "2025-10-08T00:41:25.976Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759884086005_4efyylqum",
+    "timestamp": "2025-10-08T00:41:26.005Z",
+    "action": "emergency_backup_failure",
+    "resource": "system",
+    "details": {
+      "taskId": "emergency_backup",
+      "error": "Backup falhou: 500",
+      "timestamp": "2025-10-08T00:41:26.003Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759884086032_o2ujpgf7j",
+    "timestamp": "2025-10-08T00:41:26.032Z",
+    "action": "emergency_backup_failure",
+    "resource": "system",
+    "details": {
+      "taskId": "emergency_backup",
+      "error": "Backup falhou: 500",
+      "timestamp": "2025-10-08T00:41:26.031Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759884086064_2aya13o43",
+    "timestamp": "2025-10-08T00:41:26.064Z",
+    "action": "emergency_backup_failure",
+    "resource": "system",
+    "details": {
+      "taskId": "emergency_backup",
+      "error": "Backup falhou: 500",
+      "timestamp": "2025-10-08T00:41:26.063Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759884086084_70kb8mvz7",
+    "timestamp": "2025-10-08T00:41:26.084Z",
+    "action": "emergency_backup_failure",
+    "resource": "system",
+    "details": {
+      "taskId": "emergency_backup",
+      "error": "Backup falhou: 500",
+      "timestamp": "2025-10-08T00:41:26.083Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759884086110_1ltjd3dg5",
+    "timestamp": "2025-10-08T00:41:26.110Z",
+    "action": "emergency_backup_failure",
+    "resource": "system",
+    "details": {
+      "taskId": "emergency_backup",
+      "error": "Backup falhou: 500",
+      "timestamp": "2025-10-08T00:41:26.110Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759884086130_wc06q76ne",
+    "timestamp": "2025-10-08T00:41:26.130Z",
+    "action": "emergency_backup_failure",
+    "resource": "system",
+    "details": {
+      "taskId": "emergency_backup",
+      "error": "Backup falhou: 500",
+      "timestamp": "2025-10-08T00:41:26.130Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759884086151_955w91r8n",
+    "timestamp": "2025-10-08T00:41:26.151Z",
+    "action": "emergency_backup_failure",
+    "resource": "system",
+    "details": {
+      "taskId": "emergency_backup",
+      "error": "Backup falhou: 500",
+      "timestamp": "2025-10-08T00:41:26.151Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759886501625_msiu1horu",
+    "timestamp": "2025-10-08T01:21:41.625Z",
+    "action": "scheduler_initialized",
+    "resource": "system",
+    "details": {
+      "tasksCount": 5,
+      "config": {
+        "backups": {
+          "emergency": {
+            "enabled": true,
+            "interval": 60
+          },
+          "daily": {
+            "enabled": true,
+            "time": "02:00"
+          },
+          "weekly": {
+            "enabled": true,
+            "day": 0,
+            "time": "03:00"
+          },
+          "monthly": {
+            "enabled": true,
+            "day": 1,
+            "time": "04:00"
+          }
+        },
+        "integrity": {
+          "enabled": true,
+          "interval": 6
+        },
+        "cloudBackup": {
+          "enabled": true,
+          "interval": 12
+        },
+        "monitoring": {
+          "enabled": true,
+          "interval": 15
+        }
+      }
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759886967679_9vcpfjm8d",
+    "timestamp": "2025-10-08T01:29:27.679Z",
+    "action": "scheduler_initialized",
+    "resource": "system",
+    "details": {
+      "tasksCount": 5,
+      "config": {
+        "backups": {
+          "emergency": {
+            "enabled": true,
+            "interval": 60
+          },
+          "daily": {
+            "enabled": true,
+            "time": "02:00"
+          },
+          "weekly": {
+            "enabled": true,
+            "day": 0,
+            "time": "03:00"
+          },
+          "monthly": {
+            "enabled": true,
+            "day": 1,
+            "time": "04:00"
+          }
+        },
+        "integrity": {
+          "enabled": true,
+          "interval": 6
+        },
+        "cloudBackup": {
+          "enabled": true,
+          "interval": 12
+        },
+        "monitoring": {
+          "enabled": true,
+          "interval": 15
+        }
+      }
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759890124032_opqxi25l4",
+    "timestamp": "2025-10-08T02:22:04.032Z",
+    "action": "scheduler_initialized",
+    "resource": "system",
+    "details": {
+      "tasksCount": 5,
+      "config": {
+        "backups": {
+          "emergency": {
+            "enabled": true,
+            "interval": 60
+          },
+          "daily": {
+            "enabled": true,
+            "time": "02:00"
+          },
+          "weekly": {
+            "enabled": true,
+            "day": 0,
+            "time": "03:00"
+          },
+          "monthly": {
+            "enabled": true,
+            "day": 1,
+            "time": "04:00"
+          }
+        },
+        "integrity": {
+          "enabled": true,
+          "interval": 6
+        },
+        "cloudBackup": {
+          "enabled": true,
+          "interval": 12
+        },
+        "monitoring": {
+          "enabled": true,
+          "interval": 15
+        }
+      }
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759891030011_9z7c93bun",
+    "timestamp": "2025-10-08T02:37:10.011Z",
+    "action": "emergency_backup_failure",
+    "resource": "system",
+    "details": {
+      "taskId": "emergency_backup",
+      "error": "Backup falhou: 500",
+      "timestamp": "2025-10-08T02:37:10.009Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759891030016_818uejdjc",
+    "timestamp": "2025-10-08T02:37:10.016Z",
+    "action": "critical_status_detected",
+    "resource": "system",
+    "details": {
+      "taskId": "monitoring",
+      "status": "CRITICAL",
+      "alerts": 1,
+      "timestamp": "2025-10-08T02:37:10.016Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759891948430_8umefm8hk",
+    "timestamp": "2025-10-08T02:52:28.430Z",
+    "action": "emergency_backup_failure",
+    "resource": "system",
+    "details": {
+      "taskId": "emergency_backup",
+      "error": "Backup falhou: 500",
+      "timestamp": "2025-10-08T02:52:28.428Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759891948438_zmmte0w5d",
+    "timestamp": "2025-10-08T02:52:28.438Z",
+    "action": "critical_status_detected",
+    "resource": "system",
+    "details": {
+      "taskId": "monitoring",
+      "status": "CRITICAL",
+      "alerts": 1,
+      "timestamp": "2025-10-08T02:52:28.438Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759893102097_2v2n3rlpe",
+    "timestamp": "2025-10-08T03:11:42.097Z",
+    "action": "scheduler_initialized",
+    "resource": "system",
+    "details": {
+      "tasksCount": 5,
+      "config": {
+        "backups": {
+          "emergency": {
+            "enabled": true,
+            "interval": 60
+          },
+          "daily": {
+            "enabled": true,
+            "time": "02:00"
+          },
+          "weekly": {
+            "enabled": true,
+            "day": 0,
+            "time": "03:00"
+          },
+          "monthly": {
+            "enabled": true,
+            "day": 1,
+            "time": "04:00"
+          }
+        },
+        "integrity": {
+          "enabled": true,
+          "interval": 6
+        },
+        "cloudBackup": {
+          "enabled": true,
+          "interval": 12
+        },
+        "monitoring": {
+          "enabled": true,
+          "interval": 15
+        }
+      }
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759894055337_u2a0mwb3a",
+    "timestamp": "2025-10-08T03:27:35.337Z",
+    "action": "emergency_backup_failure",
+    "resource": "system",
+    "details": {
+      "taskId": "emergency_backup",
+      "error": "Backup falhou: 500",
+      "timestamp": "2025-10-08T03:27:35.333Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759894055345_xycbhgmad",
+    "timestamp": "2025-10-08T03:27:35.345Z",
+    "action": "critical_status_detected",
+    "resource": "system",
+    "details": {
+      "taskId": "monitoring",
+      "status": "CRITICAL",
+      "alerts": 1,
+      "timestamp": "2025-10-08T03:27:35.344Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759894906610_xzjmkdgj2",
+    "timestamp": "2025-10-08T03:41:46.610Z",
+    "action": "emergency_backup_failure",
+    "resource": "system",
+    "details": {
+      "taskId": "emergency_backup",
+      "error": "Backup falhou: 500",
+      "timestamp": "2025-10-08T03:41:46.609Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759894906616_xjbkg8x74",
+    "timestamp": "2025-10-08T03:41:46.616Z",
+    "action": "critical_status_detected",
+    "resource": "system",
+    "details": {
+      "taskId": "monitoring",
+      "status": "CRITICAL",
+      "alerts": 1,
+      "timestamp": "2025-10-08T03:41:46.616Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759895804871_rf1tw171l",
+    "timestamp": "2025-10-08T03:56:44.871Z",
+    "action": "emergency_backup_failure",
+    "resource": "system",
+    "details": {
+      "taskId": "emergency_backup",
+      "error": "Backup falhou: 500",
+      "timestamp": "2025-10-08T03:56:44.870Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759895804876_y9ohk7t4t",
+    "timestamp": "2025-10-08T03:56:44.876Z",
+    "action": "critical_status_detected",
+    "resource": "system",
+    "details": {
+      "taskId": "monitoring",
+      "status": "CRITICAL",
+      "alerts": 1,
+      "timestamp": "2025-10-08T03:56:44.876Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759896037673_bycsoc6mx",
+    "timestamp": "2025-10-08T04:00:37.673Z",
+    "action": "scheduler_initialized",
+    "resource": "system",
+    "details": {
+      "tasksCount": 5,
+      "config": {
+        "backups": {
+          "emergency": {
+            "enabled": true,
+            "interval": 60
+          },
+          "daily": {
+            "enabled": true,
+            "time": "02:00"
+          },
+          "weekly": {
+            "enabled": true,
+            "day": 0,
+            "time": "03:00"
+          },
+          "monthly": {
+            "enabled": true,
+            "day": 1,
+            "time": "04:00"
+          }
+        },
+        "integrity": {
+          "enabled": true,
+          "interval": 6
+        },
+        "cloudBackup": {
+          "enabled": true,
+          "interval": 12
+        },
+        "monitoring": {
+          "enabled": true,
+          "interval": 15
+        }
+      }
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759896702921_t0q3d371o",
+    "timestamp": "2025-10-08T04:11:42.921Z",
+    "action": "emergency_backup_failure",
+    "resource": "system",
+    "details": {
+      "taskId": "emergency_backup",
+      "error": "Backup falhou: 500",
+      "timestamp": "2025-10-08T04:11:42.920Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759896704934_xvko1nrvj",
+    "timestamp": "2025-10-08T04:11:44.934Z",
+    "action": "emergency_backup_failure",
+    "resource": "system",
+    "details": {
+      "taskId": "emergency_backup",
+      "error": "Backup falhou: 500",
+      "timestamp": "2025-10-08T04:11:44.934Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759896704938_6vhe8mx0a",
+    "timestamp": "2025-10-08T04:11:44.938Z",
+    "action": "critical_status_detected",
+    "resource": "system",
+    "details": {
+      "taskId": "monitoring",
+      "status": "CRITICAL",
+      "alerts": 1,
+      "timestamp": "2025-10-08T04:11:44.938Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759896942812_2yo1blf2z",
+    "timestamp": "2025-10-08T04:15:42.812Z",
+    "action": "emergency_backup_failure",
+    "resource": "system",
+    "details": {
+      "taskId": "emergency_backup",
+      "error": "Backup falhou: 500",
+      "timestamp": "2025-10-08T04:15:42.809Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759896942818_jx2ffj5ug",
+    "timestamp": "2025-10-08T04:15:42.818Z",
+    "action": "critical_status_detected",
+    "resource": "system",
+    "details": {
+      "taskId": "monitoring",
+      "status": "CRITICAL",
+      "alerts": 1,
+      "timestamp": "2025-10-08T04:15:42.818Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759897604433_u20vs8755",
+    "timestamp": "2025-10-08T04:26:44.434Z",
+    "action": "emergency_backup_failure",
+    "resource": "system",
+    "details": {
+      "taskId": "emergency_backup",
+      "error": "Backup falhou: 500",
+      "timestamp": "2025-10-08T04:26:44.432Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759897604440_irrgrwnl7",
+    "timestamp": "2025-10-08T04:26:44.440Z",
+    "action": "critical_status_detected",
+    "resource": "system",
+    "details": {
+      "taskId": "monitoring",
+      "status": "CRITICAL",
+      "alerts": 1,
+      "timestamp": "2025-10-08T04:26:44.440Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759897843230_oudmt3b48",
+    "timestamp": "2025-10-08T04:30:43.230Z",
+    "action": "emergency_backup_failure",
+    "resource": "system",
+    "details": {
+      "taskId": "emergency_backup",
+      "error": "Backup falhou: 500",
+      "timestamp": "2025-10-08T04:30:43.221Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759897843238_wpppz42kc",
+    "timestamp": "2025-10-08T04:30:43.238Z",
+    "action": "critical_status_detected",
+    "resource": "system",
+    "details": {
+      "taskId": "monitoring",
+      "status": "CRITICAL",
+      "alerts": 1,
+      "timestamp": "2025-10-08T04:30:43.238Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759898504801_ozvanj7g8",
+    "timestamp": "2025-10-08T04:41:44.801Z",
+    "action": "emergency_backup_failure",
+    "resource": "system",
+    "details": {
+      "taskId": "emergency_backup",
+      "error": "Backup falhou: 500",
+      "timestamp": "2025-10-08T04:41:44.800Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759898504809_gg4w4bz9t",
+    "timestamp": "2025-10-08T04:41:44.809Z",
+    "action": "critical_status_detected",
+    "resource": "system",
+    "details": {
+      "taskId": "monitoring",
+      "status": "CRITICAL",
+      "alerts": 1,
+      "timestamp": "2025-10-08T04:41:44.808Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759898742620_01r2n0vs0",
+    "timestamp": "2025-10-08T04:45:42.620Z",
+    "action": "emergency_backup_failure",
+    "resource": "system",
+    "details": {
+      "taskId": "emergency_backup",
+      "error": "Backup falhou: 500",
+      "timestamp": "2025-10-08T04:45:42.620Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759898742625_gp1h62si6",
+    "timestamp": "2025-10-08T04:45:42.625Z",
+    "action": "critical_status_detected",
+    "resource": "system",
+    "details": {
+      "taskId": "monitoring",
+      "status": "CRITICAL",
+      "alerts": 1,
+      "timestamp": "2025-10-08T04:45:42.625Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759899404650_3s0rwfs14",
+    "timestamp": "2025-10-08T04:56:44.651Z",
+    "action": "emergency_backup_failure",
+    "resource": "system",
+    "details": {
+      "taskId": "emergency_backup",
+      "error": "Backup falhou: 500",
+      "timestamp": "2025-10-08T04:56:44.649Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759899404658_vd60t625p",
+    "timestamp": "2025-10-08T04:56:44.658Z",
+    "action": "critical_status_detected",
+    "resource": "system",
+    "details": {
+      "taskId": "monitoring",
+      "status": "CRITICAL",
+      "alerts": 1,
+      "timestamp": "2025-10-08T04:56:44.658Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759899600426_6mv74u91w",
+    "timestamp": "2025-10-08T05:00:00.426Z",
+    "action": "daily_backup_failure",
+    "resource": "system",
+    "details": {
+      "taskId": "daily_backup",
+      "error": "Backup diário falhou: 500",
+      "timestamp": "2025-10-08T05:00:00.426Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759899601690_4oa24vqpz",
+    "timestamp": "2025-10-08T05:00:01.690Z",
+    "action": "daily_backup_failure",
+    "resource": "system",
+    "details": {
+      "taskId": "daily_backup",
+      "error": "Backup diário falhou: 500",
+      "timestamp": "2025-10-08T05:00:01.690Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759899658015_4mjvooev6",
+    "timestamp": "2025-10-08T05:00:58.015Z",
+    "action": "emergency_backup_failure",
+    "resource": "system",
+    "details": {
+      "taskId": "emergency_backup",
+      "error": "Backup falhou: 500",
+      "timestamp": "2025-10-08T05:00:58.012Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759899658020_jun40bupu",
+    "timestamp": "2025-10-08T05:00:58.020Z",
+    "action": "critical_status_detected",
+    "resource": "system",
+    "details": {
+      "taskId": "monitoring",
+      "status": "CRITICAL",
+      "alerts": 1,
+      "timestamp": "2025-10-08T05:00:58.020Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759899658052_4goj0383u",
+    "timestamp": "2025-10-08T05:00:58.052Z",
+    "action": "emergency_backup_failure",
+    "resource": "system",
+    "details": {
+      "taskId": "emergency_backup",
+      "error": "Backup falhou: 500",
+      "timestamp": "2025-10-08T05:00:58.051Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759900332341_wswh1ud7z",
+    "timestamp": "2025-10-08T05:12:12.342Z",
+    "action": "emergency_backup_failure",
+    "resource": "system",
+    "details": {
+      "taskId": "emergency_backup",
+      "error": "Backup falhou: 500",
+      "timestamp": "2025-10-08T05:12:12.340Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759900332363_dv5b2eile",
+    "timestamp": "2025-10-08T05:12:12.363Z",
+    "action": "emergency_backup_failure",
+    "resource": "system",
+    "details": {
+      "taskId": "emergency_backup",
+      "error": "Backup falhou: 500",
+      "timestamp": "2025-10-08T05:12:12.363Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759900332371_oajhhajrl",
+    "timestamp": "2025-10-08T05:12:12.371Z",
+    "action": "critical_status_detected",
+    "resource": "system",
+    "details": {
+      "taskId": "monitoring",
+      "status": "CRITICAL",
+      "alerts": 1,
+      "timestamp": "2025-10-08T05:12:12.371Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759900554164_6oynr0fbr",
+    "timestamp": "2025-10-08T05:15:54.164Z",
+    "action": "emergency_backup_failure",
+    "resource": "system",
+    "details": {
+      "taskId": "emergency_backup",
+      "error": "Backup falhou: 500",
+      "timestamp": "2025-10-08T05:15:54.164Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759900554174_hkl19vae6",
+    "timestamp": "2025-10-08T05:15:54.174Z",
+    "action": "critical_status_detected",
+    "resource": "system",
+    "details": {
+      "taskId": "monitoring",
+      "status": "CRITICAL",
+      "alerts": 1,
+      "timestamp": "2025-10-08T05:15:54.174Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759901208567_hxx8tktti",
+    "timestamp": "2025-10-08T05:26:48.567Z",
+    "action": "emergency_backup_failure",
+    "resource": "system",
+    "details": {
+      "taskId": "emergency_backup",
+      "error": "Backup falhou: 500",
+      "timestamp": "2025-10-08T05:26:48.567Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759901208572_nhowryuid",
+    "timestamp": "2025-10-08T05:26:48.572Z",
+    "action": "critical_status_detected",
+    "resource": "system",
+    "details": {
+      "taskId": "monitoring",
+      "status": "CRITICAL",
+      "alerts": 1,
+      "timestamp": "2025-10-08T05:26:48.572Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759901476060_l2uw17tx6",
+    "timestamp": "2025-10-08T05:31:16.060Z",
+    "action": "emergency_backup_failure",
+    "resource": "system",
+    "details": {
+      "taskId": "emergency_backup",
+      "error": "Backup falhou: 500",
+      "timestamp": "2025-10-08T05:31:16.060Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759901476069_om03l7fve",
+    "timestamp": "2025-10-08T05:31:16.069Z",
+    "action": "critical_status_detected",
+    "resource": "system",
+    "details": {
+      "taskId": "monitoring",
+      "status": "CRITICAL",
+      "alerts": 1,
+      "timestamp": "2025-10-08T05:31:16.069Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759902244810_21h8svyub",
+    "timestamp": "2025-10-08T05:44:04.810Z",
+    "action": "emergency_backup_failure",
+    "resource": "system",
+    "details": {
+      "taskId": "emergency_backup",
+      "error": "Backup falhou: 500",
+      "timestamp": "2025-10-08T05:44:04.804Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759902244829_h4ni5dm9r",
+    "timestamp": "2025-10-08T05:44:04.829Z",
+    "action": "critical_status_detected",
+    "resource": "system",
+    "details": {
+      "taskId": "monitoring",
+      "status": "CRITICAL",
+      "alerts": 1,
+      "timestamp": "2025-10-08T05:44:04.829Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759902347176_tyc54kwng",
+    "timestamp": "2025-10-08T05:45:47.177Z",
+    "action": "emergency_backup_failure",
+    "resource": "system",
+    "details": {
+      "taskId": "emergency_backup",
+      "error": "Backup falhou: 500",
+      "timestamp": "2025-10-08T05:45:47.168Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759902347187_kwdzghdvc",
+    "timestamp": "2025-10-08T05:45:47.187Z",
+    "action": "critical_status_detected",
+    "resource": "system",
+    "details": {
+      "taskId": "monitoring",
+      "status": "CRITICAL",
+      "alerts": 1,
+      "timestamp": "2025-10-08T05:45:47.187Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759903089203_lzutkv7hd",
+    "timestamp": "2025-10-08T05:58:09.203Z",
+    "action": "emergency_backup_failure",
+    "resource": "system",
+    "details": {
+      "taskId": "emergency_backup",
+      "error": "Backup falhou: 500",
+      "timestamp": "2025-10-08T05:58:09.203Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759903089213_cinvgecjz",
+    "timestamp": "2025-10-08T05:58:09.213Z",
+    "action": "critical_status_detected",
+    "resource": "system",
+    "details": {
+      "taskId": "monitoring",
+      "status": "CRITICAL",
+      "alerts": 1,
+      "timestamp": "2025-10-08T05:58:09.212Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759903248260_1puxnkmop",
+    "timestamp": "2025-10-08T06:00:48.262Z",
+    "action": "emergency_backup_failure",
+    "resource": "system",
+    "details": {
+      "taskId": "emergency_backup",
+      "error": "Backup falhou: 500",
+      "timestamp": "2025-10-08T06:00:48.240Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759903250776_zv4b2bby1",
+    "timestamp": "2025-10-08T06:00:50.776Z",
+    "action": "emergency_backup_failure",
+    "resource": "system",
+    "details": {
+      "taskId": "emergency_backup",
+      "error": "Backup falhou: 500",
+      "timestamp": "2025-10-08T06:00:50.775Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759903250785_vn209ej5t",
+    "timestamp": "2025-10-08T06:00:50.786Z",
+    "action": "critical_status_detected",
+    "resource": "system",
+    "details": {
+      "taskId": "monitoring",
+      "status": "CRITICAL",
+      "alerts": 1,
+      "timestamp": "2025-10-08T06:00:50.785Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759903949621_3dcww9tdm",
+    "timestamp": "2025-10-08T06:12:29.622Z",
+    "action": "emergency_backup_failure",
+    "resource": "system",
+    "details": {
+      "taskId": "emergency_backup",
+      "error": "Backup falhou: 500",
+      "timestamp": "2025-10-08T06:12:29.611Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759903982719_32k54b1ts",
+    "timestamp": "2025-10-08T06:13:02.720Z",
+    "action": "emergency_backup_failure",
+    "resource": "system",
+    "details": {
+      "taskId": "emergency_backup",
+      "error": "Backup falhou: 500",
+      "timestamp": "2025-10-08T06:13:02.718Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759903983260_j89913coi",
+    "timestamp": "2025-10-08T06:13:03.260Z",
+    "action": "critical_status_detected",
+    "resource": "system",
+    "details": {
+      "taskId": "monitoring",
+      "status": "CRITICAL",
+      "alerts": 1,
+      "timestamp": "2025-10-08T06:13:03.219Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759904454549_8i2bcy5n4",
+    "timestamp": "2025-10-08T06:20:54.549Z",
+    "action": "emergency_backup_failure",
+    "resource": "system",
+    "details": {
+      "taskId": "emergency_backup",
+      "error": "fetch failed",
+      "timestamp": "2025-10-08T06:20:54.548Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759904454556_x5uaalhu6",
+    "timestamp": "2025-10-08T06:20:54.556Z",
+    "action": "critical_status_detected",
+    "resource": "system",
+    "details": {
+      "taskId": "monitoring",
+      "status": "CRITICAL",
+      "alerts": 1,
+      "timestamp": "2025-10-08T06:20:54.556Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759936450808_r95y6up8t",
+    "timestamp": "2025-10-08T15:14:10.809Z",
+    "action": "cloud_backup_failure",
+    "resource": "system",
+    "details": {
+      "taskId": "cloud_backup",
+      "error": "Failed to parse URL from /api/cloud-backup",
+      "timestamp": "2025-10-08T15:14:10.808Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759936477646_sr2mogud5",
+    "timestamp": "2025-10-08T15:14:37.646Z",
+    "action": "integrity_check_failure",
+    "resource": "system",
+    "details": {
+      "taskId": "integrity_check",
+      "error": "fetch failed",
+      "timestamp": "2025-10-08T15:14:37.646Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759936478047_0tz4hzf2x",
+    "timestamp": "2025-10-08T15:14:38.047Z",
+    "action": "integrity_check_failure",
+    "resource": "system",
+    "details": {
+      "taskId": "integrity_check",
+      "error": "fetch failed",
+      "timestamp": "2025-10-08T15:14:37.921Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759936540834_ef28yxdej",
+    "timestamp": "2025-10-08T15:15:40.834Z",
+    "action": "emergency_backup_failure",
+    "resource": "system",
+    "details": {
+      "taskId": "emergency_backup",
+      "error": "fetch failed",
+      "timestamp": "2025-10-08T15:15:40.832Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759936540841_k6a1yz3mo",
+    "timestamp": "2025-10-08T15:15:40.841Z",
+    "action": "critical_status_detected",
+    "resource": "system",
+    "details": {
+      "taskId": "monitoring",
+      "status": "CRITICAL",
+      "alerts": 1,
+      "timestamp": "2025-10-08T15:15:40.841Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759936764949_w54lwtxgy",
+    "timestamp": "2025-10-08T15:19:24.949Z",
+    "action": "emergency_backup_failure",
+    "resource": "system",
+    "details": {
+      "taskId": "emergency_backup",
+      "error": "fetch failed",
+      "timestamp": "2025-10-08T15:19:24.949Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759936764956_ef0rtchua",
+    "timestamp": "2025-10-08T15:19:24.956Z",
+    "action": "critical_status_detected",
+    "resource": "system",
+    "details": {
+      "taskId": "monitoring",
+      "status": "CRITICAL",
+      "alerts": 1,
+      "timestamp": "2025-10-08T15:19:24.956Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759936804527_pmkpdrsms",
+    "timestamp": "2025-10-08T15:20:04.527Z",
+    "action": "emergency_backup_failure",
+    "resource": "system",
+    "details": {
+      "taskId": "emergency_backup",
+      "error": "fetch failed",
+      "timestamp": "2025-10-08T15:20:04.527Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759936804542_ca1k2h1c7",
+    "timestamp": "2025-10-08T15:20:04.542Z",
+    "action": "emergency_backup_failure",
+    "resource": "system",
+    "details": {
+      "taskId": "emergency_backup",
+      "error": "fetch failed",
+      "timestamp": "2025-10-08T15:20:04.542Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759937640784_5ilbl59ym",
+    "timestamp": "2025-10-08T15:34:00.784Z",
+    "action": "emergency_backup_failure",
+    "resource": "system",
+    "details": {
+      "taskId": "emergency_backup",
+      "error": "fetch failed",
+      "timestamp": "2025-10-08T15:34:00.784Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759937640812_2tgcu0wdw",
+    "timestamp": "2025-10-08T15:34:00.812Z",
+    "action": "critical_status_detected",
+    "resource": "system",
+    "details": {
+      "taskId": "monitoring",
+      "status": "CRITICAL",
+      "alerts": 2,
+      "timestamp": "2025-10-08T15:34:00.811Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759937641062_dvjhi51ui",
+    "timestamp": "2025-10-08T15:34:01.062Z",
+    "action": "emergency_backup_failure",
+    "resource": "system",
+    "details": {
+      "taskId": "emergency_backup",
+      "error": "fetch failed",
+      "timestamp": "2025-10-08T15:34:01.062Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759937641112_dltvohh9w",
+    "timestamp": "2025-10-08T15:34:01.112Z",
+    "action": "critical_status_detected",
+    "resource": "system",
+    "details": {
+      "taskId": "monitoring",
+      "status": "CRITICAL",
+      "alerts": 2,
+      "timestamp": "2025-10-08T15:34:01.112Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759938541324_9lfdws0r0",
+    "timestamp": "2025-10-08T15:49:01.324Z",
+    "action": "emergency_backup_failure",
+    "resource": "system",
+    "details": {
+      "taskId": "emergency_backup",
+      "error": "fetch failed",
+      "timestamp": "2025-10-08T15:49:01.323Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759938541329_160bkfwvs",
+    "timestamp": "2025-10-08T15:49:01.330Z",
+    "action": "critical_status_detected",
+    "resource": "system",
+    "details": {
+      "taskId": "monitoring",
+      "status": "CRITICAL",
+      "alerts": 2,
+      "timestamp": "2025-10-08T15:49:01.329Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759938541811_y4qc0l74y",
+    "timestamp": "2025-10-08T15:49:01.811Z",
+    "action": "emergency_backup_failure",
+    "resource": "system",
+    "details": {
+      "taskId": "emergency_backup",
+      "error": "fetch failed",
+      "timestamp": "2025-10-08T15:49:01.811Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759938541814_n3mfkqlml",
+    "timestamp": "2025-10-08T15:49:01.814Z",
+    "action": "critical_status_detected",
+    "resource": "system",
+    "details": {
+      "taskId": "monitoring",
+      "status": "CRITICAL",
+      "alerts": 2,
+      "timestamp": "2025-10-08T15:49:01.814Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759939856905_86w53x53i",
+    "timestamp": "2025-10-08T16:10:56.905Z",
+    "action": "scheduler_initialized",
+    "resource": "system",
+    "details": {
+      "tasksCount": 5,
+      "config": {
+        "backups": {
+          "emergency": {
+            "enabled": true,
+            "interval": 60
+          },
+          "daily": {
+            "enabled": true,
+            "time": "02:00"
+          },
+          "weekly": {
+            "enabled": true,
+            "day": 0,
+            "time": "03:00"
+          },
+          "monthly": {
+            "enabled": true,
+            "day": 1,
+            "time": "04:00"
+          }
+        },
+        "integrity": {
+          "enabled": true,
+          "interval": 6
+        },
+        "cloudBackup": {
+          "enabled": true,
+          "interval": 12
+        },
+        "monitoring": {
+          "enabled": true,
+          "interval": 15
+        }
+      }
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759940615433_wqpvyju9a",
+    "timestamp": "2025-10-08T16:23:35.433Z",
+    "action": "scheduler_initialized",
+    "resource": "system",
+    "details": {
+      "tasksCount": 5,
+      "config": {
+        "backups": {
+          "emergency": {
+            "enabled": true,
+            "interval": 60
+          },
+          "daily": {
+            "enabled": true,
+            "time": "02:00"
+          },
+          "weekly": {
+            "enabled": true,
+            "day": 0,
+            "time": "03:00"
+          },
+          "monthly": {
+            "enabled": true,
+            "day": 1,
+            "time": "04:00"
+          }
+        },
+        "integrity": {
+          "enabled": true,
+          "interval": 6
+        },
+        "cloudBackup": {
+          "enabled": true,
+          "interval": 12
+        },
+        "monitoring": {
+          "enabled": true,
+          "interval": 15
+        }
+      }
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759940809469_1qsdoptsl",
+    "timestamp": "2025-10-08T16:26:49.469Z",
+    "action": "scheduler_initialized",
+    "resource": "system",
+    "details": {
+      "tasksCount": 5,
+      "config": {
+        "backups": {
+          "emergency": {
+            "enabled": true,
+            "interval": 60
+          },
+          "daily": {
+            "enabled": true,
+            "time": "02:00"
+          },
+          "weekly": {
+            "enabled": true,
+            "day": 0,
+            "time": "03:00"
+          },
+          "monthly": {
+            "enabled": true,
+            "day": 1,
+            "time": "04:00"
+          }
+        },
+        "integrity": {
+          "enabled": true,
+          "interval": 6
+        },
+        "cloudBackup": {
+          "enabled": true,
+          "interval": 12
+        },
+        "monitoring": {
+          "enabled": true,
+          "interval": 15
+        }
+      }
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759942017796_8atw6acta",
+    "timestamp": "2025-10-08T16:46:57.796Z",
+    "action": "emergency_backup_failure",
+    "resource": "system",
+    "details": {
+      "taskId": "emergency_backup",
+      "error": "fetch failed",
+      "timestamp": "2025-10-08T16:46:57.772Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759942017823_wvf1wf0km",
+    "timestamp": "2025-10-08T16:46:57.823Z",
+    "action": "critical_status_detected",
+    "resource": "system",
+    "details": {
+      "taskId": "monitoring",
+      "status": "CRITICAL",
+      "alerts": 2,
+      "timestamp": "2025-10-08T16:46:57.822Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759942916516_26y7ub139",
+    "timestamp": "2025-10-08T17:01:56.516Z",
+    "action": "emergency_backup_failure",
+    "resource": "system",
+    "details": {
+      "taskId": "emergency_backup",
+      "error": "fetch failed",
+      "timestamp": "2025-10-08T17:01:56.509Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759942916529_b20fqlgqk",
+    "timestamp": "2025-10-08T17:01:56.530Z",
+    "action": "critical_status_detected",
+    "resource": "system",
+    "details": {
+      "taskId": "monitoring",
+      "status": "CRITICAL",
+      "alerts": 2,
+      "timestamp": "2025-10-08T17:01:56.528Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759946085316_ibfcg73jz",
+    "timestamp": "2025-10-08T17:54:45.316Z",
+    "action": "scheduler_initialized",
+    "resource": "system",
+    "details": {
+      "tasksCount": 5,
+      "config": {
+        "backups": {
+          "emergency": {
+            "enabled": true,
+            "interval": 60
+          },
+          "daily": {
+            "enabled": true,
+            "time": "02:00"
+          },
+          "weekly": {
+            "enabled": true,
+            "day": 0,
+            "time": "03:00"
+          },
+          "monthly": {
+            "enabled": true,
+            "day": 1,
+            "time": "04:00"
+          }
+        },
+        "integrity": {
+          "enabled": true,
+          "interval": 6
+        },
+        "cloudBackup": {
+          "enabled": true,
+          "interval": 12
+        },
+        "monitoring": {
+          "enabled": true,
+          "interval": 15
+        }
+      }
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759946131253_madzddfvg",
+    "timestamp": "2025-10-08T17:55:31.253Z",
+    "action": "scheduler_initialized",
+    "resource": "system",
+    "details": {
+      "tasksCount": 5,
+      "config": {
+        "backups": {
+          "emergency": {
+            "enabled": true,
+            "interval": 60
+          },
+          "daily": {
+            "enabled": true,
+            "time": "02:00"
+          },
+          "weekly": {
+            "enabled": true,
+            "day": 0,
+            "time": "03:00"
+          },
+          "monthly": {
+            "enabled": true,
+            "day": 1,
+            "time": "04:00"
+          }
+        },
+        "integrity": {
+          "enabled": true,
+          "interval": 6
+        },
+        "cloudBackup": {
+          "enabled": true,
+          "interval": 12
+        },
+        "monitoring": {
+          "enabled": true,
+          "interval": 15
+        }
+      }
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759946397542_lhzgnwxaq",
+    "timestamp": "2025-10-08T17:59:57.542Z",
+    "action": "scheduler_initialized",
+    "resource": "system",
+    "details": {
+      "tasksCount": 5,
+      "config": {
+        "backups": {
+          "emergency": {
+            "enabled": true,
+            "interval": 60
+          },
+          "daily": {
+            "enabled": true,
+            "time": "02:00"
+          },
+          "weekly": {
+            "enabled": true,
+            "day": 0,
+            "time": "03:00"
+          },
+          "monthly": {
+            "enabled": true,
+            "day": 1,
+            "time": "04:00"
+          }
+        },
+        "integrity": {
+          "enabled": true,
+          "interval": 6
+        },
+        "cloudBackup": {
+          "enabled": true,
+          "interval": 12
+        },
+        "monitoring": {
+          "enabled": true,
+          "interval": 15
+        }
+      }
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759946433946_hs9cf1sp3",
+    "timestamp": "2025-10-08T18:00:33.946Z",
+    "action": "scheduler_initialized",
+    "resource": "system",
+    "details": {
+      "tasksCount": 5,
+      "config": {
+        "backups": {
+          "emergency": {
+            "enabled": true,
+            "interval": 60
+          },
+          "daily": {
+            "enabled": true,
+            "time": "02:00"
+          },
+          "weekly": {
+            "enabled": true,
+            "day": 0,
+            "time": "03:00"
+          },
+          "monthly": {
+            "enabled": true,
+            "day": 1,
+            "time": "04:00"
+          }
+        },
+        "integrity": {
+          "enabled": true,
+          "interval": 6
+        },
+        "cloudBackup": {
+          "enabled": true,
+          "interval": 12
+        },
+        "monitoring": {
+          "enabled": true,
+          "interval": 15
+        }
+      }
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759946622990_2255gzygc",
+    "timestamp": "2025-10-08T18:03:42.990Z",
+    "action": "scheduler_initialized",
+    "resource": "system",
+    "details": {
+      "tasksCount": 5,
+      "config": {
+        "backups": {
+          "emergency": {
+            "enabled": true,
+            "interval": 60
+          },
+          "daily": {
+            "enabled": true,
+            "time": "02:00"
+          },
+          "weekly": {
+            "enabled": true,
+            "day": 0,
+            "time": "03:00"
+          },
+          "monthly": {
+            "enabled": true,
+            "day": 1,
+            "time": "04:00"
+          }
+        },
+        "integrity": {
+          "enabled": true,
+          "interval": 6
+        },
+        "cloudBackup": {
+          "enabled": true,
+          "interval": 12
+        },
+        "monitoring": {
+          "enabled": true,
+          "interval": 15
+        }
+      }
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759946858521_f7zugdyii",
+    "timestamp": "2025-10-08T18:07:38.521Z",
+    "action": "scheduler_initialized",
+    "resource": "system",
+    "details": {
+      "tasksCount": 5,
+      "config": {
+        "backups": {
+          "emergency": {
+            "enabled": true,
+            "interval": 60
+          },
+          "daily": {
+            "enabled": true,
+            "time": "02:00"
+          },
+          "weekly": {
+            "enabled": true,
+            "day": 0,
+            "time": "03:00"
+          },
+          "monthly": {
+            "enabled": true,
+            "day": 1,
+            "time": "04:00"
+          }
+        },
+        "integrity": {
+          "enabled": true,
+          "interval": 6
+        },
+        "cloudBackup": {
+          "enabled": true,
+          "interval": 12
+        },
+        "monitoring": {
+          "enabled": true,
+          "interval": 15
+        }
+      }
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759946991487_jisj58495",
+    "timestamp": "2025-10-08T18:09:51.487Z",
+    "action": "emergency_backup_success",
+    "resource": "system",
+    "details": {
+      "taskId": "emergency_backup",
+      "timestamp": "2025-10-08T18:09:51.486Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759946991492_xdlvmrchz",
+    "timestamp": "2025-10-08T18:09:51.492Z",
+    "action": "critical_status_detected",
+    "resource": "system",
+    "details": {
+      "taskId": "monitoring",
+      "status": "CRITICAL",
+      "alerts": 2,
+      "timestamp": "2025-10-08T18:09:51.492Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759947033290_xj4er0kcb",
+    "timestamp": "2025-10-08T18:10:33.290Z",
+    "action": "emergency_backup_success",
+    "resource": "system",
+    "details": {
+      "taskId": "emergency_backup",
+      "timestamp": "2025-10-08T18:10:33.290Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759947033295_tfdh23t64",
+    "timestamp": "2025-10-08T18:10:33.295Z",
+    "action": "critical_status_detected",
+    "resource": "system",
+    "details": {
+      "taskId": "monitoring",
+      "status": "CRITICAL",
+      "alerts": 2,
+      "timestamp": "2025-10-08T18:10:33.295Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759947301266_gf69j4orq",
+    "timestamp": "2025-10-08T18:15:01.266Z",
+    "action": "emergency_backup_success",
+    "resource": "system",
+    "details": {
+      "taskId": "emergency_backup",
+      "timestamp": "2025-10-08T18:15:01.265Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759947301271_spp55vmzh",
+    "timestamp": "2025-10-08T18:15:01.271Z",
+    "action": "critical_status_detected",
+    "resource": "system",
+    "details": {
+      "taskId": "monitoring",
+      "status": "CRITICAL",
+      "alerts": 2,
+      "timestamp": "2025-10-08T18:15:01.271Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759947335931_fehkdd525",
+    "timestamp": "2025-10-08T18:15:35.931Z",
+    "action": "emergency_backup_success",
+    "resource": "system",
+    "details": {
+      "taskId": "emergency_backup",
+      "timestamp": "2025-10-08T18:15:35.930Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759947335935_2mtikavml",
+    "timestamp": "2025-10-08T18:15:35.935Z",
+    "action": "critical_status_detected",
+    "resource": "system",
+    "details": {
+      "taskId": "monitoring",
+      "status": "CRITICAL",
+      "alerts": 2,
+      "timestamp": "2025-10-08T18:15:35.935Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759947524932_tzff0ms78",
+    "timestamp": "2025-10-08T18:18:44.932Z",
+    "action": "emergency_backup_success",
+    "resource": "system",
+    "details": {
+      "taskId": "emergency_backup",
+      "timestamp": "2025-10-08T18:18:44.932Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759947524937_s50wuliuu",
+    "timestamp": "2025-10-08T18:18:44.937Z",
+    "action": "critical_status_detected",
+    "resource": "system",
+    "details": {
+      "taskId": "monitoring",
+      "status": "CRITICAL",
+      "alerts": 2,
+      "timestamp": "2025-10-08T18:18:44.936Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759948421932_69fwpao48",
+    "timestamp": "2025-10-08T18:33:41.932Z",
+    "action": "scheduler_initialized",
+    "resource": "system",
+    "details": {
+      "tasksCount": 5,
+      "config": {
+        "backups": {
+          "emergency": {
+            "enabled": true,
+            "interval": 60
+          },
+          "daily": {
+            "enabled": true,
+            "time": "02:00"
+          },
+          "weekly": {
+            "enabled": true,
+            "day": 0,
+            "time": "03:00"
+          },
+          "monthly": {
+            "enabled": true,
+            "day": 1,
+            "time": "04:00"
+          }
+        },
+        "integrity": {
+          "enabled": true,
+          "interval": 6
+        },
+        "cloudBackup": {
+          "enabled": true,
+          "interval": 12
+        },
+        "monitoring": {
+          "enabled": true,
+          "interval": 15
+        }
+      }
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759958918542_pzi1rhp2q",
+    "timestamp": "2025-10-08T21:28:38.542Z",
+    "action": "scheduler_initialized",
+    "resource": "system",
+    "details": {
+      "tasksCount": 5,
+      "config": {
+        "backups": {
+          "emergency": {
+            "enabled": true,
+            "interval": 60
+          },
+          "daily": {
+            "enabled": true,
+            "time": "02:00"
+          },
+          "weekly": {
+            "enabled": true,
+            "day": 0,
+            "time": "03:00"
+          },
+          "monthly": {
+            "enabled": true,
+            "day": 1,
+            "time": "04:00"
+          }
+        },
+        "integrity": {
+          "enabled": true,
+          "interval": 6
+        },
+        "cloudBackup": {
+          "enabled": true,
+          "interval": 12
+        },
+        "monitoring": {
+          "enabled": true,
+          "interval": 15
+        }
+      }
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759959826216_0l0w72yqb",
+    "timestamp": "2025-10-08T21:43:46.216Z",
+    "action": "emergency_backup_success",
+    "resource": "system",
+    "details": {
+      "taskId": "emergency_backup",
+      "timestamp": "2025-10-08T21:43:46.215Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759959826223_ahu5qlw45",
+    "timestamp": "2025-10-08T21:43:46.223Z",
+    "action": "critical_status_detected",
+    "resource": "system",
+    "details": {
+      "taskId": "monitoring",
+      "status": "CRITICAL",
+      "alerts": 2,
+      "timestamp": "2025-10-08T21:43:46.223Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759960726813_ej8zlfjgz",
+    "timestamp": "2025-10-08T21:58:46.813Z",
+    "action": "emergency_backup_success",
+    "resource": "system",
+    "details": {
+      "taskId": "emergency_backup",
+      "timestamp": "2025-10-08T21:58:46.812Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759960726818_18fz4lqzn",
+    "timestamp": "2025-10-08T21:58:46.818Z",
+    "action": "critical_status_detected",
+    "resource": "system",
+    "details": {
+      "taskId": "monitoring",
+      "status": "CRITICAL",
+      "alerts": 2,
+      "timestamp": "2025-10-08T21:58:46.818Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759961623921_5mec53pk1",
+    "timestamp": "2025-10-08T22:13:43.922Z",
+    "action": "emergency_backup_success",
+    "resource": "system",
+    "details": {
+      "taskId": "emergency_backup",
+      "timestamp": "2025-10-08T22:13:43.921Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759961623928_hbq83afhi",
+    "timestamp": "2025-10-08T22:13:43.928Z",
+    "action": "critical_status_detected",
+    "resource": "system",
+    "details": {
+      "taskId": "monitoring",
+      "status": "CRITICAL",
+      "alerts": 2,
+      "timestamp": "2025-10-08T22:13:43.927Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759962521955_71flgq8rt",
+    "timestamp": "2025-10-08T22:28:41.955Z",
+    "action": "emergency_backup_success",
+    "resource": "system",
+    "details": {
+      "taskId": "emergency_backup",
+      "timestamp": "2025-10-08T22:28:41.954Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759962521960_yowtjf9q1",
+    "timestamp": "2025-10-08T22:28:41.960Z",
+    "action": "critical_status_detected",
+    "resource": "system",
+    "details": {
+      "taskId": "monitoring",
+      "status": "CRITICAL",
+      "alerts": 2,
+      "timestamp": "2025-10-08T22:28:41.960Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759962521967_xzia2sgve",
+    "timestamp": "2025-10-08T22:28:41.967Z",
+    "action": "emergency_backup_success",
+    "resource": "system",
+    "details": {
+      "taskId": "emergency_backup",
+      "timestamp": "2025-10-08T22:28:41.967Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759963424208_xqtqp6cdk",
+    "timestamp": "2025-10-08T22:43:44.208Z",
+    "action": "emergency_backup_success",
+    "resource": "system",
+    "details": {
+      "taskId": "emergency_backup",
+      "timestamp": "2025-10-08T22:43:44.208Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759963424218_s2saxpdk0",
+    "timestamp": "2025-10-08T22:43:44.218Z",
+    "action": "critical_status_detected",
+    "resource": "system",
+    "details": {
+      "taskId": "monitoring",
+      "status": "CRITICAL",
+      "alerts": 2,
+      "timestamp": "2025-10-08T22:43:44.218Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759964324144_c05v2ald9",
+    "timestamp": "2025-10-08T22:58:44.144Z",
+    "action": "emergency_backup_success",
+    "resource": "system",
+    "details": {
+      "taskId": "emergency_backup",
+      "timestamp": "2025-10-08T22:58:44.143Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  },
+  {
+    "id": "audit_1759964324150_51urdm5s2",
+    "timestamp": "2025-10-08T22:58:44.150Z",
+    "action": "critical_status_detected",
+    "resource": "system",
+    "details": {
+      "taskId": "monitoring",
+      "status": "CRITICAL",
+      "alerts": 2,
+      "timestamp": "2025-10-08T22:58:44.150Z"
+    },
+    "severity": "HIGH",
+    "status": "SUCCESS"
+  }
+]

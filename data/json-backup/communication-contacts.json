@@ -1,0 +1,56 @@
+[
+  {
+    "id": "comm_1759530156269_xz5dnm7hr",
+    "name": "Jo�o Silva Teste",
+    "email": "joao.teste@email.com",
+    "whatsapp": "11999887766",
+    "birthDate": "1990-01-01",
+    "registrationSources": [
+      "secretary_area"
+    ],
+    "emailPreferences": {
+      "newsletter": false,
+      "healthTips": false,
+      "appointments": true,
+      "promotions": false,
+      "subscribed": false
+    },
+    "whatsappPreferences": {
+      "appointments": true,
+      "reminders": true,
+      "promotions": false,
+      "subscribed": true,
+      "subscribedAt": "2025-10-03T22:22:36.000Z"
+    },
+    "createdAt": "2025-10-03T22:22:36.000Z",
+    "updatedAt": "2025-10-03T22:22:36.000Z",
+    "lastContactAt": "2025-10-03T22:22:36.000Z"
+  },
+  {
+    "id": "comm_1759530167083_4nok5228z",
+    "name": "Maria Santos Teste",
+    "email": "maria.teste@email.com",
+    "whatsapp": "11888777666",
+    "birthDate": "1985-05-15",
+    "registrationSources": [
+      "secretary_area"
+    ],
+    "emailPreferences": {
+      "newsletter": false,
+      "healthTips": false,
+      "appointments": true,
+      "promotions": false,
+      "subscribed": false
+    },
+    "whatsappPreferences": {
+      "appointments": true,
+      "reminders": true,
+      "promotions": false,
+      "subscribed": true,
+      "subscribedAt": "2025-10-03T22:22:47.000Z"
+    },
+    "createdAt": "2025-10-03T22:22:47.000Z",
+    "updatedAt": "2025-10-03T22:22:47.000Z",
+    "lastContactAt": "2025-10-03T22:22:47.000Z"
+  }
+]

@@ -1,0 +1,234 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Tema escuro como padrão - Identidade visual preta/branca/azul */
+    --background: 0 0% 0%; /* Fundo preto */
+    --foreground: 0 0% 100%; /* Texto branco */
+    --card: 0 0% 5%; /* Cards em cinza muito escuro */
+    --card-foreground: 0 0% 100%;
+    --popover: 0 0% 5%;
+    --popover-foreground: 0 0% 100%;
+    --primary: 217 91% 60%; /* Azul primário */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 0 0% 10%; /* Cinza escuro para elementos secundários */
+    --secondary-foreground: 0 0% 100%;
+    --muted: 0 0% 10%;
+    --muted-foreground: 0 0% 70%;
+    --accent: 217 91% 60%; /* Azul para acentos */
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 0 0% 15%; /* Bordas em cinza escuro */
+    --input: 0 0% 10%; /* Inputs em cinza escuro */
+    --ring: 217 91% 60%; /* Azul para focus rings */
+    --radius: 0.5rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    background: rgb(0, 0, 0);
+    min-height: 100vh;
+    padding-top: 80px; /* Compensar altura do header fixo */
+  }
+}
+
+/* Estilos para o título principal */
+.hero-title {
+  font-size: clamp(2.5rem, 6vw, 5.5rem);
+}
+
+.hero-doctor-name {
+  background: linear-gradient(90deg, #60a5fa 0%, #60a5fa 20%, #ffffff 50%, #93c5fd 80%, #60a5fa 100%);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+/* Animação de pulsação do gradiente para o nome do médico */
+@keyframes gradientPulse {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.animate-gradient-pulse {
+  animation: gradientPulse 3s ease-in-out infinite;
+}
+
+/* Animações para os detalhes azuis do fundo */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px) translateX(0px) rotate(0deg);
+  }
+  25% {
+    transform: translateY(-10px) translateX(5px) rotate(1deg);
+  }
+  50% {
+    transform: translateY(-5px) translateX(-3px) rotate(-0.5deg);
+  }
+  75% {
+    transform: translateY(-15px) translateX(8px) rotate(1.5deg);
+  }
+}
+
+@keyframes glow {
+  0% {
+    opacity: 0.15;
+    filter: blur(3px);
+  }
+  100% {
+    opacity: 0.25;
+    filter: blur(2px);
+  }
+}
+
+/* Forçar formato 24h para inputs de time */
+input[type='time'] {
+  -webkit-appearance: none;
+  -moz-appearance: textfield;
+  appearance: none;
+}
+
+input[type='time']::-webkit-datetime-edit-ampm-field {
+  display: none;
+}
+
+input[type='time']::-webkit-datetime-edit {
+  color: inherit;
+}
+
+input[type='time']::-webkit-datetime-edit-fields-wrapper {
+  background: transparent;
+}
+
+input[type='time']::-webkit-datetime-edit-text {
+  color: inherit;
+  padding: 0 0.3em;
+}
+
+input[type='time']::-webkit-datetime-edit-month-field,
+input[type='time']::-webkit-datetime-edit-day-field,
+input[type='time']::-webkit-datetime-edit-year-field,
+input[type='time']::-webkit-datetime-edit-hour-field,
+input[type='time']::-webkit-datetime-edit-minute-field {
+  color: inherit;
+}
+
+input[type='time']::-webkit-clear-button {
+  display: none;
+}
+
+input[type='time']::-webkit-inner-spin-button {
+  display: none;
+}
+
+/* Forçar formato brasileiro para inputs de date */
+input[type='date'] {
+  -webkit-appearance: none;
+  -moz-appearance: textfield;
+  appearance: none;
+}
+
+input[type='date']::-webkit-datetime-edit {
+  color: inherit;
+}
+
+input[type='date']::-webkit-datetime-edit-fields-wrapper {
+  background: transparent;
+}
+
+input[type='date']::-webkit-datetime-edit-text {
+  color: inherit;
+  padding: 0 0.3em;
+}
+
+input[type='date']::-webkit-datetime-edit-month-field,
+input[type='date']::-webkit-datetime-edit-day-field,
+input[type='date']::-webkit-datetime-edit-year-field {
+  color: inherit;
+}
+
+input[type='date']::-webkit-clear-button {
+  display: none;
+}
+
+input[type='date']::-webkit-inner-spin-button {
+  display: none;
+}
+
+/* Configuração específica para formato brasileiro */
+input[type='date'][lang='pt-BR'] {
+  text-align: left;
+}
+
+/* Forçar localização brasileira */
+:root {
+  --date-format: 'dd/mm/yyyy';
+}
+
+/* Configuração adicional para navegadores que suportam */
+input[type='date']:lang(pt-BR) {
+  direction: ltr;
+}
+
+/* Remover outline azul padrão do navegador */
+* {
+  outline: none !important;
+}
+
+/* Remover focus-visible outline para todos os elementos */
+*:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Remover outline específico para botões e elementos clicáveis */
+button:focus,
+button:focus-visible,
+a:focus,
+a:focus-visible,
+[role='button']:focus,
+[role='button']:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Sobrescrever estilos de acessibilidade para FAQs especificamente */
+.focus-indicators [data-faq-button]:focus,
+.focus-indicators [data-faq-button]:focus-visible {
+  outline: none !important;
+  outline-offset: 0 !important;
+  box-shadow: none !important;
+  border: none !important;
+}
+
+/* Garantir que nenhum FAQ tenha outline azul independente das configurações de acessibilidade */
+[data-faq-button] {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+[data-faq-button]:focus,
+[data-faq-button]:focus-visible,
+[data-faq-button]:active {
+  outline: none !important;
+  outline-offset: 0 !important;
+  box-shadow: none !important;
+  border: none !important;
+}

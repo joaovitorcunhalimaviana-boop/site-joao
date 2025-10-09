@@ -1,0 +1,36 @@
+{
+  "consultationTypes": {
+    "particular": {
+      "name": "Consulta Particular",
+      "price": 400,
+      "currency": "BRL",
+      "description": "Consulta particular sem plano de saúde",
+      "payment_methods": ["dinheiro", "pix", "cartão"]
+    },
+    "insurance": {
+      "name": "Consulta por Plano",
+      "plans": {
+        "unimed": {
+          "name": "Unimed",
+          "price": 150,
+          "currency": "BRL",
+          "description": "Valor recebido pelo plano Unimed"
+        },
+        "outro": {
+          "name": "Outros Planos",
+          "price": 100,
+          "currency": "BRL",
+          "description": "Valor médio recebido por outros planos"
+        }
+      }
+    }
+  },
+  "paymentMethods": [
+    "PIX",
+    "Dinheiro",
+    "Cartão de Crédito",
+    "Cartão de Débito",
+    "Bitcoin/USDT/USDC"
+  ],
+  "lastUpdated": "2025-01-23T00:00:00.000Z"
+}
