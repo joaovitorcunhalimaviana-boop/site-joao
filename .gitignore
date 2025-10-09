@@ -1,0 +1,68 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.js
+.yarn/install-state.gz
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# local env files
+.env*.local
+.env
+.env.joaovitorviana
+.env.production
+
+# vercel
+.vercel
+
+# netlify
+.netlify
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# database
+/prisma/dev.db
+/prisma/dev.db-journal
+
+# medical data (sensitive)
+/data/users.json
+/data/patients.json
+/data/unified-patients.json
+/data/unified-appointments.json
+/data/medical-records.json
+/data/medical-attachments/
+
+# logs and temporary files
+*.log
+/prompt-*.txt
+/prompt-*.decoded.txt
+
+# test files
+test-*.js
+test-*.html
+demo.html
+preview-email.html
+
+# scripts and fixes
+fix-encoding*.ps1
