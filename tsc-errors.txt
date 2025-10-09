@@ -1,0 +1,277 @@
+.next/types/app/api/audit-logs/route.ts(12,13): error TS2344: Type 'OmitWithTag<typeof import("C:/Users/joaov/Downloads/site-joao-master/site-joao-master/app/api/audit-logs/route"), "DELETE" | "config" | "generateStaticParams" | "revalidate" | "dynamic" | ... 10 more ... | "PATCH", "">' does not satisfy the constraint '{ [x: string]: never; }'.
+  Property 'AuditLogSystem' is incompatible with index signature.
+    Type 'typeof AuditLogSystem' is not assignable to type 'never'.
+app/api/agenda/route.ts(176,52): error TS2345: Argument of type '{ patientId: any; patientName: any; appointmentDate: any; appointmentTime: any; appointmentType: "consulta"; status: "agendada"; notes: any; }' is not assignable to parameter of type 'Omit<UnifiedAppointment, "id" | "createdAt" | "updatedAt">'.
+  Type '{ patientId: any; patientName: any; appointmentDate: any; appointmentTime: any; appointmentType: "consulta"; status: "agendada"; notes: any; }' is missing the following properties from type 'Omit<UnifiedAppointment, "id" | "createdAt" | "updatedAt">': insuranceType, patientPhone, patientWhatsapp, source
+app/api/cloud-backup/route.ts(129,16): error TS2339: Property 'surgery' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
+app/api/consultations/route.ts(174,44): error TS2345: Argument of type '{ patientId: any; patientName: any; appointmentDate: any; appointmentTime: any; appointmentType: any; status: "agendada"; notes: any; }' is not assignable to parameter of type 'Omit<UnifiedAppointment, "id" | "createdAt" | "updatedAt">'.
+  Type '{ patientId: any; patientName: any; appointmentDate: any; appointmentTime: any; appointmentType: any; status: "agendada"; notes: any; }' is missing the following properties from type 'Omit<UnifiedAppointment, "id" | "createdAt" | "updatedAt">': insuranceType, patientPhone, patientWhatsapp, source
+app/api/data-integrity/route.ts(161,47): error TS2339: Property 'readDataFromFiles' does not exist on type 'typeof DataIntegritySystem'.
+app/api/data-integrity/route.ts(189,49): error TS2339: Property 'readDataFromFiles' does not exist on type 'typeof DataIntegritySystem'.
+app/api/data-integrity/route.ts(214,33): error TS2339: Property 'readDataFromFiles' does not exist on type 'typeof DataIntegritySystem'.
+app/api/data-integrity/route.ts(289,33): error TS2339: Property 'readDataFromFiles' does not exist on type 'typeof DataIntegritySystem'.
+app/api/data-integrity/route.ts(336,53): error TS2339: Property 'readDataFromFiles' does not exist on type 'typeof DataIntegritySystem'.
+app/api/data-recovery/route.ts(160,15): error TS2322: Type '{ email: any; }' is not assignable to type 'PatientWhereUniqueInput'.
+  Type '{ email: any; }' is not assignable to type '{ id: string; cpf: string; } & { id?: string | undefined; cpf?: string | undefined; AND?: PatientWhereInput | PatientWhereInput[] | undefined; ... 29 more ...; avaliacoes?: AvaliacaoListRelationFilter | undefined; }'.
+    Type '{ email: any; }' is missing the following properties from type '{ id: string; cpf: string; }': id, cpf
+app/api/data-recovery/route.ts(165,17): error TS2322: Type '{ email: any; }' is not assignable to type 'PatientWhereUniqueInput'.
+  Type '{ email: any; }' is not assignable to type '{ id: string; cpf: string; } & { id?: string | undefined; cpf?: string | undefined; AND?: PatientWhereInput | PatientWhereInput[] | undefined; ... 29 more ...; avaliacoes?: AvaliacaoListRelationFilter | undefined; }'.
+    Type '{ email: any; }' is missing the following properties from type '{ id: string; cpf: string; }': id, cpf
+app/api/data-recovery/route.ts(174,19): error TS2353: Object literal may only specify known properties, and 'insurance' does not exist in type '(Without<PatientUpdateInput, PatientUncheckedUpdateInput> & PatientUncheckedUpdateInput) | (Without<...> & PatientUpdateInput)'.
+app/api/data-recovery/route.ts(190,19): error TS2353: Object literal may only specify known properties, and 'insurance' does not exist in type '(Without<PatientCreateInput, PatientUncheckedCreateInput> & PatientUncheckedCreateInput) | (Without<...> & PatientCreateInput)'.
+app/api/data-recovery/route.ts(215,15): error TS2322: Type '{ email: any; }' is not assignable to type 'PatientWhereUniqueInput'.
+  Type '{ email: any; }' is not assignable to type '{ id: string; cpf: string; } & { id?: string | undefined; cpf?: string | undefined; AND?: PatientWhereInput | PatientWhereInput[] | undefined; ... 29 more ...; avaliacoes?: AvaliacaoListRelationFilter | undefined; }'.
+    Type '{ email: any; }' is missing the following properties from type '{ id: string; cpf: string; }': id, cpf
+app/api/data-recovery/route.ts(224,19): error TS2353: Object literal may only specify known properties, and 'date' does not exist in type 'AppointmentWhereInput'.
+app/api/data-recovery/route.ts(233,21): error TS2353: Object literal may only specify known properties, and 'date' does not exist in type '(Without<AppointmentUpdateInput, AppointmentUncheckedUpdateInput> & AppointmentUncheckedUpdateInput) | (Without<...> & AppointmentUpdateInput)'.
+app/api/data-recovery/route.ts(242,21): error TS2353: Object literal may only specify known properties, and 'date' does not exist in type 'Without<AppointmentCreateInput, AppointmentUncheckedCreateInput> & AppointmentUncheckedCreateInput'.
+app/api/data-recovery/route.ts(267,15): error TS2322: Type '{ email: any; }' is not assignable to type 'PatientWhereUniqueInput'.
+  Type '{ email: any; }' is not assignable to type '{ id: string; cpf: string; } & { id?: string | undefined; cpf?: string | undefined; AND?: PatientWhereInput | PatientWhereInput[] | undefined; ... 29 more ...; avaliacoes?: AvaliacaoListRelationFilter | undefined; }'.
+    Type '{ email: any; }' is missing the following properties from type '{ id: string; cpf: string; }': id, cpf
+app/api/data-recovery/route.ts(274,19): error TS2353: Object literal may only specify known properties, and 'diagnosis' does not exist in type '(Without<MedicalRecordUpdateInput, MedicalRecordUncheckedUpdateInput> & MedicalRecordUncheckedUpdateInput) | (Without<...> & MedicalRecordUpdateInput)'.
+app/api/data-recovery/route.ts(283,19): error TS2353: Object literal may only specify known properties, and 'diagnosis' does not exist in type 'Without<MedicalRecordCreateInput, MedicalRecordUncheckedCreateInput> & MedicalRecordUncheckedCreateInput'.
+app/api/migrate-data/route.ts(161,15): error TS2353: Object literal may only specify known properties, and 'date' does not exist in type '(Without<AppointmentCreateInput, AppointmentUncheckedCreateInput> & AppointmentUncheckedCreateInput) | (Without<...> & AppointmentCreateInput)'.
+app/api/patients/[id]/route.ts(59,45): error TS2339: Property 'type' does not exist on type '{ status: ConsultationStatus; id: string; createdAt: Date; updatedAt: Date; appointmentId: string | null; patientId: string; medicalPatientId: string | null; ... 8 more ...; endTime: Date | null; }'.
+app/api/patients/[id]/route.ts(61,46): error TS2339: Property 'subjective' does not exist on type '{ status: ConsultationStatus; id: string; createdAt: Date; updatedAt: Date; appointmentId: string | null; patientId: string; medicalPatientId: string | null; ... 8 more ...; endTime: Date | null; }'.
+app/api/protection-manager/route.ts(258,20): error TS4111: Property 'scheduler' comes from an index signature, so it must be accessed with ['scheduler'].
+app/api/protection-manager/route.ts(266,20): error TS4111: Property 'database' comes from an index signature, so it must be accessed with ['database'].
+app/api/protection-manager/route.ts(274,20): error TS4111: Property 'backupSystem' comes from an index signature, so it must be accessed with ['backupSystem'].
+app/api/protection-manager/route.ts(282,20): error TS4111: Property 'integritySystem' comes from an index signature, so it must be accessed with ['integritySystem'].
+app/api/protection-manager/route.ts(292,20): error TS4111: Property 'auditSystem' comes from an index signature, so it must be accessed with ['auditSystem'].
+app/api/protection-manager/route.ts(302,20): error TS4111: Property 'monitoringSystem' comes from an index signature, so it must be accessed with ['monitoringSystem'].
+app/api/reviews/route.ts(38,22): error TS2339: Property 'phone' does not exist on type 'CommunicationContact'.
+app/api/schedule-slots/route.ts(109,33): error TS2304: Cannot find name 'updateScheduleSlot'.
+app/api/schedule-slots/route.ts(158,33): error TS2304: Cannot find name 'deleteScheduleSlot'.
+app/api/unified-appointments/route.ts(58,27): error TS2339: Property 'nomeCompleto' does not exist on type 'UnifiedPatient'.
+app/api/unified-appointments/route.ts(60,42): error TS2339: Property 'numeroRegistroMedico' does not exist on type 'UnifiedPatient'.
+app/api/unified-appointments/route.ts(61,28): error TS2339: Property 'telefone' does not exist on type 'UnifiedPatient'.
+app/api/unified-appointments/route.ts(62,31): error TS2339: Property 'telefone' does not exist on type 'UnifiedPatient'.
+app/api/unified-appointments/route.ts(64,32): error TS2339: Property 'dataNascimento' does not exist on type 'UnifiedPatient'.
+app/api/unified-appointments/route.ts(115,32): error TS2339: Property 'nomeCompleto' does not exist on type 'UnifiedPatient'.
+app/api/unified-appointments/route.ts(116,36): error TS2339: Property 'nomeCompleto' does not exist on type 'UnifiedPatient'.
+app/api/unified-appointments/route.ts(118,47): error TS2339: Property 'numeroRegistroMedico' does not exist on type 'UnifiedPatient'.
+app/api/unified-appointments/route.ts(119,33): error TS2339: Property 'telefone' does not exist on type 'UnifiedPatient'.
+app/api/unified-appointments/route.ts(120,36): error TS2339: Property 'telefone' does not exist on type 'UnifiedPatient'.
+app/api/unified-appointments/route.ts(122,37): error TS2339: Property 'dataNascimento' does not exist on type 'UnifiedPatient'.
+app/api/unified-appointments/route.ts(127,36): error TS2339: Property 'isActive' does not exist on type 'UnifiedPatient'.
+app/api/unified-appointments/route.ts(130,39): error TS2339: Property 'medicalInfo' does not exist on type 'UnifiedPatient'.
+app/api/unified-appointments/route.ts(131,36): error TS2339: Property 'consents' does not exist on type 'UnifiedPatient'.
+app/api/unified-appointments/route.ts(167,34): error TS2304: Cannot find name 'getMedicalPatientById'.
+app/api/unified-appointments/route.ts(176,45): error TS2304: Cannot find name 'getCommunicationContactById'.
+app/api/unified-appointments/route.ts(397,11): error TS2561: Object literal may only specify known properties, but 'pacienteId' does not exist in type 'Omit<UnifiedAppointment, "id" | "createdAt" | "updatedAt">'. Did you mean to write 'patientId'?
+app/api/unified-appointments/route.ts(442,59): error TS2345: Argument of type '{ nomeCompleto: any; telefone: any; email: any; dataNascimento: any; cpf: any; insurance: any; isActive: boolean; }' is not assignable to parameter of type 'Partial<UnifiedPatient> & { name: string; phone: string; whatsapp: string; }'.
+  Type '{ nomeCompleto: any; telefone: any; email: any; dataNascimento: any; cpf: any; insurance: any; isActive: boolean; }' is missing the following properties from type '{ name: string; phone: string; whatsapp: string; }': name, phone, whatsapp
+app/api/unified-system/medical-patients/route.ts(85,53): error TS2339: Property 'isActive' does not exist on type 'UnifiedPatient'.
+app/api/unified-system/medical-patients/route.ts(98,38): error TS2339: Property 'isActive' does not exist on type 'UnifiedPatient'.
+app/api/unified-system/medical-patients/route.ts(99,41): error TS2339: Property 'isActive' does not exist on type 'UnifiedPatient'.
+app/api/unified-system/medical-patients/route.ts(211,9): error TS2353: Object literal may only specify known properties, and 'cardNumber' does not exist in type '{ type: "unimed" | "particular" | "outro"; plan?: string | undefined; }'.
+app/api/unified-system/medical-patients/route.ts(246,52): error TS2345: Argument of type 'Partial<UnifiedPatient>' is not assignable to parameter of type 'Partial<UnifiedPatient> & { name: string; phone: string; whatsapp: string; }'.
+  Type 'Partial<UnifiedPatient>' is not assignable to type '{ name: string; phone: string; whatsapp: string; }'.
+    Types of property 'name' are incompatible.
+      Type 'string | undefined' is not assignable to type 'string'.
+        Type 'undefined' is not assignable to type 'string'.
+app/api/unified-system/medical-patients/route.ts(324,7): error TS2353: Object literal may only specify known properties, and 'nomeCompleto' does not exist in type 'Partial<UnifiedPatient>'.
+app/api/unified-system/medical-patients/route.ts(324,54): error TS2339: Property 'nomeCompleto' does not exist on type 'UnifiedPatient'.
+app/api/unified-system/medical-patients/route.ts(325,38): error TS2339: Property 'rg' does not exist on type 'UnifiedPatient'.
+app/api/unified-system/medical-patients/route.ts(326,49): error TS2339: Property 'endereco' does not exist on type 'UnifiedPatient'.
+app/api/unified-system/medical-patients/route.ts(327,44): error TS2339: Property 'cidade' does not exist on type 'UnifiedPatient'.
+app/api/unified-system/medical-patients/route.ts(328,45): error TS2339: Property 'estado' does not exist on type 'UnifiedPatient'.
+app/api/unified-system/medical-patients/route.ts(329,56): error TS2339: Property 'cep' does not exist on type 'UnifiedPatient'.
+app/api/unified-system/medical-patients/route.ts(330,47): error TS2339: Property 'telefone' does not exist on type 'UnifiedPatient'.
+app/api/unified-system/medical-patients/route.ts(337,20): error TS2339: Property 'medicalInfo' does not exist on type 'UnifiedPatient'.
+app/api/unified-system/medical-patients/route.ts(341,20): error TS2339: Property 'consents' does not exist on type 'UnifiedPatient'.
+app/api/unified-system/medical-patients/route.ts(344,71): error TS2339: Property 'isActive' does not exist on type 'UnifiedPatient'.
+app/api/unified-system/medical-patients/route.ts(347,56): error TS2345: Argument of type 'Partial<UnifiedPatient>' is not assignable to parameter of type 'Partial<UnifiedPatient> & { name: string; phone: string; whatsapp: string; }'.
+  Type 'Partial<UnifiedPatient>' is not assignable to type '{ name: string; phone: string; whatsapp: string; }'.
+    Types of property 'name' are incompatible.
+      Type 'string | undefined' is not assignable to type 'string'.
+        Type 'undefined' is not assignable to type 'string'.
+app/area-medica/agenda/page.tsx(365,17): error TS2345: Argument of type 'Element' is not assignable to parameter of type 'never'.
+app/area-medica/agenda/page.tsx(377,9): error TS2345: Argument of type 'Element' is not assignable to parameter of type 'never'.
+app/area-medica/relatorios/page.tsx(297,17): error TS2322: Type '{ id: string; date: string; patientName: string; status: "completed" | "scheduled" | "cancelled"; time: string; }[]' is not assignable to type 'PatientAppointment[]'.
+  Type '{ id: string; date: string; patientName: string; status: "scheduled" | "completed" | "cancelled"; time: string; }' is not assignable to type 'PatientAppointment'.
+    Types of property 'status' are incompatible.
+      Type '"completed" | "scheduled" | "cancelled"' is not assignable to type '"agendada" | "confirmada" | "concluida" | "cancelada"'.
+        Type '"completed"' is not assignable to type '"agendada" | "confirmada" | "concluida" | "cancelada"'.
+app/area-secretaria/page.tsx(1192,126): error TS2339: Property 'type' does not exist on type 'never'.
+app/area-secretaria/page.tsx(1193,69): error TS2339: Property 'type' does not exist on type 'never'.
+app/especialidades/page.tsx(53,30): error TS2322: Type '"specialty"' is not assignable to type '"procedure" | "faq" | "condition"'.
+app/especialidades/page.tsx(53,47): error TS2322: Type '{}' is not assignable to type 'MedicalSchemaData'.
+app/prontuario/[id]/page.tsx(143,18): error TS2345: Argument of type '{ id: any; name: any; phone: any; whatsapp: any; birthDate: any; insurance: { type: any; plan: any; }; status: string; createdAt: any; updatedAt: any; }' is not assignable to parameter of type 'SetStateAction<Patient | null>'.
+  Type '{ id: any; name: any; phone: any; whatsapp: any; birthDate: any; insurance: { type: any; plan: any; }; status: string; createdAt: any; updatedAt: any; }' is not assignable to type 'Patient'.
+    Types of property 'status' are incompatible.
+      Type 'string' is not assignable to type '"cancelado" | "aguardando" | "atendido"'.
+app/prontuario/[id]/page.tsx(455,49): error TS2339: Property 'interpretation' does not exist on type '{ calculatorName: string; result: any; timestamp: string; }'.
+app/prontuario/[id]/page.tsx(459,55): error TS2339: Property 'interpretation' does not exist on type '{ calculatorName: string; result: any; timestamp: string; }'.
+app/prontuario/[id]/page.tsx(464,49): error TS2339: Property 'parameters' does not exist on type '{ calculatorName: string; result: any; timestamp: string; }'.
+app/prontuario/[id]/page.tsx(464,82): error TS2339: Property 'parameters' does not exist on type '{ calculatorName: string; result: any; timestamp: string; }'.
+app/prontuario/[id]/page.tsx(468,70): error TS2339: Property 'parameters' does not exist on type '{ calculatorName: string; result: any; timestamp: string; }'.
+components/calculators/baron-calculator.tsx(105,32): error TS2339: Property 'category' does not exist on type '{ text: string; color: "green"; } | { text: string; color: "yellow"; } | { text: string; color: "red"; }'.
+  Property 'category' does not exist on type '{ text: string; color: "green"; }'.
+components/calculators/bmi-calculator.tsx(115,32): error TS2339: Property 'description' does not exist on type '{ category: string; color: string; risk: string; }'.
+components/calculators/bmi-calculator.tsx(118,30): error TS2339: Property 'description' does not exist on type '{ category: string; color: string; risk: string; }'.
+components/calculators/harvey-bradshaw-calculator.tsx(138,9): error TS2322: Type 'string' is not assignable to type '"blue" | "green" | "yellow" | "red" | undefined'.
+components/calculators/mayo-calculator.tsx(103,32): error TS2339: Property 'category' does not exist on type '{ text: string; color: "green"; } | { text: string; color: "yellow"; } | { text: string; color: "red"; }'.
+  Property 'category' does not exist on type '{ text: string; color: "green"; }'.
+components/calculators/st-marks-calculator.tsx(125,32): error TS2339: Property 'category' does not exist on type '{ text: string; color: "green"; } | { text: string; color: "yellow"; } | { text: string; color: "red"; }'.
+  Property 'category' does not exist on type '{ text: string; color: "green"; }'.
+components/calculators/truelove-witts-calculator.tsx(84,43): error TS4111: Property 'bowel_movements' comes from an index signature, so it must be accessed with ['bowel_movements'].
+components/calculators/truelove-witts-calculator.tsx(85,41): error TS4111: Property 'blood_in_stool' comes from an index signature, so it must be accessed with ['blood_in_stool'].
+components/calculators/truelove-witts-calculator.tsx(86,40): error TS4111: Property 'temperature' comes from an index signature, so it must be accessed with ['temperature'].
+components/calculators/truelove-witts-calculator.tsx(87,34): error TS4111: Property 'pulse' comes from an index signature, so it must be accessed with ['pulse'].
+components/calculators/truelove-witts-calculator.tsx(88,39): error TS4111: Property 'hemoglobin' comes from an index signature, so it must be accessed with ['hemoglobin'].
+components/calculators/truelove-witts-calculator.tsx(89,32): error TS4111: Property 'esr' comes from an index signature, so it must be accessed with ['esr'].
+components/calculators/truelove-witts-calculator.tsx(148,9): error TS2322: Type 'string' is not assignable to type '"blue" | "green" | "yellow" | "red" | undefined'.
+components/calculators/truelove-witts-calculator.tsx(160,51): error TS4111: Property 'bowel_movements' comes from an index signature, so it must be accessed with ['bowel_movements'].
+components/calculators/truelove-witts-calculator.tsx(161,30): error TS4111: Property 'bowel_movements' comes from an index signature, so it must be accessed with ['bowel_movements'].
+components/calculators/truelove-witts-calculator.tsx(161,63): error TS4111: Property 'bowel_movements' comes from an index signature, so it must be accessed with ['bowel_movements'].
+components/calculators/truelove-witts-calculator.tsx(166,51): error TS4111: Property 'blood_in_stool' comes from an index signature, so it must be accessed with ['blood_in_stool'].
+components/calculators/truelove-witts-calculator.tsx(167,37): error TS4111: Property 'blood_in_stool' comes from an index signature, so it must be accessed with ['blood_in_stool'].
+components/calculators/truelove-witts-calculator.tsx(172,51): error TS4111: Property 'temperature' comes from an index signature, so it must be accessed with ['temperature'].
+components/calculators/truelove-witts-calculator.tsx(173,30): error TS4111: Property 'temperature' comes from an index signature, so it must be accessed with ['temperature'].
+components/calculators/truelove-witts-calculator.tsx(173,61): error TS4111: Property 'temperature' comes from an index signature, so it must be accessed with ['temperature'].
+components/calculators/truelove-witts-calculator.tsx(178,51): error TS4111: Property 'pulse' comes from an index signature, so it must be accessed with ['pulse'].
+components/calculators/truelove-witts-calculator.tsx(179,30): error TS4111: Property 'pulse' comes from an index signature, so it must be accessed with ['pulse'].
+components/calculators/truelove-witts-calculator.tsx(179,57): error TS4111: Property 'pulse' comes from an index signature, so it must be accessed with ['pulse'].
+components/calculators/truelove-witts-calculator.tsx(189,51): error TS4111: Property 'hemoglobin' comes from an index signature, so it must be accessed with ['hemoglobin'].
+components/calculators/truelove-witts-calculator.tsx(190,30): error TS4111: Property 'hemoglobin' comes from an index signature, so it must be accessed with ['hemoglobin'].
+components/calculators/truelove-witts-calculator.tsx(190,63): error TS4111: Property 'hemoglobin' comes from an index signature, so it must be accessed with ['hemoglobin'].
+components/calculators/truelove-witts-calculator.tsx(195,51): error TS4111: Property 'esr' comes from an index signature, so it must be accessed with ['esr'].
+components/calculators/truelove-witts-calculator.tsx(196,30): error TS4111: Property 'esr' comes from an index signature, so it must be accessed with ['esr'].
+components/calculators/truelove-witts-calculator.tsx(196,56): error TS4111: Property 'esr' comes from an index signature, so it must be accessed with ['esr'].
+components/calculators/wexner-calculator.tsx(121,32): error TS2339: Property 'category' does not exist on type '{ text: string; color: "green"; } | { text: string; color: "yellow"; } | { text: string; color: "red"; }'.
+  Property 'category' does not exist on type '{ text: string; color: "green"; }'.
+components/ui/calendar.tsx(47,29): error TS2345: Argument of type 'unknown[]' is not assignable to parameter of type 'SetStateAction<string[]>'.
+  Type 'unknown[]' is not assignable to type 'string[]'.
+    Type 'unknown' is not assignable to type 'string'.
+components/ui/endoscopic-calculators.tsx(78,17): error TS2559: Type '{ onSave: (result: any) => void; }' has no properties in common with type 'IntrinsicAttributes & MayoCalculatorProps'.
+components/ui/endoscopic-calculators.tsx(80,17): error TS2559: Type '{ onSave: (result: any) => void; }' has no properties in common with type 'IntrinsicAttributes & BaronCalculatorProps'.
+components/ui/endoscopic-calculators.tsx(82,17): error TS2559: Type '{ onSave: (result: any) => void; }' has no properties in common with type 'IntrinsicAttributes & JNETCalculatorProps'.
+components/ui/endoscopic-calculators.tsx(84,17): error TS2559: Type '{ onSave: (result: any) => void; }' has no properties in common with type 'IntrinsicAttributes & UCEISCalculatorProps'.
+components/ui/endoscopic-calculators.tsx(86,17): error TS2559: Type '{ onSave: (result: any) => void; }' has no properties in common with type 'IntrinsicAttributes & { onSaveResult?: ((result: any) => void) | undefined; darkMode?: boolean | undefined; }'.
+components/ui/endoscopic-calculators.tsx(88,17): error TS2559: Type '{ onSave: (result: any) => void; }' has no properties in common with type 'IntrinsicAttributes & { onSaveResult?: ((result: any) => void) | undefined; darkMode?: boolean | undefined; }'.
+components/ui/endoscopic-calculators.tsx(90,17): error TS2559: Type '{ onSave: (result: any) => void; }' has no properties in common with type 'IntrinsicAttributes & { onSaveResult?: ((result: any) => void) | undefined; darkMode?: boolean | undefined; }'.
+components/ui/productivity-features.tsx(134,29): error TS2304: Cannot find name 'MEDICAL_TERMS_AUTOCOMPLETE'.
+components/ui/productivity-features.tsx(157,19): error TS2339: Property 'content' does not exist on type 'never'.
+components/ui/productivity-features.tsx(158,19): error TS2339: Property 'category' does not exist on type 'never'.
+components/ui/productivity-features.tsx(164,25): error TS2339: Property 'content' does not exist on type 'never'.
+components/ui/productivity-features.tsx(168,29): error TS2339: Property 'category' does not exist on type 'never'.
+lib/audit-middleware.ts(34,9): error TS2353: Object literal may only specify known properties, and 'resourceId' does not exist in type 'AuditOptions'.
+lib/audit-middleware.ts(67,9): error TS2353: Object literal may only specify known properties, and 'resourceId' does not exist in type 'AuditOptions'.
+lib/audit-middleware.ts(99,9): error TS2353: Object literal may only specify known properties, and 'resourceId' does not exist in type 'AuditOptions'.
+lib/database.ts(454,13): error TS2353: Object literal may only specify known properties, and 'gender' does not exist in type 'PatientSelect<DefaultArgs>'.
+lib/database.ts(478,13): error TS2561: Object literal may only specify known properties, but 'medication' does not exist in type 'PrescriptionSelect<DefaultArgs>'. Did you mean to write 'medications'?
+lib/database.ts(533,13): error TS2561: Object literal may only specify known properties, but 'medication' does not exist in type 'PrescriptionSelect<DefaultArgs>'. Did you mean to write 'medications'?
+lib/duplicate-detection.ts(70,15): error TS2353: Object literal may only specify known properties, and 'date' does not exist in type 'AppointmentSelect<DefaultArgs>'.
+lib/duplicate-detection.ts(73,15): error TS2353: Object literal may only specify known properties, and 'date' does not exist in type 'AppointmentOrderByWithRelationInput | AppointmentOrderByWithRelationInput[]'.
+lib/duplicate-detection.ts(107,42): error TS2339: Property 'appointments' does not exist on type '{ name: string; id: string; email: string | null; createdAt: Date; updatedAt: Date; cpf: string | null; address: string | null; city: string | null; state: string | null; zipCode: string | null; ... 11 more ...; dataRetentionDate: Date | null; }'.
+lib/duplicate-detection.ts(108,43): error TS2339: Property '_count' does not exist on type '{ name: string; id: string; email: string | null; createdAt: Date; updatedAt: Date; cpf: string | null; address: string | null; city: string | null; state: string | null; zipCode: string | null; ... 11 more ...; dataRetentionDate: Date | null; }'.
+lib/duplicate-detection.ts(175,15): error TS2353: Object literal may only specify known properties, and 'date' does not exist in type 'AppointmentSelect<DefaultArgs>'.
+lib/duplicate-detection.ts(178,15): error TS2353: Object literal may only specify known properties, and 'date' does not exist in type 'AppointmentOrderByWithRelationInput | AppointmentOrderByWithRelationInput[]'.
+lib/duplicate-detection.ts(257,38): error TS2339: Property 'appointments' does not exist on type '{ name: string; id: string; email: string | null; createdAt: Date; updatedAt: Date; cpf: string | null; address: string | null; city: string | null; state: string | null; zipCode: string | null; ... 11 more ...; dataRetentionDate: Date | null; }'.
+lib/duplicate-detection.ts(258,39): error TS2339: Property '_count' does not exist on type '{ name: string; id: string; email: string | null; createdAt: Date; updatedAt: Date; cpf: string | null; address: string | null; city: string | null; state: string | null; zipCode: string | null; ... 11 more ...; dataRetentionDate: Date | null; }'.
+lib/enhanced-backup-system.ts(197,28): error TS2322: Type 'null' is not assignable to type 'string | FieldRef<"MedicalRecord", "String"> | undefined'.
+lib/notification-utils.ts(337,25): error TS2345: Argument of type '{ level: "ERROR"; channel: "email" | "whatsapp" | "telegram"; notificationType: NotificationType; recipient: string | undefined; message: string; error: string; metadata: { ...; }; }' is not assignable to parameter of type 'NotificationLog'.
+  Property 'timestamp' is missing in type '{ level: "ERROR"; channel: "email" | "whatsapp" | "telegram"; notificationType: NotificationType; recipient: string | undefined; message: string; error: string; metadata: { ...; }; }' but required in type 'NotificationLog'.
+lib/prisma-service.ts(243,29): error TS2552: Cannot find name 'getCommunicationContactByPhone'. Did you mean 'getCommunicationContactById'?
+lib/prisma-service.ts(248,40): error TS2552: Cannot find name 'getMedicalPatientByCpf'. Did you mean 'getMedicalPatientById'?
+lib/prisma-service.ts(251,41): error TS2552: Cannot find name 'updateMedicalPatient'. Did you mean 'updatedMedicalPatient'?
+lib/prisma-service.ts(259,34): error TS2304: Cannot find name 'updateCommunicationContact'.
+lib/prisma-service.ts(284,37): error TS2552: Cannot find name 'createMedicalPatient'. Did you mean 'newMedicalPatient'?
+lib/prisma-service.ts(311,32): error TS2304: Cannot find name 'updateCommunicationContact'.
+lib/prisma-service.ts(337,26): error TS2552: Cannot find name 'createCommunicationContact'. Did you mean 'getAllCommunicationContacts'?
+lib/prisma-service.ts(347,35): error TS2552: Cannot find name 'createMedicalPatient'. Did you mean 'newMedicalPatient'?
+lib/prisma-service.ts(405,18): error TS2353: Object literal may only specify known properties, and 'scheduledDate' does not exist in type 'ConsultationOrderByWithRelationInput | ConsultationOrderByWithRelationInput[]'.
+lib/prisma-service.ts(411,33): error TS2551: Property 'patient' does not exist on type '{ id: string; createdAt: Date; updatedAt: Date; appointmentId: string | null; patientId: string; medicalPatientId: string | null; doctorId: string; chiefComplaint: string | null; ... 7 more ...; endTime: Date | null; }'. Did you mean 'patientId'?
+lib/prisma-service.ts(412,32): error TS2551: Property 'patient' does not exist on type '{ id: string; createdAt: Date; updatedAt: Date; appointmentId: string | null; patientId: string; medicalPatientId: string | null; doctorId: string; chiefComplaint: string | null; ... 7 more ...; endTime: Date | null; }'. Did you mean 'patientId'?
+lib/prisma-service.ts(414,34): error TS2551: Property 'patient' does not exist on type '{ id: string; createdAt: Date; updatedAt: Date; appointmentId: string | null; patientId: string; medicalPatientId: string | null; doctorId: string; chiefComplaint: string | null; ... 7 more ...; endTime: Date | null; }'. Did you mean 'patientId'?
+lib/prisma-service.ts(415,37): error TS2551: Property 'patient' does not exist on type '{ id: string; createdAt: Date; updatedAt: Date; appointmentId: string | null; patientId: string; medicalPatientId: string | null; doctorId: string; chiefComplaint: string | null; ... 7 more ...; endTime: Date | null; }'. Did you mean 'patientId'?
+lib/prisma-service.ts(416,34): error TS2551: Property 'patient' does not exist on type '{ id: string; createdAt: Date; updatedAt: Date; appointmentId: string | null; patientId: string; medicalPatientId: string | null; doctorId: string; chiefComplaint: string | null; ... 7 more ...; endTime: Date | null; }'. Did you mean 'patientId'?
+lib/prisma-service.ts(417,38): error TS2551: Property 'patient' does not exist on type '{ id: string; createdAt: Date; updatedAt: Date; appointmentId: string | null; patientId: string; medicalPatientId: string | null; doctorId: string; chiefComplaint: string | null; ... 7 more ...; endTime: Date | null; }'. Did you mean 'patientId'?
+lib/prisma-service.ts(418,36): error TS2551: Property 'patient' does not exist on type '{ id: string; createdAt: Date; updatedAt: Date; appointmentId: string | null; patientId: string; medicalPatientId: string | null; doctorId: string; chiefComplaint: string | null; ... 7 more ...; endTime: Date | null; }'. Did you mean 'patientId'?
+lib/prisma-service.ts(419,35): error TS2551: Property 'patient' does not exist on type '{ id: string; createdAt: Date; updatedAt: Date; appointmentId: string | null; patientId: string; medicalPatientId: string | null; doctorId: string; chiefComplaint: string | null; ... 7 more ...; endTime: Date | null; }'. Did you mean 'patientId'?
+lib/prisma-service.ts(420,37): error TS2339: Property 'scheduledDate' does not exist on type '{ id: string; createdAt: Date; updatedAt: Date; appointmentId: string | null; patientId: string; medicalPatientId: string | null; doctorId: string; chiefComplaint: string | null; ... 7 more ...; endTime: Date | null; }'.
+lib/prisma-service.ts(421,37): error TS2339: Property 'scheduledDate' does not exist on type '{ id: string; createdAt: Date; updatedAt: Date; appointmentId: string | null; patientId: string; medicalPatientId: string | null; doctorId: string; chiefComplaint: string | null; ... 7 more ...; endTime: Date | null; }'.
+lib/prisma-service.ts(422,38): error TS2339: Property 'type' does not exist on type '{ id: string; createdAt: Date; updatedAt: Date; appointmentId: string | null; patientId: string; medicalPatientId: string | null; doctorId: string; chiefComplaint: string | null; ... 7 more ...; endTime: Date | null; }'.
+lib/prisma-service.ts(425,27): error TS2339: Property 'notes' does not exist on type '{ id: string; createdAt: Date; updatedAt: Date; appointmentId: string | null; patientId: string; medicalPatientId: string | null; doctorId: string; chiefComplaint: string | null; ... 7 more ...; endTime: Date | null; }'.
+lib/prisma-service.ts(439,9): error TS2353: Object literal may only specify known properties, and 'scheduledDate' does not exist in type 'ConsultationWhereInput'.
+lib/prisma-service.ts(449,33): error TS2551: Property 'patient' does not exist on type '{ id: string; createdAt: Date; updatedAt: Date; appointmentId: string | null; patientId: string; medicalPatientId: string | null; doctorId: string; chiefComplaint: string | null; ... 7 more ...; endTime: Date | null; }'. Did you mean 'patientId'?
+lib/prisma-service.ts(450,32): error TS2551: Property 'patient' does not exist on type '{ id: string; createdAt: Date; updatedAt: Date; appointmentId: string | null; patientId: string; medicalPatientId: string | null; doctorId: string; chiefComplaint: string | null; ... 7 more ...; endTime: Date | null; }'. Did you mean 'patientId'?
+lib/prisma-service.ts(452,34): error TS2551: Property 'patient' does not exist on type '{ id: string; createdAt: Date; updatedAt: Date; appointmentId: string | null; patientId: string; medicalPatientId: string | null; doctorId: string; chiefComplaint: string | null; ... 7 more ...; endTime: Date | null; }'. Did you mean 'patientId'?
+lib/prisma-service.ts(453,37): error TS2551: Property 'patient' does not exist on type '{ id: string; createdAt: Date; updatedAt: Date; appointmentId: string | null; patientId: string; medicalPatientId: string | null; doctorId: string; chiefComplaint: string | null; ... 7 more ...; endTime: Date | null; }'. Did you mean 'patientId'?
+lib/prisma-service.ts(454,34): error TS2551: Property 'patient' does not exist on type '{ id: string; createdAt: Date; updatedAt: Date; appointmentId: string | null; patientId: string; medicalPatientId: string | null; doctorId: string; chiefComplaint: string | null; ... 7 more ...; endTime: Date | null; }'. Did you mean 'patientId'?
+lib/prisma-service.ts(455,38): error TS2551: Property 'patient' does not exist on type '{ id: string; createdAt: Date; updatedAt: Date; appointmentId: string | null; patientId: string; medicalPatientId: string | null; doctorId: string; chiefComplaint: string | null; ... 7 more ...; endTime: Date | null; }'. Did you mean 'patientId'?
+lib/prisma-service.ts(456,36): error TS2551: Property 'patient' does not exist on type '{ id: string; createdAt: Date; updatedAt: Date; appointmentId: string | null; patientId: string; medicalPatientId: string | null; doctorId: string; chiefComplaint: string | null; ... 7 more ...; endTime: Date | null; }'. Did you mean 'patientId'?
+lib/prisma-service.ts(457,35): error TS2551: Property 'patient' does not exist on type '{ id: string; createdAt: Date; updatedAt: Date; appointmentId: string | null; patientId: string; medicalPatientId: string | null; doctorId: string; chiefComplaint: string | null; ... 7 more ...; endTime: Date | null; }'. Did you mean 'patientId'?
+lib/prisma-service.ts(458,37): error TS2339: Property 'scheduledDate' does not exist on type '{ id: string; createdAt: Date; updatedAt: Date; appointmentId: string | null; patientId: string; medicalPatientId: string | null; doctorId: string; chiefComplaint: string | null; ... 7 more ...; endTime: Date | null; }'.
+lib/prisma-service.ts(459,37): error TS2339: Property 'scheduledDate' does not exist on type '{ id: string; createdAt: Date; updatedAt: Date; appointmentId: string | null; patientId: string; medicalPatientId: string | null; doctorId: string; chiefComplaint: string | null; ... 7 more ...; endTime: Date | null; }'.
+lib/prisma-service.ts(460,38): error TS2339: Property 'type' does not exist on type '{ id: string; createdAt: Date; updatedAt: Date; appointmentId: string | null; patientId: string; medicalPatientId: string | null; doctorId: string; chiefComplaint: string | null; ... 7 more ...; endTime: Date | null; }'.
+lib/prisma-service.ts(463,27): error TS2339: Property 'notes' does not exist on type '{ id: string; createdAt: Date; updatedAt: Date; appointmentId: string | null; patientId: string; medicalPatientId: string | null; doctorId: string; chiefComplaint: string | null; ... 7 more ...; endTime: Date | null; }'.
+lib/prisma-service.ts(500,9): error TS2322: Type '"agendada" | "confirmada" | "em_andamento" | "concluida" | "cancelada" | "reagendada"' is not assignable to type 'ConsultationStatus | undefined'.
+  Type '"agendada"' is not assignable to type 'ConsultationStatus | undefined'.
+lib/prisma-service.ts(511,36): error TS2551: Property 'patient' does not exist on type '{ id: string; createdAt: Date; updatedAt: Date; appointmentId: string | null; patientId: string; medicalPatientId: string | null; doctorId: string; chiefComplaint: string | null; ... 7 more ...; endTime: Date | null; }'. Did you mean 'patientId'?
+lib/prisma-service.ts(512,35): error TS2551: Property 'patient' does not exist on type '{ id: string; createdAt: Date; updatedAt: Date; appointmentId: string | null; patientId: string; medicalPatientId: string | null; doctorId: string; chiefComplaint: string | null; ... 7 more ...; endTime: Date | null; }'. Did you mean 'patientId'?
+lib/prisma-service.ts(514,37): error TS2551: Property 'patient' does not exist on type '{ id: string; createdAt: Date; updatedAt: Date; appointmentId: string | null; patientId: string; medicalPatientId: string | null; doctorId: string; chiefComplaint: string | null; ... 7 more ...; endTime: Date | null; }'. Did you mean 'patientId'?
+lib/prisma-service.ts(515,40): error TS2551: Property 'patient' does not exist on type '{ id: string; createdAt: Date; updatedAt: Date; appointmentId: string | null; patientId: string; medicalPatientId: string | null; doctorId: string; chiefComplaint: string | null; ... 7 more ...; endTime: Date | null; }'. Did you mean 'patientId'?
+lib/prisma-service.ts(516,37): error TS2551: Property 'patient' does not exist on type '{ id: string; createdAt: Date; updatedAt: Date; appointmentId: string | null; patientId: string; medicalPatientId: string | null; doctorId: string; chiefComplaint: string | null; ... 7 more ...; endTime: Date | null; }'. Did you mean 'patientId'?
+lib/prisma-service.ts(517,41): error TS2551: Property 'patient' does not exist on type '{ id: string; createdAt: Date; updatedAt: Date; appointmentId: string | null; patientId: string; medicalPatientId: string | null; doctorId: string; chiefComplaint: string | null; ... 7 more ...; endTime: Date | null; }'. Did you mean 'patientId'?
+lib/prisma-service.ts(518,39): error TS2551: Property 'patient' does not exist on type '{ id: string; createdAt: Date; updatedAt: Date; appointmentId: string | null; patientId: string; medicalPatientId: string | null; doctorId: string; chiefComplaint: string | null; ... 7 more ...; endTime: Date | null; }'. Did you mean 'patientId'?
+lib/prisma-service.ts(519,38): error TS2551: Property 'patient' does not exist on type '{ id: string; createdAt: Date; updatedAt: Date; appointmentId: string | null; patientId: string; medicalPatientId: string | null; doctorId: string; chiefComplaint: string | null; ... 7 more ...; endTime: Date | null; }'. Did you mean 'patientId'?
+lib/prisma-service.ts(520,40): error TS2339: Property 'scheduledDate' does not exist on type '{ id: string; createdAt: Date; updatedAt: Date; appointmentId: string | null; patientId: string; medicalPatientId: string | null; doctorId: string; chiefComplaint: string | null; ... 7 more ...; endTime: Date | null; }'.
+lib/prisma-service.ts(521,40): error TS2339: Property 'scheduledDate' does not exist on type '{ id: string; createdAt: Date; updatedAt: Date; appointmentId: string | null; patientId: string; medicalPatientId: string | null; doctorId: string; chiefComplaint: string | null; ... 7 more ...; endTime: Date | null; }'.
+lib/prisma-service.ts(522,41): error TS2339: Property 'type' does not exist on type '{ id: string; createdAt: Date; updatedAt: Date; appointmentId: string | null; patientId: string; medicalPatientId: string | null; doctorId: string; chiefComplaint: string | null; ... 7 more ...; endTime: Date | null; }'.
+lib/prisma-service.ts(525,30): error TS2339: Property 'notes' does not exist on type '{ id: string; createdAt: Date; updatedAt: Date; appointmentId: string | null; patientId: string; medicalPatientId: string | null; doctorId: string; chiefComplaint: string | null; ... 7 more ...; endTime: Date | null; }'.
+lib/prisma-service.ts(567,9): error TS2322: Type '"agendada" | "confirmada" | "em_andamento" | "concluida" | "cancelada" | "reagendada" | undefined' is not assignable to type 'ConsultationStatus | EnumConsultationStatusFieldUpdateOperationsInput | undefined'.
+  Type '"agendada"' is not assignable to type 'ConsultationStatus | EnumConsultationStatusFieldUpdateOperationsInput | undefined'.
+lib/prisma-service.ts(579,40): error TS2551: Property 'patient' does not exist on type '{ id: string; createdAt: Date; updatedAt: Date; appointmentId: string | null; patientId: string; medicalPatientId: string | null; doctorId: string; chiefComplaint: string | null; ... 7 more ...; endTime: Date | null; }'. Did you mean 'patientId'?
+lib/prisma-service.ts(580,39): error TS2551: Property 'patient' does not exist on type '{ id: string; createdAt: Date; updatedAt: Date; appointmentId: string | null; patientId: string; medicalPatientId: string | null; doctorId: string; chiefComplaint: string | null; ... 7 more ...; endTime: Date | null; }'. Did you mean 'patientId'?
+lib/prisma-service.ts(582,41): error TS2551: Property 'patient' does not exist on type '{ id: string; createdAt: Date; updatedAt: Date; appointmentId: string | null; patientId: string; medicalPatientId: string | null; doctorId: string; chiefComplaint: string | null; ... 7 more ...; endTime: Date | null; }'. Did you mean 'patientId'?
+lib/prisma-service.ts(583,44): error TS2551: Property 'patient' does not exist on type '{ id: string; createdAt: Date; updatedAt: Date; appointmentId: string | null; patientId: string; medicalPatientId: string | null; doctorId: string; chiefComplaint: string | null; ... 7 more ...; endTime: Date | null; }'. Did you mean 'patientId'?
+lib/prisma-service.ts(584,41): error TS2551: Property 'patient' does not exist on type '{ id: string; createdAt: Date; updatedAt: Date; appointmentId: string | null; patientId: string; medicalPatientId: string | null; doctorId: string; chiefComplaint: string | null; ... 7 more ...; endTime: Date | null; }'. Did you mean 'patientId'?
+lib/prisma-service.ts(585,45): error TS2551: Property 'patient' does not exist on type '{ id: string; createdAt: Date; updatedAt: Date; appointmentId: string | null; patientId: string; medicalPatientId: string | null; doctorId: string; chiefComplaint: string | null; ... 7 more ...; endTime: Date | null; }'. Did you mean 'patientId'?
+lib/prisma-service.ts(586,43): error TS2551: Property 'patient' does not exist on type '{ id: string; createdAt: Date; updatedAt: Date; appointmentId: string | null; patientId: string; medicalPatientId: string | null; doctorId: string; chiefComplaint: string | null; ... 7 more ...; endTime: Date | null; }'. Did you mean 'patientId'?
+lib/prisma-service.ts(587,42): error TS2551: Property 'patient' does not exist on type '{ id: string; createdAt: Date; updatedAt: Date; appointmentId: string | null; patientId: string; medicalPatientId: string | null; doctorId: string; chiefComplaint: string | null; ... 7 more ...; endTime: Date | null; }'. Did you mean 'patientId'?
+lib/prisma-service.ts(588,44): error TS2339: Property 'scheduledDate' does not exist on type '{ id: string; createdAt: Date; updatedAt: Date; appointmentId: string | null; patientId: string; medicalPatientId: string | null; doctorId: string; chiefComplaint: string | null; ... 7 more ...; endTime: Date | null; }'.
+lib/prisma-service.ts(589,44): error TS2339: Property 'scheduledDate' does not exist on type '{ id: string; createdAt: Date; updatedAt: Date; appointmentId: string | null; patientId: string; medicalPatientId: string | null; doctorId: string; chiefComplaint: string | null; ... 7 more ...; endTime: Date | null; }'.
+lib/prisma-service.ts(590,45): error TS2339: Property 'type' does not exist on type '{ id: string; createdAt: Date; updatedAt: Date; appointmentId: string | null; patientId: string; medicalPatientId: string | null; doctorId: string; chiefComplaint: string | null; ... 7 more ...; endTime: Date | null; }'.
+lib/prisma-service.ts(593,34): error TS2339: Property 'notes' does not exist on type '{ id: string; createdAt: Date; updatedAt: Date; appointmentId: string | null; patientId: string; medicalPatientId: string | null; doctorId: string; chiefComplaint: string | null; ... 7 more ...; endTime: Date | null; }'.
+prisma/seed.ts(85,7): error TS2322: Type '{ email: string; }' is not assignable to type 'CommunicationContactWhereUniqueInput'.
+  Type '{ email: string; }' is not assignable to type '{ id: string; } & { id?: string | undefined; AND?: CommunicationContactWhereInput | CommunicationContactWhereInput[] | undefined; ... 28 more ...; appointments?: AppointmentListRelationFilter | undefined; }'.
+    Property 'id' is missing in type '{ email: string; }' but required in type '{ id: string; }'.
+prisma/seed.ts(89,26): error TS2345: Argument of type '{ id: string; email: string | null; name: string; createdAt: Date; updatedAt: Date; whatsapp: string | null; birthDate: string | null; registrationSources: string | null; ... 17 more ...; lastContactAt: Date | null; }' is not assignable to parameter of type 'never'.
+prisma/seed.ts(96,50): error TS2339: Property 'id' does not exist on type 'never'.
+prisma/seed.ts(110,50): error TS2339: Property 'id' does not exist on type 'never'.
+prisma/seed.ts(130,7): error TS2322: Type '{ communicationContactId: any; cpf: string; medicalRecordNumber: number; fullName: string; rg: string; address: string; city: string; state: string; zipCode: string; insuranceType: string; insurancePlan: string; createdBy: string; }' is not assignable to type '(Without<MedicalPatientCreateInput, MedicalPatientUncheckedCreateInput> & MedicalPatientUncheckedCreateInput) | (Without<...> & MedicalPatientCreateInput)'.
+  Type '{ communicationContactId: any; cpf: string; medicalRecordNumber: number; fullName: string; rg: string; address: string; city: string; state: string; zipCode: string; insuranceType: string; insurancePlan: string; createdBy: string; }' is not assignable to type 'Without<MedicalPatientCreateInput, MedicalPatientUncheckedCreateInput> & MedicalPatientUncheckedCreateInput'.
+    Type '{ communicationContactId: any; cpf: string; medicalRecordNumber: number; fullName: string; rg: string; address: string; city: string; state: string; zipCode: string; insuranceType: string; insurancePlan: string; createdBy: string; }' is not assignable to type 'MedicalPatientUncheckedCreateInput'.
+      Types of property 'insuranceType' are incompatible.
+        Type 'string' is not assignable to type 'InsuranceType | undefined'.
+prisma/seed.ts(132,33): error TS2345: Argument of type '{ id: string; isActive: boolean; createdAt: Date; updatedAt: Date; cpf: string; medicalRecordNumber: number; communicationContactId: string; fullName: string; rg: string | null; ... 21 more ...; createdBy: string | null; }' is not assignable to parameter of type 'never'.
+prisma/seed.ts(148,50): error TS2339: Property 'id' does not exist on type 'never'.
+prisma/seed.ts(149,51): error TS2339: Property 'id' does not exist on type 'never'.
+prisma/seed.ts(150,39): error TS2339: Property 'name' does not exist on type 'never'.
+prisma/seed.ts(151,40): error TS2339: Property 'whatsapp' does not exist on type 'never'.
+prisma/seed.ts(152,43): error TS2339: Property 'whatsapp' does not exist on type 'never'.
+prisma/seed.ts(153,40): error TS2339: Property 'email' does not exist on type 'never'.
+prisma/seed.ts(154,44): error TS2339: Property 'birthDate' does not exist on type 'never'.
+prisma/seed.ts(167,50): error TS2339: Property 'id' does not exist on type 'never'.
+prisma/seed.ts(168,51): error TS2339: Property 'id' does not exist on type 'never'.
+prisma/seed.ts(169,39): error TS2339: Property 'name' does not exist on type 'never'.
+prisma/seed.ts(170,40): error TS2339: Property 'whatsapp' does not exist on type 'never'.
+prisma/seed.ts(171,43): error TS2339: Property 'whatsapp' does not exist on type 'never'.
+prisma/seed.ts(172,40): error TS2339: Property 'email' does not exist on type 'never'.
+prisma/seed.ts(173,44): error TS2339: Property 'birthDate' does not exist on type 'never'.
+scripts/migrar-dados.ts(114,41): error TS2551: Property 'paciente' does not exist on type 'Omit<PrismaClient<PrismaClientOptions, never, DefaultArgs>, "$connect" | "$disconnect" | "$on" | "$transaction" | "$extends">'. Did you mean 'patient'?
+scripts/migrar-dados.ts(144,45): error TS2551: Property 'paciente' does not exist on type 'Omit<PrismaClient<PrismaClientOptions, never, DefaultArgs>, "$connect" | "$disconnect" | "$on" | "$transaction" | "$extends">'. Did you mean 'patient'?
+scripts/migrar-dados.ts(149,24): error TS2339: Property 'consulta' does not exist on type 'Omit<PrismaClient<PrismaClientOptions, never, DefaultArgs>, "$connect" | "$disconnect" | "$on" | "$transaction" | "$extends">'.
+scripts/migrate-json-to-postgres.ts(105,20): error TS2551: Property 'paciente' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'. Did you mean 'patient'?
+scripts/migrate-json-to-postgres.ts(113,26): error TS2339: Property 'email' does not exist on type 'JsonPatient'.
+scripts/migrate-json-to-postgres.ts(153,42): error TS2551: Property 'paciente' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'. Did you mean 'patient'?
+scripts/migrate-json-to-postgres.ts(182,20): error TS2339: Property 'consulta' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
+scripts/migrate-json-to-postgres.ts(209,37): error TS2551: Property 'paciente' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'. Did you mean 'patient'?
+scripts/migrate-json-to-postgres.ts(210,42): error TS2339: Property 'consulta' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
+scripts/validate-migration.ts(12,36): error TS2551: Property 'paciente' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'. Did you mean 'patient'?
+scripts/validate-migration.ts(36,36): error TS2339: Property 'consulta' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
+scripts/validate-migration.ts(65,41): error TS2339: Property 'consulta' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
+scripts/validate-migration.ts(66,41): error TS2551: Property 'paciente' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'. Did you mean 'patient'?
+scripts/validate-migration.ts(75,43): error TS2551: Property 'paciente' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'. Did you mean 'patient'?
