@@ -21,7 +21,7 @@ export async function GET(
     }
 
     const { patientId } = await params
-    const patientRecords = getMedicalRecordsByPatient(patientId)
+    const patientRecords = await getMedicalRecordsByPatientId(patientId)
 
     return NextResponse.json({
       records: patientRecords,

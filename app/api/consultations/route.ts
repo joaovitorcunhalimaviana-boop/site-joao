@@ -54,20 +54,20 @@ function convertAppointmentToConsultation(
 ): Consultation {
   return {
     id: appointment.id,
-    patientId: appointment.patientId,
-    patientName: appointment.patientName || 'Nome não informado',
+    patientId: appointment.medicalPatientId || appointment.communicationContactId,
+    patientName: 'Nome não informado', // Nome deve ser buscado do relacionamento
     date: appointment.appointmentDate,
     time: appointment.appointmentTime,
-    type: appointment.appointmentType,
+    type: appointment.type,
     status:
-      appointment.status === 'agendada'
+      appointment.status === 'scheduled'
         ? 'scheduled'
-        : appointment.status === 'concluida'
+        : appointment.status === 'completed'
           ? 'completed'
-          : appointment.status === 'cancelada'
+          : appointment.status === 'cancelled'
             ? 'cancelled'
             : 'scheduled',
-    notes: appointment.notes || '',
+    notes: appointment.observations || '',
     createdAt: appointment.createdAt,
   }
 }
@@ -163,13 +163,13 @@ export async function POST(request: NextRequest) {
 
     // Criar agendamento no sistema unificado
     const appointmentData = {
-      patientId: patientId,
-      patientName: patientName,
+      communicationContactId: patientId,
+      medicalPatientId: patientId,
       appointmentDate: date,
       appointmentTime: time,
-      appointmentType: type,
-      status: 'agendada' as const,
-      notes: notes || '',
+      type: type,
+      status: 'scheduled' as const,
+      observations: notes || '',
     }
 
     const result = await createAppointment(appointmentData)
@@ -226,18 +226,18 @@ export async function PUT(request: NextRequest) {
 
     if (updateData.date) appointmentUpdateData.appointmentDate = updateData.date
     if (updateData.time) appointmentUpdateData.appointmentTime = updateData.time
-    if (updateData.type) appointmentUpdateData.appointmentType = updateData.type
+    if (updateData.type) appointmentUpdateData.type = updateData.type
     if (updateData.notes !== undefined)
-      appointmentUpdateData.notes = updateData.notes
+      appointmentUpdateData.observations = updateData.notes
     if (updateData.status) {
       appointmentUpdateData.status =
         updateData.status === 'scheduled'
-          ? 'agendada'
+          ? 'scheduled'
           : updateData.status === 'completed'
-            ? 'concluida'
+            ? 'completed'
             : updateData.status === 'cancelled'
-              ? 'cancelada'
-              : 'agendada'
+              ? 'cancelled'
+              : 'scheduled'
     }
 
     const result = await updateAppointment(id, appointmentUpdateData)
@@ -291,7 +291,7 @@ export async function DELETE(request: NextRequest) {
     }
 
     // Atualizar status para cancelada no sistema unificado
-    const result = await updateAppointment(id, { status: 'cancelada' })
+    const result = await updateAppointment(id, { status: 'cancelled' })
 
     if (!result.success) {
       return NextResponse.json(

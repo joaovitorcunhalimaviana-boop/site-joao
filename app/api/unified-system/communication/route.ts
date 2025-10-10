@@ -18,7 +18,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
     if (id) {
       // Buscar por ID
-      const contact = getCommunicationContactById(id)
+      const contact = await getCommunicationContactById(id)
 
       if (!contact) {
         return NextResponse.json(
@@ -42,7 +42,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
     if (email) {
       // Buscar por email
-      const contact = getCommunicationContactByEmail(email)
+      const contact = await getCommunicationContactByEmail(email)
 
       if (!contact) {
         return NextResponse.json(
@@ -194,7 +194,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       )
     }
 
-    const result = createOrUpdateCommunicationContact({
+    const result = await createOrUpdateCommunicationContact({
       name: body.name.trim(),
       email: body.email?.trim().toLowerCase(),
       whatsapp: body.whatsapp?.trim(),
@@ -270,9 +270,9 @@ export async function PUT(request: NextRequest): Promise<NextResponse> {
     let contact: CommunicationContact | null = null
 
     if (body.id) {
-      contact = getCommunicationContactById(body.id)
+      contact = await getCommunicationContactById(body.id)
     } else if (body.email) {
-      contact = getCommunicationContactByEmail(body.email)
+      contact = await getCommunicationContactByEmail(body.email)
     }
 
     if (!contact) {
@@ -333,7 +333,7 @@ export async function PUT(request: NextRequest): Promise<NextResponse> {
       }
     }
 
-    const result = createOrUpdateCommunicationContact(updateData)
+    const result = await createOrUpdateCommunicationContact(updateData)
 
     if (!result.success) {
       return NextResponse.json(

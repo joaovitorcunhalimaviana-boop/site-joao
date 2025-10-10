@@ -68,7 +68,9 @@ export default function AgendaPage() {
   const loadAgenda = async () => {
     try {
       setLoading(true)
-      const response = await fetch(`/api/agenda?date=${selectedDate}`)
+      const response = await fetch(`/api/agenda?date=${selectedDate}`, {
+        credentials: 'include'
+      })
       if (response.ok) {
         const data = await response.json()
         setAgenda(data)
@@ -82,7 +84,9 @@ export default function AgendaPage() {
 
   const loadPatients = async () => {
     try {
-      const response = await fetch('/api/unified-system/medical-patients')
+      const response = await fetch('/api/unified-system/medical-patients', {
+        credentials: 'include'
+      })
       if (response.ok) {
         const data = await response.json()
         // A API retorna {patients: [...], total: number}
@@ -105,6 +109,7 @@ export default function AgendaPage() {
     try {
       const response = await fetch('/api/agenda', {
         method: 'POST',
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
         },
@@ -138,6 +143,7 @@ export default function AgendaPage() {
     try {
       const response = await fetch('/api/agenda', {
         method: 'PUT',
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
         },
@@ -160,6 +166,7 @@ export default function AgendaPage() {
     try {
       const response = await fetch(`/api/agenda?id=${id}`, {
         method: 'DELETE',
+        credentials: 'include'
       })
 
       if (response.ok) {

@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
       }
 
       console.log('🔍 Carregando todos os registros para buscar específico')
-      const records = getAllMedicalRecords()
+      const records = await getAllMedicalRecords()
       console.log('🔍 Total de registros carregados:', records.length)
 
       const record = records.find(r => r.id === recordId)
@@ -45,7 +45,7 @@ export async function GET(request: NextRequest) {
       // Cache por 10 minutos
       await redisCache.set(cacheKey, record, {
         ttl: 5 * 60 * 1000, // 5 minutos
-        tags: ['medical-records', `patient:${record.medicalPatientId}`],
+        tags: ['medical-records', `patient:${record.patientId}`],
       })
 
       console.log('🔍 Registro específico encontrado e retornado')
@@ -66,7 +66,7 @@ export async function GET(request: NextRequest) {
       }
 
       console.log('🔍 Carregando registros do paciente do arquivo')
-      const patientRecords = getMedicalRecordsByPatient(patientId)
+      const patientRecords = await getMedicalRecordsByPatient(patientId)
       console.log(
         '🔍 Registros encontrados para o paciente:',
         patientRecords.length
@@ -75,8 +75,8 @@ export async function GET(request: NextRequest) {
       // Ordenar por data mais recente primeiro
       patientRecords.sort(
         (a, b) =>
-          new Date(b.consultationDate).getTime() -
-          new Date(a.consultationDate).getTime()
+          new Date(b.date).getTime() -
+          new Date(a.date).getTime()
       )
 
       // Cache por 5 minutos
@@ -99,7 +99,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Retornar todos os prontuários se não houver filtro
-    const allRecords = getAllMedicalRecords()
+    const allRecords = await getAllMedicalRecords()
     console.log('🔍 Total de registros carregados:', allRecords.length)
 
     // Cache por 3 minutos
@@ -192,7 +192,7 @@ export async function POST(request: NextRequest) {
       recordData
     )
 
-    const result = createMedicalRecord(recordData)
+    const result = await createMedicalRecord(recordData)
 
     console.log(
       '🔍 API medical-records POST - Resultado de createMedicalRecord:',
@@ -231,7 +231,7 @@ export async function PUT(request: Request) {
 
     const body = await request.json()
 
-    const result = updateMedicalRecord(id, body)
+    const result = await updateMedicalRecord(id, body)
 
     if (!result.success) {
       return NextResponse.json(
@@ -246,7 +246,7 @@ export async function PUT(request: Request) {
     // Invalidar cache relacionado aos prontuários médicos
     await redisCache.invalidateByTags([
       'medical-records',
-      `patient:${result.record?.medicalPatientId}`,
+      `patient:${result.record?.patientId}`,
       `medical-record:${id}`,
     ])
 
@@ -270,7 +270,7 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: 'ID é obrigatório' }, { status: 400 })
     }
 
-    const result = deleteMedicalRecord(id)
+    const result = await deleteMedicalRecord(id)
 
     if (!result.success) {
       return NextResponse.json(

@@ -27,27 +27,36 @@ interface ReviewsData {
   }
 }
 
-// Função para converter contatos de comunicação em reviews
-function convertContactsToReviews(contacts: CommunicationContact[]): Review[] {
-  return contacts
-    .filter(contact => contact.reviewData && contact.reviewData.rating > 0)
-    .map(contact => ({
-      id: contact.id,
-      patientName: contact.name,
-      email: contact.email || '',
-      phone: contact.whatsapp || '',
-      rating: contact.reviewData!.rating,
-      comment: contact.reviewData!.comment,
-      date: contact.reviewData!.reviewDate,
-      verified: contact.reviewData!.verified || false,
-      approved: contact.reviewData!.approved || true,
-    }))
-}
-
 // Função para obter reviews do sistema unificado
 async function getReviewsFromUnifiedSystem(): Promise<Review[]> {
-  const contacts = await getAllCommunicationContacts()
-  return convertContactsToReviews(contacts)
+  const { prisma } = await import('@/lib/prisma-service')
+
+  const reviews = await prisma.review.findMany({
+    include: {
+      contact: {
+        select: {
+          name: true,
+          email: true,
+          whatsapp: true
+        }
+      }
+    },
+    orderBy: {
+      createdAt: 'desc'
+    }
+  })
+
+  return reviews.map(review => ({
+    id: review.id,
+    patientName: review.contact.name,
+    email: review.contact.email || '',
+    phone: review.contact.whatsapp || '',
+    rating: review.rating,
+    comment: review.comment,
+    date: review.createdAt.toISOString(),
+    verified: review.verified,
+    approved: review.approved,
+  }))
 }
 
 // Função para calcular estatísticas
@@ -239,14 +248,20 @@ export async function POST(request: NextRequest) {
         }
 
         // Verificar se já existe review deste email no sistema unificado
-        const contacts = await getAllCommunicationContacts()
-        const existingContact = contacts.find(
-          contact =>
-            contact.email?.toLowerCase() === email.toLowerCase() &&
-            contact.reviewData
-        )
+        const { prisma } = await import('@/lib/prisma-service')
 
-        if (existingContact) {
+        const existingReview = await prisma.review.findFirst({
+          where: {
+            contact: {
+              email: {
+                equals: email.toLowerCase(),
+                mode: 'insensitive'
+              }
+            }
+          }
+        })
+
+        if (existingReview) {
           return NextResponse.json(
             { error: 'Já existe uma avaliação para este email' },
             { status: 400 }
@@ -254,18 +269,11 @@ export async function POST(request: NextRequest) {
         }
 
         // Criar ou atualizar contato com dados da review
-        const contactResult = createOrUpdateCommunicationContact({
+        const contactResult = await createOrUpdateCommunicationContact({
           name: patientName.trim(),
           email: email.trim().toLowerCase(),
           whatsapp: phone?.trim() || undefined,
           source: 'review',
-          reviewData: {
-            rating: parseInt(rating),
-            comment: comment.trim(),
-            reviewDate: new Date().toISOString(),
-            verified: false,
-            approved: true,
-          },
         })
 
         if (!contactResult.success) {
@@ -275,17 +283,28 @@ export async function POST(request: NextRequest) {
           )
         }
 
+        // Usar Prisma para criar a review (prisma já importado acima)
+        const createdReview = await prisma.review.create({
+          data: {
+            contactId: contactResult.contact!.id,
+            rating: parseInt(rating),
+            comment: comment.trim(),
+            verified: false,
+            approved: true,
+          }
+        })
+
         // Criar objeto review para resposta
         const newReview: Review = {
-          id: contactResult.contact.id,
-          patientName: contactResult.contact.name,
-          email: contactResult.contact.email!,
-          phone: contactResult.contact.whatsapp || '',
-          rating: contactResult.contact.reviewData!.rating,
-          comment: contactResult.contact.reviewData!.comment,
-          date: contactResult.contact.reviewData!.reviewDate,
-          verified: contactResult.contact.reviewData!.verified || false,
-          approved: contactResult.contact.reviewData!.approved || true,
+          id: createdReview.id,
+          patientName: contactResult.contact!.name,
+          email: contactResult.contact!.email!,
+          phone: contactResult.contact!.whatsapp || '',
+          rating: createdReview.rating,
+          comment: createdReview.comment,
+          date: createdReview.createdAt.toISOString(),
+          verified: createdReview.verified,
+          approved: createdReview.approved,
         }
 
         // Enviar para Telegram (não bloquear a resposta)

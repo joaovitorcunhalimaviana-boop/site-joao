@@ -121,7 +121,7 @@ async function getProtectionStatus(): Promise<NextResponse> {
     const baseUrl =
       process.env['NEXTAUTH_URL'] ||
       process.env['NEXT_PUBLIC_APP_URL'] ||
-      (process.env.NODE_ENV === 'development' ? 'http://localhost:3002' : 'http://localhost:3000')
+      'http://localhost:3003'
 
     // Status de integridade
     let integrityStatus: any = { status: 'UNKNOWN', issues: 0 }
@@ -238,10 +238,7 @@ async function getSystemHealth(): Promise<NextResponse> {
     console.log('🏥 VERIFICANDO SAÚDE DO SISTEMA...')
 
     // Obter base URL para chamadas internas
-    const baseUrl =
-      process.env['NEXTAUTH_URL'] ||
-      process.env['NEXT_PUBLIC_APP_URL'] ||
-      (process.env.NODE_ENV === 'development' ? 'http://localhost:3002' : 'http://localhost:3000')
+    const baseUrl = process.env['NEXTAUTH_URL'] || process.env['NEXT_PUBLIC_APP_URL'] || 'http://localhost:3003'
 
     const healthChecks: Record<string, boolean> = {
       scheduler: false,

@@ -4,6 +4,7 @@ import {
   getAppointmentsByDate,
   updateAppointment,
   createAppointment,
+  deleteAppointment,
   getAllPatients,
   getPatientById,
   createOrUpdatePatient,
@@ -54,22 +55,25 @@ export async function GET(request: NextRequest) {
         const allPatients = await getAllPatients()
 
         // Mapear dados dos pacientes para formato compatível
-        const patientsWithContactData = allPatients.map(patient => {
+        const patientsWithContactData = await Promise.all(allPatients.map(async patient => {
+          // Buscar dados do contato de comunicação
+          const communicationContact = await getCommunicationContactById(patient.communicationContactId)
+
           return {
             id: patient.id,
             name: patient.fullName,
             cpf: patient.cpf,
-            medicalRecordNumber: patient.numeroRegistroMedico,
-            phone: patient.telefone || '',
-            whatsapp: patient.telefone || '',
-            email: patient.email,
-            birthDate: patient.dataNascimento,
-            insuranceType: patient.insurance?.type,
-            insurancePlan: patient.insurance?.plan,
+            medicalRecordNumber: patient.medicalRecordNumber,
+            phone: communicationContact?.whatsapp || '',
+            whatsapp: communicationContact?.whatsapp || '',
+            email: communicationContact?.email || '',
+            birthDate: communicationContact?.birthDate || '',
+            insuranceType: patient.insuranceType,
+            insurancePlan: patient.insurancePlan,
             createdAt: patient.createdAt,
             updatedAt: patient.updatedAt,
           }
-        })
+        }))
 
         return NextResponse.json({
           success: true,
@@ -111,26 +115,25 @@ export async function GET(request: NextRequest) {
           )
         }
 
+        // Buscar dados do contato de comunicação para campos adicionais
+        const patientContact = await getCommunicationContactById(medicalPatient.communicationContactId)
+
         // Formato unificado com todos os dados necessários
         const unifiedPatient = {
           id: medicalPatient.id,
           name: medicalPatient.fullName,
           fullName: medicalPatient.fullName,
           cpf: medicalPatient.cpf,
-          medicalRecordNumber: medicalPatient.numeroRegistroMedico,
-          phone: medicalPatient.telefone || '',
-          whatsapp: medicalPatient.telefone || '',
-          email: medicalPatient.email || '',
-          birthDate: medicalPatient.dataNascimento || '',
-          insuranceType: medicalPatient.insurance?.type,
-          insurancePlan: medicalPatient.insurance?.plan,
+          medicalRecordNumber: medicalPatient.medicalRecordNumber,
+          phone: patientContact?.whatsapp || '',
+          whatsapp: patientContact?.whatsapp || '',
+          email: patientContact?.email || '',
+          birthDate: patientContact?.birthDate || '',
+          insuranceType: medicalPatient.insuranceType,
+          insurancePlan: medicalPatient.insurancePlan,
           createdAt: medicalPatient.createdAt,
           updatedAt: medicalPatient.updatedAt,
           isActive: medicalPatient.isActive,
-          // Dados médicos originais
-          insurance: medicalPatient.insurance,
-          medicalInfo: medicalPatient.medicalInfo,
-          consents: medicalPatient.consents,
         }
 
         return NextResponse.json({ success: true, patient: unifiedPatient })
@@ -142,16 +145,22 @@ export async function GET(request: NextRequest) {
           totalAppointments: statsAppointments.length,
           totalPatients: statsPatients.length,
           appointmentsByStatus: {
-            agendada: statsAppointments.filter(apt => apt.status === 'agendada')
+            SCHEDULED: statsAppointments.filter(apt => apt.status === 'SCHEDULED')
               .length,
-            confirmada: statsAppointments.filter(
-              apt => apt.status === 'confirmada'
+            CONFIRMED: statsAppointments.filter(
+              apt => apt.status === 'CONFIRMED'
             ).length,
-            cancelada: statsAppointments.filter(
-              apt => apt.status === 'cancelada'
+            CANCELLED: statsAppointments.filter(
+              apt => apt.status === 'CANCELLED'
             ).length,
-            realizada: statsAppointments.filter(
-              apt => apt.status === 'concluida'
+            COMPLETED: statsAppointments.filter(
+              apt => apt.status === 'COMPLETED'
+            ).length,
+            IN_PROGRESS: statsAppointments.filter(
+              apt => apt.status === 'IN_PROGRESS'
+            ).length,
+            NO_SHOW: statsAppointments.filter(
+              apt => apt.status === 'NO_SHOW'
             ).length,
           },
         }
@@ -230,84 +239,28 @@ export async function DELETE(request: NextRequest) {
           )
         }
 
-        const deleteAppointments = await getAllAppointments()
-        const appointmentExists = deleteAppointments.find(
-          apt => apt.id === appointmentId
-        )
-
-        if (!appointmentExists) {
+        const deleteResult = await deleteAppointment(appointmentId)
+        
+        if (!deleteResult.success) {
+          const statusCode = deleteResult.message.includes('não encontrado') ? 404 : 500
           return NextResponse.json(
-            { success: false, error: 'Agendamento não encontrado' },
-            { status: 404 }
+            { success: false, error: deleteResult.message },
+            { status: statusCode }
           )
-        }
-
-        const allAppointments2 = await getAllAppointments()
-        const filteredAppointments = allAppointments2.filter(
-          apt => apt.id !== appointmentId
-        )
-
-        // Salvar os agendamentos sem o excluído
-        const fs = require('fs').promises
-        const path = require('path')
-
-        // Remover de unified-appointments.json
-        const appointmentsPath = path.join(
-          process.cwd(),
-          'data',
-          'unified-appointments.json'
-        )
-
-        await fs.writeFile(
-          appointmentsPath,
-          JSON.stringify(filteredAppointments, null, 2)
-        )
-
-        // Remover também de unified-system/appointments.json
-        const unifiedSystemAppointmentsPath = path.join(
-          process.cwd(),
-          'data',
-          'unified-system',
-          'appointments.json'
-        )
-
-        try {
-          // Ler o arquivo do sistema unificado
-          const unifiedSystemData = await fs.readFile(
-            unifiedSystemAppointmentsPath,
-            'utf8'
-          )
-          const unifiedSystemAppointments = JSON.parse(unifiedSystemData)
-
-          // Filtrar o agendamento excluído
-          const filteredUnifiedSystemAppointments =
-            unifiedSystemAppointments.filter(apt => apt.id !== appointmentId)
-
-          // Salvar o arquivo atualizado
-          await fs.writeFile(
-            unifiedSystemAppointmentsPath,
-            JSON.stringify(filteredUnifiedSystemAppointments, null, 2)
-          )
-
-          console.log(
-            `🗑️ Agendamento ${appointmentId} foi excluído de ambos os arquivos`
-          )
-        } catch (error) {
-          console.log(`⚠️ Erro ao remover do sistema unificado: ${error}`)
         }
 
         return NextResponse.json({
           success: true,
-          message: 'Agendamento excluído com sucesso',
+          message: deleteResult.message,
         })
 
       case 'remove-cancelled-appointments':
         const allAppointments3 = await getAllAppointments()
         const cancelledAppointments = allAppointments3.filter(
-          apt => apt.status === 'cancelada'
+          apt => apt.status === 'CANCELLED'
         )
         const activeAppointments = allAppointments3.filter(
-          apt => apt.status !== 'cancelada'
+          apt => apt.status !== 'CANCELLED'
         )
 
         // Salvar apenas os agendamentos não cancelados
@@ -397,11 +350,11 @@ export async function POST(request: NextRequest) {
 
         const appointmentResult = await createAppointment({
           patientId: patientId,
-          dataConsulta: appointmentDate,
-          horaConsulta: appointmentTime,
-          tipoConsulta: appointmentType || 'consulta',
-          status: 'agendada',
-          observacoes: notes,
+          appointmentDate: appointmentDate,
+          appointmentTime: appointmentTime,
+          appointmentType: appointmentType || 'CONSULTATION',
+          status: 'SCHEDULED',
+          notes: notes,
         })
 
         return NextResponse.json({
@@ -433,12 +386,12 @@ export async function POST(request: NextRequest) {
         // Criar novo paciente usando Prisma service
         const patientData = {
           fullName: name,
-          telefone: whatsapp || phone,
+          whatsapp: whatsapp || phone,
           email: email,
-          dataNascimento: birthDate,
+          birthDate: birthDate,
           cpf: cpf || '',
-          insurance: insurance || { type: 'particular' },
-          isActive: true,
+          insuranceType: insurance?.type || 'PARTICULAR',
+          insurancePlan: insurance?.plan,
         }
 
         const patientResult = await createOrUpdatePatient(patientData)

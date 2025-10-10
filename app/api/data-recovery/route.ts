@@ -188,19 +188,24 @@ class DataRecoverySystem {
         console.log('📅 Recuperando consultas...')
         for (const appointment of backupData.appointments) {
           try {
-            // Verificar se o paciente existe
-            const patient = await prisma.patient.findUnique({
+            // Verificar se o paciente médico existe
+            const medicalPatient = await prisma.medicalPatient.findFirst({
               where: {
-                email: appointment.patient?.email || appointment.patientEmail,
+                communicationContact: {
+                  email: appointment.patient?.email || appointment.patientEmail,
+                }
               },
+              include: {
+                communicationContact: true
+              }
             })
 
-            if (patient) {
+            if (medicalPatient) {
               const existingAppointment = await prisma.appointment.findFirst({
                 where: {
-                  patientId: patient.id,
-                  date: new Date(appointment.date),
-                  time: appointment.time,
+                  medicalPatientId: medicalPatient.id,
+                  appointmentDate: appointment.date || appointment.appointmentDate,
+                  appointmentTime: appointment.time || appointment.appointmentTime,
                 },
               })
 
@@ -208,22 +213,20 @@ class DataRecoverySystem {
                 await prisma.appointment.upsert({
                   where: { id: appointment.id || 'new-' + Date.now() },
                   update: {
-                    patientName: appointment.patientName || 'Unknown',
-                    patientPhone: appointment.patientPhone || '',
-                    patientWhatsapp: appointment.patientWhatsapp || '',
-                    date: new Date(appointment.date || appointment.appointmentDate),
-                    time: appointment.time || appointment.appointmentTime,
+                    medicalPatientId: medicalPatient.id,
+                    communicationContactId: medicalPatient.communicationContactId,
+                    appointmentDate: appointment.date || appointment.appointmentDate,
+                    appointmentTime: appointment.time || appointment.appointmentTime,
                     type: appointment.type,
                     status: appointment.status,
                     notes: appointment.notes,
                     updatedAt: new Date(),
                   },
                   create: {
-                    patientName: appointment.patientName || 'Unknown',
-                    patientPhone: appointment.patientPhone || '',
-                    patientWhatsapp: appointment.patientWhatsapp || '',
-                    date: new Date(appointment.date || appointment.appointmentDate),
-                    time: appointment.time || appointment.appointmentTime,
+                    medicalPatientId: medicalPatient.id,
+                    communicationContactId: medicalPatient.communicationContactId,
+                    appointmentDate: appointment.date || appointment.appointmentDate,
+                    appointmentTime: appointment.time || appointment.appointmentTime,
                     type: appointment.type,
                     status: appointment.status || 'SCHEDULED',
                     notes: appointment.notes,

@@ -17,30 +17,31 @@ export async function GET(request: NextRequest) {
     const status = searchParams.get('status')
     const paymentType = searchParams.get('paymentType')
 
-    let surgeries = getAllSurgeries()
+    let surgeries = await getAllSurgeries()
 
     // Filtros
     if (date) {
-      surgeries = getSurgeriesByDate(date)
+      surgeries = await getSurgeriesByDate(date)
     }
 
     if (status) {
       surgeries = surgeries.filter(surgery => surgery.status === status)
     }
 
-    if (paymentType) {
-      surgeries = surgeries.filter(
-        surgery => surgery.paymentType === paymentType
-      )
-    }
+    // Remover filtro de paymentType pois não existe na interface Surgery
+    // if (paymentType) {
+    //   surgeries = surgeries.filter(
+    //     surgery => surgery.paymentType === paymentType
+    //   )
+    // }
 
     // Ordenar por data e hora (mais recentes primeiro)
     surgeries.sort((a, b) => {
       const dateA = new Date(
-        `${a.date.split('/').reverse().join('-')}T${a.time}`
+        `${a.surgeryDate}T${a.surgeryTime}`
       )
       const dateB = new Date(
-        `${b.date.split('/').reverse().join('-')}T${b.time}`
+        `${b.surgeryDate}T${b.surgeryTime}`
       )
       return dateB.getTime() - dateA.getTime()
     })
@@ -64,14 +65,12 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
 
-    // Validação básica
+    // Validação básica - campos da interface Surgery
     if (
       !body.patientName ||
       !body.surgeryType ||
-      !body.date ||
-      !body.time ||
-      !body.paymentType ||
-      !body.hospital
+      !body.surgeryDate ||
+      !body.surgeryTime
     ) {
       return NextResponse.json(
         { success: false, error: 'Campos obrigatórios não preenchidos' },
@@ -80,7 +79,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Criar ou atualizar contato de comunicação
-    const contactResult = createOrUpdateCommunicationContact({
+    const contactResult = await createOrUpdateCommunicationContact({
       name: body.patientName,
       email: body.patientEmail,
       whatsapp: body.patientWhatsapp,
@@ -94,30 +93,21 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Criar cirurgia usando o sistema unificado
+    // Criar cirurgia usando o sistema unificado - campos corretos da interface Surgery
     const surgeryResult = await createSurgery({
       communicationContactId: contactResult.contact.id,
       medicalPatientId: body.medicalPatientId,
-      patientName: body.patientName,
-      surgeryType: body.surgeryType,
-      date: body.date,
-      time: body.time,
-      hospital: body.hospital,
-      paymentType: body.paymentType,
-      insurancePlan: body.insurancePlan,
-      totalValue: body.totalValue,
-      hospitalValue: body.hospitalValue,
-      anesthesiologistValue: body.anesthesiologistValue,
-      instrumentalistValue: body.instrumentalistValue,
-      auxiliaryValue: body.auxiliaryValue,
-      doctorValue: body.doctorValue,
-      doctorAmount: body.doctorAmount,
-      totalAmount: body.totalAmount,
-      hospitalAmount: body.hospitalAmount,
-      assistantAmount: body.assistantAmount,
-      expectedAmount: body.expectedAmount,
-      procedureCodes: body.procedureCodes,
-      notes: body.notes,
+      surgeryDate: body.surgeryDate || body.date,
+      surgeryTime: body.surgeryTime || body.time,
+      type: body.surgeryType,
+      description: body.description || '',
+      surgeon: body.surgeon || 'Dr. João Vitor Viana',
+      anesthesiologist: body.anesthesiologist,
+      duration: body.duration,
+      status: body.status || 'scheduled',
+      preOpNotes: body.preOpNotes,
+      postOpNotes: body.postOpNotes,
+      complications: body.complications,
     })
 
     if (!surgeryResult.success) {
@@ -155,29 +145,19 @@ export async function PUT(request: NextRequest) {
       )
     }
 
-    // Atualizar cirurgia usando o sistema unificado
+    // Atualizar cirurgia usando o sistema unificado - campos corretos da interface Surgery
     const surgeryResult = await updateSurgery(body.id, {
-      patientName: body.patientName,
-      surgeryType: body.surgeryType,
-      date: body.date,
-      time: body.time,
-      hospital: body.hospital,
-      paymentType: body.paymentType,
-      insurancePlan: body.insurancePlan,
-      totalValue: body.totalValue,
-      hospitalValue: body.hospitalValue,
-      anesthesiologistValue: body.anesthesiologistValue,
-      instrumentalistValue: body.instrumentalistValue,
-      auxiliaryValue: body.auxiliaryValue,
-      doctorValue: body.doctorValue,
-      doctorAmount: body.doctorAmount,
-      totalAmount: body.totalAmount,
-      hospitalAmount: body.hospitalAmount,
-      assistantAmount: body.assistantAmount,
-      expectedAmount: body.expectedAmount,
-      procedureCodes: body.procedureCodes,
+      surgeryDate: body.surgeryDate || body.date,
+      surgeryTime: body.surgeryTime || body.time,
+      type: body.surgeryType,
+      description: body.description,
+      surgeon: body.surgeon,
+      anesthesiologist: body.anesthesiologist,
+      duration: body.duration,
       status: body.status,
-      notes: body.notes,
+      preOpNotes: body.preOpNotes,
+      postOpNotes: body.postOpNotes,
+      complications: body.complications,
     })
 
     if (!surgeryResult.success) {

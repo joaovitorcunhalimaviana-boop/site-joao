@@ -205,7 +205,7 @@ export async function POST(request: NextRequest) {
 
       // 3. Criar paciente médico
       const medicalPatient = await createMedicalPatient({
-        communicationContactId: communicationContact.contact.id,
+        communicationContactId: communicationContact.contact?.id ?? '',
         cpf: cpfClean,
         fullName,
         insuranceType: insuranceType,
@@ -220,14 +220,14 @@ export async function POST(request: NextRequest) {
         },
       })
 
-      if (!medicalPatient.success) {
+      if (!medicalPatient.success || !medicalPatient.patient) {
         throw new Error(medicalPatient.message)
       }
 
       // 4. Criar agendamento unificado
       const appointmentResult = await createAppointment({
-        communicationContactId: communicationContact.contact.id,
-        medicalPatientId: medicalPatient.patient.id,
+        communicationContactId: communicationContact.contact?.id ?? '',
+        medicalPatientId: medicalPatient.patient?.id ?? '',
         appointmentDate: selectedDate,
         appointmentTime: selectedTime,
         appointmentType: 'consulta',

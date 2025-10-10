@@ -23,39 +23,49 @@ export async function POST(request: NextRequest) {
 
       for (const patientData of patients) {
         try {
-          // Verificar se o paciente já existe
-          const existingPatient = await prisma.patient.findFirst({
+          // Verificar se o paciente médico já existe
+          const existingMedicalPatient = await prisma.medicalPatient.findFirst({
             where: {
-              OR: [
-                { cpf: patientData.cpf },
-                {
-                  AND: [
-                    { name: patientData.name },
-                    { phone: patientData.phone },
-                  ],
-                },
-              ],
+              cpf: patientData.cpf,
             },
           })
 
-          if (existingPatient) {
-            console.log(`⚠️ Paciente já existe: ${patientData.name}`)
+          if (existingMedicalPatient) {
+            console.log(`⚠️ Paciente médico já existe: ${patientData.name}`)
             continue
           }
 
-          // Criar novo paciente
-          await prisma.patient.create({
+          // Criar ou buscar contato de comunicação
+          let communicationContact = await prisma.communicationContact.findFirst({
+            where: {
+              OR: [
+                { email: patientData.email },
+                { whatsapp: patientData.phone }
+              ]
+            }
+          })
+
+          if (!communicationContact) {
+            communicationContact = await prisma.communicationContact.create({
+              data: {
+                name: patientData.name,
+                email: patientData.email,
+                whatsapp: patientData.whatsapp || patientData.phone,
+                birthDate: patientData.birthDate,
+                createdAt: patientData.createdAt ? new Date(patientData.createdAt) : new Date(),
+                updatedAt: patientData.updatedAt ? new Date(patientData.updatedAt) : new Date(),
+              }
+            })
+          }
+
+          // Criar novo paciente médico
+          await prisma.medicalPatient.create({
             data: {
               id: patientData.id,
-              name: patientData.name,
+              communicationContactId: communicationContact.id,
               cpf: patientData.cpf,
-              email: patientData.email,
-              phone: patientData.phone,
-              whatsapp: patientData.whatsapp,
-              birthDate: patientData.birthDate
-                ? new Date(patientData.birthDate)
-                : null,
-              insuranceType: patientData.insurance?.type || 'particular',
+              fullName: patientData.name,
+              insuranceType: patientData.insurance?.type || 'PARTICULAR',
               insurancePlan: patientData.insurance?.plan,
               createdAt: patientData.createdAt
                 ? new Date(patientData.createdAt)
@@ -106,14 +116,14 @@ export async function POST(request: NextRequest) {
             continue
           }
 
-          // Verificar se o paciente existe
-          const patient = await prisma.patient.findUnique({
+          // Verificar se o paciente médico existe
+          const medicalPatient = await prisma.medicalPatient.findUnique({
             where: { id: appointmentData.patientId },
           })
 
-          if (!patient) {
+          if (!medicalPatient) {
             console.log(
-              `⚠️ Paciente não encontrado para agendamento: ${appointmentData.patientId}`
+              `⚠️ Paciente médico não encontrado para agendamento: ${appointmentData.patientId}`
             )
             results.appointments.errors++
             continue
@@ -157,14 +167,13 @@ export async function POST(request: NextRequest) {
           await prisma.appointment.create({
             data: {
               id: appointmentData.id,
-              patientId: appointmentData.patientId,
-              date: new Date(
-                `${appointmentData.date}T${appointmentData.time}:00`
-              ),
-              time: appointmentData.time,
+              medicalPatientId: appointmentData.patientId,
+              communicationContactId: medicalPatient.communicationContactId,
+              appointmentDate: appointmentData.date,
+              appointmentTime: appointmentData.time,
               type: type as any,
               status: status as any,
-              reason: appointmentData.notes,
+              notes: appointmentData.notes,
               createdAt: appointmentData.createdAt
                 ? new Date(appointmentData.createdAt)
                 : new Date(),

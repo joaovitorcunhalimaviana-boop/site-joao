@@ -81,6 +81,14 @@ export async function POST(request: NextRequest) {
 
     // Gerar tokens
     console.log('🎫 [Login API] Gerando tokens...')
+    console.log('Gerando token com dados:', {
+      userId: user.id,
+      username: user.username,
+      email: user.email,
+      role: user.role.toLowerCase(),
+      name: user.name
+    })
+
     const accessToken = jwt.sign(
       {
         userId: user.id,
@@ -105,28 +113,17 @@ export async function POST(request: NextRequest) {
 
     console.log('✅ [Login API] Tokens gerados!')
 
-    // Mapear role para áreas
-    const roleToAreas: Record<string, string[]> = {
-      'admin': ['medica', 'secretaria', 'admin'],
-      'doctor': ['medica'],
-      'secretary': ['secretaria']
-    }
-
-    const userRole = user.role.toLowerCase()
-    const areas = roleToAreas[userRole] || []
-
-    console.log('📋 [Login API] Mapeamento:', { role: userRole, areas })
-
     // Preparar resposta
     const userData = {
       id: user.id,
       username: user.username,
       email: user.email,
-      role: userRole,
+      role: user.role,
       name: user.name,
-      isActive: user.isActive,
-      areas: areas
+      isActive: user.isActive
     }
+
+    console.log('📋 [Login API] Dados do usuário:', userData)
 
     console.log('✅ [Login API] Login bem-sucedido!')
 

@@ -171,7 +171,8 @@ export default function AppointmentPage() {
 
       // Primeiro, buscar o agendamento pelo ID
       const appointmentResponse = await fetch(
-        `/api/unified-appointments?action=appointment-by-id&appointmentId=${appointmentId}`
+        `/api/unified-appointments?action=appointment-by-id&appointmentId=${appointmentId}`,
+        { credentials: 'include' }
       )
 
       if (!appointmentResponse.ok) {
@@ -198,7 +199,8 @@ export default function AppointmentPage() {
 
       // Agora buscar os dados completos do paciente usando o medicalPatientId
       const patientResponse = await fetch(
-        `/api/unified-appointments?action=patient-by-id&patientId=${appointment.medicalPatientId}`
+        `/api/unified-appointments?action=patient-by-id&patientId=${appointment.medicalPatientId}`,
+        { credentials: 'include' }
       )
 
       if (patientResponse.ok) {
@@ -233,7 +235,8 @@ export default function AppointmentPage() {
 
       // Carregar histórico de consultas anteriores reais usando o medicalPatientId correto
       const medicalRecordsResponse = await fetch(
-        `/api/medical-records?patientId=${appointment.medicalPatientId}`
+        `/api/medical-records?patientId=${appointment.medicalPatientId}`,
+        { credentials: 'include' }
       )
       if (medicalRecordsResponse.ok) {
         const patientRecords = await medicalRecordsResponse.json()
@@ -284,6 +287,7 @@ export default function AppointmentPage() {
     try {
       const response = await fetch('/api/medical-records', {
         method: 'POST',
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
         },
@@ -461,6 +465,7 @@ export default function AppointmentPage() {
       // 2. Salvar o prontuário médico com anexos da consulta atual
       const medicalRecordResponse = await fetch('/api/medical-records', {
         method: 'POST',
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
         },
@@ -490,6 +495,7 @@ export default function AppointmentPage() {
       // 2. Atualizar status do agendamento para 'concluida'
       const updateStatusResponse = await fetch('/api/unified-appointments', {
         method: 'PUT',
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
         },

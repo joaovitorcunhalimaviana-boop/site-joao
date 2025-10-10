@@ -56,15 +56,15 @@ export async function GET(request: NextRequest) {
               },
             },
           },
-          orderBy: { date: 'desc' },
+          orderBy: { appointmentDate: 'desc' },
         })
 
         const appointments = consultas.map(consulta => ({
           id: consulta.id,
           patientId: consulta.medicalPatientId || consulta.communicationContactId,
-          patientName: consulta.patientName,
-          appointmentDate: consulta.date,
-          appointmentTime: consulta.time,
+          patientName: consulta.medicalPatient?.fullName || consulta.communicationContact?.name || 'Não informado',
+          appointmentDate: consulta.appointmentDate,
+          appointmentTime: consulta.appointmentTime,
           appointmentType: consulta.type,
           status: consulta.status,
           notes: consulta.notes,
@@ -132,13 +132,13 @@ export async function POST(request: NextRequest) {
         }
 
         // Se não existir, criar novo contato de comunicação
-        if (!medicalPatient && !communicationContact && patientPhone && patientWhatsapp) {
+        if (!medicalPatient && !communicationContact && (patientPhone || patientWhatsapp)) {
           communicationContact = await prisma.communicationContact.create({
             data: {
               name: patientName,
-              email: patientEmail,
-              whatsapp: patientWhatsapp,
-              birthDate: patientBirthDate,
+              email: patientEmail || undefined,
+              whatsapp: patientWhatsapp || patientPhone || undefined,
+              birthDate: patientBirthDate || undefined,
             },
           })
         }
@@ -155,14 +155,8 @@ export async function POST(request: NextRequest) {
           data: {
             medicalPatientId: medicalPatient?.id,
             communicationContactId: communicationContact?.id,
-            patientName,
-            patientPhone: patientPhone || '',
-            patientWhatsapp: patientWhatsapp || '',
-            patientEmail: patientEmail,
-            patientCpf: patientCpf,
-            patientBirthDate: patientBirthDate,
-            date: new Date(date),
-            time: time,
+            appointmentDate: date,
+            appointmentTime: time,
             type: type,
             status: 'SCHEDULED',
             notes,
@@ -200,9 +194,9 @@ export async function POST(request: NextRequest) {
         const newAppointment = {
           id: newConsulta.id,
           patientId: newConsulta.medicalPatientId || newConsulta.communicationContactId,
-          patientName: newConsulta.patientName,
-          appointmentDate: newConsulta.date,
-          appointmentTime: newConsulta.time,
+          patientName: newConsulta.medicalPatient?.fullName || newConsulta.communicationContact?.name || patientName,
+          appointmentDate: newConsulta.appointmentDate,
+          appointmentTime: newConsulta.appointmentTime,
           appointmentType: newConsulta.type,
           status: newConsulta.status,
           notes: newConsulta.notes,
@@ -268,9 +262,9 @@ export async function PUT(request: NextRequest) {
       appointment: {
         id: updatedAppointment.id,
         patientId: updatedAppointment.medicalPatientId || updatedAppointment.communicationContactId,
-        patientName: updatedAppointment.patientName,
-        appointmentDate: updatedAppointment.date,
-        appointmentTime: updatedAppointment.time,
+        patientName: updatedAppointment.medicalPatient?.fullName || updatedAppointment.communicationContact?.name || 'Não informado',
+        appointmentDate: updatedAppointment.appointmentDate,
+        appointmentTime: updatedAppointment.appointmentTime,
         appointmentType: updatedAppointment.type,
         status: updatedAppointment.status,
         notes: updatedAppointment.notes,

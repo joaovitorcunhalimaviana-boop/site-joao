@@ -55,13 +55,10 @@ export async function POST(request: NextRequest) {
     // const patients = await prisma.patient.deleteMany({})
     // console.log(`✅ Removidos ${patients.count} pacientes (sistema antigo)`)
 
-    // 10. Limpar assinantes da newsletter
-    const newsletterSubscribers = await prisma.newsletterSubscriber.deleteMany(
-      {}
-    )
-    console.log(
-      `✅ Removidos ${newsletterSubscribers.count} assinantes da newsletter`
-    )
+    // 10. Limpar assinantes da newsletter (modelo removido - dados agora em CommunicationContact)
+    // const newsletterSubscribers = await prisma.newsletterSubscriber.deleteMany({})
+    // console.log(`✅ Removidos ${newsletterSubscribers.count} assinantes da newsletter`)
+    const newsletterSubscribers = { count: 0 }
 
     // 11. Limpar avaliações
     const reviews = await prisma.review.deleteMany({})
@@ -126,19 +123,19 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// DELETE - Remove all patients from database (legacy method)
+// DELETE - Remove all patients from database (legacy method - DEPRECATED)
 export async function DELETE(request: NextRequest) {
   try {
-    console.log('Iniciando limpeza de pacientes...')
+    console.log('Método DELETE descontinuado - use POST para limpeza completa')
 
-    // Get all patients first
-    const patients = await prisma.patient.findMany({
-      select: { id: true, name: true },
+    // O modelo Patient não existe mais, use MedicalPatient
+    const medicalPatients = await prisma.medicalPatient.findMany({
+      select: { id: true, fullName: true },
     })
 
-    console.log(`Encontrados ${patients.length} pacientes para deletar`)
+    console.log(`Encontrados ${medicalPatients.length} pacientes médicos para deletar`)
 
-    if (patients.length === 0) {
+    if (medicalPatients.length === 0) {
       return NextResponse.json({
         success: true,
         message: 'Nenhum paciente encontrado para deletar',
@@ -146,16 +143,16 @@ export async function DELETE(request: NextRequest) {
       })
     }
 
-    // Delete all patients
-    const deleteResult = await prisma.patient.deleteMany({})
+    // Delete all medical patients
+    const deleteResult = await prisma.medicalPatient.deleteMany({})
 
-    console.log(`${deleteResult.count} pacientes deletados com sucesso`)
+    console.log(`${deleteResult.count} pacientes médicos deletados com sucesso`)
 
     return NextResponse.json({
       success: true,
-      message: `${deleteResult.count} pacientes deletados com sucesso`,
+      message: `${deleteResult.count} pacientes médicos deletados com sucesso`,
       deletedCount: deleteResult.count,
-      deletedPatients: patients.map(p => ({ id: p.id, name: p.name })),
+      deletedPatients: medicalPatients.map(p => ({ id: p.id, name: p.fullName })),
     })
   } catch (error) {
     console.error('Erro ao deletar pacientes:', error)
@@ -175,17 +172,30 @@ export async function DELETE(request: NextRequest) {
 // GET - List all patients
 export async function GET(request: NextRequest) {
   try {
-    const patients = await prisma.patient.findMany({
+    // O modelo Patient não existe mais, use MedicalPatient
+    const medicalPatients = await prisma.medicalPatient.findMany({
       select: {
         id: true,
-        name: true,
-        email: true,
+        fullName: true,
         cpf: true,
-        phone: true,
+        communicationContact: {
+          select: {
+            email: true,
+            whatsapp: true,
+          },
+        },
       },
     })
 
-    console.log(`${patients.length} pacientes encontrados`)
+    console.log(`${medicalPatients.length} pacientes médicos encontrados`)
+
+    const patients = medicalPatients.map(p => ({
+      id: p.id,
+      name: p.fullName,
+      cpf: p.cpf,
+      email: p.communicationContact?.email,
+      phone: p.communicationContact?.whatsapp,
+    }))
 
     return NextResponse.json({
       success: true,

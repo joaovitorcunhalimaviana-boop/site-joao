@@ -73,14 +73,23 @@ export class AuthMiddleware {
     
     // Se não há token no header, verificar cookie
     if (!token) {
+      console.log('🍪 [Auth] Token não encontrado no header, verificando cookies...')
       const cookieHeader = request.headers.get('cookie')
       if (cookieHeader) {
+        console.log('🔍 [Auth] Cookies encontrados:', cookieHeader)
         const cookies = cookieHeader.split(';').reduce((acc, cookie) => {
           const [key, value] = cookie.trim().split('=')
           acc[key] = value
           return acc
         }, {} as Record<string, string>)
         token = cookies['auth-token']
+        if (token) {
+          console.log('✅ [Auth] Token encontrado no cookie auth-token')
+        } else {
+          console.warn('⚠️ [Auth] Cookie auth-token não encontrado')
+        }
+      } else {
+        console.warn('⚠️ [Auth] Nenhum cookie encontrado')
       }
     }
 
@@ -97,14 +106,24 @@ export class AuthMiddleware {
 
     try {
       // Verificar token JWT
+      console.log('🔑 [Auth] Verificando token JWT...')
       const decoded = verify(token, process.env['JWT_SECRET']!) as {
         userId: string
         type: string
+        role: string
         iat: number
         exp: number
       }
 
+      console.log('✅ [Auth] Token decodificado:', {
+        userId: decoded.userId,
+        type: decoded.type,
+        role: decoded.role,
+        exp: new Date(decoded.exp * 1000).toISOString()
+      })
+
       if (decoded.type !== 'access') {
+        console.error('❌ [Auth] Tipo de token inválido:', decoded.type)
         throw new Error('Tipo de token inválido')
       }
 
@@ -132,6 +151,9 @@ export class AuthMiddleware {
         }
       }
 
+      // Normalizar role para maiúsculas (o banco armazena em maiúsculas)
+      const normalizedRole = user.role.toUpperCase() as 'ADMIN' | 'DOCTOR' | 'SECRETARY'
+
       // Verificar rate limiting
       const rateLimitResult = this.checkRateLimit(user.id, user.role)
       if (!rateLimitResult.allowed) {
@@ -149,8 +171,18 @@ export class AuthMiddleware {
       }
 
       // Verificar permissões
-      const hasPermission = this.checkPermissions(user.role, pathname)
+      console.log('🔒 [Auth] Verificando permissões:', {
+        role: normalizedRole,
+        pathname,
+        availablePermissions: ROLE_PERMISSIONS[normalizedRole as keyof typeof ROLE_PERMISSIONS] || []
+      })
+      const hasPermission = this.checkPermissions(normalizedRole, pathname)
       if (!hasPermission) {
+        console.warn('⚠️ [Auth] Permissão negada:', {
+          role: user.role,
+          pathname,
+          userId: user.id
+        })
         // Log de tentativa de acesso não autorizado
         await AuditService.log({
           userId: user.id,
@@ -191,7 +223,7 @@ export class AuthMiddleware {
           id: user.id,
           email: user.email,
           name: user.name,
-          role: user.role,
+          role: normalizedRole,
           isActive: user.isActive,
         },
       }

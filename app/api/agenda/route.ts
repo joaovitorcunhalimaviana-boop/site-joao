@@ -47,14 +47,18 @@ function mapUnifiedStatus(
   if (!unifiedStatus) return 'pending'
 
   switch (unifiedStatus) {
-    case 'agendada':
+    case 'SCHEDULED':
       return 'pending'
-    case 'confirmada':
+    case 'CONFIRMED':
       return 'accepted'
-    case 'cancelada':
+    case 'CANCELLED':
       return 'rejected'
-    case 'concluida':
+    case 'COMPLETED':
       return 'completed'
+    case 'IN_PROGRESS':
+      return 'accepted'
+    case 'NO_SHOW':
+      return 'rejected'
     default:
       return 'pending'
   }
@@ -64,23 +68,23 @@ function mapUnifiedStatus(
 function mapAgendaStatus(
   agendaStatus: string
 ):
-  | 'agendada'
-  | 'confirmada'
-  | 'em_andamento'
-  | 'concluida'
-  | 'cancelada'
-  | 'reagendada' {
+  | 'SCHEDULED'
+  | 'CONFIRMED'
+  | 'IN_PROGRESS'
+  | 'COMPLETED'
+  | 'CANCELLED'
+  | 'NO_SHOW' {
   switch (agendaStatus) {
     case 'pending':
-      return 'agendada'
+      return 'SCHEDULED'
     case 'accepted':
-      return 'confirmada'
+      return 'CONFIRMED'
     case 'rejected':
-      return 'cancelada'
+      return 'CANCELLED'
     case 'completed':
-      return 'concluida'
+      return 'COMPLETED'
     default:
-      return 'agendada'
+      return 'SCHEDULED'
   }
 }
 
@@ -215,7 +219,7 @@ export async function PUT(request: NextRequest) {
     }
 
     if (notes !== undefined) {
-      updateData.notes = notes
+      updateData.observations = notes
     }
 
     // Atualizar no sistema unificado
@@ -265,7 +269,7 @@ export async function DELETE(request: NextRequest) {
     }
 
     // Cancelar agendamento (mudando status para cancelada)
-    const cancelResult = await updateAppointment(id, { status: 'cancelada' })
+    const cancelResult = await updateAppointment(id, { status: 'CANCELLED' })
 
     if (!cancelResult.success) {
       return NextResponse.json(

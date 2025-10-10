@@ -14,20 +14,8 @@ export async function DELETE(
 
     console.log('🗑️ Tentando excluir paciente médico:', id)
 
-    // Verificar se o paciente existe
-    const patient = await getMedicalPatientById(id)
-    if (!patient) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'Paciente médico não encontrado',
-        },
-        { status: 404 }
-      )
-    }
-
-    // Tentar excluir o paciente
-    const result = deleteMedicalPatient(id)
+    // Tentar excluir o paciente (a função deleteMedicalPatient já verifica se existe)
+    const result = await deleteMedicalPatient(id)
 
     if (!result.success) {
       console.error('❌ Erro ao excluir paciente:', result.message)

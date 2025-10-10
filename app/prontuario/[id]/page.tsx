@@ -105,7 +105,9 @@ export default function ProntuarioPage() {
       console.log('🔍 Carregando dados do paciente:', patientId)
 
       // Buscar paciente médico através da API unificada
-      const response = await fetch(`/api/unified-system/medical-patients?id=${patientId}`)
+      const response = await fetch(`/api/unified-system/medical-patients?id=${patientId}`, {
+        credentials: 'include'
+      })
 
       if (!response.ok) {
         console.error('❌ Erro na resposta da API:', response.status, response.statusText)
@@ -153,7 +155,9 @@ export default function ProntuarioPage() {
   const loadMedicalRecords = async () => {
     try {
       console.log('🔍 Carregando registros médicos para paciente:', patientId)
-      const response = await fetch(`/api/medical-records?patientId=${patientId}`)
+      const response = await fetch(`/api/medical-records?patientId=${patientId}`, {
+        credentials: 'include'
+      })
       if (response.ok) {
         const data = await response.json()
         console.log('🔍 Dados recebidos da API medical-records:', data)

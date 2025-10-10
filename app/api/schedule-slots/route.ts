@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
       id: s.id,
       date: s.date,
       time: s.time,
-      isActive: s.isActive
+      isAvailable: s.isAvailable
     })))
 
     return NextResponse.json({
@@ -115,7 +115,7 @@ export async function PUT(request: NextRequest) {
     }
 
     try {
-      const updatedSlot = await updateSCHEDULESlot(id, { isActive })
+      const updatedSlot = await updateSCHEDULESlot(id, { isAvailable: isActive })
 
       return NextResponse.json({
         success: true,

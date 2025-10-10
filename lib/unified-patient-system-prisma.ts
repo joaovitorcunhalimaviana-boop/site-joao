@@ -418,6 +418,12 @@ export async function getCommunicationContactByPhone(phone: string): Promise<Com
 export async function getAllMedicalPatients(): Promise<MedicalPatient[]> {
   try {
     const patients = await prisma.medicalPatient.findMany({
+      where: {
+        isActive: true
+      },
+      include: {
+        communicationContact: true
+      },
       orderBy: { createdAt: 'desc' }
     })
     
@@ -432,12 +438,13 @@ export async function getAllMedicalPatients(): Promise<MedicalPatient[]> {
       maritalStatus: patient.maritalStatus || undefined,
       profession: patient.profession || undefined,
       emergencyContact: patient.emergencyContact as any,
-      insurance: patient.insurance as any,
+      insuranceType: patient.insuranceType,
+      insurancePlan: patient.insurancePlan,
       medicalInfo: patient.medicalInfo as any,
       consents: patient.consents as any,
       createdAt: patient.createdAt.toISOString(),
       updatedAt: patient.updatedAt.toISOString(),
-      recordNumber: patient.recordNumber
+      medicalRecordNumber: patient.medicalRecordNumber
     }))
   } catch (error) {
     console.error('❌ Erro ao buscar pacientes médicos:', error)
@@ -489,11 +496,59 @@ export async function updateMedicalPatient(id: string, updates: Partial<MedicalP
 }
 
 export async function deleteMedicalPatient(id: string): Promise<{ success: boolean; message: string }> {
-  // TODO: Implement medical patient deletion with Prisma
-  console.log('⚠️ deleteMedicalPatient não implementado ainda')
-  return {
-    success: false,
-    message: 'Função não implementada'
+  try {
+    const existingPatient = await prisma.medicalPatient.findUnique({
+      where: { id },
+      include: {
+        appointments: true,
+        medicalRecords: true
+      }
+    })
+
+    if (!existingPatient) {
+      return {
+        success: false,
+        message: 'Paciente médico não encontrado'
+      }
+    }
+
+    // Verificar se há agendamentos associados
+    if (existingPatient.appointments && existingPatient.appointments.length > 0) {
+      console.log(`⚠️ Paciente ${id} possui ${existingPatient.appointments.length} agendamentos associados`)
+      // Opcional: deletar agendamentos em cascata ou retornar erro
+      // Por enquanto, vamos deletar os agendamentos primeiro
+      await prisma.appointment.deleteMany({
+        where: { medicalPatientId: id }
+      })
+    }
+
+    // Verificar se há prontuários médicos associados
+    if (existingPatient.medicalRecords && existingPatient.medicalRecords.length > 0) {
+      console.log(`⚠️ Paciente ${id} possui ${existingPatient.medicalRecords.length} prontuários associados`)
+      // Deletar prontuários em cascata
+      await prisma.medicalRecord.deleteMany({
+        where: { medicalPatientId: id }
+      })
+    }
+
+    // Marcar o paciente médico como inativo (soft delete)
+    await prisma.medicalPatient.update({
+      where: { id },
+      data: { isActive: false }
+    })
+
+    console.log(`🗑️ Paciente médico ${id} foi marcado como inativo`)
+    
+    return {
+      success: true,
+      message: 'Paciente médico excluído com sucesso'
+    }
+  } catch (error) {
+    console.error('❌ Erro ao deletar paciente médico:', error)
+    return {
+      success: false,
+      message: 'Erro ao excluir paciente médico'
+    }
   }
 }
 
@@ -1324,6 +1379,38 @@ export async function updateAppointment(id: string, updates: any): Promise<{ suc
     return {
       success: false,
       message: 'Erro ao atualizar agendamento'
+    }
+  }
+}
+
+export async function deleteAppointment(appointmentId: string): Promise<{ success: boolean; message: string }> {
+  try {
+    const existingAppointment = await prisma.appointment.findUnique({
+      where: { id: appointmentId }
+    })
+
+    if (!existingAppointment) {
+      return {
+        success: false,
+        message: 'Agendamento não encontrado'
+      }
+    }
+
+    await prisma.appointment.delete({
+      where: { id: appointmentId }
+    })
+
+    console.log(`🗑️ Agendamento ${appointmentId} foi excluído com sucesso`)
+    
+    return {
+      success: true,
+      message: 'Agendamento excluído com sucesso'
+    }
+  } catch (error) {
+    console.error('❌ Erro ao deletar agendamento:', error)
+    return {
+      success: false,
+      message: 'Erro ao excluir agendamento'
     }
   }
 }

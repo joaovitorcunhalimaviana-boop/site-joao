@@ -123,25 +123,32 @@ export default function AreaMedicaPage() {
   }, [])
 
   const checkAuth = async () => {
-    // Sistema simplificado - verificar apenas se há dados do usuário
-    const userData = localStorage.getItem('currentUser')
+    try {
+      const response = await fetch('/api/auth/check', {
+        credentials: 'include'
+      })
+      
+      if (!response.ok) {
+        router.push('/login-medico')
+        return
+      }
 
-    if (userData) {
-      const user = JSON.parse(userData)
+      const data = await response.json()
+      
+      if (!data.authenticated || !data.user.areas.includes('medica')) {
+        router.push('/unauthorized')
+        return
+      }
+
       setDoctor({
-        name: user.name || 'João Vítor Viana',
-        email: user.email || 'joao.viana@clinica.com',
-        specialty: 'Coloproctologista e Cirurgião Geral',
-        crm: 'CRMPB 12831',
+        name: data.user.name,
+        email: data.user.email,
+        specialty: data.user.specialty || 'Coloproctologista e Cirurgião Geral',
+        crm: data.user.crm || 'CRMPB 12831'
       })
-    } else {
-      // Definir dados padrão se não houver usuário logado
-      setDoctor({
-        name: 'João Vítor Viana',
-        email: 'joao.viana@clinica.com',
-        specialty: 'Coloproctologista e Cirurgião Geral',
-        crm: 'CRMPB 12831',
-      })
+    } catch (error) {
+      console.error('Erro ao verificar autenticação:', error)
+      router.push('/login-medico')
     }
   }
 
@@ -155,16 +162,27 @@ export default function AreaMedicaPage() {
       const formattedDate = format(selectedDate, 'yyyy-MM-dd')
       console.log('🔍 [DEBUG] Data formatada:', formattedDate)
 
+      // Adicionar timestamp para evitar cache
+      const timestamp = Date.now()
+      
       // Carregar agenda do dia
       const agendaResponse = await fetch(
-        `/api/unified-appointments?action=daily-agenda&date=${formattedDate}`
+        `/api/unified-appointments?action=daily-agenda&date=${formattedDate}&_t=${timestamp}`,
+        { 
+          credentials: 'include',
+          cache: 'no-cache'
+        }
       )
       const agendaData = await agendaResponse.json()
       console.log('🔍 [DEBUG] Resposta da agenda:', agendaData)
 
       // Carregar APENAS pacientes médicos reais (com prontuário)
       const patientsResponse = await fetch(
-        '/api/unified-system/medical-patients'
+        `/api/unified-system/medical-patients?_t=${timestamp}`,
+        { 
+          credentials: 'include',
+          cache: 'no-cache'
+        }
       )
       const patientsData = await patientsResponse.json()
       console.log('🔍 [DEBUG] Resposta dos pacientes médicos:', patientsData)
@@ -172,7 +190,11 @@ export default function AreaMedicaPage() {
 
       // Carregar estatísticas baseadas APENAS em pacientes médicos
       const statsResponse = await fetch(
-        '/api/unified-system/medical-patients'
+        `/api/unified-system/medical-patients?_t=${timestamp}`,
+        { 
+          credentials: 'include',
+          cache: 'no-cache'
+        }
       )
       const statsResponseData = await statsResponse.json()
       console.log('🔍 [DEBUG] Resposta das estatísticas:', statsResponseData)
@@ -290,7 +312,10 @@ export default function AreaMedicaPage() {
 
   const handleLogout = useCallback(async () => {
     try {
-      await fetch('/api/auth/logout', { method: 'POST' })
+      await fetch('/api/auth/logout', { 
+        method: 'POST',
+        credentials: 'include'
+      })
       router.push('/login-medico')
     } catch (error) {
       console.error('Erro no logout:', error)
@@ -378,6 +403,7 @@ export default function AreaMedicaPage() {
           headers: {
             'Content-Type': 'application/json',
           },
+          credentials: 'include'
         }
       )
 
@@ -411,6 +437,7 @@ export default function AreaMedicaPage() {
           headers: {
             'Content-Type': 'application/json',
           },
+          credentials: 'include',
           body: JSON.stringify({
             action: 'delete-appointment',
             appointmentId: todayAppointment.id,
@@ -479,13 +506,15 @@ export default function AreaMedicaPage() {
     if (!doubleConfirm) return
 
     try {
-      console.log('ðŸ—‘ï¸ Excluindo paciente:', patientId)
+      console.log('🗑️ Excluindo paciente:', patientId)
+      console.log('🔍 URL da requisição:', `/api/unified-system/medical-patients/${patientId}`)
 
       const deleteResponse = await fetch(`/api/unified-system/medical-patients/${patientId}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include'
       })
 
       console.log('ðŸ“¡ Delete response status:', deleteResponse.status)
@@ -499,17 +528,30 @@ export default function AreaMedicaPage() {
           errorData = { error: 'Erro desconhecido na resposta do servidor' }
         }
         
-        console.error('âŒ Erro ao excluir paciente:', JSON.stringify(errorData, null, 2))
+        console.error('❌ Erro ao excluir paciente:', JSON.stringify(errorData, null, 2))
         
-        // Tratar erro especÃ­fico de paciente com agendamentos
-        if (errorData.error && errorData.error.includes('agendamentos associados')) {
-          alert('âŒ NÃ£o Ã© possÃ­vel excluir este paciente pois ele possui agendamentos associados. Cancele ou conclua os agendamentos primeiro.')
+        // Se o paciente não foi encontrado, pode ter sido excluído anteriormente
+        if (deleteResponse.status === 400 && errorData.error && (errorData.error.includes('não encontrado') || errorData.error.includes('Paciente médico não encontrado'))) {
+          console.warn('⚠️ Paciente já foi excluído anteriormente, recarregando dados...')
+          console.log('🔄 Forçando recarregamento completo dos dados...')
+          await loadDashboardData()
+          // Aguardar um pouco para garantir que os dados foram atualizados
+          setTimeout(() => {
+            window.location.reload()
+          }, 1000)
+          alert('paciente já excluído, a lista foi atualizada')
           return
         }
         
-        // Tratar erro especÃ­fico de paciente com prontuÃ¡rios mÃ©dicos
-        if (errorData.error && errorData.error.includes('prontuÃ¡rios mÃ©dicos associados')) {
-          alert('âŒ NÃ£o Ã© possÃ­vel excluir este paciente pois ele possui prontuÃ¡rios mÃ©dicos associados. Remova os prontuÃ¡rios primeiro.')
+        // Tratar erro específico de paciente com agendamentos
+        if (errorData.error && errorData.error.includes('agendamentos associados')) {
+          alert('❌ Não é possível excluir este paciente pois ele possui agendamentos associados. Cancele ou conclua os agendamentos primeiro.')
+          return
+        }
+        
+        // Tratar erro específico de paciente com prontuários médicos
+        if (errorData.error && errorData.error.includes('prontuários médicos associados')) {
+          alert('❌ Não é possível excluir este paciente pois ele possui prontuários médicos associados. Remova os prontuários primeiro.')
           return
         }
         
@@ -522,13 +564,18 @@ export default function AreaMedicaPage() {
       console.log('âœ… Resultado da exclusÃ£o:', deleteResult)
 
       if (deleteResult.success) {
-        loadDashboardData() // Recarregar dados
-        alert('Paciente excluÃ­do com sucesso!')
+        // Forçar recarregamento dos dados sem cache
+        await loadDashboardData()
+        // Aguardar um pouco para garantir que os dados foram atualizados
+        setTimeout(() => {
+          window.location.reload()
+        }, 500)
+        alert('Paciente excluído com sucesso!')
       } else {
         throw new Error(deleteResult.error || 'Erro desconhecido ao excluir')
       }
     } catch (error) {
-      console.error('âŒ Erro completo ao excluir paciente:', error)
+      console.error('❌ Erro completo ao excluir paciente:', error)
 
       // Mostrar erro mais detalhado para o usuÃ¡rio
       if (error instanceof Error) {

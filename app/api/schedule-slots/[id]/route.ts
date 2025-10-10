@@ -29,7 +29,7 @@ export async function PATCH(
       }
 
       // Alternar o status
-      const result = updateSCHEDULESlot(id, { isActive: !currentSlot.isActive })
+      const result = await updateSCHEDULESlot(id, { isAvailable: !currentSlot.isAvailable })
 
       if (result.success) {
         return NextResponse.json({
@@ -45,7 +45,7 @@ export async function PATCH(
       }
     } else if (typeof isActive === 'boolean') {
       // Atualizar com valor específico
-      const result = updateSCHEDULESlot(id, { isActive })
+      const result = await updateSCHEDULESlot(id, { isAvailable: isActive })
 
       if (result.success) {
         return NextResponse.json({
@@ -89,7 +89,7 @@ export async function DELETE(
       )
     }
 
-    const result = deleteSCHEDULESlot(id)
+    const result = await deleteSCHEDULESlot(id)
 
     if (result.success) {
       return NextResponse.json({

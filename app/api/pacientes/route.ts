@@ -139,8 +139,8 @@ export async function PUT(request: Request) {
       )
     }
 
-    // Verificar se paciente existe
-    const pacienteExistente = await prisma.patient.findFirst({
+    // Verificar se paciente médico existe
+    const pacienteExistente = await prisma.medicalPatient.findFirst({
       where: { id },
     })
 
@@ -156,7 +156,7 @@ export async function PUT(request: Request) {
       dadosAtualizacao.cpf &&
       dadosAtualizacao.cpf !== pacienteExistente.cpf
     ) {
-      const cpfExistente = await prisma.patient.findFirst({
+      const cpfExistente = await prisma.medicalPatient.findFirst({
         where: {
           cpf: dadosAtualizacao.cpf,
           NOT: { id },
@@ -171,13 +171,10 @@ export async function PUT(request: Request) {
       }
     }
 
-    const pacienteAtualizado = await prisma.patient.update({
+    const pacienteAtualizado = await prisma.medicalPatient.update({
       where: { id },
       data: {
         ...dadosAtualizacao,
-        ...(dadosAtualizacao.dataNascimento && {
-          birthDate: new Date(dadosAtualizacao.dataNascimento),
-        }),
         updatedAt: new Date(),
       },
     })
@@ -212,8 +209,8 @@ export async function DELETE(request: Request) {
       )
     }
 
-    // Verificar se paciente existe
-    const pacienteExistente = await prisma.patient.findFirst({
+    // Verificar se paciente médico existe
+    const pacienteExistente = await prisma.medicalPatient.findFirst({
       where: {
         id,
       },
@@ -227,11 +224,11 @@ export async function DELETE(request: Request) {
     }
 
     // Soft delete - marcar como inativo
-    await prisma.patient.update({
+    await prisma.medicalPatient.update({
       where: { id },
       data: {
+        isActive: false,
         updatedAt: new Date(),
-        // Note: O modelo Patient não tem campo deletedAt, então apenas atualizamos
       },
     })
 

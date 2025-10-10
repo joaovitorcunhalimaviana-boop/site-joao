@@ -278,7 +278,7 @@ export class DataProtectionScheduler {
       
       // Executar backup via API apenas no lado do servidor
       if (typeof window === 'undefined') {
-        const baseUrl = process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : (process.env['NEXT_PUBLIC_BASE_URL'] || 'https://www.joaovitorviana.com.br')
+        const baseUrl = process.env['NEXTAUTH_URL'] || process.env['NEXT_PUBLIC_APP_URL'] || 'http://localhost:3003'
         const response = await fetch(`${baseUrl}/api/backup-emergency`, { method: 'POST' })
         
         if (response.ok) {
@@ -327,7 +327,8 @@ export class DataProtectionScheduler {
       
       // Executar backup completo via API apenas no servidor
       if (typeof window === 'undefined') {
-        const response = await fetch(`${process.env['NEXT_PUBLIC_BASE_URL'] || 'https://www.joaovitorviana.com.br'}/api/backup-emergency`, { method: 'POST' })
+        const baseUrl = process.env['NEXTAUTH_URL'] || process.env['NEXT_PUBLIC_APP_URL'] || 'http://localhost:3003'
+        const response = await fetch(`${baseUrl}/api/backup-emergency`, { method: 'POST' })
         
         if (response.ok) {
           task.status = 'completed'
@@ -370,7 +371,8 @@ export class DataProtectionScheduler {
       
       // Executar verificação via API apenas no servidor
       if (typeof window === 'undefined') {
-        const response = await fetch(`${process.env['NEXT_PUBLIC_BASE_URL'] || 'https://www.joaovitorviana.com.br'}/api/data-integrity?action=check`)
+        const baseUrl = process.env['NEXTAUTH_URL'] || process.env['NEXT_PUBLIC_APP_URL'] || 'http://localhost:3003'
+        const response = await fetch(`${baseUrl}/api/data-integrity?action=check`)
         
         if (response.ok) {
           const result = await response.json()
@@ -426,7 +428,8 @@ export class DataProtectionScheduler {
       task.lastRun = new Date()
       
       // Executar backup em nuvem via API
-      const response = await fetch('/api/cloud-backup', {
+      const baseUrl = process.env['NEXTAUTH_URL'] || process.env['NEXT_PUBLIC_APP_URL'] || 'http://localhost:3003'
+      const response = await fetch(`${baseUrl}/api/cloud-backup`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'backup' })
@@ -470,7 +473,8 @@ export class DataProtectionScheduler {
       task.lastRun = new Date()
       
       // Executar monitoramento via API
-      const response = await fetch(`${process.env['NEXT_PUBLIC_BASE_URL'] || 'https://www.joaovitorviana.com.br'}/api/emergency-dashboard?action=status`)
+      const baseUrl = process.env['NEXTAUTH_URL'] || process.env['NEXT_PUBLIC_APP_URL'] || 'http://localhost:3003'
+      const response = await fetch(`${baseUrl}/api/emergency-dashboard?action=status`)
       
       if (response.ok) {
         const result = await response.json()

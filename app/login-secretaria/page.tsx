@@ -58,17 +58,30 @@ export default function LoginSecretaria() {
       })
 
       const data = await response.json()
+      console.log('📥 [Cliente] Resposta da API:', data)
 
       if (response.ok && data.success) {
+        console.log('🔍 [Cliente] Verificando role do usuário:', {
+          role: data.user?.role,
+          roleLowerCase: data.user?.role?.toLowerCase(),
+          isSecretary: data.user?.role?.toLowerCase() === 'secretary',
+          isAdmin: data.user?.role?.toLowerCase() === 'admin'
+        })
+
         // Verificar se o usuário pode acessar a área da secretaria
-        if (data.user.areas.includes('secretaria')) {
-          // Salvar dados do usuário
-          localStorage.setItem('currentUser', JSON.stringify(data.user))
-          router.push('/area-secretaria')
+        if (data.user && data.user.role && (data.user.role.toLowerCase() === 'secretary' || data.user.role.toLowerCase() === 'admin')) {
+          console.log('✅ [Cliente] Acesso à área da secretaria permitido')
+          console.log('🚀 [Cliente] Redirecionando para /area-secretaria...')
+
+          // Usar window.location para garantir o redirecionamento
+          window.location.href = '/area-secretaria'
         } else {
+          console.warn('⚠️ [Cliente] Sem permissão para área da secretaria')
+          console.warn('Role recebida:', data.user?.role)
           setError('Você não tem permissão para acessar a área da secretaria')
         }
       } else {
+        console.error('❌ [Cliente] Erro na resposta:', data)
         setError(data.error || 'Erro no login')
       }
     } catch (error) {

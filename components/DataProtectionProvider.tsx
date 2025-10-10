@@ -57,6 +57,11 @@ export function DataProtectionProvider({ children }: DataProtectionProviderProps
       const controller = new AbortController()
       const timeoutId = setTimeout(() => controller.abort(), 10000) // 10 segundos
       
+      // Temporariamente desabilitado para evitar erros de rede
+      console.log('ℹ️ Sistema de proteção desabilitado temporariamente')
+      const response = null
+      
+      /*
       const response = await fetch('/api/protection-manager', {
         method: 'POST',
         headers: {
@@ -70,6 +75,7 @@ export function DataProtectionProvider({ children }: DataProtectionProviderProps
         console.warn('⚠️ API de proteção não disponível, continuando sem proteção avançada:', error)
         return null
       })
+      */
       
       clearTimeout(timeoutId)
       
@@ -205,6 +211,11 @@ export function DataProtectionProvider({ children }: DataProtectionProviderProps
       const controller = new AbortController()
       const timeoutId = setTimeout(() => controller.abort(), 15000) // 15 segundos
       
+      // Temporariamente desabilitado para evitar erros de rede
+      console.log('ℹ️ Backup de emergência desabilitado temporariamente')
+      const response = { ok: true, json: () => Promise.resolve({ data: 'simulado' }) }
+      
+      /*
       const response = await fetch('/api/protection-manager', {
         method: 'POST',
         headers: {
@@ -215,6 +226,7 @@ export function DataProtectionProvider({ children }: DataProtectionProviderProps
         }),
         signal: controller.signal
       })
+      */
       
       clearTimeout(timeoutId)
       

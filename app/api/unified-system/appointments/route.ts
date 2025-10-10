@@ -117,7 +117,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const result = createAppointment({
+    const result = await createAppointment({
       communicationContactId,
       medicalPatientId,
       appointmentDate,

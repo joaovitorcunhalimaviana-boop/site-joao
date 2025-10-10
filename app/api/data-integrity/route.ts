@@ -104,7 +104,7 @@ class DataIntegritySystem {
         reviewsCount,
         usersCount,
       ] = await Promise.all([
-        prisma.patient.count(),
+        prisma.medicalPatient.count(),
         prisma.appointment.count(),
         prisma.medicalRecord.count(),
         prisma.consultation.count(),

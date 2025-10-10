@@ -233,34 +233,32 @@ class EmergencyDashboard {
     try {
       // Contar registros
       const [patients, appointments, medicalRecords] = await Promise.all([
-        prisma.patient.count(),
+        prisma.medicalPatient.count(),
         prisma.appointment.count(),
         prisma.medicalRecord.count(),
       ])
 
       const recordCount = patients + appointments + medicalRecords
 
-      // Verificar registros órfãos (corrigido para usar patientId)
+      // Verificar registros órfãos (corrigido para usar medicalPatientId)
       const orphanedAppointments = await prisma.appointment.count({
         where: {
-          patientId: {
-            not: {
-              in: await prisma.patient
-                .findMany({ select: { id: true } })
-                .then(p => p.map(patient => patient.id)),
-            },
+          medicalPatientId: {
+            not: null,
+            notIn: await prisma.medicalPatient
+              .findMany({ select: { id: true } })
+              .then(p => p.map(patient => patient.id)),
           },
         },
       })
 
       const orphanedRecords = await prisma.medicalRecord.count({
         where: {
-          patientId: {
-            not: {
-              in: await prisma.patient
-                .findMany({ select: { id: true } })
-                .then(p => p.map(patient => patient.id)),
-            },
+          medicalPatientId: {
+            not: null,
+            notIn: await prisma.medicalPatient
+              .findMany({ select: { id: true } })
+              .then(p => p.map(patient => patient.id)),
           },
         },
       })

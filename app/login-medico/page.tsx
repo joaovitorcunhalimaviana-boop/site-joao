@@ -82,27 +82,23 @@ export default function LoginMedicoPage() {
 
       if (response.ok && data.success) {
         console.log('🎉 [Cliente] Login bem-sucedido!')
+        console.log('🔍 [Cliente] Verificando role do usuário:', {
+          role: data.user?.role,
+          roleLowerCase: data.user?.role?.toLowerCase(),
+          isDoctor: data.user?.role?.toLowerCase() === 'doctor',
+          isAdmin: data.user?.role?.toLowerCase() === 'admin'
+        })
 
         // Verificar se o usuário pode acessar a área médica
-        if (data.user && data.user.areas && data.user.areas.includes('medica')) {
+        if (data.user && data.user.role && (data.user.role.toLowerCase() === 'doctor' || data.user.role.toLowerCase() === 'admin')) {
           console.log('✅ [Cliente] Acesso à área médica permitido')
+          console.log('🚀 [Cliente] Redirecionando para /area-medica...')
 
-          // Salvar dados do usuário no formato esperado pelos componentes
-          localStorage.setItem('currentUser', JSON.stringify(data.user))
-
-          // Salvar dados do médico no formato esperado pela área médica
-          const doctorData = {
-            name: data.user.name,
-            email: data.user.email || 'joao.viana@clinica.com',
-            specialty: 'Coloproctologista e Cirurgião Geral',
-            crm: 'CRMPB 12831'
-          }
-          localStorage.setItem('doctor', JSON.stringify(doctorData))
-
-          console.log('🚀 [Cliente] Redirecionando para /area-medica')
-          router.push('/area-medica')
+          // Usar window.location para garantir o redirecionamento
+          window.location.href = '/area-medica'
         } else {
           console.warn('⚠️ [Cliente] Sem permissão para área médica')
+          console.warn('Role recebida:', data.user?.role)
           setError('Você não tem permissão para acessar a área médica')
         }
       } else {

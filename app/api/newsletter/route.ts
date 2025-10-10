@@ -78,6 +78,7 @@ interface Subscriber {
   subscribed: boolean
   subscribedAt: string
   preferences: {
+    newsletter: boolean
     healthTips: boolean
     appointments: boolean
     promotions: boolean
@@ -99,8 +100,7 @@ function convertContactsToSubscribers(
   return contacts
     .filter(
       contact =>
-        contact.emailPreferences.newsletter ||
-        contact.emailPreferences.subscribed
+        contact.email && (contact.emailNewsletter || contact.emailSubscribed)
     )
     .map(contact => ({
       id: contact.id,
@@ -108,12 +108,13 @@ function convertContactsToSubscribers(
       name: contact.name,
       whatsapp: contact.whatsapp,
       birthDate: contact.birthDate,
-      subscribed: contact.emailPreferences.subscribed,
-      subscribedAt: contact.emailPreferences.subscribedAt || contact.createdAt,
+      subscribed: contact.emailSubscribed,
+      subscribedAt: contact.createdAt,
       preferences: {
-        healthTips: contact.emailPreferences.healthTips,
-        appointments: contact.emailPreferences.appointments,
-        promotions: contact.emailPreferences.promotions,
+        newsletter: contact.emailNewsletter,
+        healthTips: contact.emailHealthTips,
+        appointments: contact.emailAppointments,
+        promotions: contact.emailPromotions,
       },
     }))
 }
@@ -372,7 +373,7 @@ export async function POST(request: NextRequest) {
         c => c.email?.toLowerCase() === email.toLowerCase()
       )
 
-      if (existingContact && existingContact.emailPreferences.subscribed) {
+      if (existingContact && existingContact.emailSubscribed) {
         return NextResponse.json(
           {
             success: false,
@@ -384,7 +385,7 @@ export async function POST(request: NextRequest) {
       }
 
       // Criar ou atualizar contato no sistema unificado
-      const contactResult = createOrUpdateCommunicationContact({
+      const contactResult = await createOrUpdateCommunicationContact({
         name,
         email,
         whatsapp: whatsapp || undefined,
@@ -499,7 +500,13 @@ export async function PUT(request: NextRequest) {
       )
     }
 
-    let updatedPreferences = { ...contact.emailPreferences }
+    let updatedPreferences = {
+      subscribed: contact.emailSubscribed,
+      newsletter: contact.emailNewsletter,
+      healthTips: contact.emailHealthTips,
+      appointments: contact.emailAppointments,
+      promotions: contact.emailPromotions,
+    }
 
     if (action === 'unsubscribe') {
       // Desinscrever da newsletter
@@ -518,26 +525,33 @@ export async function PUT(request: NextRequest) {
       }
     }
 
-    // Atualizar contato usando o sistema Prisma
-    const updatedContact = await createOrUpdateCommunicationContact({
-      id: contact.id,
-      name: contact.name,
-      email: contact.email!,
-      phone: contact.phone,
-      whatsapp: contact.whatsapp,
-      birthDate: contact.birthDate,
-      emailPreferences: updatedPreferences,
-      registrationSources: contact.registrationSources
+    // Atualizar contato usando o sistema Prisma diretamente
+    const updatedContactPrisma = await prisma.communicationContact.update({
+      where: { id: contact.id },
+      data: {
+        emailSubscribed: updatedPreferences.subscribed,
+        emailNewsletter: updatedPreferences.newsletter,
+        emailHealthTips: updatedPreferences.healthTips ?? contact.emailHealthTips,
+        emailAppointments: updatedPreferences.appointments ?? contact.emailAppointments,
+        emailPromotions: updatedPreferences.promotions,
+        emailUnsubscribedAt: !updatedPreferences.subscribed ? new Date() : undefined
+      }
     })
 
     return NextResponse.json({
       success: true,
       message: 'Preferências atualizadas com sucesso',
       contact: {
-        id: updatedContact.id,
-        email: updatedContact.email,
-        name: updatedContact.name,
-        emailPreferences: updatedContact.emailPreferences,
+        id: updatedContactPrisma.id,
+        email: updatedContactPrisma.email,
+        name: updatedContactPrisma.name,
+        emailPreferences: {
+          subscribed: updatedContactPrisma.emailSubscribed,
+          newsletter: updatedContactPrisma.emailNewsletter,
+          healthTips: updatedContactPrisma.emailHealthTips,
+          appointments: updatedContactPrisma.emailAppointments,
+          promotions: updatedContactPrisma.emailPromotions
+        },
       },
     })
   } catch (error) {
@@ -576,34 +590,32 @@ export async function DELETE(request: NextRequest) {
     }
 
     // Remover completamente as preferências de email (unsubscribe total)
-    const updatedPreferences = {
-      subscribed: false,
-      newsletter: false,
-      healthTips: false,
-      appointments: false,
-      promotions: false,
-    }
-
-    // Atualizar contato usando o sistema Prisma
-    const updatedContact = await createOrUpdateCommunicationContact({
-      id: contact.id,
-      name: contact.name,
-      email: contact.email!,
-      phone: contact.phone,
-      whatsapp: contact.whatsapp,
-      birthDate: contact.birthDate,
-      emailPreferences: updatedPreferences,
-      registrationSources: contact.registrationSources
+    const updatedContactPrisma = await prisma.communicationContact.update({
+      where: { id: contact.id },
+      data: {
+        emailSubscribed: false,
+        emailNewsletter: false,
+        emailHealthTips: false,
+        emailAppointments: false,
+        emailPromotions: false,
+        emailUnsubscribedAt: new Date()
+      }
     })
 
     return NextResponse.json({
       success: true,
       message: 'Subscriber removido com sucesso',
       contact: {
-        id: updatedContact.id,
-        email: updatedContact.email,
-        name: updatedContact.name,
-        emailPreferences: updatedContact.emailPreferences,
+        id: updatedContactPrisma.id,
+        email: updatedContactPrisma.email,
+        name: updatedContactPrisma.name,
+        emailPreferences: {
+          subscribed: updatedContactPrisma.emailSubscribed,
+          newsletter: updatedContactPrisma.emailNewsletter,
+          healthTips: updatedContactPrisma.emailHealthTips,
+          appointments: updatedContactPrisma.emailAppointments,
+          promotions: updatedContactPrisma.emailPromotions
+        },
       },
     })
   } catch (error) {
