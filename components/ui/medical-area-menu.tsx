@@ -35,10 +35,31 @@ export default function MedicalAreaMenu({ currentPage }: MedicalAreaMenuProps) {
   const router = useRouter()
 
   useEffect(() => {
-    const checkAuth = () => {
-      const doctorData = localStorage.getItem('doctor')
+    const checkAuth = async () => {
+      let doctorData = localStorage.getItem('doctor')
       if (doctorData) {
         setDoctor(JSON.parse(doctorData))
+        return
+      }
+      
+      // Se não há dados no localStorage, tentar obter do servidor
+      try {
+        const response = await fetch('/api/auth/check')
+        if (response.ok) {
+          const data = await response.json()
+          if (data.authenticated && data.user) {
+            const doctorInfo = {
+              name: data.user.name,
+              email: data.user.email,
+              specialty: 'Coloproctologia',
+              crm: 'CRM/DF 12345'
+            }
+            localStorage.setItem('doctor', JSON.stringify(doctorInfo))
+            setDoctor(doctorInfo)
+          }
+        }
+      } catch (error) {
+        console.error('Erro ao verificar autenticação:', error)
       }
     }
     checkAuth()

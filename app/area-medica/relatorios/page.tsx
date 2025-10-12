@@ -65,23 +65,50 @@ export default function RelatoriosPage() {
 
   // Verificar autenticação
   useEffect(() => {
-    const checkAuth = () => {
-      // Sistema simplificado - verificar apenas se há dados do usuário
-      const userData = localStorage.getItem('currentUser')
-      
-      if (userData) {
-        const user = JSON.parse(userData)
-        console.log('Usuário logado:', user.username)
-        setIsAuthenticated(true)
-      } else {
-        // Para desenvolvimento, permitir acesso sem autenticação
-        console.log('Acesso permitido para desenvolvimento')
-        setIsAuthenticated(true)
-      }
-      setIsLoading(false)
+    const initializeAuth = async () => {
+      await checkAuth()
     }
-    checkAuth()
-  }, [router])
+    initializeAuth()
+  }, [])
+  
+  const checkAuth = async () => {
+    // Sistema simplificado - verificar apenas se há dados do usuário
+    let userData = localStorage.getItem('currentUser')
+    
+    if (userData) {
+      const user = JSON.parse(userData)
+      console.log('Usuário logado:', user.username)
+      setIsAuthenticated(true)
+      setIsLoading(false)
+      return
+    }
+    
+    // Se não há dados no localStorage, tentar obter do servidor
+    try {
+      const response = await fetch('/api/auth/check')
+      if (response.ok) {
+        const data = await response.json()
+        if (data.authenticated && data.user) {
+          const userInfo = {
+            username: data.user.name || data.user.email,
+            email: data.user.email
+          }
+          localStorage.setItem('currentUser', JSON.stringify(userInfo))
+          console.log('Usuário autenticado:', userInfo.username)
+          setIsAuthenticated(true)
+          setIsLoading(false)
+          return
+        }
+      }
+    } catch (error) {
+      console.error('Erro ao verificar autenticação:', error)
+    }
+    
+    // Para desenvolvimento, permitir acesso sem autenticação
+    console.log('Acesso permitido para desenvolvimento')
+    setIsAuthenticated(true)
+    setIsLoading(false)
+  }
 
   useEffect(() => {
     if (isAuthenticated) {

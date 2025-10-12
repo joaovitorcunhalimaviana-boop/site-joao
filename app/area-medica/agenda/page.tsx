@@ -134,19 +134,46 @@ function AgendaManagementPageContent() {
   }
 
   useEffect(() => {
-    if (checkAuth()) {
-      loadScheduleSlots()
+    const initializeAuth = async () => {
+      const isAuthenticated = await checkAuth()
+      if (isAuthenticated) {
+        loadScheduleSlots()
+      }
     }
+    initializeAuth()
   }, [])
 
-  const checkAuth = () => {
-    const doctorData = localStorage.getItem('doctor')
-    if (!doctorData) {
-      router.push('/login-medico')
-      return false
+  const checkAuth = async () => {
+    let doctorData = localStorage.getItem('doctor')
+    if (doctorData) {
+      setDoctor(JSON.parse(doctorData))
+      return true
     }
-    setDoctor(JSON.parse(doctorData))
-    return true
+    
+    // Se não há dados no localStorage, tentar obter do servidor
+    try {
+      const response = await fetch('/api/auth/check')
+      if (response.ok) {
+        const data = await response.json()
+        if (data.authenticated && data.user) {
+          const doctorInfo = {
+            name: data.user.name,
+            email: data.user.email,
+            specialty: 'Coloproctologia',
+            crm: 'CRM/DF 12345'
+          }
+          localStorage.setItem('doctor', JSON.stringify(doctorInfo))
+          setDoctor(doctorInfo)
+          return true
+        }
+      }
+    } catch (error) {
+      console.error('Erro ao verificar autenticação:', error)
+    }
+    
+    // Se chegou até aqui, não está autenticado
+    router.push('/login-medico')
+    return false
   }
 
   const loadScheduleSlots = async () => {

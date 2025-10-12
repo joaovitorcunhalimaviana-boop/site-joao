@@ -84,11 +84,14 @@ export default function AreaMedicaPage() {
 
   const router = useRouter()
 
-  // Verificar autenticaÃ§Ã£o e carregar dados iniciais
+  // Verificar autenticação e carregar dados iniciais
   useEffect(() => {
-    checkAuth()
-    loadDashboardData()
-    setRetryCount(0) // Reset retry count on initial load
+    const initializeAuth = async () => {
+      await checkAuth()
+      loadDashboardData()
+      setRetryCount(0) // Reset retry count on initial load
+    }
+    initializeAuth()
   }, [])
 
   // Recarregar dados quando a data selecionada mudar

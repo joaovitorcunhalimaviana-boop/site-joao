@@ -92,6 +92,17 @@ export default function LoginMedicoPage() {
         // Verificar se o usuário pode acessar a área médica
         if (data.user && data.user.role && (data.user.role.toLowerCase() === 'doctor' || data.user.role.toLowerCase() === 'admin')) {
           console.log('✅ [Cliente] Acesso à área médica permitido')
+          
+          // Salvar dados do médico no localStorage para as páginas da área médica
+          const doctorData = {
+            name: data.user.name,
+            email: data.user.email,
+            specialty: 'Coloproctologia', // Especialidade padrão
+            crm: 'CRM/DF 12345' // CRM padrão - pode ser configurado
+          }
+          localStorage.setItem('doctor', JSON.stringify(doctorData))
+          console.log('💾 [Cliente] Dados do médico salvos no localStorage')
+          
           console.log('🚀 [Cliente] Redirecionando para /area-medica...')
 
           // Usar window.location para garantir o redirecionamento
