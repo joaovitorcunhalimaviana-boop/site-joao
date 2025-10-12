@@ -48,6 +48,9 @@ next-env.d.ts
 # medical data (sensitive)
 /data/users.json
 /data/patients.json
+
+# problematic files
+nul
 /data/unified-patients.json
 /data/unified-appointments.json
 /data/medical-records.json
