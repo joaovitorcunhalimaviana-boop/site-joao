@@ -1,69 +1,5 @@
 [
   {
-    "timestamp": "2025-10-12T20:38:27.290Z",
-    "overallStatus": "CRITICAL",
-    "alerts": [
-      {
-        "id": "backup_critical_1760301507290",
-        "type": "BACKUP_FAILURE",
-        "severity": "CRITICAL",
-        "title": "Sistema de Backup Crítico",
-        "description": "Backups não estão funcionando adequadamente",
-        "timestamp": "2025-10-12T20:38:27.290Z",
-        "resolved": false,
-        "actions": [
-          "Executar backup manual",
-          "Verificar configuração",
-          "Testar restauração"
-        ]
-      }
-    ],
-    "systemHealth": {
-      "database": "ONLINE",
-      "api": "ONLINE",
-      "backupSystem": "ONLINE",
-      "auditSystem": "ONLINE",
-      "lastCheck": "2025-10-12T20:38:26.689Z",
-      "uptime": 3053.0817422,
-      "responseTime": 408
-    },
-    "dataIntegrity": {
-      "status": "HEALTHY",
-      "lastCheck": "2025-10-12T20:38:27.286Z",
-      "issues": 0,
-      "criticalIssues": 0,
-      "recordCount": 9,
-      "orphanedRecords": 0
-    },
-    "backupStatus": {
-      "status": "CRITICAL",
-      "lastBackup": "2025-10-09T18:26:01.337Z",
-      "nextScheduled": "2025-10-13T05:00:00.000Z",
-      "successRate": 100,
-      "totalBackups": 336,
-      "failedBackups": 0,
-      "cloudProviders": {
-        "github": true,
-        "dropbox": false,
-        "googleDrive": false
-      }
-    },
-    "securityStatus": {
-      "status": "SECURE",
-      "lastSecurityCheck": "2025-10-12T20:38:27.290Z",
-      "suspiciousActivity": 0,
-      "failedLogins": 0,
-      "dataAccess": 0,
-      "encryptionStatus": true
-    },
-    "recommendations": [
-      "⚠️ SITUAÇÃO CRÍTICA: Resolva problemas urgentemente",
-      "🔧 Execute correções automáticas disponíveis",
-      "📋 Monitore o sistema continuamente",
-      "🔄 PRIORIDADE: Corrigir sistema de backup"
-    ]
-  },
-  {
     "timestamp": "2025-10-12T20:40:16.099Z",
     "overallStatus": "CRITICAL",
     "alerts": [
@@ -1523,6 +1459,70 @@
     "securityStatus": {
       "status": "SECURE",
       "lastSecurityCheck": "2025-10-12T22:11:01.909Z",
+      "suspiciousActivity": 0,
+      "failedLogins": 0,
+      "dataAccess": 0,
+      "encryptionStatus": true
+    },
+    "recommendations": [
+      "⚠️ SITUAÇÃO CRÍTICA: Resolva problemas urgentemente",
+      "🔧 Execute correções automáticas disponíveis",
+      "📋 Monitore o sistema continuamente",
+      "🔄 PRIORIDADE: Corrigir sistema de backup"
+    ]
+  },
+  {
+    "timestamp": "2025-10-12T22:20:40.102Z",
+    "overallStatus": "CRITICAL",
+    "alerts": [
+      {
+        "id": "backup_critical_1760307640102",
+        "type": "BACKUP_FAILURE",
+        "severity": "CRITICAL",
+        "title": "Sistema de Backup Crítico",
+        "description": "Backups não estão funcionando adequadamente",
+        "timestamp": "2025-10-12T22:20:40.102Z",
+        "resolved": false,
+        "actions": [
+          "Executar backup manual",
+          "Verificar configuração",
+          "Testar restauração"
+        ]
+      }
+    ],
+    "systemHealth": {
+      "database": "ONLINE",
+      "api": "ONLINE",
+      "backupSystem": "ONLINE",
+      "auditSystem": "ONLINE",
+      "lastCheck": "2025-10-12T22:20:39.509Z",
+      "uptime": 5818.899501,
+      "responseTime": 335
+    },
+    "dataIntegrity": {
+      "status": "HEALTHY",
+      "lastCheck": "2025-10-12T22:20:40.095Z",
+      "issues": 0,
+      "criticalIssues": 0,
+      "recordCount": 0,
+      "orphanedRecords": 0
+    },
+    "backupStatus": {
+      "status": "CRITICAL",
+      "lastBackup": "2025-10-09T18:26:01.337Z",
+      "nextScheduled": "2025-10-13T05:00:00.000Z",
+      "successRate": 100,
+      "totalBackups": 336,
+      "failedBackups": 0,
+      "cloudProviders": {
+        "github": true,
+        "dropbox": false,
+        "googleDrive": false
+      }
+    },
+    "securityStatus": {
+      "status": "SECURE",
+      "lastSecurityCheck": "2025-10-12T22:20:40.101Z",
       "suspiciousActivity": 0,
       "failedLogins": 0,
       "dataAccess": 0,

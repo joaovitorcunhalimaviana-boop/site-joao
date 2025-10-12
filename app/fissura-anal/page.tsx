@@ -182,7 +182,6 @@ export default function FissuraAnalPage() {
                 <ul className='text-gray-300 space-y-2'>
                   <li>• Constipação intestinal e fezes endurecidas</li>
                   <li>• Diarreia frequente</li>
-                  <li>• Parto vaginal</li>
                   <li>• Doença de Crohn</li>
                   <li>• Trauma anal</li>
                   <li>• Hipertonia do esfíncter anal</li>
