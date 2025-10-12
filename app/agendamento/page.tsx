@@ -383,6 +383,75 @@ const AgendamentoPage = () => {
                 </div>
               )}
           </div>
+
+          {/* Seção de Endereço */}
+          <div className='mt-16 pt-8 border-t border-gray-700'>
+            <div className='text-center'>
+              <div className='flex items-center justify-center mb-4'>
+                <svg
+                  className='h-6 w-6 text-blue-400 mr-2'
+                  fill='none'
+                  stroke='currentColor'
+                  viewBox='0 0 24 24'
+                >
+                  <path
+                    strokeLinecap='round'
+                    strokeLinejoin='round'
+                    strokeWidth={2}
+                    d='M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z'
+                  />
+                  <path
+                    strokeLinecap='round'
+                    strokeLinejoin='round'
+                    strokeWidth={2}
+                    d='M15 11a3 3 0 11-6 0 3 3 0 016 0z'
+                  />
+                </svg>
+                <h3 className='text-xl font-semibold text-white'>
+                  Localização do Consultório
+                </h3>
+              </div>
+              <div className='text-gray-300 space-y-1'>
+                <p className='text-lg'>Avenida Rui Barbosa, 484</p>
+                <p className='text-lg'>Edifício Arcádia, Sala 101 - Torre</p>
+                <p className='text-lg'>João Pessoa - PB</p>
+              </div>
+              <div className='mt-4'>
+                <a
+                  href='https://maps.google.com/?q=Avenida+Rui+Barbosa,+484,+Edifício+Arcádia,+Sala+101,+Torre'
+                  target='_blank'
+                  rel='noopener noreferrer'
+                  className='inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 h-10 px-6 py-2 text-white'
+                  style={{
+                    background:
+                      'linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%)',
+                    border: '1px solid #475569',
+                  }}
+                >
+                  <svg
+                    className='h-4 w-4 mr-2'
+                    fill='none'
+                    stroke='currentColor'
+                    viewBox='0 0 24 24'
+                  >
+                    <path
+                      strokeLinecap='round'
+                      strokeLinejoin='round'
+                      strokeWidth={2}
+                      d='M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z'
+                    />
+                    <path
+                      strokeLinecap='round'
+                      strokeLinejoin='round'
+                      strokeWidth={2}
+                      d='M15 11a3 3 0 11-6 0 3 3 0 016 0z'
+                    />
+                  </svg>
+                  Ver no Google Maps
+                </a>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
       <Footer />
