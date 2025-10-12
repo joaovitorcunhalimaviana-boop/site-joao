@@ -52,21 +52,21 @@ export class DataProtectionScheduler {
   static getDefaultConfig(): ScheduleConfig {
     return {
       backups: {
-        emergency: { enabled: false, interval: 60 }, // DESABILITADO TEMPORARIAMENTE
-        daily: { enabled: false, time: '02:00' }, // DESABILITADO TEMPORARIAMENTE
-        weekly: { enabled: false, day: 0, time: '03:00' }, // DESABILITADO TEMPORARIAMENTE
-        monthly: { enabled: false, day: 1, time: '04:00' } // DESABILITADO TEMPORARIAMENTE
+        emergency: { enabled: true, interval: 60 }, // REATIVADO
+        daily: { enabled: true, time: '02:00' }, // REATIVADO
+        weekly: { enabled: true, day: 0, time: '03:00' }, // REATIVADO
+        monthly: { enabled: true, day: 1, time: '04:00' } // REATIVADO
       },
       integrity: {
-        enabled: false, // DESABILITADO TEMPORARIAMENTE
+        enabled: true, // REATIVADO
         interval: 6 // A cada 6 horas
       },
       cloudBackup: {
-        enabled: false, // DESABILITADO TEMPORARIAMENTE
+        enabled: true, // REATIVADO
         interval: 12 // A cada 12 horas
       },
       monitoring: {
-        enabled: false, // DESABILITADO TEMPORARIAMENTE
+        enabled: true, // REATIVADO
         interval: 15 // A cada 15 minutos
       }
     }

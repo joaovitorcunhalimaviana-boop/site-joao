@@ -1,102 +1,64 @@
 import { NextRequest, NextResponse } from 'next/server'
-import fs from 'fs'
-import path from 'path'
 import { writeFile } from 'fs/promises'
-
-interface MedicalAttachment {
-  id: string
-  fileName: string
-  originalName: string
-  fileType: string
-  fileSize: number
-  category: 'exame' | 'foto' | 'documento' | 'outro'
-  description: string
-  uploadedAt: string
-  filePath: string
-  patientId: string
-}
+import path from 'path'
+import fs from 'fs'
+import { prisma } from '@/lib/prisma'
+import { 
+  createMedicalAttachment,
+  getMedicalAttachmentsByConsultation,
+  getMedicalAttachmentById,
+  deleteMedicalAttachment,
+  getAllMedicalAttachments
+} from '@/lib/medical-attachments-temp'
 
 const ATTACHMENTS_DIR = path.join(process.cwd(), 'data', 'medical-attachments')
-const ATTACHMENTS_FILE = path.join(
-  process.cwd(),
-  'data',
-  'medical-attachments.json'
-)
 
 // Função para garantir que os diretórios existem
-function ensureDirectories() {
+function ensureDirectoriesExist() {
   if (!fs.existsSync(ATTACHMENTS_DIR)) {
     fs.mkdirSync(ATTACHMENTS_DIR, { recursive: true })
   }
-  const dataDir = path.dirname(ATTACHMENTS_FILE)
-  if (!fs.existsSync(dataDir)) {
-    fs.mkdirSync(dataDir, { recursive: true })
-  }
 }
 
-// Função para ler anexos
-function readAttachments(): MedicalAttachment[] {
-  ensureDirectories()
-  try {
-    if (fs.existsSync(ATTACHMENTS_FILE)) {
-      const data = fs.readFileSync(ATTACHMENTS_FILE, 'utf8')
-      return JSON.parse(data)
-    }
-    return []
-  } catch (error) {
-    console.error('Erro ao ler anexos:', error)
-    return []
-  }
-}
-
-// Função para salvar anexos
-function saveAttachments(attachments: MedicalAttachment[]) {
-  ensureDirectories()
-  try {
-    fs.writeFileSync(ATTACHMENTS_FILE, JSON.stringify(attachments, null, 2))
-  } catch (error) {
-    console.error('Erro ao salvar anexos:', error)
-    throw error
-  }
-}
-
-// GET - Buscar anexos por paciente
+// GET - Buscar anexos por consulta
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
-    const patientId = searchParams.get('patientId')
+    const consultationId = searchParams.get('consultationId')
     const attachmentId = searchParams.get('id')
-
-    const attachments = readAttachments()
-
+    
     if (attachmentId) {
-      const attachment = attachments.find(a => a.id === attachmentId)
+      // Buscar anexo específico por ID
+      const attachment = await getMedicalAttachmentById(attachmentId)
       if (!attachment) {
         return NextResponse.json(
-          { error: 'Anexo não encontrado' },
+          { success: false, error: 'Anexo não encontrado' },
           { status: 404 }
         )
       }
-      return NextResponse.json(attachment)
+      return NextResponse.json({
+        success: true,
+        attachment
+      })
+    } else if (consultationId) {
+      // Buscar anexos por consulta
+      const attachments = await getMedicalAttachmentsByConsultation(consultationId)
+      return NextResponse.json({
+        success: true,
+        attachments
+      })
+    } else {
+      // Buscar todos os anexos
+      const attachments = await getAllMedicalAttachments()
+      return NextResponse.json({
+        success: true,
+        attachments
+      })
     }
-
-    if (patientId) {
-      const patientAttachments = attachments.filter(
-        a => a.patientId === patientId
-      )
-      // Ordenar por data mais recente primeiro
-      patientAttachments.sort(
-        (a, b) =>
-          new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime()
-      )
-      return NextResponse.json(patientAttachments)
-    }
-
-    return NextResponse.json(attachments)
   } catch (error) {
     console.error('Erro ao buscar anexos:', error)
     return NextResponse.json(
-      { error: 'Erro interno do servidor' },
+      { success: false, error: 'Erro interno do servidor' },
       { status: 500 }
     )
   }
@@ -105,21 +67,64 @@ export async function GET(request: NextRequest) {
 // POST - Upload de novo anexo
 export async function POST(request: NextRequest) {
   try {
+    console.log('📎 [Upload] Iniciando upload de anexo médico')
     const formData = await request.formData()
     const file = formData.get('file') as File
-    const patientId = formData.get('patientId') as string
-    const category = formData.get('category') as
-      | 'exame'
-      | 'foto'
-      | 'documento'
-      | 'outro'
+    const consultationId = formData.get('consultationId') as string
+    const category = formData.get('category') as string
     const description = formData.get('description') as string
+    
+    console.log('📎 [Upload] Dados recebidos:', {
+      fileName: file?.name,
+      fileSize: file?.size,
+      consultationId,
+      category,
+      description
+    })
 
-    if (!file || !patientId) {
+    if (!file || !consultationId) {
       return NextResponse.json(
-        { error: 'Arquivo e ID do paciente são obrigatórios' },
+        { success: false, error: 'Arquivo e ID da consulta são obrigatórios' },
         { status: 400 }
       )
+    }
+
+    // Verificar se a consulta existe, se não, criar uma
+    console.log('📎 [Upload] Verificando consulta:', consultationId)
+    let consultation = await prisma.consultation.findUnique({
+      where: { id: consultationId }
+    })
+
+    if (!consultation) {
+      console.log('📎 [Upload] Consulta não encontrada, tentando criar...')
+      // Tentar encontrar um appointment com esse ID para criar a consulta
+      const appointment = await prisma.appointment.findUnique({
+        where: { id: consultationId },
+        include: { medicalPatient: true }
+      })
+
+      if (appointment) {
+        console.log('📎 [Upload] Appointment encontrado, criando consulta...')
+        // Criar consulta baseada no appointment
+        consultation = await prisma.consultation.create({
+          data: {
+            id: consultationId, // Usar o mesmo ID do appointment
+            appointmentId: consultationId,
+            medicalPatientId: appointment.medicalPatientId,
+            doctorId: appointment.createdBy || 'cmgnckun90000vdggz430loes', // ID padrão do Dr. João
+            status: 'IN_PROGRESS'
+          }
+        })
+        console.log('✅ Consulta criada automaticamente:', consultation.id)
+      } else {
+        console.log('❌ [Upload] Appointment não encontrado')
+        return NextResponse.json(
+          { success: false, error: 'Consulta não encontrada e não foi possível criar automaticamente' },
+          { status: 404 }
+        )
+      }
+    } else {
+      console.log('✅ [Upload] Consulta encontrada:', consultation.id)
     }
 
     // Validar tipo de arquivo
@@ -129,10 +134,12 @@ export async function POST(request: NextRequest) {
       'image/gif',
       'application/pdf',
       'text/plain',
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
     ]
     if (!allowedTypes.includes(file.type)) {
       return NextResponse.json(
-        { error: 'Tipo de arquivo não permitido' },
+        { success: false, error: 'Tipo de arquivo não permitido' },
         { status: 400 }
       )
     }
@@ -140,45 +147,63 @@ export async function POST(request: NextRequest) {
     // Validar tamanho do arquivo (máximo 10MB)
     if (file.size > 10 * 1024 * 1024) {
       return NextResponse.json(
-        { error: 'Arquivo muito grande. Máximo 10MB' },
+        { success: false, error: 'Arquivo muito grande. Máximo 10MB' },
         { status: 400 }
       )
     }
 
-    const attachmentId = `att_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+    // Garantir que os diretórios existem
+    console.log('📎 [Upload] Garantindo que diretórios existem...')
+    ensureDirectoriesExist()
+
+    // Gerar nome único para o arquivo
     const fileExtension = path.extname(file.name)
-    const fileName = `${attachmentId}${fileExtension}`
+    const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}${fileExtension}`
     const filePath = path.join(ATTACHMENTS_DIR, fileName)
+    console.log('📎 [Upload] Caminho do arquivo:', filePath)
 
     // Salvar arquivo no disco
+    console.log('📎 [Upload] Salvando arquivo no disco...')
     const bytes = await file.arrayBuffer()
     const buffer = Buffer.from(bytes)
     await writeFile(filePath, buffer)
+    console.log('✅ [Upload] Arquivo salvo com sucesso')
 
-    // Criar registro do anexo
-    const attachment: MedicalAttachment = {
-      id: attachmentId,
-      fileName,
+    // Criar registro do anexo usando Prisma
+    console.log('📎 [Upload] Criando registro no banco de dados...')
+    const attachmentData = {
+      consultationId,
       originalName: file.name,
-      fileType: file.type,
-      fileSize: file.size,
-      category: category || 'outro',
-      description: description || '',
-      uploadedAt: new Date().toISOString(),
-      filePath: fileName, // Apenas o nome do arquivo para segurança
-      patientId,
+      mimeType: file.type,
+      size: file.size,
+      path: path.relative(process.cwd(), filePath),
+      category: (category as 'EXAM_RESULT' | 'PRESCRIPTION' | 'MEDICAL_REPORT' | 'IMAGE' | 'DOCUMENT' | 'OTHER') || 'OTHER',
+      description: description || undefined,
+      tags: [],
+      encrypted: false
     }
+    console.log('📎 [Upload] Dados do anexo:', attachmentData)
+    
+    const result = await createMedicalAttachment(attachmentData)
 
-    // Salvar no índice
-    const attachments = readAttachments()
-    attachments.push(attachment)
-    saveAttachments(attachments)
+    if (!result.success) {
+      console.log('❌ [Upload] Erro ao criar registro:', result.message)
+      return NextResponse.json(
+        { success: false, error: result.message },
+        { status: 500 }
+      )
+    }
+    
+    console.log('✅ [Upload] Registro criado com sucesso')
 
-    return NextResponse.json(attachment, { status: 201 })
+    return NextResponse.json({
+      success: true,
+      attachment: result.attachment
+    })
   } catch (error) {
-    console.error('Erro ao fazer upload:', error)
+    console.error('Erro ao fazer upload do anexo:', error)
     return NextResponse.json(
-      { error: 'Erro interno do servidor' },
+      { success: false, error: 'Erro interno do servidor' },
       { status: 500 }
     )
   }
@@ -192,38 +217,44 @@ export async function DELETE(request: NextRequest) {
 
     if (!attachmentId) {
       return NextResponse.json(
-        { error: 'ID do anexo é obrigatório' },
+        { success: false, error: 'ID do anexo é obrigatório' },
         { status: 400 }
       )
     }
 
-    const attachments = readAttachments()
-    const attachmentIndex = attachments.findIndex(a => a.id === attachmentId)
-
-    if (attachmentIndex === -1) {
+    // Buscar anexo para obter o caminho do arquivo
+    const attachment = await getMedicalAttachmentById(attachmentId)
+    if (!attachment) {
       return NextResponse.json(
-        { error: 'Anexo não encontrado' },
+        { success: false, error: 'Anexo não encontrado' },
         { status: 404 }
       )
     }
 
-    const attachment = attachments[attachmentIndex]
-
     // Remover arquivo do disco
-    const filePath = path.join(ATTACHMENTS_DIR, attachment.fileName)
-    if (fs.existsSync(filePath)) {
-      fs.unlinkSync(filePath)
+    const fullPath = path.join(process.cwd(), attachment.path)
+    if (fs.existsSync(fullPath)) {
+      fs.unlinkSync(fullPath)
     }
 
-    // Remover do índice
-    attachments.splice(attachmentIndex, 1)
-    saveAttachments(attachments)
+    // Remover registro do banco
+    const result = await deleteMedicalAttachment(attachmentId)
+    
+    if (!result.success) {
+      return NextResponse.json(
+        { success: false, error: result.message },
+        { status: 500 }
+      )
+    }
 
-    return NextResponse.json({ message: 'Anexo removido com sucesso' })
+    return NextResponse.json({
+      success: true,
+      message: 'Anexo removido com sucesso'
+    })
   } catch (error) {
     console.error('Erro ao remover anexo:', error)
     return NextResponse.json(
-      { error: 'Erro interno do servidor' },
+      { success: false, error: 'Erro interno do servidor' },
       { status: 500 }
     )
   }

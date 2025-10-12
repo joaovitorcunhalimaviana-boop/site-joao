@@ -16,6 +16,7 @@ interface Patient {
   phone: string
   whatsapp: string
   birthDate: string
+  cpf: string
   insurance: {
     type: 'particular' | 'unimed' | 'outro'
     plan?: string
@@ -32,6 +33,12 @@ interface Consultation {
   type: string
   status: 'agendada' | 'confirmada' | 'cancelada' | 'concluida'
   notes?: string
+  // Dados adicionais do paciente vindos diretamente da API
+  patientPhone?: string
+  patientWhatsapp?: string
+  patientEmail?: string
+  patientCpf?: string
+  insuranceType?: string
 }
 
 export default function AreaSecretaria() {
@@ -46,7 +53,7 @@ export default function AreaSecretaria() {
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null)
   const [editingConsultation, setEditingConsultation] = useState<Consultation | null>(null)
   const [showCalendar, setShowCalendar] = useState(false)
-  const [activeTab, setActiveTab] = useState<'today' | 'scheduled' | 'all'>('today')
+
 
   // Estados para o formulário de novo paciente
   const [newPatient, setNewPatient] = useState({
@@ -55,6 +62,7 @@ export default function AreaSecretaria() {
     phone: '',
     whatsapp: '',
     birthDate: '',
+    cpf: '',
     insurance: {
       type: 'particular' as 'particular' | 'unimed' | 'outro',
       plan: '',
@@ -72,33 +80,27 @@ export default function AreaSecretaria() {
     notes: '',
   })
 
+  // Filtrar pacientes apenas com CPF
+  const validPatients = useMemo(() => {
+    return patients.filter(patient => patient.cpf && patient.cpf.trim() !== '')
+  }, [patients])
+
   // Filtrar consultas por status
   const todayConsultations = useMemo(() => {
     return consultations.filter((consultation) => {
       const consultationDate = consultation.date
-      const today = getTodayISO()
+      // Usar data atual sem conversão de fuso horário para evitar inconsistências
+      const today = new Date().toISOString().split('T')[0]
+      console.log('🔍 Filtro de consultas:', {
+        consultationDate,
+        today,
+        status: consultation.status,
+        patientName: consultation.patientName
+      })
       return (
         consultationDate === today &&
-        (consultation.status === 'agendada' || consultation.status === 'confirmada')
-      )
-    })
-  }, [consultations])
-
-  const scheduledConsultations = useMemo(() => {
-    return consultations.filter((consultation) => {
-      const consultationDate = consultation.date
-      const today = getTodayISO()
-      return (
-        consultationDate > today &&
-        (consultation.status === 'agendada' || consultation.status === 'confirmada')
-      )
-    })
-  }, [consultations])
-
-  const allActiveConsultations = useMemo(() => {
-    return consultations.filter((consultation) => {
-      return (
-        consultation.status === 'agendada' || consultation.status === 'confirmada'
+        (consultation.status === 'agendada' || consultation.status === 'confirmada' || 
+         consultation.status === 'scheduled' || consultation.status === 'confirmed')
       )
     })
   }, [consultations])
@@ -116,7 +118,27 @@ export default function AreaSecretaria() {
         const apiData = await patientsResponse.json()
         const patientsData = apiData.patients || []
         console.log('✅ Pacientes carregados da API:', patientsData.length)
-        setPatients(patientsData)
+        console.log('📋 Dados dos pacientes:', patientsData)
+        
+        // Mapear dados dos pacientes para o formato esperado pelo frontend
+        const mappedPatients = patientsData.map((patient: any) => ({
+          id: patient.id,
+          name: patient.fullName || patient.name || 'Nome não disponível',
+          email: patient.email || '',
+          phone: patient.phone || '',
+          whatsapp: patient.whatsapp || '',
+          birthDate: patient.birthDate || '',
+          cpf: patient.cpf || '',
+          insurance: {
+            type: patient.insurance?.type || patient.insuranceType || 'particular',
+            plan: patient.insurance?.plan || patient.insurancePlan || ''
+          },
+          isActive: patient.isActive ?? true,
+          createdAt: patient.createdAt || new Date().toISOString()
+        }))
+        
+        console.log('📋 Pacientes mapeados:', mappedPatients)
+        setPatients(mappedPatients)
       } else {
         console.error('❌ Erro ao carregar pacientes:', patientsResponse.status)
         setPatients([])
@@ -129,16 +151,39 @@ export default function AreaSecretaria() {
       if (appointmentsResponse.ok) {
         const apiData = await appointmentsResponse.json()
         const appointments = apiData.appointments || []
-        const consultationsData = appointments.map((apt: any) => ({
-          id: apt.id,
-          patientId: apt.patientId || apt.communicationContactId || apt.medicalPatientId,
-          patientName: apt.patientName,
-          date: apt.date || apt.appointmentDate,
-          time: apt.time || apt.appointmentTime,
-          type: apt.type || apt.appointmentType || 'CONSULTATION',
-          status: apt.status,
-          notes: apt.notes || '',
-        }))
+        const consultationsData = appointments.map((apt: any) => {
+          // Mapear status da API para o formato esperado pelo frontend
+          let mappedStatus = apt.status
+          if (apt.status === 'SCHEDULED' || apt.status === 'scheduled') mappedStatus = 'agendada'
+          if (apt.status === 'CONFIRMED' || apt.status === 'confirmed') mappedStatus = 'confirmada'
+          if (apt.status === 'COMPLETED' || apt.status === 'completed') mappedStatus = 'realizada'
+          if (apt.status === 'CANCELLED' || apt.status === 'cancelled') mappedStatus = 'cancelada'
+          if (apt.status === 'NO_SHOW' || apt.status === 'no_show') mappedStatus = 'faltou'
+          
+          console.log('🔍 Mapeando consulta:', {
+            appointmentId: apt.id,
+            medicalPatientId: apt.medicalPatientId,
+            communicationContactId: apt.communicationContactId,
+            patientName: apt.patientName
+          })
+          
+          return {
+            id: apt.id,
+            patientId: apt.medicalPatientId || apt.patientId || apt.communicationContactId,
+            patientName: apt.patientName || 'Nome não disponível',
+            date: apt.date || apt.appointmentDate,
+            time: apt.time || apt.appointmentTime,
+            type: apt.type || apt.appointmentType || 'CONSULTATION',
+            status: mappedStatus,
+            notes: apt.notes || '',
+            // Dados adicionais do paciente vindos diretamente da API
+            patientPhone: apt.patientPhone || apt.patientWhatsapp || '',
+            patientWhatsapp: apt.patientWhatsapp || apt.patientPhone || '',
+            patientEmail: apt.patientEmail || '',
+            patientCpf: apt.patientCpf || '',
+            insuranceType: apt.insuranceType || 'particular'
+          }
+        })
         console.log('✅ Consultas carregadas da API:', consultationsData.length)
         setConsultations(consultationsData)
       } else {
@@ -206,6 +251,26 @@ export default function AreaSecretaria() {
 
   // Função para criar novo paciente
   const handleCreatePatient = async () => {
+    // Validar campos obrigatórios
+    if (!newPatient.name || !newPatient.email || !newPatient.phone || !newPatient.cpf) {
+      alert('Por favor, preencha todos os campos obrigatórios')
+      return
+    }
+
+    // Validar CPF
+    const cpfNumbers = newPatient.cpf.replace(/\D/g, '')
+    if (cpfNumbers.length !== 11) {
+      alert('Por favor, insira um CPF válido')
+      return
+    }
+
+    // Verificar se CPF já existe
+    const existingPatient = patients.find(p => p.cpf === newPatient.cpf)
+    if (existingPatient) {
+      alert('Já existe um paciente cadastrado com este CPF')
+      return
+    }
+
     try {
       const response = await fetch('/api/unified-system/medical-patients', {
         credentials: 'include', // Inclui cookies na requisição
@@ -213,12 +278,35 @@ export default function AreaSecretaria() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(newPatient),
+        body: JSON.stringify({
+          fullName: newPatient.name,
+          cpf: newPatient.cpf,
+          email: newPatient.email,
+          phone: newPatient.phone,
+          whatsapp: newPatient.whatsapp,
+          birthDate: newPatient.birthDate,
+          insurance: newPatient.insurance,
+        }),
       })
 
       if (response.ok) {
-        const createdPatient = await response.json()
-        setPatients([...patients, createdPatient])
+        const responseData = await response.json()
+        const createdPatient = responseData.patient
+        
+        // Mapear os dados do paciente para o formato esperado pelo frontend
+        const patientForFrontend = {
+          id: createdPatient.id,
+          name: createdPatient.name || createdPatient.fullName,
+          email: createdPatient.email,
+          phone: createdPatient.phone,
+          whatsapp: createdPatient.whatsapp,
+          birthDate: createdPatient.birthDate,
+          cpf: createdPatient.cpf,
+          insurance: createdPatient.insurance,
+          createdAt: createdPatient.createdAt
+        }
+        
+        setPatients([...patients, patientForFrontend])
 
         setShowNewPatientForm(false)
         setNewPatient({
@@ -227,6 +315,7 @@ export default function AreaSecretaria() {
           phone: '',
           whatsapp: '',
           birthDate: '',
+          cpf: '',
           insurance: {
             type: 'particular',
             plan: '',
@@ -235,7 +324,11 @@ export default function AreaSecretaria() {
         alert('Paciente criado com sucesso!')
       } else {
         const errorData = await response.json()
-        alert(`Erro ao criar paciente: ${errorData.error || 'Erro desconhecido'}`)
+        if (errorData.message && errorData.message.includes('CPF')) {
+          alert('Este CPF já está cadastrado no sistema')
+        } else {
+          alert(`Erro ao criar paciente: ${errorData.message || errorData.error || 'Erro desconhecido'}`)
+        }
       }
     } catch (error) {
       console.error('Erro ao criar paciente:', error)
@@ -246,10 +339,86 @@ export default function AreaSecretaria() {
   // Função para criar nova consulta
   const handleCreateConsultation = async () => {
     try {
+      const patientId = selectedPatient?.id || newConsultation.patientId
+      const appointmentDate = newConsultation.date
+      
+      console.log('🔍 [DEBUG] Iniciando criação de consulta:', {
+        patientId,
+        selectedPatient: selectedPatient?.name,
+        appointmentDate,
+        newConsultationPatientId: newConsultation.patientId,
+        selectedPatientId: selectedPatient?.id
+      })
+      
+      console.log('🔍 [DEBUG] João Vítor ID esperado: cmgla4agm000dvd24ujkmiw10')
+      console.log('🔍 [DEBUG] PatientId sendo usado:', patientId)
+      
+      // Verificar se paciente pode agendar nova consulta usando sistema unificado
+      try {
+        console.log('🔍 [DEBUG] Fazendo requisição para check-can-schedule...')
+        const response = await fetch('/api/unified-appointments', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'check-can-schedule', patientId })
+        })
+        
+        console.log('🔍 [DEBUG] Resposta da API:', {
+          status: response.status,
+          ok: response.ok
+        })
+        
+        const canScheduleData = await response.json()
+        console.log('🔍 [DEBUG] Dados da validação:', canScheduleData)
+        
+        if (!canScheduleData.canSchedule) {
+          console.log('❌ [DEBUG] Paciente não pode agendar:', canScheduleData.reason)
+          alert(canScheduleData.reason || 'Este paciente já possui uma consulta ativa. Aguarde a conclusão para agendar uma nova.')
+          return
+        }
+        
+        console.log('✅ [DEBUG] Paciente pode agendar consulta')
+      } catch (error) {
+        console.error('❌ [DEBUG] Erro ao verificar disponibilidade:', error)
+        // Fallback para verificação local
+        const activeConsultation = consultations.find(consultation => 
+          consultation.patientId === patientId && 
+          (consultation.status === 'agendada' || consultation.status === 'confirmada')
+        )
+        
+        if (activeConsultation) {
+          alert(`Este paciente já possui uma consulta ativa agendada para ${activeConsultation.date} às ${activeConsultation.time}. Aguarde a conclusão desta consulta para agendar uma nova.`)
+          return
+        }
+      }
+      
+      // Verificar se já existe consulta para este paciente na mesma data E HORÁRIO
+      const existingConsultation = consultations.find(consultation => 
+        consultation.patientId === patientId && 
+        consultation.date === appointmentDate &&
+        consultation.time === newConsultation.time &&
+        (consultation.status === 'agendada' || consultation.status === 'confirmada')
+      )
+      
+      if (existingConsultation) {
+        alert('Este paciente já possui uma consulta agendada para esta data e horário. Escolha um horário diferente.')
+        return
+      }
+      
       const consultationData = {
-        ...newConsultation,
-        patientId: selectedPatient?.id || newConsultation.patientId,
+        action: 'create-appointment',
+        patientId: patientId,
         patientName: selectedPatient?.name || newConsultation.patientName,
+        patientPhone: selectedPatient?.phone,
+        patientWhatsapp: selectedPatient?.whatsapp,
+        patientEmail: selectedPatient?.email,
+        patientCpf: selectedPatient?.cpf,
+        insuranceType: selectedPatient?.insurance?.type || 'particular',
+        appointmentDate: newConsultation.date,
+        appointmentTime: newConsultation.time,
+        appointmentType: newConsultation.type,
+        notes: newConsultation.notes,
+        source: 'secretary',
+        createdBy: 'secretary'
       }
 
       const response = await fetch('/api/unified-appointments', {
@@ -395,16 +564,7 @@ export default function AreaSecretaria() {
   }
 
   const getCurrentConsultations = () => {
-    switch (activeTab) {
-      case 'today':
-        return todayConsultations
-      case 'scheduled':
-        return scheduledConsultations
-      case 'all':
-        return allActiveConsultations
-      default:
-        return todayConsultations
-    }
+    return todayConsultations
   }
 
   if (isLoading) {
@@ -460,7 +620,7 @@ export default function AreaSecretaria() {
                 </div>
                 <div className='ml-4'>
                   <p className='text-sm font-medium text-gray-300'>Total de Pacientes</p>
-                  <p className='text-2xl font-bold text-white'>{patients.length}</p>
+                  <p className='text-2xl font-bold text-white'>{validPatients.length}</p>
                 </div>
               </div>
             </div>
@@ -479,19 +639,7 @@ export default function AreaSecretaria() {
               </div>
             </div>
 
-            <div className='bg-gray-900/50 backdrop-blur-sm rounded-2xl shadow-xl p-6 border border-gray-700'>
-              <div className='flex items-center'>
-                <div className='p-3 bg-yellow-900/20 rounded-xl'>
-                  <svg className='w-6 h-6 text-yellow-400' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-                    <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z' />
-                  </svg>
-                </div>
-                <div className='ml-4'>
-                  <p className='text-sm font-medium text-gray-300'>Agendadas</p>
-                  <p className='text-2xl font-bold text-white'>{scheduledConsultations.length}</p>
-                </div>
-              </div>
-            </div>
+
           </div>
         </div>
 
@@ -530,6 +678,9 @@ export default function AreaSecretaria() {
                       Paciente
                     </th>
                     <th className='px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider'>
+                      CPF
+                    </th>
+                    <th className='px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider'>
                       Telefone
                     </th>
                     <th className='px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider'>
@@ -546,7 +697,7 @@ export default function AreaSecretaria() {
                 <tbody className='divide-y divide-gray-700'>
                 {filteredPatients.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className='px-6 py-8 text-center text-gray-400'>
+                    <td colSpan={6} className='px-6 py-8 text-center text-gray-400'>
                       <div className='flex flex-col items-center'>
                         <svg className='w-12 h-12 text-gray-500 mb-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
                           <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z' />
@@ -563,6 +714,9 @@ export default function AreaSecretaria() {
                         <div className='text-sm text-gray-400'>{patient.email}</div>
                       </td>
                       <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>
+                        {patient.cpf}
+                      </td>
+                      <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>
                         {patient.phone}
                       </td>
                       <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>
@@ -570,14 +724,14 @@ export default function AreaSecretaria() {
                       </td>
                       <td className='px-6 py-4 whitespace-nowrap'>
                         <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                          patient.insurance.type === 'particular'
+                          patient.insurance?.type === 'particular'
                             ? 'bg-blue-900/30 text-blue-400 border border-blue-500/30'
-                            : patient.insurance.type === 'unimed'
+                            : patient.insurance?.type === 'unimed'
                             ? 'bg-green-900/30 text-green-400 border border-green-500/30'
                             : 'bg-gray-900/30 text-gray-400 border border-gray-500/30'
                         }`}>
-                          {patient.insurance.type === 'particular' ? 'Particular' :
-                           patient.insurance.type === 'unimed' ? 'Unimed' : 'Outro'}
+                          {patient.insurance?.type === 'particular' ? 'Particular' :
+                           patient.insurance?.type === 'unimed' ? 'Unimed' : 'Outro'}
                         </span>
                       </td>
                       <td className='px-6 py-4 whitespace-nowrap text-sm font-medium'>
@@ -644,40 +798,11 @@ export default function AreaSecretaria() {
               </div>
             )}
 
-            {/* Tabs para diferentes visualizações */}
-            <div className='border-b border-gray-700'>
-              <nav className='-mb-px flex'>
-                <button
-                  onClick={() => setActiveTab('today')}
-                  className={`py-5 px-8 text-sm font-semibold border-b-3 transition-all duration-200 ${
-                    activeTab === 'today'
-                      ? 'border-blue-500 text-blue-400 bg-blue-900/20'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  }`}
-                >
-                  Pacientes do Dia ({todayConsultations.length})
-                </button>
-                <button
-                  onClick={() => setActiveTab('scheduled')}
-                  className={`py-5 px-8 text-sm font-semibold border-b-3 transition-all duration-200 ${
-                    activeTab === 'scheduled'
-                      ? 'border-blue-500 text-blue-400 bg-blue-900/20'
-                      : 'border-transparent text-gray-400 hover:text-gray-200 hover:border-gray-600 hover:bg-gray-800/30'
-                  }`}
-                >
-                  Agendados ({scheduledConsultations.length})
-                </button>
-                <button
-                  onClick={() => setActiveTab('all')}
-                  className={`py-5 px-8 text-sm font-semibold border-b-3 transition-all duration-200 ${
-                    activeTab === 'all'
-                      ? 'border-blue-500 text-blue-400 bg-blue-900/20'
-                      : 'border-transparent text-gray-400 hover:text-gray-200 hover:border-gray-600 hover:bg-gray-800/30'
-                  }`}
-                >
-                  Todos os Pacientes ({allActiveConsultations.length})
-                </button>
-              </nav>
+            {/* Título da seção */}
+            <div className='p-6 border-b border-gray-700'>
+              <h3 className='text-lg font-semibold text-white'>
+                Consultas Totais ({todayConsultations.length})
+              </h3>
             </div>
 
             {/* Lista de consultas */}
@@ -720,34 +845,47 @@ export default function AreaSecretaria() {
                   ) : (
                     getCurrentConsultations().map((consultation) => {
                       const patient = patients.find(p => p.id === consultation.patientId)
+                      
+                      // Usar dados da consulta como prioridade, depois dados do paciente encontrado
+                      const displayName = consultation.patientName || patient?.name || 'Paciente não identificado'
+                      const displayPhone = consultation.patientPhone || patient?.phone || '-'
+                      const displayWhatsapp = consultation.patientWhatsapp || patient?.whatsapp || '-'
+                      const displayInsuranceType = consultation.insuranceType || patient?.insurance?.type || 'particular'
+                      
+                      console.log('🔍 Exibindo consulta:', {
+                        consultationId: consultation.id,
+                        patientId: consultation.patientId,
+                        patientFound: !!patient,
+                        displayName,
+                        displayPhone,
+                        displayWhatsapp,
+                        displayInsuranceType
+                      })
+                      
                       return (
                         <tr key={consultation.id} className="hover:bg-gray-800/30 transition-colors">
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="text-sm font-medium text-gray-100">
-                              {consultation.patientName || patient?.name || 'Nome não encontrado'}
+                              {displayName}
                             </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                            {patient?.phone || '-'}
+                            {displayPhone}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                            {patient?.whatsapp || '-'}
+                            {displayWhatsapp}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
-                            {patient ? (
-                              <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full backdrop-blur-sm ${
-                                patient.insurance.type === 'particular'
-                                  ? 'bg-blue-900/30 text-blue-300 border border-blue-700/50'
-                                  : patient.insurance.type === 'unimed'
-                                  ? 'bg-green-900/30 text-green-300 border border-green-700/50'
-                                  : 'bg-gray-800/30 text-gray-300 border border-gray-600/50'
-                              }`}>
-                                {patient.insurance.type === 'particular' ? 'Particular' :
-                                 patient.insurance.type === 'unimed' ? 'Unimed' : 'Outro'}
-                              </span>
-                            ) : (
-                              <span className="text-gray-400">-</span>
-                            )}
+                            <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full backdrop-blur-sm ${
+                              displayInsuranceType === 'particular'
+                                ? 'bg-blue-900/30 text-blue-300 border border-blue-700/50'
+                                : displayInsuranceType === 'unimed'
+                                ? 'bg-green-900/30 text-green-300 border border-green-700/50'
+                                : 'bg-gray-800/30 text-gray-300 border border-gray-600/50'
+                            }`}>
+                              {displayInsuranceType === 'particular' ? 'Particular' :
+                               displayInsuranceType === 'unimed' ? 'Unimed' : 'Outro'}
+                            </span>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="text-sm text-gray-200">
@@ -796,7 +934,32 @@ export default function AreaSecretaria() {
                   type="text"
                   value={newPatient.name}
                   onChange={(e) => setNewPatient({ ...newPatient, name: e.target.value })}
-                  className="w-full px-3 py-2 bg-gray-800/50 border border-gray-600/50 rounded-md text-gray-100 placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent backdrop-blur-sm"
+                  className="w-full px-3 py-2 bg-blue-900/50 border border-blue-600/50 rounded-md text-gray-100 placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent backdrop-blur-sm"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-1">
+                  CPF *
+                </label>
+                <input
+                  type="text"
+                  value={newPatient.cpf}
+                  onChange={(e) => {
+                    // Formatar CPF automaticamente
+                    let value = e.target.value.replace(/\D/g, '')
+                    if (value.length <= 11) {
+                      value = value.replace(/(\d{3})(\d)/, '$1.$2')
+                      value = value.replace(/(\d{3})(\d)/, '$1.$2')
+                      value = value.replace(/(\d{3})(\d{1,2})$/, '$1-$2')
+                      setNewPatient({ ...newPatient, cpf: value })
+                    }
+                  }}
+                  placeholder="000.000.000-00"
+                  maxLength={14}
+                  className="w-full px-3 py-2 bg-blue-900/50 border border-blue-600/50 rounded-md text-gray-100 placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent backdrop-blur-sm"
+                  required
                 />
               </div>
 
@@ -808,7 +971,7 @@ export default function AreaSecretaria() {
                   type="email"
                   value={newPatient.email}
                   onChange={(e) => setNewPatient({ ...newPatient, email: e.target.value })}
-                  className="w-full px-3 py-2 bg-gray-800/50 border border-gray-600/50 rounded-md text-gray-100 placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent backdrop-blur-sm"
+                  className="w-full px-3 py-2 bg-blue-900/50 border border-blue-600/50 rounded-md text-gray-100 placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent backdrop-blur-sm"
                 />
               </div>
 
@@ -819,8 +982,23 @@ export default function AreaSecretaria() {
                 <input
                   type="tel"
                   value={newPatient.phone}
-                  onChange={(e) => setNewPatient({ ...newPatient, phone: e.target.value })}
-                  className="w-full px-3 py-2 bg-gray-800/50 border border-gray-600/50 rounded-md text-gray-100 placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent backdrop-blur-sm"
+                  onChange={(e) => {
+                    // Formatar telefone automaticamente com DDD
+                    let value = e.target.value.replace(/\D/g, '')
+                    if (value.length <= 11) {
+                      if (value.length <= 2) {
+                        value = value.replace(/(\d{0,2})/, '($1')
+                      } else if (value.length <= 7) {
+                        value = value.replace(/(\d{2})(\d{0,5})/, '($1) $2')
+                      } else {
+                        value = value.replace(/(\d{2})(\d{5})(\d{0,4})/, '($1) $2-$3')
+                      }
+                      setNewPatient({ ...newPatient, phone: value })
+                    }
+                  }}
+                  placeholder="(11) 99999-9999"
+                  maxLength={15}
+                  className="w-full px-3 py-2 bg-blue-900/50 border border-blue-600/50 rounded-md text-gray-100 placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent backdrop-blur-sm"
                 />
               </div>
 
@@ -831,8 +1009,23 @@ export default function AreaSecretaria() {
                 <input
                   type="tel"
                   value={newPatient.whatsapp}
-                  onChange={(e) => setNewPatient({ ...newPatient, whatsapp: e.target.value })}
-                  className="w-full px-3 py-2 bg-gray-800/50 border border-gray-600/50 rounded-md text-gray-100 placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent backdrop-blur-sm"
+                  onChange={(e) => {
+                    // Formatar WhatsApp automaticamente com DDD
+                    let value = e.target.value.replace(/\D/g, '')
+                    if (value.length <= 11) {
+                      if (value.length <= 2) {
+                        value = value.replace(/(\d{0,2})/, '($1')
+                      } else if (value.length <= 7) {
+                        value = value.replace(/(\d{2})(\d{0,5})/, '($1) $2')
+                      } else {
+                        value = value.replace(/(\d{2})(\d{5})(\d{0,4})/, '($1) $2-$3')
+                      }
+                      setNewPatient({ ...newPatient, whatsapp: value })
+                    }
+                  }}  
+                  placeholder="(11) 99999-9999"
+                  maxLength={15}
+                  className="w-full px-3 py-2 bg-blue-900/50 border border-blue-600/50 rounded-md text-gray-100 placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent backdrop-blur-sm"
                 />
               </div>
 
@@ -843,6 +1036,7 @@ export default function AreaSecretaria() {
                 <BrazilianDateInput
                   value={newPatient.birthDate}
                   onChange={(value) => setNewPatient({ ...newPatient, birthDate: value })}
+                  className="w-full px-3 py-2 bg-blue-900/50 border border-blue-600/50 rounded-md text-gray-100 placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent backdrop-blur-sm"
                 />
               </div>
 
@@ -852,14 +1046,28 @@ export default function AreaSecretaria() {
                 </label>
                 <select
                   value={newPatient.insurance.type}
-                  onChange={(e) => setNewPatient({
-                    ...newPatient,
-                    insurance: {
-                      ...newPatient.insurance,
-                      type: e.target.value as 'particular' | 'unimed' | 'outro'
+                  onChange={(e) => {
+                    const selectedType = e.target.value as 'particular' | 'unimed' | 'outro'
+                    let planValue = ''
+                    
+                    // Definir plano automaticamente baseado no tipo
+                    if (selectedType === 'particular') {
+                      planValue = '' // Particular não tem plano
+                    } else if (selectedType === 'unimed') {
+                      planValue = 'Unimed' // Unimed já é o plano
+                    } else {
+                      planValue = '' // Outro: usuário digita
                     }
-                  })}
-                  className="w-full px-3 py-2 bg-gray-800/50 border border-gray-600/50 rounded-md text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent backdrop-blur-sm"
+                    
+                    setNewPatient({
+                      ...newPatient,
+                      insurance: {
+                        type: selectedType,
+                        plan: planValue
+                      }
+                    })
+                  }}
+                  className="w-full px-3 py-2 bg-blue-900/50 border border-blue-600/50 rounded-md text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent backdrop-blur-sm"
                 >
                   <option value="particular">Particular</option>
                   <option value="unimed">Unimed</option>
@@ -867,7 +1075,7 @@ export default function AreaSecretaria() {
                 </select>
               </div>
 
-              {newPatient.insurance.type !== 'particular' && (
+              {newPatient.insurance.type === 'outro' && (
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-1">
                     Plano
@@ -879,7 +1087,8 @@ export default function AreaSecretaria() {
                       ...newPatient,
                       insurance: { ...newPatient.insurance, plan: e.target.value }
                     })}
-                    className="w-full px-3 py-2 bg-gray-800/50 border border-gray-600/50 rounded-md text-gray-100 placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent backdrop-blur-sm"
+                    placeholder="Digite o nome do plano"
+                    className="w-full px-3 py-2 bg-blue-900/50 border border-blue-600/50 rounded-md text-gray-100 placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent backdrop-blur-sm"
                   />
                 </div>
               )}
@@ -927,7 +1136,7 @@ export default function AreaSecretaria() {
                         patientName: patient?.name || ''
                       })
                     }}
-                    className="w-full px-3 py-2 bg-gray-800/50 border border-gray-600/50 rounded-md text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent backdrop-blur-sm"
+                    className="w-full px-3 py-2 bg-blue-900/50 border border-blue-600/50 rounded-md text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent backdrop-blur-sm"
                   >
                     <option value="">Selecione um paciente</option>
                     {patients.map((patient) => (
@@ -946,6 +1155,7 @@ export default function AreaSecretaria() {
                 <BrazilianDateInput
                   value={newConsultation.date}
                   onChange={(value) => setNewConsultation({ ...newConsultation, date: value })}
+                  className="w-full px-3 py-2 bg-blue-900/50 border border-blue-600/50 rounded-md text-gray-100 placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent backdrop-blur-sm"
                 />
               </div>
 
@@ -956,6 +1166,7 @@ export default function AreaSecretaria() {
                 <TimePicker
                   value={newConsultation.time}
                   onChange={(value) => setNewConsultation({ ...newConsultation, time: value })}
+                  className="w-full px-3 py-2 bg-blue-900/50 border border-blue-600/50 rounded-md text-gray-100 placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent backdrop-blur-sm"
                 />
               </div>
 
@@ -966,7 +1177,7 @@ export default function AreaSecretaria() {
                 <select
                   value={newConsultation.type}
                   onChange={(e) => setNewConsultation({ ...newConsultation, type: e.target.value })}
-                  className="w-full px-3 py-2 bg-gray-800/50 border border-gray-600/50 rounded-md text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent backdrop-blur-sm"
+                  className="w-full px-3 py-2 bg-blue-900/50 border border-blue-600/50 rounded-md text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent backdrop-blur-sm"
                 >
                   <option value="CONSULTATION">Consulta</option>
                   <option value="RETURN">Retorno</option>
@@ -983,7 +1194,7 @@ export default function AreaSecretaria() {
                   value={newConsultation.notes}
                   onChange={(e) => setNewConsultation({ ...newConsultation, notes: e.target.value })}
                   rows={3}
-                  className="w-full px-3 py-2 bg-gray-800/50 border border-gray-600/50 rounded-md text-gray-100 placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent backdrop-blur-sm"
+                  className="w-full px-3 py-2 bg-blue-900/50 border border-blue-600/50 rounded-md text-gray-100 placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent backdrop-blur-sm"
                 />
               </div>
             </div>
@@ -1046,7 +1257,7 @@ export default function AreaSecretaria() {
                     ...editingConsultation,
                     status: e.target.value as 'agendada' | 'confirmada' | 'cancelada' | 'concluida'
                   })}
-                  className="w-full px-3 py-2 bg-gray-800/50 border border-gray-600/50 rounded-md text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent backdrop-blur-sm"
+                  className="w-full px-3 py-2 bg-blue-900/50 border border-blue-600/50 rounded-md text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent backdrop-blur-sm"
                 >
                   <option value="agendada">Agendada</option>
                   <option value="confirmada">Confirmada</option>
@@ -1063,7 +1274,7 @@ export default function AreaSecretaria() {
                   value={editingConsultation.notes || ''}
                   onChange={(e) => setEditingConsultation({ ...editingConsultation, notes: e.target.value })}
                   rows={3}
-                  className="w-full px-3 py-2 bg-gray-800/50 border border-gray-600/50 rounded-md text-gray-100 placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent backdrop-blur-sm"
+                  className="w-full px-3 py-2 bg-blue-900/50 border border-blue-600/50 rounded-md text-gray-100 placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent backdrop-blur-sm"
                 />
               </div>
             </div>

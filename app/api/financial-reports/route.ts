@@ -23,6 +23,7 @@ interface Patient {
   phone: string
   whatsapp: string
   birthDate: string
+  cpf?: string
   insurance: {
     type: 'particular' | 'unimed' | 'outro'
     plan?: string

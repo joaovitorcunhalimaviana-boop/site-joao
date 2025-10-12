@@ -34,6 +34,7 @@ interface Patient {
   name: string
   phone: string
   whatsapp: string
+  cpf?: string
   insurance: {
     type: 'particular' | 'unimed' | 'outro'
     plan?: string
@@ -236,12 +237,10 @@ export default function AreaMedicaPage() {
           
           // Se ainda não encontrou, criar um objeto paciente com os dados do agendamento
           if (!patient) {
-            console.log('🔍 [DEBUG] Processando consulta:', appointment)
-            console.log('🔍 [DEBUG] Paciente encontrado:', patient)
+            console.log('🔍 [DEBUG] Criando paciente a partir dos dados do agendamento:', appointment.patientName)
             
-            // Se ainda não encontrou, criar um objeto paciente com os dados do agendamento
             patient = {
-              id: appointment.patientId || appointment.communicationContactId,
+              id: appointment.patientId || appointment.communicationContactId || `temp-${appointment.id}`,
               name: appointment.patientName,
               fullName: appointment.patientName,
               phone: appointment.patientPhone,
@@ -254,6 +253,15 @@ export default function AreaMedicaPage() {
             }
           }
           
+          // Mapear status da API para o formato esperado pelo frontend
+          let mappedStatus = appointment.status
+          if (appointment.status === 'SCHEDULED' || appointment.status === 'scheduled') mappedStatus = 'agendada'
+          if (appointment.status === 'CONFIRMED' || appointment.status === 'confirmed') mappedStatus = 'confirmada'
+          if (appointment.status === 'COMPLETED' || appointment.status === 'completed') mappedStatus = 'concluida'
+          if (appointment.status === 'CANCELLED' || appointment.status === 'cancelled') mappedStatus = 'cancelada'
+          if (appointment.status === 'IN_PROGRESS' || appointment.status === 'in_progress') mappedStatus = 'em_andamento'
+          if (appointment.status === 'NO_SHOW' || appointment.status === 'no_show') mappedStatus = 'faltou'
+          
           return {
             ...patient,
             // Garantir que o nome esteja sempre disponível
@@ -262,39 +270,49 @@ export default function AreaMedicaPage() {
               id: appointment.id,
               time: appointment.appointmentTime,
               type: appointment.appointmentType,
-              status: appointment.status,
+              status: mappedStatus,
               notes: appointment.notes
             }
           }
         }).filter(Boolean)
 
-        console.log('ðŸ” [DEBUG] Pacientes do dia processados:', todayPatientsData)
+        // Remover duplicatas baseadas no ID
+        const uniqueTodayPatients = todayPatientsData.filter((patient, index, self) => 
+          index === self.findIndex(p => p.id === patient.id)
+        )
+
+        console.log('🔍 [DEBUG] Pacientes do dia processados:', uniqueTodayPatients)
+        console.log('🔍 [DEBUG] Duplicatas removidas:', todayPatientsData.length - uniqueTodayPatients.length)
 
         // Processar pacientes atendidos
-        const attendedPatientsData = todayPatientsData.filter(
+        const attendedPatientsData = uniqueTodayPatients.filter(
           (patient: any) => patient.consultation?.status === 'concluida'
         )
 
-        console.log('ðŸ” [DEBUG] Pacientes atendidos:', attendedPatientsData)
+        console.log('🔍 [DEBUG] Pacientes atendidos:', attendedPatientsData)
 
-        // Processar todos os pacientes - garantir que tenham a estrutura correta
+        // Processar todos os pacientes - garantir que tenham a estrutura correta e remover duplicatas
         const processedAllPatients = allPatients.map((patient: any) => ({
           ...patient,
           name: patient.name || patient.fullName,
           phone: patient.phone || patient.whatsapp,
           whatsapp: patient.whatsapp || patient.phone
         }))
+        
+        const uniqueAllPatients = processedAllPatients.filter((patient, index, self) => 
+          index === self.findIndex(p => p.id === patient.id)
+        )
 
         // Atualizar estados
-        setTodayPatients(todayPatientsData)
+        setTodayPatients(uniqueTodayPatients)
         setAttendedPatients(attendedPatientsData)
-        setPatients(processedAllPatients)
+        setPatients(uniqueAllPatients)
         setStats(customStats)
 
         console.log('🔍 [DEBUG] Estados atualizados:')
-        console.log('  - todayPatients:', todayPatientsData.length)
+        console.log('  - todayPatients:', uniqueTodayPatients.length)
         console.log('  - attendedPatients:', attendedPatientsData.length)
-        console.log('  - patients:', processedAllPatients.length)
+        console.log('  - patients:', uniqueAllPatients.length)
         console.log('  - stats:', customStats)
       } else {
         console.error('âŒ [DEBUG] Erro nas respostas das APIs:')
@@ -1090,15 +1108,15 @@ export default function AreaMedicaPage() {
                             </button>
                             {activeTab === 'today' && patient.consultation ? (
                               <>
-                                {patient.consultation.status === 'agendada' ? (
+                                {patient.consultation.status === 'agendada' || patient.consultation.status === 'confirmada' ? (
                                   <>
                                     <button
                                       onClick={() =>
                                         startConsultation(patient.id)
                                       }
-                                      className='text-blue-400 hover:text-blue-300 mr-3 transition-colors duration-200'
+                                      className='text-green-400 hover:text-green-300 mr-3 transition-colors duration-200'
                                     >
-                                      Iniciar
+                                      Atender
                                     </button>
                                     <button
                                       onClick={() =>
@@ -1109,9 +1127,13 @@ export default function AreaMedicaPage() {
                                       Remover
                                     </button>
                                   </>
-                                ) : (
+                                ) : patient.consultation.status === 'concluida' ? (
                                   <span className='text-green-400 text-sm'>
                                     Atendimento Concluído
+                                  </span>
+                                ) : (
+                                  <span className='text-yellow-400 text-sm'>
+                                    {patient.consultation.status === 'em_andamento' ? 'Em Andamento' : 'Status: ' + patient.consultation.status}
                                   </span>
                                 )}
                               </>

@@ -343,6 +343,7 @@ model CommunicationContact {
   id                   String               @id @default(cuid())
   name                 String
   email                String?
+  phone                String?
   whatsapp             String?
   birthDate            String?
   emailSubscribed      Boolean              @default(true)
@@ -366,6 +367,7 @@ model CommunicationContact {
   reviews              Review[]
 
   @@index([email])
+  @@index([phone])
   @@index([whatsapp])
   @@index([emailSubscribed])
   @@index([whatsappSubscribed])

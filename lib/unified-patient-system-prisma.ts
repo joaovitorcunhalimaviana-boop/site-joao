@@ -5,6 +5,7 @@ import { prisma } from './prisma-service'
 import { getBrasiliaTimestamp } from './date-utils'
 import { sendTelegramAppointmentNotification, AppointmentNotificationData } from './telegram-notifications'
 import { validateCPF } from './validation-schemas'
+import { MedicalAttachment } from './medical-attachments-temp'
 import { 
   CommunicationContact as PrismaCommunicationContact,
   MedicalPatient as PrismaMedicalPatient,
@@ -113,6 +114,11 @@ export interface UnifiedAppointment {
   id: string
   communicationContactId: string // FK obrigatória
   medicalPatientId?: string // FK opcional (nem todo agendamento vira paciente médico)
+  patientName?: string // Nome do paciente para exibição
+  patientCpf?: string // CPF do paciente (apenas se for paciente médico)
+  patientPhone?: string // Telefone do paciente
+  patientWhatsapp?: string // WhatsApp do paciente
+  patientEmail?: string // Email do paciente
   
   // Dados do agendamento
   appointmentDate: string // YYYY-MM-DD
@@ -131,6 +137,7 @@ export interface UnifiedAppointment {
   
   // Informações de seguro para o agendamento
   insuranceType?: 'unimed' | 'particular' | 'outro'
+  insurancePlan?: string // Plano do convênio
   
   // Origem do agendamento
   source: 'phone' | 'whatsapp' | 'website' | 'walk_in' | 'referral' | 'return'
@@ -235,6 +242,7 @@ export async function createOrUpdateCommunicationContact(
       update: {
         name: contactData.name,
         email: contactData.email,
+        phone: contactData.phone,
         whatsapp: contactData.whatsapp,
         birthDate: contactData.birthDate,
         // Update individual preference fields based on the actual schema
@@ -253,6 +261,7 @@ export async function createOrUpdateCommunicationContact(
       create: {
         name: contactData.name,
         email: contactData.email,
+        phone: contactData.phone,
         whatsapp: contactData.whatsapp,
         birthDate: contactData.birthDate,
         // Set individual preference fields based on the actual schema
@@ -284,8 +293,8 @@ export async function createOrUpdateCommunicationContact(
       id: updatedContact.id,
       name: updatedContact.name,
       email: updatedContact.email || undefined,
+      phone: updatedContact.phone || undefined,
       whatsapp: updatedContact.whatsapp || undefined,
-      phone: updatedContact.whatsapp || undefined,
       birthDate: updatedContact.birthDate || undefined,
       registrationSources: [contactData.source] as any,
       emailPreferences: {
@@ -455,12 +464,22 @@ export async function getAllMedicalPatients(): Promise<MedicalPatient[]> {
 export async function getMedicalPatientById(id: string): Promise<MedicalPatient | null> {
   try {
     const patient = await prisma.medicalPatient.findUnique({
-      where: { id }
+      where: { id },
+      include: {
+        communicationContact: true
+      }
     })
     
     if (!patient) {
       return null
     }
+    
+    console.log('🏥 Dados do paciente do banco:', {
+      id: patient.id,
+      fullName: patient.fullName,
+      insuranceType: patient.insuranceType,
+      insurancePlan: patient.insurancePlan
+    })
     
     return {
       id: patient.id,
@@ -468,17 +487,27 @@ export async function getMedicalPatientById(id: string): Promise<MedicalPatient 
       fullName: patient.fullName,
       cpf: patient.cpf,
       rg: patient.rg || undefined,
-      birthDate: patient.birthDate,
+      birthDate: patient.communicationContact?.birthDate,
+      phone: patient.communicationContact?.whatsapp,
+      whatsapp: patient.communicationContact?.whatsapp,
       gender: patient.gender as 'M' | 'F' | 'Other' | undefined,
       maritalStatus: patient.maritalStatus || undefined,
       profession: patient.profession || undefined,
       emergencyContact: patient.emergencyContact as any,
-      insurance: patient.insurance as any,
-      medicalInfo: patient.medicalInfo as any,
-      consents: patient.consents as any,
+      insurance: {
+        type: patient.insuranceType?.toLowerCase() as 'unimed' | 'particular' | 'outro' || 'particular',
+        plan: patient.insurancePlan || undefined,
+        originalType: patient.insuranceType // Manter o tipo original para debug
+      },
+      medicalInfo: patient.medicalNotes ? { notes: patient.medicalNotes } : undefined,
+      consents: {
+        dataProcessing: patient.consentDataProcessing,
+        medicalTreatment: patient.consentMedicalTreatment,
+        imageUse: patient.consentImageUse
+      },
       createdAt: patient.createdAt.toISOString(),
       updatedAt: patient.updatedAt.toISOString(),
-      recordNumber: patient.recordNumber
+      recordNumber: patient.medicalRecordNumber
     }
   } catch (error) {
     console.error('❌ Erro ao buscar paciente médico por ID:', error)
@@ -557,6 +586,10 @@ export async function deleteMedicalPatient(id: string): Promise<{ success: boole
 export async function getAllAppointments(): Promise<UnifiedAppointment[]> {
   try {
     const appointments = await prisma.appointment.findMany({
+      include: {
+        communicationContact: true,
+        medicalPatient: true
+      },
       orderBy: { appointmentDate: 'desc' }
     })
     
@@ -564,6 +597,13 @@ export async function getAllAppointments(): Promise<UnifiedAppointment[]> {
       id: appointment.id,
       communicationContactId: appointment.communicationContactId,
       medicalPatientId: appointment.medicalPatientId || undefined,
+      patientName: appointment.medicalPatient?.fullName || appointment.communicationContact?.name || 'Paciente não identificado',
+      patientCpf: appointment.medicalPatient?.cpf || undefined,
+      patientPhone: appointment.communicationContact?.whatsapp || '',
+      patientWhatsapp: appointment.communicationContact?.whatsapp || '',
+      patientEmail: appointment.communicationContact?.email || '',
+      insuranceType: appointment.medicalPatient?.insurance?.type || appointment.insuranceType as 'unimed' | 'particular' | 'outro' | undefined,
+      insurancePlan: appointment.medicalPatient?.insurance?.planType || undefined,
       appointmentDate: appointment.appointmentDate,
       appointmentTime: appointment.appointmentTime,
       duration: appointment.duration || undefined,
@@ -573,7 +613,8 @@ export async function getAllAppointments(): Promise<UnifiedAppointment[]> {
       doctorName: appointment.doctorName || undefined,
       reason: appointment.reason || undefined,
       observations: appointment.observations || undefined,
-      insuranceType: appointment.insuranceType as 'unimed' | 'particular' | 'outro' | undefined,
+      insuranceType: (appointment.medicalPatient?.insuranceType?.toLowerCase() || appointment.insuranceType || 'particular') as 'unimed' | 'particular' | 'outro',
+      insurancePlan: appointment.medicalPatient?.insurancePlan || undefined,
       source: mapAppointmentSourceFromPrisma(appointment.source),
       reminderSent: appointment.reminderSent || undefined,
       confirmationSent: appointment.confirmationSent || undefined,
@@ -590,6 +631,10 @@ export async function getAppointmentsByDate(date: string): Promise<UnifiedAppoin
   try {
     const appointments = await prisma.appointment.findMany({
       where: { appointmentDate: date },
+      include: {
+        communicationContact: true,
+        medicalPatient: true
+      },
       orderBy: { appointmentTime: 'asc' }
     })
     
@@ -597,6 +642,11 @@ export async function getAppointmentsByDate(date: string): Promise<UnifiedAppoin
       id: appointment.id,
       communicationContactId: appointment.communicationContactId,
       medicalPatientId: appointment.medicalPatientId || undefined,
+      patientName: appointment.medicalPatient?.fullName || appointment.communicationContact?.name || 'Paciente não identificado',
+      patientCpf: appointment.medicalPatient?.cpf || undefined,
+      patientPhone: appointment.communicationContact?.whatsapp || '',
+      patientWhatsapp: appointment.communicationContact?.whatsapp || '',
+      patientEmail: appointment.communicationContact?.email || '',
       appointmentDate: appointment.appointmentDate,
       appointmentTime: appointment.appointmentTime,
       duration: appointment.duration || undefined,
@@ -606,7 +656,6 @@ export async function getAppointmentsByDate(date: string): Promise<UnifiedAppoin
       doctorName: appointment.doctorName || undefined,
       reason: appointment.reason || undefined,
       observations: appointment.observations || undefined,
-      insuranceType: appointment.insuranceType as 'unimed' | 'particular' | 'outro' | undefined,
       source: mapAppointmentSourceFromPrisma(appointment.source),
       reminderSent: appointment.reminderSent || undefined,
       confirmationSent: appointment.confirmationSent || undefined,
@@ -668,13 +717,13 @@ function mapAppointmentTypeFromPrisma(type: AppointmentType): string {
 
 function mapAppointmentStatusFromPrisma(status: AppointmentStatus): string {
   switch (status) {
-    case 'SCHEDULED': return 'scheduled'
-    case 'CONFIRMED': return 'confirmed'
-    case 'IN_PROGRESS': return 'in_progress'
-    case 'COMPLETED': return 'completed'
-    case 'CANCELLED': return 'cancelled'
-    case 'NO_SHOW': return 'no_show'
-    default: return 'scheduled'
+    case 'SCHEDULED': return 'agendada'
+    case 'CONFIRMED': return 'confirmada'
+    case 'IN_PROGRESS': return 'em_andamento'
+    case 'COMPLETED': return 'concluida'
+    case 'CANCELLED': return 'cancelada'
+    case 'NO_SHOW': return 'cancelada'
+    default: return 'agendada'
   }
 }
 
@@ -890,10 +939,17 @@ export interface MedicalRecord {
   id: string
   patientId: string
   date: string
+  time?: string
   type: string
-  description: string
+  anamnesis: string
+  examination?: string
   diagnosis?: string
   treatment?: string
+  prescription?: string
+  observations?: string
+  calculatorResults?: any[]
+  diagnosticHypotheses?: any[]
+  attachments?: MedicalAttachment[]
   medications?: string[]
   notes?: string
   doctorName?: string
@@ -923,17 +979,155 @@ export interface Surgery {
 // ==================== FUNÇÕES DE PRONTUÁRIOS MÉDICOS ====================
 
 export async function getMedicalRecordsByPatientId(patientId: string): Promise<MedicalRecord[]> {
-  // TODO: Implement medical records with Prisma
-  console.log('⚠️ getMedicalRecordsByPatientId não implementado ainda')
-  return []
+  try {
+    console.log('📋 Buscando prontuários médicos para paciente:', patientId)
+    
+    const medicalRecords = await prisma.medicalRecord.findMany({
+      where: {
+        medicalPatientId: patientId
+      },
+      include: {
+        consultation: true,
+        doctor: true
+      },
+      orderBy: {
+        createdAt: 'desc'
+      }
+    })
+
+    console.log(`📋 Encontrados ${medicalRecords.length} prontuários para o paciente ${patientId}`)
+
+    const formattedRecords: MedicalRecord[] = medicalRecords.map(record => {
+      let parsedContent: any = {}
+      try {
+        parsedContent = JSON.parse(record.content || '{}')
+      } catch (error) {
+        console.warn('⚠️ Erro ao parsear conteúdo do prontuário:', error)
+        parsedContent = {}
+      }
+
+      return {
+        id: record.id,
+        patientId: record.medicalPatientId || '',
+        date: record.consultation?.startTime ? 
+          record.consultation.startTime.toISOString().split('T')[0] : 
+          record.createdAt.toISOString().split('T')[0],
+        time: record.consultation?.startTime ? 
+          record.consultation.startTime.toTimeString().split(' ')[0].substring(0, 5) : 
+          record.createdAt.toTimeString().split(' ')[0].substring(0, 5),
+        type: 'consultation',
+        anamnesis: parsedContent.anamnesis || '',
+        examination: parsedContent.physicalExamination || '',
+        diagnosis: parsedContent.diagnosis || '',
+        treatment: parsedContent.treatment || '',
+        prescription: parsedContent.prescription || '',
+        observations: parsedContent.observations || '',
+        calculatorResults: parsedContent.calculatorResults || [],
+        diagnosticHypotheses: parsedContent.diagnosticHypotheses || [],
+        doctorName: record.doctor?.name || 'Dr. João Vitor Viana',
+        createdAt: record.createdAt.toISOString(),
+        updatedAt: record.updatedAt.toISOString(),
+      }
+    })
+
+    console.log('📋 Prontuários formatados:', formattedRecords.length)
+    return formattedRecords
+  } catch (error) {
+    console.error('❌ Erro ao buscar prontuários médicos:', error)
+    return []
+  }
 }
 
-export async function createMedicalRecord(record: Omit<MedicalRecord, 'id' | 'createdAt' | 'updatedAt'>): Promise<{ success: boolean; record?: MedicalRecord; message: string }> {
-  // TODO: Implement medical record creation with Prisma
-  console.log('⚠️ createMedicalRecord não implementado ainda')
-  return {
-    success: false,
-    message: 'Função não implementada'
+export async function createMedicalRecord(recordData: any): Promise<{ success: boolean; record?: MedicalRecord; message: string }> {
+  try {
+    console.log('📋 Criando prontuário médico:', recordData)
+
+    // Buscar o ID do médico ativo
+    const doctor = await prisma.user.findFirst({
+      where: {
+        role: 'DOCTOR',
+        isActive: true
+      }
+    })
+
+    if (!doctor) {
+      throw new Error('Nenhum médico ativo encontrado no sistema')
+    }
+
+    // Primeiro, criar uma consulta se não existir
+    let consultationId = recordData.consultationId
+    if (!consultationId) {
+      const consultation = await prisma.consultation.create({
+        data: {
+          medicalPatientId: recordData.medicalPatientId,
+          doctorId: doctor.id,
+          startTime: new Date(`${recordData.consultationDate}T${recordData.consultationTime}:00`),
+          status: 'COMPLETED',
+          anamnese: recordData.anamnesis
+        },
+      })
+      consultationId = consultation.id
+    }
+
+    // Criar o prontuário médico
+    const content = JSON.stringify({
+      anamnesis: recordData.anamnesis,
+      physicalExamination: recordData.physicalExamination || '',
+      diagnosis: recordData.diagnosis || '',
+      treatment: recordData.treatment || '',
+      prescription: recordData.prescription || '',
+      observations: recordData.observations || '',
+      calculatorResults: recordData.calculatorResults || [],
+      diagnosticHypotheses: recordData.diagnosticHypotheses || [],
+      attachments: recordData.attachments || []
+    })
+
+    const medicalRecord = await prisma.medicalRecord.create({
+      data: {
+        consultationId: consultationId,
+        medicalPatientId: recordData.medicalPatientId,
+        doctorId: doctor.id,
+        content: content,
+        summary: recordData.diagnosis || recordData.anamnesis?.substring(0, 200) || '',
+        category: 'consultation',
+      },
+    })
+
+    // Vincular anexos existentes à consulta se fornecidos
+    if (recordData.attachments && recordData.attachments.length > 0) {
+      console.log('📎 Vinculando anexos à consulta:', recordData.attachments.length)
+      
+      // Atualizar anexos para vincular à consulta
+      for (const attachment of recordData.attachments) {
+        if (attachment.id) {
+          await prisma.medicalAttachment.update({
+            where: { id: attachment.id },
+            data: { consultationId: consultationId }
+          })
+        }
+      }
+    }
+
+    const result: MedicalRecord = {
+      id: medicalRecord.id,
+      patientId: medicalRecord.medicalPatientId || '',
+      date: recordData.consultationDate,
+      type: 'consultation',
+      description: recordData.anamnesis,
+      diagnosis: recordData.diagnosis,
+      treatment: recordData.treatment,
+      medications: [],
+      notes: recordData.observations,
+      doctorName: recordData.doctorName,
+      createdAt: medicalRecord.createdAt.toISOString(),
+      updatedAt: medicalRecord.updatedAt.toISOString(),
+    }
+
+    console.log('✅ Prontuário médico criado com sucesso:', result.id)
+    return { success: true, record: result, message: 'Prontuário criado com sucesso' }
+  } catch (error) {
+    console.error('❌ Erro ao criar prontuário médico:', error)
+    return { success: false, message: `Erro ao criar prontuário médico: ${error}` }
   }
 }
 
@@ -997,9 +1191,99 @@ export async function deleteSurgery(id: string): Promise<{ success: boolean; mes
 }
 
 export async function getMedicalRecordsByPatient(patientId: string): Promise<MedicalRecord[]> {
-  // TODO: Implement medical records with Prisma
-  console.log('⚠️ getMedicalRecordsByPatient não implementado ainda')
-  return []
+  try {
+    console.log('🔍 Buscando registros médicos para paciente:', patientId)
+    
+    // Buscar todos os anexos do paciente de todas as suas consultas
+    const patientAttachments = await prisma.medicalAttachment.findMany({
+      where: {
+        consultation: {
+          medicalPatientId: patientId
+        }
+      },
+      orderBy: {
+        uploadedAt: 'desc'
+      }
+    })
+    
+    // Buscar registros médicos através das consultas do paciente
+    const medicalRecords = await prisma.medicalRecord.findMany({
+      where: {
+        medicalPatientId: patientId
+      },
+      include: {
+        consultation: {
+          include: {
+            attachments: true,
+            prescriptions: true
+          }
+        },
+        doctor: {
+          select: {
+            id: true,
+            name: true,
+            email: true
+          }
+        }
+      },
+      orderBy: {
+        createdAt: 'desc'
+      }
+    })
+    
+    console.log(`✅ Encontrados ${medicalRecords.length} registros médicos para o paciente ${patientId}`)
+    
+    // Mapear para o formato esperado pela interface
+    const mappedRecords: MedicalRecord[] = medicalRecords.map(record => {
+      // Parse do conteúdo JSON se existir
+      let parsedContent: any = {}
+      try {
+        if (record.content) {
+          parsedContent = JSON.parse(record.content)
+        }
+      } catch (error) {
+        console.warn('⚠️ Erro ao fazer parse do content JSON:', error)
+        parsedContent = {}
+      }
+
+      return {
+        id: record.id,
+        patientId: record.medicalPatientId || '',
+        doctorId: record.doctorId,
+        doctorName: record.doctor.name || 'Dr. João Vitor Viana',
+        doctorCrm: '', // CRM não está no modelo atual
+        date: record.createdAt.toISOString().split('T')[0], // YYYY-MM-DD
+        time: record.createdAt.toTimeString().split(' ')[0], // HH:MM:SS
+        anamnesis: parsedContent.anamnesis || record.consultation?.anamnese || '',
+        physicalExamination: parsedContent.physicalExamination || '',
+        diagnosis: parsedContent.diagnosis || '',
+        treatment: parsedContent.treatment || '',
+        prescription: parsedContent.prescription || record.consultation?.prescriptions?.[0]?.medications || '',
+        observations: parsedContent.observations || '',
+        attachments: parsedContent.attachments || patientAttachments.map(att => ({
+          id: att.id,
+          fileName: att.path.split('\\').pop() || att.path.split('/').pop() || att.filename,
+          originalName: att.originalName,
+          fileType: att.mimeType,
+          fileSize: att.size,
+          category: att.category.toLowerCase() as 'exame' | 'foto' | 'documento' | 'outro',
+          description: att.description || '',
+          uploadedAt: att.uploadedAt.toISOString(),
+          filePath: att.path
+        })) || [],
+        calculatorResults: parsedContent.calculatorResults || [],
+        diagnosticHypotheses: parsedContent.diagnosticHypotheses || [],
+        createdAt: record.createdAt.toISOString(),
+        updatedAt: record.updatedAt.toISOString()
+      }
+    })
+    
+    return mappedRecords
+    
+  } catch (error) {
+    console.error('❌ Erro ao buscar registros médicos:', error)
+    return []
+  }
 }
 
 // ==================== FUNÇÕES ADICIONAIS PARA COMPATIBILIDADE COM API ROUTES ====================
@@ -1021,7 +1305,7 @@ export async function createOrUpdatePatient(patientData: any): Promise<{ success
       })
       
       if (existingPatient) {
-        // Update existing patient
+        // Update existing patient and reactivate if it was inactive
         const updatedPatient = await prisma.medicalPatient.update({
           where: { id: existingPatient.id },
           data: {
@@ -1031,10 +1315,25 @@ export async function createOrUpdatePatient(patientData: any): Promise<{ success
             gender: patientData.gender,
             maritalStatus: patientData.maritalStatus,
             profession: patientData.profession,
-            emergencyContact: patientData.emergencyContact || {},
-            insurance: patientData.insurance || { type: 'particular' },
-            medicalInfo: patientData.medicalInfo || {},
-            consents: patientData.consents || { lgpd: true, lgpdDate: new Date().toISOString(), medicalTreatment: true },
+            emergencyContact: patientData.medicalInfo?.emergencyContact,
+            emergencyPhone: patientData.medicalInfo?.emergencyPhone,
+            insuranceType: patientData.insurance?.type?.toUpperCase() === 'UNIMED' ? 'UNIMED' : 
+                          patientData.insurance?.type?.toUpperCase() === 'PARTICULAR' ? 'PARTICULAR' : 'OUTRO',
+            insurancePlan: patientData.insurance?.plan,
+            insuranceCardNumber: patientData.insurance?.cardNumber,
+            insuranceValidUntil: patientData.insurance?.validUntil ? new Date(patientData.insurance.validUntil) : null,
+            allergies: Array.isArray(patientData.medicalInfo?.allergies) ? patientData.medicalInfo.allergies.join(', ') : null,
+            medications: Array.isArray(patientData.medicalInfo?.medications) ? patientData.medicalInfo.medications.join(', ') : null,
+            conditions: Array.isArray(patientData.medicalInfo?.conditions) ? patientData.medicalInfo.conditions.join(', ') : null,
+            bloodType: patientData.medicalInfo?.bloodType,
+            medicalNotes: patientData.medicalInfo?.notes,
+            consentDataProcessing: patientData.consents?.dataProcessing ?? true,
+            consentDataProcessingDate: patientData.consents?.dataProcessing ? new Date() : null,
+            consentMedicalTreatment: patientData.consents?.medicalTreatment ?? true,
+            consentMedicalTreatmentDate: patientData.consents?.medicalTreatment ? new Date() : null,
+            consentImageUse: patientData.consents?.imageUse ?? false,
+            consentImageUseDate: patientData.consents?.imageUse ? new Date() : null,
+            isActive: true, // Reativar o paciente quando for atualizado
             updatedAt: new Date()
           }
         })
@@ -1051,10 +1350,23 @@ export async function createOrUpdatePatient(patientData: any): Promise<{ success
             gender: updatedPatient.gender as 'M' | 'F' | 'Other' | undefined,
             maritalStatus: updatedPatient.maritalStatus || undefined,
             profession: updatedPatient.profession || undefined,
-            emergencyContact: updatedPatient.emergencyContact as any,
-            insurance: updatedPatient.insurance as any,
-            medicalInfo: updatedPatient.medicalInfo as any,
-            consents: updatedPatient.consents as any,
+            emergencyContact: updatedPatient.emergencyContact,
+            emergencyPhone: updatedPatient.emergencyPhone,
+            insuranceType: updatedPatient.insuranceType,
+            insurancePlan: updatedPatient.insurancePlan,
+            insuranceCardNumber: updatedPatient.insuranceCardNumber,
+            insuranceValidUntil: updatedPatient.insuranceValidUntil?.toISOString(),
+            allergies: updatedPatient.allergies,
+            medications: updatedPatient.medications,
+            conditions: updatedPatient.conditions,
+            bloodType: updatedPatient.bloodType,
+            medicalNotes: updatedPatient.medicalNotes,
+            consentDataProcessing: updatedPatient.consentDataProcessing,
+            consentDataProcessingDate: updatedPatient.consentDataProcessingDate?.toISOString(),
+            consentMedicalTreatment: updatedPatient.consentMedicalTreatment,
+            consentMedicalTreatmentDate: updatedPatient.consentMedicalTreatmentDate?.toISOString(),
+            consentImageUse: updatedPatient.consentImageUse,
+            consentImageUseDate: updatedPatient.consentImageUseDate?.toISOString(),
             createdAt: updatedPatient.createdAt.toISOString(),
             updatedAt: updatedPatient.updatedAt.toISOString(),
             recordNumber: updatedPatient.recordNumber
@@ -1110,8 +1422,35 @@ export async function createOrUpdatePatient(patientData: any): Promise<{ success
         cpf: patientData.cpf,
         medicalRecordNumber: nextRecordNumber,
         rg: patientData.rg,
-        insuranceType: patientData.insuranceType?.toUpperCase() === 'PARTICULAR' ? 'PARTICULAR' : 'OUTRO'
+        address: patientData.address || patientData.endereco,
+        city: patientData.city || patientData.cidade,
+        state: patientData.state || patientData.estado,
+        zipCode: patientData.zipCode || patientData.cep,
+        insuranceType: patientData.insurance?.type?.toUpperCase() === 'UNIMED' ? 'UNIMED' : 
+                      patientData.insurance?.type?.toUpperCase() === 'PARTICULAR' ? 'PARTICULAR' : 'OUTRO',
+        insurancePlan: patientData.insurance?.plan,
+        insuranceCardNumber: patientData.insurance?.cardNumber,
+        insuranceValidUntil: patientData.insurance?.validUntil ? new Date(patientData.insurance.validUntil) : null,
+        allergies: Array.isArray(patientData.medicalInfo?.allergies) ? patientData.medicalInfo.allergies.join(', ') : null,
+        medications: Array.isArray(patientData.medicalInfo?.medications) ? patientData.medicalInfo.medications.join(', ') : null,
+        conditions: Array.isArray(patientData.medicalInfo?.conditions) ? patientData.medicalInfo.conditions.join(', ') : null,
+        emergencyContact: patientData.medicalInfo?.emergencyContact,
+        emergencyPhone: patientData.medicalInfo?.emergencyPhone,
+        bloodType: patientData.medicalInfo?.bloodType,
+        medicalNotes: patientData.medicalInfo?.notes,
+        consentDataProcessing: patientData.consents?.dataProcessing ?? true,
+        consentDataProcessingDate: patientData.consents?.dataProcessing ? new Date() : null,
+        consentMedicalTreatment: patientData.consents?.medicalTreatment ?? true,
+        consentMedicalTreatmentDate: patientData.consents?.medicalTreatment ? new Date() : null,
+        consentImageUse: patientData.consents?.imageUse ?? false,
+        consentImageUseDate: patientData.consents?.imageUse ? new Date() : null,
+        isActive: true
       }
+    })
+    
+    // Buscar dados do contato de comunicação para incluir telefone e whatsapp corretos
+    const communicationContact = await prisma.communicationContact.findUnique({
+      where: { id: newPatient.communicationContactId }
     })
     
     return {
@@ -1122,6 +1461,37 @@ export async function createOrUpdatePatient(patientData: any): Promise<{ success
             fullName: newPatient.fullName,
             cpf: newPatient.cpf,
             rg: newPatient.rg || undefined,
+            address: newPatient.address,
+            city: newPatient.city,
+            state: newPatient.state,
+            zipCode: newPatient.zipCode,
+            telefone: communicationContact?.phone || communicationContact?.whatsapp || '',
+            whatsapp: communicationContact?.whatsapp || communicationContact?.phone || '',
+            email: communicationContact?.email || patientData.email,
+            birthDate: communicationContact?.birthDate || patientData.birthDate,
+            insurance: {
+              type: newPatient.insuranceType.toLowerCase(),
+              plan: newPatient.insurancePlan,
+              cardNumber: newPatient.insuranceCardNumber,
+              validUntil: newPatient.insuranceValidUntil?.toISOString()
+            },
+            medicalInfo: {
+              allergies: newPatient.allergies ? newPatient.allergies.split(', ') : [],
+              medications: newPatient.medications ? newPatient.medications.split(', ') : [],
+              conditions: newPatient.conditions ? newPatient.conditions.split(', ') : [],
+              emergencyContact: newPatient.emergencyContact,
+              emergencyPhone: newPatient.emergencyPhone,
+              bloodType: newPatient.bloodType,
+              notes: newPatient.medicalNotes
+            },
+            consents: {
+              dataProcessing: newPatient.consentDataProcessing,
+              dataProcessingDate: newPatient.consentDataProcessingDate?.toISOString(),
+              medicalTreatment: newPatient.consentMedicalTreatment,
+              medicalTreatmentDate: newPatient.consentMedicalTreatmentDate?.toISOString(),
+              imageUse: newPatient.consentImageUse,
+              imageUseDate: newPatient.consentImageUseDate?.toISOString()
+            },
             insuranceType: newPatient.insuranceType,
             createdAt: newPatient.createdAt.toISOString(),
             updatedAt: newPatient.updatedAt.toISOString(),
@@ -1483,4 +1853,53 @@ export async function createMedicalPatient(patientData: any): Promise<{ success:
 export function validateDataIntegrity(): any {
   console.log('⚠️ validateDataIntegrity não implementado ainda')
   return { valid: true, errors: [] }
+}
+
+// ============================================================================
+// APPOINTMENT VALIDATION
+// ============================================================================
+
+export async function canPatientScheduleNewAppointment(patientCpf: string): Promise<{ canSchedule: boolean; reason?: string }> {
+  try {
+    console.log('🔍 Verificando se paciente pode agendar nova consulta:', patientCpf)
+    
+    // Buscar paciente médico pelo CPF
+    const medicalPatient = await getMedicalPatientByCpf(patientCpf)
+    if (!medicalPatient) {
+      console.log('✅ Paciente não encontrado no sistema médico - pode agendar')
+      return { canSchedule: true }
+    }
+
+    // Buscar consultas ativas do paciente
+    const activeAppointments = await prisma.appointment.findMany({
+      where: {
+        medicalPatientId: medicalPatient.id,
+        status: {
+          in: ['SCHEDULED', 'CONFIRMED', 'IN_PROGRESS']
+        }
+      },
+      orderBy: {
+        appointmentDate: 'desc'
+      }
+    })
+
+    if (activeAppointments.length > 0) {
+      const activeAppointment = activeAppointments[0]
+      console.log('❌ Paciente possui consulta ativa:', activeAppointment.id)
+      return {
+        canSchedule: false,
+        reason: 'Você já possui uma consulta agendada. Uma nova consulta só pode ser marcada após a consulta anterior ser concluída pelo médico.'
+      }
+    }
+
+    console.log('✅ Paciente pode agendar nova consulta')
+    return { canSchedule: true }
+    
+  } catch (error) {
+    console.error('❌ Erro ao verificar se paciente pode agendar:', error)
+    return {
+      canSchedule: false,
+      reason: 'Erro interno do sistema. Tente novamente.'
+    }
+  }
 }

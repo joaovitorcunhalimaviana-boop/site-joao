@@ -17,6 +17,7 @@ import Header from '../../../components/ui/header'
 import Footer from '../../../components/ui/footer'
 import MedicalAreaMenu from '../../../components/ui/medical-area-menu'
 import { BrazilianDateInput } from '../../../components/ui/brazilian-date-input'
+import { validateCPF } from '@/lib/validation-schemas'
 
 interface PatientData {
   name: string
@@ -46,6 +47,8 @@ export default function NovoPackiente() {
     whatsapp: '',
   })
   const [isLoading, setIsLoading] = useState(false)
+  const [cpfError, setCpfError] = useState('')
+  const [duplicateWarning, setDuplicateWarning] = useState('')
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -56,6 +59,20 @@ export default function NovoPackiente() {
     if (name === 'cpf') {
       const formatted = value.replace(/\D/g, '').substring(0, 11)
       setFormData(prev => ({ ...prev, [name]: formatted }))
+      
+      // Validar CPF em tempo real
+      if (formatted.length === 11) {
+        if (!validateCPF(formatted)) {
+          setCpfError('CPF inválido')
+        } else {
+          setCpfError('')
+          // Verificar duplicatas
+          checkForDuplicates(formatted)
+        }
+      } else {
+        setCpfError('')
+        setDuplicateWarning('')
+      }
     }
     // Formatação automática para telefone e WhatsApp
     else if (name === 'phone' || name === 'whatsapp') {
@@ -83,8 +100,44 @@ export default function NovoPackiente() {
     }
   }
 
+  const checkForDuplicates = async (cpf: string) => {
+    try {
+      const response = await fetch(`/api/patients/duplicate-check?cpf=${cpf}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+
+      if (response.ok) {
+        const result = await response.json()
+        if (result.success && result.result?.isDuplicate) {
+          setDuplicateWarning(`Atenção: Já existe um paciente cadastrado com este CPF (${result.result.existingPatient?.name})`)
+        } else {
+          setDuplicateWarning('')
+        }
+      }
+    } catch (error) {
+      console.error('Erro ao verificar duplicatas:', error)
+    }
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    
+    // Validações antes do envio
+    if (!validateCPF(formData.cpf)) {
+      alert('Por favor, insira um CPF válido')
+      return
+    }
+    
+    if (duplicateWarning) {
+      const confirmDuplicate = confirm(`${duplicateWarning}\n\nDeseja continuar mesmo assim?`)
+      if (!confirmDuplicate) {
+        return
+      }
+    }
+    
     setIsLoading(true)
 
     try {
@@ -171,20 +224,21 @@ export default function NovoPackiente() {
                     id='cpf'
                     name='cpf'
                     type='text'
-                    value={formData.cpf}
-                    onChange={e => {
-                      const value = e.target.value.replace(/\D/g, '')
-                      const formattedValue = value.replace(
-                        /(\d{3})(\d{3})(\d{3})(\d{2})/,
-                        '$1.$2.$3-$4'
-                      )
-                      setFormData({ ...formData, cpf: formattedValue })
-                    }}
+                    value={formData.cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4')}
+                    onChange={handleInputChange}
                     required
                     maxLength={14}
                     placeholder='000.000.000-00'
-                    className='bg-gray-800 border-gray-600 text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500'
+                    className={`bg-gray-800 border-gray-600 text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 ${
+                      cpfError ? 'border-red-500' : duplicateWarning ? 'border-yellow-500' : ''
+                    }`}
                   />
+                  {cpfError && (
+                    <p className='text-red-400 text-sm'>{cpfError}</p>
+                  )}
+                  {duplicateWarning && (
+                    <p className='text-yellow-400 text-sm'>{duplicateWarning}</p>
+                  )}
                 </div>
 
                 <div className='space-y-2'>

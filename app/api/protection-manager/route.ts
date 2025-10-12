@@ -252,7 +252,7 @@ async function getSystemHealth(): Promise<NextResponse> {
 
     // Verificar agendador
     try {
-      healthChecks['scheduler'] = dataProtectionScheduler.isSchedulerRunning()
+      healthChecks.scheduler = dataProtectionScheduler.isSchedulerRunning()
     } catch (error) {
       console.warn('⚠️ Problema com agendador:', error)
     }
@@ -260,7 +260,7 @@ async function getSystemHealth(): Promise<NextResponse> {
     // Verificar banco de dados
     try {
       // Simular verificação de banco
-      healthChecks['database'] = true
+      healthChecks.database = true
     } catch (error) {
       console.warn('⚠️ Problema com banco de dados:', error)
     }
@@ -268,7 +268,7 @@ async function getSystemHealth(): Promise<NextResponse> {
     // Verificar sistema de backup
     try {
       const backupResponse = await fetch(`${baseUrl}/api/backup-emergency`)
-      healthChecks['backupSystem'] = backupResponse.ok
+      healthChecks.backupSystem = backupResponse.ok
     } catch (error) {
       console.warn('⚠️ Problema com sistema de backup:', error)
     }
@@ -276,7 +276,7 @@ async function getSystemHealth(): Promise<NextResponse> {
     // Verificar sistema de integridade
     try {
       const integrityResponse = await fetch(`${baseUrl}/api/data-integrity`)
-      healthChecks['integritySystem'] = integrityResponse.ok
+      healthChecks.integritySystem = integrityResponse.ok
     } catch (error) {
       console.warn('⚠️ Problema com sistema de integridade:', error)
     }
@@ -286,7 +286,7 @@ async function getSystemHealth(): Promise<NextResponse> {
       const auditResponse = await fetch(
         `${baseUrl}/api/audit-logs`
       )
-      healthChecks['auditSystem'] = auditResponse.ok
+      healthChecks.auditSystem = auditResponse.ok
     } catch (error) {
       console.warn('⚠️ Problema com sistema de auditoria:', error)
     }
@@ -296,7 +296,7 @@ async function getSystemHealth(): Promise<NextResponse> {
       const monitoringResponse = await fetch(
         `${baseUrl}/api/emergency-dashboard`
       )
-      healthChecks['monitoringSystem'] = monitoringResponse.ok
+      healthChecks.monitoringSystem = monitoringResponse.ok
     } catch (error) {
       console.warn('⚠️ Problema com sistema de monitoramento:', error)
     }

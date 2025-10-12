@@ -26,6 +26,7 @@ interface Patient {
   email: string
   phone: string
   birthDate: string
+  cpf?: string
   address: string
   medicalHistory: string
   allergies: string

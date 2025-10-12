@@ -139,7 +139,7 @@ export async function getAllPatients(): Promise<UnifiedPatient[]> {
           name: medPatient.fullName,
           cpf: medPatient.cpf,
           medicalRecordNumber: medPatient.medicalRecordNumber,
-          phone: contact.whatsapp || '',
+          phone: contact.phone || '',
           whatsapp: contact.whatsapp || '',
           email: contact.email,
           birthDate: contact.birthDate,
@@ -157,6 +157,7 @@ export async function getAllPatients(): Promise<UnifiedPatient[]> {
             newsletter: contact.emailPreferences?.newsletter ?? false
           },
           birthdayEmailLogs: [],
+          isActive: medPatient.isActive ?? true,
           createdAt: medPatient.createdAt,
           updatedAt: medPatient.updatedAt
         })
@@ -172,7 +173,7 @@ export async function getAllPatients(): Promise<UnifiedPatient[]> {
           name: contact.name,
           cpf: undefined,
           medicalRecordNumber: undefined,
-          phone: contact.whatsapp || '',
+          phone: contact.phone || '',
           whatsapp: contact.whatsapp || '',
           email: contact.email,
           birthDate: contact.birthDate,
@@ -190,6 +191,7 @@ export async function getAllPatients(): Promise<UnifiedPatient[]> {
             newsletter: contact.emailPreferences?.newsletter ?? false
           },
           birthdayEmailLogs: [],
+          isActive: true, // Contatos de comunicação são sempre ativos
           createdAt: contact.createdAt,
           updatedAt: contact.updatedAt
         })
@@ -215,7 +217,7 @@ export async function getPatientById(id: string): Promise<UnifiedPatient | null>
           name: medicalPatient.fullName,
           cpf: medicalPatient.cpf,
           medicalRecordNumber: medicalPatient.medicalRecordNumber,
-          phone: contact.whatsapp || '',
+          phone: contact.phone || '',
           whatsapp: contact.whatsapp || '',
           email: contact.email,
           birthDate: contact.birthDate,
@@ -247,7 +249,7 @@ export async function getPatientById(id: string): Promise<UnifiedPatient | null>
         name: contact.name,
         cpf: undefined,
         medicalRecordNumber: undefined,
-        phone: contact.whatsapp || '',
+        phone: contact.phone || '',
         whatsapp: contact.whatsapp || '',
         email: contact.email,
         birthDate: contact.birthDate,
@@ -303,7 +305,7 @@ export async function createOrUpdatePatient(patientData: Partial<UnifiedPatient>
             name: updatedMedicalPatient.fullName,
             cpf: updatedMedicalPatient.cpf,
             medicalRecordNumber: updatedMedicalPatient.medicalRecordNumber,
-            phone: updatedContact.whatsapp || '',
+            phone: updatedContact.phone || '',
             whatsapp: updatedContact.whatsapp || '',
             email: updatedContact.email,
             birthDate: updatedContact.birthDate,
@@ -335,7 +337,7 @@ export async function createOrUpdatePatient(patientData: Partial<UnifiedPatient>
             name: newMedicalPatient.fullName,
             cpf: newMedicalPatient.cpf,
             medicalRecordNumber: newMedicalPatient.medicalRecordNumber,
-            phone: existingContact.whatsapp || '',
+            phone: existingContact.phone || '',
             whatsapp: existingContact.whatsapp || '',
             email: existingContact.email,
             birthDate: existingContact.birthDate,
@@ -356,7 +358,7 @@ export async function createOrUpdatePatient(patientData: Partial<UnifiedPatient>
           name: updatedContact.name,
           cpf: undefined,
           medicalRecordNumber: undefined,
-          phone: updatedContact.whatsapp || '',
+          phone: updatedContact.phone || '',
           whatsapp: updatedContact.whatsapp || '',
           email: updatedContact.email,
           birthDate: updatedContact.birthDate,
@@ -371,7 +373,8 @@ export async function createOrUpdatePatient(patientData: Partial<UnifiedPatient>
     } else {
       // Criar novo contato de comunicação
       const contactResult = await createOrUpdateCommunicationContact({
-        name: patientData.name,
+        name: patientData.fullName || patientData.name,
+        phone: patientData.phone,
         whatsapp: patientData.whatsapp,
         email: patientData.email,
         birthDate: patientData.birthDate,
@@ -388,7 +391,7 @@ export async function createOrUpdatePatient(patientData: Partial<UnifiedPatient>
         // Criar também paciente médico
         const medicalPatientResult = await createMedicalPatient({
           communicationContactId: newContact.id,
-          fullName: patientData.name,
+          fullName: patientData.fullName || patientData.name,
           cpf: patientData.cpf,
           medicalRecordNumber: patientData.medicalRecordNumber,
           insurance: patientData.insurance || { type: 'particular' }
@@ -405,7 +408,7 @@ export async function createOrUpdatePatient(patientData: Partial<UnifiedPatient>
           name: newMedicalPatient.fullName,
           cpf: newMedicalPatient.cpf,
           medicalRecordNumber: newMedicalPatient.medicalRecordNumber,
-          phone: newContact.whatsapp || '',
+          phone: newContact.phone || '',
           whatsapp: newContact.whatsapp || '',
           email: newContact.email,
           birthDate: newContact.birthDate,
@@ -423,7 +426,7 @@ export async function createOrUpdatePatient(patientData: Partial<UnifiedPatient>
           name: newContact.name,
           cpf: undefined,
           medicalRecordNumber: undefined,
-          phone: newContact.whatsapp || '',
+          phone: newContact.phone || '',
           whatsapp: newContact.whatsapp || '',
           email: newContact.email,
           birthDate: newContact.birthDate,
@@ -455,22 +458,22 @@ export async function getAllAppointments(): Promise<UnifiedAppointment[]> {
 
     return consultations.map(consultation => ({
       id: consultation.id,
-      patientId: consultation.patientId,
-      patientName: consultation.patient.name,
-      patientCpf: consultation.patient.cpf || undefined,
-      patientMedicalRecordNumber: undefined, // Patient model doesn't have this field
-      patientPhone: consultation.patient.phone,
-      patientWhatsapp: consultation.patient.whatsapp,
-      patientEmail: consultation.patient.email || undefined,
-      patientBirthDate: consultation.patient.birthDate?.toISOString().split('T')[0],
-      insuranceType: (consultation.patient.insuranceType as 'unimed' | 'particular' | 'outro') || 'particular',
-      insurancePlan: consultation.patient.insurancePlan || undefined,
-      appointmentDate: consultation.scheduledDate.toISOString().split('T')[0],
-      appointmentTime: consultation.scheduledDate.toTimeString().split(' ')[0].substring(0, 5),
-      appointmentType: (consultation.type as 'consulta' | 'retorno' | 'urgencia' | 'teleconsulta' | 'visita_domiciliar') || 'consulta',
-      status: (consultation.status as 'agendada' | 'confirmada' | 'em_andamento' | 'concluida' | 'cancelada' | 'reagendada') || 'agendada',
-      source: 'public_appointment',
-      notes: consultation.notes || undefined,
+      patientId: consultation.medicalPatientId || '',
+      patientName: consultation.medicalPatient?.name || 'Paciente não identificado',
+      patientCpf: consultation.medicalPatient?.cpf || undefined,
+      patientMedicalRecordNumber: consultation.medicalPatient?.medicalRecordNumber || undefined,
+      patientPhone: consultation.medicalPatient?.phone || '',
+      patientWhatsapp: consultation.medicalPatient?.whatsapp || '',
+      patientEmail: consultation.medicalPatient?.email || undefined,
+      patientBirthDate: consultation.medicalPatient?.birthDate?.toISOString().split('T')[0],
+      insuranceType: (consultation.medicalPatient?.insuranceType as 'unimed' | 'particular' | 'outro') || 'particular',
+      insurancePlan: consultation.medicalPatient?.insurancePlan || undefined,
+      appointmentDate: consultation.startTime.toISOString().split('T')[0],
+      appointmentTime: consultation.startTime.toTimeString().split(' ')[0].substring(0, 5),
+      appointmentType: 'consulta',
+      status: (consultation.status.toLowerCase() as 'agendada' | 'confirmada' | 'em_andamento' | 'concluida' | 'cancelada' | 'reagendada') || 'agendada',
+      source: 'consultation',
+      notes: consultation.anamnese || undefined,
       createdAt: consultation.createdAt.toISOString(),
       updatedAt: consultation.updatedAt.toISOString()
     }))
@@ -482,12 +485,19 @@ export async function getAllAppointments(): Promise<UnifiedAppointment[]> {
 
 export async function getAppointmentsByDate(date: string): Promise<UnifiedAppointment[]> {
   try {
+    const targetDate = new Date(date)
+    const startOfDay = new Date(targetDate.getFullYear(), targetDate.getMonth(), targetDate.getDate())
+    const endOfDay = new Date(targetDate.getFullYear(), targetDate.getMonth(), targetDate.getDate() + 1)
+    
     const consultations = await prisma.consultation.findMany({
       where: {
-        scheduledDate: new Date(date)
+        startTime: {
+          gte: startOfDay,
+          lt: endOfDay
+        }
       },
       include: {
-        patient: true
+        medicalPatient: true
       }
     })
 

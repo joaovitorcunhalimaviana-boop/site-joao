@@ -269,6 +269,23 @@ export default function AppointmentPage() {
           }
         }
       }
+
+      // Carregar anexos existentes da consulta
+      try {
+        const attachmentsResponse = await fetch(
+          `/api/medical-attachments?consultationId=${appointmentId}`,
+          { credentials: 'include' }
+        )
+        if (attachmentsResponse.ok) {
+          const attachmentsData = await attachmentsResponse.json()
+          if (attachmentsData.attachments && attachmentsData.attachments.length > 0) {
+            console.log('📎 Anexos existentes carregados:', attachmentsData.attachments.length)
+            setSavedAttachments(attachmentsData.attachments)
+          }
+        }
+      } catch (attachmentError) {
+        console.error('Erro ao carregar anexos existentes:', attachmentError)
+      }
     } catch (err) {
       console.error('Erro ao carregar dados:', err)
       setError(err instanceof Error ? err.message : 'Erro desconhecido')
@@ -301,6 +318,7 @@ export default function AppointmentPage() {
           observations: '',
           doctorName: 'Dr. João Vitor Viana',
           calculatorResults: [],
+          diagnosticHypotheses: diagnosticHypotheses,
         }),
       })
 
@@ -476,10 +494,7 @@ export default function AppointmentPage() {
           diagnosis: '',
           treatment: '',
           prescription: '',
-          observations:
-            calculatorResults.length > 0
-              ? formatCalculatorResults(calculatorResults)
-              : '',
+          observations: '', // Removido formatCalculatorResults para evitar duplicação
           doctorName: 'Dr. João Vitor Viana',
           doctorCrm: '', // Adicionado campo esperado pela API
           calculatorResults: calculatorResults,
@@ -768,6 +783,17 @@ export default function AppointmentPage() {
                                 {consultation.anamnesis}
                               </p>
                             </div>
+
+                            {consultation.observations && consultation.observations.trim() && (
+                              <div>
+                                <h4 className='text-sm font-medium text-white mb-2'>
+                                  Observações:
+                                </h4>
+                                <p className='text-sm text-gray-300'>
+                                  {consultation.observations}
+                                </p>
+                              </div>
+                            )}
 
                             {consultation.calculatorResults &&
                               consultation.calculatorResults.length > 0 && (
@@ -1096,14 +1122,44 @@ export default function AppointmentPage() {
               </TabsContent>
 
               <TabsContent value='anexos' className='mt-6'>
-                <MedicalImageUpload
-                  patientId={patient?.id || appointmentId}
-                  patientName={patient?.name || 'Paciente'}
-                  onSave={attachments => {
-                    console.log('Anexos salvos:', attachments)
-                    setSavedAttachments(prev => [...prev, ...attachments])
-                  }}
-                />
+                <div className='space-y-6'>
+                  <MedicalImageUpload
+                    consultationId={appointmentId}
+                    patientName={patient?.name || 'Paciente'}
+                    onSave={attachments => {
+                      console.log('Anexos salvos:', attachments)
+                      setSavedAttachments(prev => [...prev, ...attachments])
+                    }}
+                  />
+                  
+                  {savedAttachments.length > 0 && (
+                    <div className='mt-6'>
+                      <h3 className='text-lg font-semibold mb-4 text-green-600'>
+                        📎 Anexos Salvos ({savedAttachments.length})
+                      </h3>
+                      <div className='grid gap-3'>
+                        {savedAttachments.map((attachment, index) => (
+                          <div key={attachment.id || index} className='flex items-center justify-between p-3 bg-green-50 border border-green-200 rounded-lg'>
+                            <div className='flex items-center space-x-3'>
+                              <div className='w-8 h-8 bg-green-100 rounded-full flex items-center justify-center'>
+                                <span className='text-green-600 text-sm'>📄</span>
+                              </div>
+                              <div>
+                                <p className='font-medium text-gray-900'>{attachment.originalName}</p>
+                                <p className='text-sm text-gray-500'>
+                                  {attachment.category} • {attachment.description}
+                                </p>
+                              </div>
+                            </div>
+                            <div className='text-sm text-green-600 font-medium'>
+                              ✅ Salvo
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
               </TabsContent>
             </Tabs>
           </div>

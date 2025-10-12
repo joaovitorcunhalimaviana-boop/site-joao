@@ -26,17 +26,29 @@ const publicRoutes = [
   '/login',
   '/login-medico',
   '/login-secretaria',
+  '/test-upload.html',
   '/api/auth/login',
   '/api/public-appointment',
+  '/api/admin/clear-data',
+  '/api/unified-system/*',
+  '/api/unified-appointments',
+  '/api/data-integrity',
+  '/api/emergency-dashboard',
+  '/api/protection-manager',
+  '/api/health',
+  '/api/cron-control',
+  '/api/daily-agenda',
+  '/api/newsletter',
+  '/api/reviews',
   '/_next/*',
   '/favicon.ico',
 ]
 
 // Rotas protegidas por área
 const areaProtectedRoutes: Record<string, string[]> = {
-  '/area-medica': ['doctor', 'admin'],
-  '/area-secretaria': ['secretary', 'admin'],
-  '/admin': ['admin'],
+  '/area-medica': ['DOCTOR', 'ADMIN'],
+  '/area-secretaria': ['SECRETARY', 'ADMIN'],
+  '/admin': ['ADMIN'],
 }
 
 // Configurar runtime para Node.js
@@ -80,7 +92,13 @@ export async function middleware(request: NextRequest) {
   if (requiredRoles) {
     try {
       console.log('🔐 [Middleware] Verificando autenticação com token:', token)
-      const checkUrl = new URL('/api/auth/check', request.url)
+      
+      // Em produção (Railway), usar localhost interno
+      const baseUrl = process.env.NODE_ENV === 'production' 
+        ? 'http://localhost:8080' 
+        : request.url.split('/').slice(0, 3).join('/')
+      
+      const checkUrl = new URL('/api/auth/check', baseUrl)
       console.log('📡 [Middleware] Chamando API:', checkUrl.toString())
       
       const response = await fetch(checkUrl, {
@@ -107,8 +125,8 @@ export async function middleware(request: NextRequest) {
       const data = await response.json()
       console.log('👤 [Middleware] Dados do usuário:', data)
 
-      // Verificar role do usuário - normalizar para minúsculas para comparação
-      const userRole = data.user?.role?.toLowerCase()
+      // Verificar role do usuário
+      const userRole = data.user?.role
       console.log('👮 [Middleware] Role do usuário:', userRole)
       console.log('🔒 [Middleware] Roles necessárias:', requiredRoles)
 
@@ -117,8 +135,8 @@ export async function middleware(request: NextRequest) {
         return NextResponse.redirect(new URL('/unauthorized', request.url))
       }
 
-      // Normalizar roles necessárias para minúsculas também
-      const normalizedRequiredRoles = requiredRoles.map(r => r.toLowerCase())
+      // Normalizar roles necessárias para maiúsculas
+      const normalizedRequiredRoles = requiredRoles.map(r => r.toUpperCase())
 
       if (!normalizedRequiredRoles.includes(userRole)) {
         console.error(`❌ [Middleware] Acesso negado: role ${userRole} não tem permissão. Necessário: ${requiredRoles.join(', ')}`)

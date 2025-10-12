@@ -21,6 +21,7 @@ interface Patient {
   phone: string
   whatsapp: string
   birthDate: string
+  cpf?: string
   insurance: {
     type: 'particular' | 'unimed' | 'outro'
     plan?: string
@@ -76,9 +77,39 @@ export default function ProntuarioPage() {
   const params = useParams()
   const patientId = params['id'] as string
 
-  const calculateAge = (birthDate: string | undefined): number => {
-    if (!birthDate) return 0
-    const birth = new Date(birthDate)
+  const calculateAge = (birthDate: string | null | undefined): number => {
+    console.log('🎂 Calculando idade para:', birthDate)
+    if (!birthDate || birthDate === 'null' || birthDate.trim() === '') {
+      console.log('❌ Data de nascimento não fornecida ou inválida')
+      return 0
+    }
+    
+    // Tentar diferentes formatos de data
+    let birth: Date
+    
+    // Se a data está no formato DD/MM/YYYY
+    if (birthDate.includes('/')) {
+      const [day, month, year] = birthDate.split('/')
+      birth = new Date(parseInt(year), parseInt(month) - 1, parseInt(day))
+      console.log('📅 Formato DD/MM/YYYY detectado:', { day, month, year, birth })
+    } 
+    // Se a data está no formato YYYY-MM-DD
+    else if (birthDate.includes('-')) {
+      birth = new Date(birthDate)
+      console.log('📅 Formato YYYY-MM-DD detectado:', birth)
+    }
+    // Tentar criar a data diretamente
+    else {
+      birth = new Date(birthDate)
+      console.log('📅 Formato direto:', birth)
+    }
+    
+    // Verificar se a data é válida
+    if (isNaN(birth.getTime())) {
+      console.error('❌ Data de nascimento inválida:', birthDate)
+      return 0
+    }
+    
     const today = new Date()
     let age = today.getFullYear() - birth.getFullYear()
     const monthDiff = today.getMonth() - birth.getMonth()
@@ -90,6 +121,7 @@ export default function ProntuarioPage() {
       age--
     }
 
+    console.log('✅ Idade calculada:', age)
     return age
   }
 
@@ -126,15 +158,23 @@ export default function ProntuarioPage() {
 
       // Mapear dados para o formato esperado pelo componente
       const patientData = data.patient
+      
+      console.log('🔍 Dados do convênio recebidos:', {
+        insurance: patientData.insurance,
+        originalType: patientData.insurance?.originalType,
+        type: patientData.insurance?.type,
+        plan: patientData.insurance?.plan
+      })
+      
       const mappedPatient = {
         id: patientData.id || patientId,
         name: patientData.fullName || patientData.name || 'Nome não disponível',
-        phone: patientData.communicationContact?.whatsapp || patientData.phone || '',
-        whatsapp: patientData.communicationContact?.whatsapp || patientData.whatsapp || '',
-        birthDate: patientData.communicationContact?.birthDate || patientData.birthDate || '',
+        phone: patientData.phone || '',
+        whatsapp: patientData.whatsapp || '',
+        birthDate: patientData.birthDate || '',
         insurance: {
-          type: patientData.insurance?.type || patientData.insuranceType || 'particular',
-          plan: patientData.insurance?.plan || patientData.insurancePlan || ''
+          type: patientData.insurance?.type || 'particular',
+          plan: patientData.insurance?.planType || patientData.insurance?.plan || ''
         },
         status: 'aguardando', // Status padrão
         createdAt: patientData.createdAt || new Date().toISOString(),
@@ -173,9 +213,15 @@ export default function ProntuarioPage() {
     }
   }
 
-  const formatDate = (dateString: string | undefined) => {
-    if (!dateString) return 'Data não informada'
-    return dateString.split('-').reverse().join('/')
+  const formatDate = (dateString: string | null | undefined) => {
+    if (!dateString || dateString === 'null') return 'Data não informada'
+    // Se já está no formato DD/MM/YYYY, retorna como está
+    if (dateString.includes('/')) return dateString
+    // Se está no formato YYYY-MM-DD, converte para DD/MM/YYYY
+    if (dateString.includes('-')) {
+      return dateString.split('-').reverse().join('/')
+    }
+    return 'Data não informada'
   }
 
   const formatTime = (timeString: string | undefined) => {
@@ -283,9 +329,11 @@ export default function ProntuarioPage() {
                       ? 'Particular'
                       : patient.insurance?.type === 'unimed'
                         ? 'UNIMED'
-                        : patient.insurance?.plan ||
-                          patient.insurance?.type ||
-                          'Não informado'}
+                        : patient.insurance?.type === 'outro'
+                          ? patient.insurance?.plan || 'Outro'
+                          : patient.insurance?.plan ||
+                            patient.insurance?.type ||
+                            'Não informado'}
                   </p>
                 </div>
 
@@ -423,62 +471,60 @@ export default function ProntuarioPage() {
                             </div>
                           )}
 
-                          {/* Calculadoras Utilizadas */}
+                          {/* Calculadoras */}
                           {record.calculatorResults &&
                             record.calculatorResults.length > 0 && (
                               <div>
-                                <p className='text-white font-medium text-sm mb-2 flex items-center'>
-                                  <svg className='h-4 w-4 mr-1' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-                                    <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z' />
-                                  </svg>
-                                  Calculadoras Utilizadas ({record.calculatorResults.length})
+                                <p className='text-white font-medium text-sm mb-1'>
+                                  Calculadoras:
                                 </p>
-                                <div className='space-y-3'>
-                                  {record.calculatorResults.map((result, index) => (
-                                    <div
-                                      key={index}
-                                      className='bg-gray-700 rounded-lg p-3 border border-gray-600'
-                                    >
-                                      <div className='flex items-center justify-between mb-2'>
-                                        <h4 className='text-white font-medium text-sm'>
-                                          {result.calculatorName}
-                                        </h4>
-                                        <span className='text-xs text-gray-400'>
-                                          {formatDate(result.timestamp)}
-                                        </span>
+                                <div className='text-gray-300 text-sm whitespace-pre-line'>
+                                  {record.calculatorResults.map((result, index) => {
+                                    // Renderizar resultado baseado na estrutura dos dados
+                                    const renderResult = () => {
+                                      if (typeof result.result === 'object' && result.result !== null) {
+                                        // Se result.result é um objeto, extrair informações relevantes
+                                        if (result.result.bmi) {
+                                          return `IMC: ${result.result.bmi} (${result.result.category})`
+                                        }
+                                        if (result.result.score !== undefined) {
+                                          return `Score: ${result.result.score}`
+                                        }
+                                        if (result.result.interpretation) {
+                                          return result.result.interpretation
+                                        }
+                                        // Fallback para outros objetos
+                                        return JSON.stringify(result.result)
+                                      }
+                                      // Se result.result é string/number, renderizar diretamente
+                                      return result.result
+                                    }
+
+                                    const interpretation = result.interpretation || 
+                                      (result.result && typeof result.result === 'object' ? result.result.interpretation : '')
+
+                                    return (
+                                      <div key={index}>
+                                        - {result.calculatorName}: {renderResult()}
+                                        {interpretation && ` - ${interpretation}`}
                                       </div>
-                                      
-                                      <div className='space-y-2'>
-                                        <div>
-                                          <p className='text-xs text-gray-300 mb-1'>Resultado:</p>
-                                          <p className='text-sm text-white font-medium'>
-                                            {result.result}
-                                          </p>
-                                        </div>
-                                        
-                                        {result.interpretation && (
-                                          <div>
-                                            <p className='text-xs text-gray-300 mb-1'>Interpretação:</p>
-                                            <p className='text-sm text-gray-200'>
-                                              {result.interpretation}
-                                            </p>
-                                          </div>
-                                        )}
-                                        
-                                        {result.parameters && Object.keys(result.parameters).length > 0 && (
-                                          <div>
-                                            <p className='text-xs text-gray-300 mb-1'>Parâmetros:</p>
-                                            <div className='grid grid-cols-2 gap-2'>
-                                              {Object.entries(result.parameters).map(([key, value]) => (
-                                                <div key={key} className='text-xs'>
-                                                  <span className='text-gray-400'>{key}:</span>
-                                                  <span className='text-white ml-1'>{String(value)}</span>
-                                                </div>
-                                              ))}
-                                            </div>
-                                          </div>
-                                        )}
-                                      </div>
+                                    )
+                                  })}
+                                </div>
+                              </div>
+                            )}
+
+                          {/* Hipóteses Diagnósticas */}
+                          {record.diagnosticHypotheses &&
+                            record.diagnosticHypotheses.length > 0 && (
+                              <div>
+                                <p className='text-white font-medium text-sm mb-1'>
+                                  Hipóteses Diagnósticas:
+                                </p>
+                                <div className='text-gray-300 text-sm whitespace-pre-line'>
+                                  {record.diagnosticHypotheses.map((hypothesis, index) => (
+                                    <div key={index}>
+                                      - {hypothesis}
                                     </div>
                                   ))}
                                 </div>

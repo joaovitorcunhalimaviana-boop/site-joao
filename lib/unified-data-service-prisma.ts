@@ -2,17 +2,16 @@
 // Substitui as funções JSON por operações Prisma
 
 import { prisma } from './prisma-service'
-// Removendo imports das funções JSON-based que não são mais necessárias
-// import { 
-//   getAllCommunicationContacts, 
-//   getAllMedicalPatients,
-//   createOrUpdateCommunicationContact,
-//   createMedicalPatient,
-//   getCommunicationContactById,
-//   getMedicalPatientById,
-//   type CommunicationContact,
-//   type MedicalPatient
-// } from './unified-patient-system'
+import { 
+  getAllCommunicationContacts, 
+  getAllMedicalPatients,
+  createOrUpdateCommunicationContact,
+  createMedicalPatient,
+  getCommunicationContactById,
+  getMedicalPatientById,
+  type CommunicationContact,
+  type MedicalPatient
+} from './unified-patient-system-prisma'
 
 // Interfaces unificadas (mantidas para compatibilidade)
 export interface UnifiedPatient {
@@ -91,8 +90,8 @@ export async function getAllPatients(): Promise<UnifiedPatient[]> {
           email: contact.email,
           birthDate: contact.birthDate,
           insurance: {
-            type: medPatient.insurance.type as 'unimed' | 'particular' | 'outro',
-            plan: medPatient.insurance.plan
+            type: (medPatient.insuranceType?.toLowerCase() || 'particular') as 'unimed' | 'particular' | 'outro',
+            plan: medPatient.insurancePlan || undefined
           },
           registrationSources: contact.registrationSources,
           emailPreferences: {

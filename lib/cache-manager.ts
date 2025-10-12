@@ -280,27 +280,31 @@ class PersistentCache {
       return memoryResult
     }
 
-    // Tentar localStorage
-    try {
-      const stored = localStorage.getItem(this.prefix + key)
-      if (!stored) return null
+    // Tentar localStorage (apenas no cliente)
+    if (typeof window !== 'undefined' && window.localStorage) {
+      try {
+        const stored = localStorage.getItem(this.prefix + key)
+        if (!stored) return null
 
-      const item: CacheItem<T> = JSON.parse(stored)
+        const item: CacheItem<T> = JSON.parse(stored)
 
-      // Verificar TTL
-      if (Date.now() > item.timestamp + item.ttl) {
-        localStorage.removeItem(this.prefix + key)
-        return null
-      }
+        // Verificar TTL
+        if (Date.now() > item.timestamp + item.ttl) {
+          localStorage.removeItem(this.prefix + key)
+          return null
+        }
 
-      // Adicionar de volta ao cache em memória
-      this.memoryCache.set(key, item.data, { ttl: item.ttl, tags: item.tags })
+        // Adicionar de volta ao cache em memória
+        this.memoryCache.set(key, item.data, { ttl: item.ttl, tags: item.tags })
 
-      return item.data
-    } catch (error) {
-      console.warn('Erro ao ler cache persistente:', error)
-      return null
-    }
+        return item.data
+      } catch (error) {
+        console.warn('Erro ao ler cache persistente:', error)
+         return null
+       }
+     }
+
+     return null
   }
 
   // Definir item no cache persistente
@@ -329,8 +333,10 @@ class PersistentCache {
         size: CompressionUtils.calculateSize(processedData),
       }
 
-      // Salvar no localStorage
-      localStorage.setItem(this.prefix + key, JSON.stringify(item))
+      // Salvar no localStorage (apenas no cliente)
+      if (typeof window !== 'undefined' && window.localStorage) {
+        localStorage.setItem(this.prefix + key, JSON.stringify(item))
+      }
 
       // Também salvar no cache em memória
       this.memoryCache.set(key, data, options)
@@ -345,7 +351,9 @@ class PersistentCache {
   // Remover item
   delete(key: string): boolean {
     try {
-      localStorage.removeItem(this.prefix + key)
+      if (typeof window !== 'undefined' && window.localStorage) {
+        localStorage.removeItem(this.prefix + key)
+      }
       this.memoryCache.delete(key)
       return true
     } catch (error) {
@@ -396,20 +404,22 @@ class PersistentCache {
       // Limpar cache em memória
       cleaned += this.memoryCache.cleanup()
 
-      // Limpar localStorage
-      const keys = Object.keys(localStorage)
-      for (const fullKey of keys) {
-        if (fullKey.startsWith(this.prefix)) {
-          try {
-            const item = JSON.parse(localStorage.getItem(fullKey) || '{}')
-            if (now > item.timestamp + item.ttl) {
+      // Limpar localStorage (apenas no cliente)
+      if (typeof window !== 'undefined' && window.localStorage) {
+        const keys = Object.keys(localStorage)
+        for (const fullKey of keys) {
+          if (fullKey.startsWith(this.prefix)) {
+            try {
+              const item = JSON.parse(localStorage.getItem(fullKey) || '{}')
+              if (now > item.timestamp + item.ttl) {
+                localStorage.removeItem(fullKey)
+                cleaned++
+              }
+            } catch {
+              // Remover itens corrompidos
               localStorage.removeItem(fullKey)
               cleaned++
             }
-          } catch {
-            // Remover itens corrompidos
-            localStorage.removeItem(fullKey)
-            cleaned++
           }
         }
       }
@@ -425,10 +435,12 @@ class PersistentCache {
     try {
       this.memoryCache.clear()
 
-      const keys = Object.keys(localStorage)
-      for (const key of keys) {
-        if (key.startsWith(this.prefix)) {
-          localStorage.removeItem(key)
+      if (typeof window !== 'undefined' && window.localStorage) {
+        const keys = Object.keys(localStorage)
+        for (const key of keys) {
+          if (key.startsWith(this.prefix)) {
+            localStorage.removeItem(key)
+          }
         }
       }
     } catch (error) {

@@ -10,6 +10,7 @@ import {
   createOrUpdatePatient,
   getMedicalPatientById,
   getCommunicationContactById,
+  canPatientScheduleNewAppointment,
 } from '../../../lib/unified-patient-system-prisma'
 
 // GET - Obter agendamentos, agenda diária ou estatísticas
@@ -174,6 +175,13 @@ export async function GET(request: NextRequest) {
             { status: 400 }
           )
         }
+        
+      case 'check-can-schedule':
+        // Este caso será tratado no POST method
+        return NextResponse.json(
+          { success: false, error: 'Use POST method for check-can-schedule' },
+          { status: 405 }
+        )
 
         const getPatient = await getMedicalPatientById(getPatientId)
         if (!getPatient) {
@@ -309,8 +317,11 @@ export async function DELETE(request: NextRequest) {
 // POST - Criar agendamento, paciente ou atualizar status
 export async function POST(request: NextRequest) {
   try {
+    console.log('🔍 [DEBUG] POST request received')
     const body = await request.json()
+    console.log('🔍 [DEBUG] Request body:', body)
     const { action } = body
+    console.log('🔍 [DEBUG] Action:', action)
 
     switch (action) {
       case 'create-appointment':
@@ -331,10 +342,10 @@ export async function POST(request: NextRequest) {
           createdBy,
         } = body
 
+        // Validação mais flexível - apenas campos essenciais para agendamento
         if (
           !patientId ||
           !patientName ||
-          (!patientPhone && !patientWhatsapp) ||
           !appointmentDate ||
           !appointmentTime
         ) {
@@ -342,19 +353,80 @@ export async function POST(request: NextRequest) {
             {
               success: false,
               error:
-                'Campos obrigatórios: ID do Paciente, Nome do Paciente, Telefone ou WhatsApp do Paciente, Data do Agendamento e Horário do Agendamento',
+                'Campos obrigatórios: ID do Paciente, Nome do Paciente, Data do Agendamento e Horário do Agendamento',
+            },
+            { status: 400 }
+          )
+        }
+
+        // Validação para impedir agendamento no mesmo dia (apenas para agendamento público)
+        const today = new Date().toISOString().split('T')[0]
+        const selectedDate = new Date(appointmentDate).toISOString().split('T')[0]
+        
+        // Secretária pode agendar para o mesmo dia (consultas de urgência)
+        if (selectedDate === today && source !== 'secretary') {
+          return NextResponse.json(
+            {
+              success: false,
+              error: 'Não é possível agendar consultas para o mesmo dia. Por favor, escolha uma data futura.',
+            },
+            { status: 400 }
+          )
+        }
+
+        // Buscar dados completos do paciente para notificação
+        const patientData = await getPatientById(patientId)
+        if (!patientData) {
+          return NextResponse.json(
+            {
+              success: false,
+              error: 'Paciente não encontrado',
+            },
+            { status: 404 }
+          )
+        }
+
+        // Buscar dados do contato de comunicação para campos adicionais
+        const patientContact = await getCommunicationContactById(patientData.communicationContactId)
+        if (!patientContact) {
+          return NextResponse.json(
+            {
+              success: false,
+              error: 'Dados de contato do paciente não encontrados',
+            },
+            { status: 404 }
+          )
+        }
+
+        // Verificar se o paciente pode agendar uma nova consulta
+        const canSchedule = await canPatientScheduleNewAppointment(patientData.cpf || '')
+        if (!canSchedule.canSchedule) {
+          return NextResponse.json(
+            {
+              success: false,
+              error: canSchedule.reason,
             },
             { status: 400 }
           )
         }
 
         const appointmentResult = await createAppointment({
+          communicationContactId: patientData.communicationContactId,
+          medicalPatientId: patientData.id,
           patientId: patientId,
           appointmentDate: appointmentDate,
           appointmentTime: appointmentTime,
           appointmentType: appointmentType || 'CONSULTATION',
           status: 'SCHEDULED',
           notes: notes,
+          // Dados do paciente para notificação
+          fullName: patientData.fullName,
+          name: patientData.fullName,
+          phone: patientContact.phone,
+          whatsapp: patientContact.whatsapp || patientContact.phone,
+          email: patientContact.email,
+          insuranceType: patientData.insuranceType?.toLowerCase() || 'particular',
+          source: source || 'secretary',
         })
 
         return NextResponse.json({
@@ -367,6 +439,7 @@ export async function POST(request: NextRequest) {
       case 'create-patient':
         const {
           name,
+          fullName,
           phone,
           whatsapp,
           email,
@@ -376,7 +449,7 @@ export async function POST(request: NextRequest) {
           medicalRecord,
         } = body
 
-        if (!name || !phone) {
+        if (!(name || fullName) || !phone) {
           return NextResponse.json(
             { success: false, error: 'Nome e telefone são obrigatórios' },
             { status: 400 }
@@ -384,8 +457,8 @@ export async function POST(request: NextRequest) {
         }
 
         // Criar novo paciente usando Prisma service
-        const patientData = {
-          fullName: name,
+        const newPatientData = {
+          fullName: fullName || name,
           whatsapp: whatsapp || phone,
           email: email,
           birthDate: birthDate,
@@ -394,7 +467,7 @@ export async function POST(request: NextRequest) {
           insurancePlan: insurance?.plan,
         }
 
-        const patientResult = await createOrUpdatePatient(patientData)
+        const patientResult = await createOrUpdatePatient(newPatientData)
 
         return NextResponse.json({
           success: true,
@@ -420,6 +493,38 @@ export async function POST(request: NextRequest) {
           notes: statusNotes,
         })
         return NextResponse.json(updateResult)
+        
+      case 'check-can-schedule':
+        const { patientId: checkPatientId } = body
+        
+        if (!checkPatientId) {
+          return NextResponse.json(
+            {
+              success: false,
+              error: 'ID do paciente é obrigatório',
+            },
+            { status: 400 }
+          )
+        }
+        
+        const checkPatientData = await getPatientById(checkPatientId)
+        if (!checkPatientData) {
+          return NextResponse.json(
+            {
+              success: false,
+              error: 'Paciente não encontrado',
+            },
+            { status: 404 }
+          )
+        }
+        
+        const canScheduleResult = await canPatientScheduleNewAppointment(checkPatientData.cpf || '')
+        
+        return NextResponse.json({
+          success: true,
+          canSchedule: canScheduleResult.canSchedule,
+          reason: canScheduleResult.reason,
+        })
 
       default:
         return NextResponse.json(

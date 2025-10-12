@@ -286,7 +286,7 @@ export async function authenticateUser(
       userId: user.id,
       username: user.username,
       email: user.email,
-      role: user.role.toLowerCase() as 'doctor' | 'secretary' | 'admin',
+      role: user.role as 'DOCTOR' | 'SECRETARY' | 'ADMIN',
       name: user.name,
     })
 
@@ -297,7 +297,7 @@ export async function authenticateUser(
         id: user.id,
         username: user.username,
         email: user.email,
-        role: user.role.toLowerCase() as 'doctor' | 'secretary' | 'admin',
+        role: user.role as 'DOCTOR' | 'SECRETARY' | 'ADMIN',
         name: user.name,
         isActive: user.isActive,
         createdAt: new Date().toISOString(),

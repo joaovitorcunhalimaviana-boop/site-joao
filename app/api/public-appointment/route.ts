@@ -5,6 +5,7 @@ import {
   createAppointment,
   getMedicalPatientByCpf,
   getCommunicationContactByEmail,
+  canPatientScheduleNewAppointment,
 } from '@/lib/unified-patient-system-prisma'
 import { validateCPF, formatCPF } from '@/lib/validation-schemas'
 import { sendTelegramAppointmentNotification, convertPrismaToNotificationData } from '@/lib/telegram-notifications'
@@ -134,6 +135,19 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(cachedResult)
     }
 
+    // Validar se não é agendamento para o mesmo dia
+    const today = new Date().toISOString().split('T')[0]
+    if (selectedDate === today) {
+      console.log('❌ Tentativa de agendamento para o mesmo dia:', selectedDate)
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Não é possível agendar consultas para o mesmo dia. Por favor, escolha uma data futura.',
+        },
+        { status: 400 }
+      )
+    }
+
     console.log('💾 Criando contato de comunicação e paciente médico...')
 
     try {
@@ -142,6 +156,20 @@ export async function POST(request: NextRequest) {
 
       if (existingMedicalPatient) {
         console.log('⚠️ Paciente médico já existe com este CPF:', cpfClean)
+
+        // Verificar se paciente pode agendar nova consulta
+        const canSchedule = await canPatientScheduleNewAppointment(cpfClean)
+        
+        if (!canSchedule.canSchedule) {
+          console.log('❌ Paciente não pode agendar nova consulta:', canSchedule.reason)
+          return NextResponse.json(
+            {
+              success: false,
+              error: canSchedule.reason,
+            },
+            { status: 400 }
+          )
+        }
 
         // Criar apenas o agendamento para o paciente existente
         const appointmentResult = await createAppointment({

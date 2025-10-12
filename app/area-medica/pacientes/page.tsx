@@ -350,6 +350,10 @@ export default function PatientsListPage() {
                       <span className="text-white text-sm">WhatsApp: {formatPhone(patient.whatsapp)}</span>
                     </div>
                     <div className="flex items-center space-x-2">
+                      <User className="h-4 w-4 text-yellow-400" />
+                      <span className="text-white text-sm">CPF: {patient.cpf || 'Não informado'}</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
                       <Calendar className="h-4 w-4 text-purple-400" />
                       <span className="text-white text-sm">{formatDate(patient.birthDate)}</span>
                     </div>

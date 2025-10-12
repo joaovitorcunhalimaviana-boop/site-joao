@@ -40,6 +40,7 @@ interface Patient {
   phone: string
   whatsapp: string
   email: string
+  cpf?: string
   insurance: {
     type: string
     plan?: string

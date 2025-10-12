@@ -11,10 +11,37 @@ export async function POST(request: NextRequest) {
   try {
     console.log('🔐 [Login API] Iniciando processo de login...')
 
-    const credentials = await request.json()
-    const { email, password } = credentials
+    // Tentar diferentes formas de obter os dados
+    let credentials: any = {}
+    let email: string = ''
+    let password: string = ''
 
-    console.log('📝 [Login API] Credenciais recebidas:', { email })
+    try {
+      // Primeiro, tentar JSON
+      credentials = await request.json()
+      console.log('📝 [Login API] Dados JSON recebidos:', credentials)
+      
+      email = credentials.email || credentials.username || ''
+      password = credentials.password || ''
+    } catch (jsonError) {
+      console.log('⚠️ [Login API] Erro ao parsear JSON, tentando FormData...')
+      
+      try {
+        // Se JSON falhar, tentar FormData
+        const formData = await request.formData()
+        email = formData.get('email')?.toString() || formData.get('username')?.toString() || ''
+        password = formData.get('password')?.toString() || ''
+        console.log('📝 [Login API] Dados FormData recebidos:', { email: email ? 'presente' : 'ausente' })
+      } catch (formError) {
+        console.error('❌ [Login API] Erro ao parsear FormData:', formError)
+      }
+    }
+
+    console.log('📝 [Login API] Credenciais finais:', { 
+      email: email ? 'presente' : 'ausente',
+      password: password ? 'presente' : 'ausente',
+      emailValue: email
+    })
 
     // Validar dados
     if (!email || !password) {
@@ -85,7 +112,7 @@ export async function POST(request: NextRequest) {
       userId: user.id,
       username: user.username,
       email: user.email,
-      role: user.role.toLowerCase(),
+      role: user.role,
       name: user.name
     })
 
@@ -94,7 +121,7 @@ export async function POST(request: NextRequest) {
         userId: user.id,
         username: user.username,
         email: user.email,
-        role: user.role.toLowerCase(),
+        role: user.role,
         name: user.name,
         type: 'access'
       },

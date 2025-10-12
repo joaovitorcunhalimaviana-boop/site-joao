@@ -5,7 +5,9 @@ import {
   createOrUpdatePatient,
   UnifiedPatient,
 } from '@/lib/prisma-service'
+import { getAllMedicalPatients } from '@/lib/unified-patient-system-prisma'
 import { AuthMiddleware } from '@/lib/auth-middleware'
+import { prisma } from '@/lib/prisma'
 
 // GET - Listar todos os pacientes médicos ou buscar por ID/CPF
 export async function GET(request: NextRequest): Promise<NextResponse> {
@@ -76,8 +78,76 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       )
     }
 
-    // Listar todos os pacientes com filtros opcionais
-    let patients = await getAllPatients()
+    // Listar apenas pacientes médicos (com CPF) - incluir dados do contato de comunicação
+    const medicalPatients = await getAllMedicalPatients()
+    
+    // Buscar dados completos incluindo contatos de comunicação
+    const patientsWithContacts = await Promise.all(
+      medicalPatients.map(async (patient) => {
+        try {
+          const contact = await prisma.communicationContact.findUnique({
+            where: { id: patient.communicationContactId }
+          })
+          
+          return {
+            id: patient.id,
+            name: patient.fullName,
+            cpf: patient.cpf,
+            medicalRecordNumber: patient.medicalRecordNumber,
+            phone: contact?.phone || contact?.whatsapp || '',
+            whatsapp: contact?.whatsapp || contact?.phone || '',
+            email: contact?.email || '',
+            birthDate: contact?.birthDate || '',
+            insurance: {
+              type: (patient.insuranceType?.toLowerCase() || 'particular') as 'unimed' | 'particular' | 'outro',
+              plan: patient.insurancePlan || undefined
+            },
+            registrationSources: [],
+            emailPreferences: {
+              healthTips: false,
+              appointments: false,
+              promotions: false,
+              subscribed: false,
+              newsletter: false
+            },
+            birthdayEmailLogs: [],
+            createdAt: patient.createdAt,
+            updatedAt: patient.updatedAt,
+            isActive: patient.isActive ?? true
+          }
+        } catch (error) {
+          console.error('Erro ao buscar contato para paciente:', patient.id, error)
+          return {
+            id: patient.id,
+            name: patient.fullName,
+            cpf: patient.cpf,
+            medicalRecordNumber: patient.medicalRecordNumber,
+            phone: '',
+            whatsapp: '',
+            email: '',
+            birthDate: '',
+            insurance: {
+              type: (patient.insuranceType?.toLowerCase() || 'particular') as 'unimed' | 'particular' | 'outro',
+              plan: patient.insurancePlan || undefined
+            },
+            registrationSources: [],
+            emailPreferences: {
+              healthTips: false,
+              appointments: false,
+              promotions: false,
+              subscribed: false,
+              newsletter: false
+            },
+            birthdayEmailLogs: [],
+            createdAt: patient.createdAt,
+            updatedAt: patient.updatedAt,
+            isActive: patient.isActive ?? true
+          }
+        }
+      })
+    )
+    
+    let patients = patientsWithContacts
 
     // Filtrar por status ativo
     if (active !== null) {
@@ -140,8 +210,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     return auth.response || NextResponse.json({ error: 'Não autenticado' }, { status: 401 })
   }
 
-  // Verificar permissões (apenas médicos e admins podem criar pacientes médicos)
-  if (!['DOCTOR', 'ADMIN'].includes(auth.user.role)) {
+  // Verificar permissões (médicos, secretárias e admins podem criar pacientes médicos)
+  if (!['DOCTOR', 'SECRETARY', 'ADMIN'].includes(auth.user.role)) {
     return NextResponse.json({ error: 'Sem permissão para criar pacientes médicos' }, { status: 403 })
   }
 
@@ -184,26 +254,61 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     // Verificar se CPF já existe
     const allPatients = await getAllPatients()
     const existingPatient = allPatients.find(p => p.cpf === cpfClean)
-    if (existingPatient) {
+    if (existingPatient && existingPatient.isActive) {
       return NextResponse.json(
         {
           success: false,
-          message: 'Já existe um paciente com este CPF',
+          message: 'Já existe um paciente ativo com este CPF',
         },
         { status: 409 }
+      )
+    }
+
+    // Se existe um paciente inativo com o mesmo CPF, reativar ao invés de criar novo
+    if (existingPatient && !existingPatient.isActive) {
+      const reactivatedPatient = await createOrUpdatePatient({
+        ...existingPatient,
+        fullName: body.fullName.trim(),
+        name: body.fullName.trim(),
+        rg: body.rg?.trim() || existingPatient.rg,
+        endereco: body.address?.trim() || existingPatient.endereco,
+        cidade: body.city?.trim() || existingPatient.cidade,
+        estado: body.state?.trim() || existingPatient.estado,
+        cep: body.zipCode?.replace(/\D/g, '') || existingPatient.cep,
+        phone: body.phone?.trim() || existingPatient.phone,
+        whatsapp: body.whatsapp?.trim() || body.phone?.trim() || existingPatient.whatsapp,
+        email: body.email?.trim() || existingPatient.email,
+        insurance: {
+          type: body.insurance?.type || existingPatient.insurance?.type || 'particular',
+          plan: body.insurance?.plan?.trim() || existingPatient.insurance?.plan,
+          cardNumber: body.insurance?.cardNumber?.trim() || existingPatient.insurance?.cardNumber,
+          validUntil: body.insurance?.validUntil || existingPatient.insurance?.validUntil,
+        },
+        isActive: true,
+      })
+
+      return NextResponse.json(
+        {
+          success: true,
+          patient: reactivatedPatient,
+          message: 'Paciente reativado com sucesso',
+        },
+        { status: 200 }
       )
     }
 
     // Criar novo paciente usando Prisma service
     const patientData: Partial<UnifiedPatient> = {
       cpf: cpfClean,
+      name: body.fullName.trim(),
       fullName: body.fullName.trim(),
       rg: body.rg?.trim(),
       endereco: body.address?.trim(),
       cidade: body.city?.trim(),
       estado: body.state?.trim(),
       cep: body.zipCode?.replace(/\D/g, ''),
-      telefone: body.phone?.trim(),
+      phone: body.phone?.trim(),
+      whatsapp: body.whatsapp?.trim() || body.phone?.trim(),
       email: body.email?.trim(),
       insurance: {
         type: body.insurance?.type || 'particular',
@@ -279,8 +384,8 @@ export async function PUT(request: NextRequest): Promise<NextResponse> {
     return auth.response || NextResponse.json({ error: 'Não autenticado' }, { status: 401 })
   }
 
-  // Verificar permissões (apenas médicos e admins podem atualizar pacientes médicos)
-  if (!['DOCTOR', 'ADMIN'].includes(auth.user.role)) {
+  // Verificar permissões (médicos, secretárias e admins podem atualizar pacientes médicos)
+  if (!['DOCTOR', 'SECRETARY', 'ADMIN'].includes(auth.user.role)) {
     return NextResponse.json({ error: 'Sem permissão para atualizar pacientes médicos' }, { status: 403 })
   }
 

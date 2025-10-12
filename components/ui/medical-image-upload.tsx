@@ -19,18 +19,18 @@ interface MedicalImage {
   file: File
   preview: string
   description: string
-  category: 'exame' | 'foto' | 'documento' | 'outro'
+  category: 'EXAM_RESULT' | 'IMAGE' | 'DOCUMENT' | 'OTHER'
   uploadedAt: string
 }
 
 interface MedicalImageUploadProps {
-  patientId: string
+  consultationId: string
   patientName: string
   onSave?: (images: MedicalImage[]) => void
 }
 
 export default function MedicalImageUpload({
-  patientId,
+  consultationId,
   patientName,
   onSave,
 }: MedicalImageUploadProps) {
@@ -40,22 +40,38 @@ export default function MedicalImageUpload({
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    console.log('📁 [FileSelect] Evento de seleção de arquivo disparado')
     const files = event.target.files
-    if (!files) return
+    if (!files) {
+      console.log('📁 [FileSelect] Nenhum arquivo selecionado')
+      return
+    }
 
-    Array.from(files).forEach(file => {
+    console.log('📁 [FileSelect] Arquivos selecionados:', files.length)
+    
+    Array.from(files).forEach((file, index) => {
+      console.log(`📁 [FileSelect ${index + 1}] Processando arquivo:`, {
+        name: file.name,
+        type: file.type,
+        size: file.size
+      })
+      
       // Validar tipo de arquivo
       if (!file.type.startsWith('image/') && !file.type.includes('pdf')) {
+        console.error(`📁 [FileSelect ${index + 1}] Tipo de arquivo inválido:`, file.type)
         alert('Apenas imagens (JPG, PNG, GIF) e PDFs são permitidos.')
         return
       }
 
       // Validar tamanho (máximo 10MB)
       if (file.size > 10 * 1024 * 1024) {
+        console.error(`📁 [FileSelect ${index + 1}] Arquivo muito grande:`, file.size)
         alert('Arquivo muito grande. Máximo permitido: 10MB.')
         return
       }
 
+      console.log(`📁 [FileSelect ${index + 1}] Arquivo válido, iniciando leitura`)
+      
       const reader = new FileReader()
       reader.onload = e => {
         const newImage: MedicalImage = {
@@ -63,10 +79,15 @@ export default function MedicalImageUpload({
           file,
           preview: e.target?.result as string,
           description: '',
-          category: 'exame',
+          category: 'EXAM_RESULT',
           uploadedAt: formatDateTimeToBrazilian(new Date()),
         }
-        setImages(prev => [...prev, newImage])
+        console.log(`📁 [FileSelect ${index + 1}] Imagem adicionada ao array:`, newImage.id)
+        setImages(prev => {
+          const updated = [...prev, newImage]
+          console.log('📁 [FileSelect] Total de imagens no array:', updated.length)
+          return updated
+        })
       }
       reader.readAsDataURL(file)
     })
@@ -96,20 +117,41 @@ export default function MedicalImageUpload({
       return
     }
 
+    console.log('🚀 [Upload] Iniciando upload de', images.length, 'imagens')
+    console.log('🚀 [Upload] ConsultationId:', consultationId)
+    console.log('🚀 [Upload] Imagens:', images.map(img => ({ 
+      filename: img.file.name, 
+      size: img.file.size, 
+      category: img.category, 
+      description: img.description 
+    })))
+
     try {
-      const uploadPromises = images.map(async image => {
+      const uploadPromises = images.map(async (image, index) => {
+        console.log(`📤 [Upload ${index + 1}] Preparando upload de:`, image.file.name)
+        
         const formData = new FormData()
         formData.append('file', image.file)
-        formData.append('patientId', patientId)
+        formData.append('consultationId', consultationId)
         formData.append('category', image.category)
         formData.append('description', image.description)
 
+        console.log(`📤 [Upload ${index + 1}] Enviando requisição para /api/medical-attachments`)
+        
         const response = await fetch('/api/medical-attachments', {
           method: 'POST',
           body: formData,
         })
 
+        console.log(`📥 [Upload ${index + 1}] Resposta recebida:`, {
+          status: response.status,
+          statusText: response.statusText,
+          ok: response.ok
+        })
+
         if (!response.ok) {
+          const errorText = await response.text()
+          console.error(`❌ [Upload ${index + 1}] Erro na resposta:`, errorText)
           throw new Error(`Erro ao fazer upload: ${response.statusText}`)
         }
 
@@ -257,10 +299,10 @@ export default function MedicalImageUpload({
                     }
                     className='w-full text-xs bg-gray-700 border-gray-600 text-white rounded px-2 py-1'
                   >
-                    <option value='exame'>Exame</option>
-                    <option value='foto'>Foto Clínica</option>
-                    <option value='documento'>Documento</option>
-                    <option value='outro'>Outro</option>
+                    <option value='EXAM_RESULT'>Exame</option>
+                    <option value='IMAGE'>Foto Clínica</option>
+                    <option value='DOCUMENT'>Documento</option>
+                    <option value='OTHER'>Outro</option>
                   </select>
 
                   {/* Description */}
