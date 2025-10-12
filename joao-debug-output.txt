@@ -1,0 +1,13 @@
+=== DEBUG JOÃO VÍTOR ===
+
+Medical Patients encontrados: 1
+
+Paciente 1:
+- ID: cmgla4agm000dvd24ujkmiw10
+- Nome: João Vítor da Cunha Lima Viana
+- CPF: 05166083474
+- Ativo: true
+- Agendamentos: 0
+
+
+Agendamentos encontrados: 0

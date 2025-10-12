@@ -1,0 +1,8 @@
+=== TESTE API CAN SCHEDULE ===
+
+Patient ID: cmgla4agm000dvd24ujkmiw10
+Status HTTP: 400
+Success: false
+Can Schedule: undefined
+Reason: N/A
+Error: Ação não reconhecida

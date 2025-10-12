@@ -283,6 +283,17 @@ export default function EspecialidadesPage() {
                         </p>
                       </div>
                     </li>
+                    <li className='text-gray-200 flex items-start p-3 bg-gray-700/20 rounded-lg hover:bg-gray-700/30 transition-colors'>
+                      <span className='w-2 h-2 bg-blue-400 rounded-full mr-4 mt-3 flex-shrink-0'></span>
+                      <div>
+                        <strong className='text-white text-base'>
+                          Câncer Colorretal:
+                        </strong>
+                        <p className='text-gray-300 mt-1 text-base'>
+                          Diagnóstico e tratamento de tumores do cólon e reto
+                        </p>
+                      </div>
+                    </li>
                   </ul>
                 </div>
 
