@@ -21,5 +21,5 @@ RUN npm run build
 # Expose port (Railway will set PORT env var)
 EXPOSE $PORT
 
-# Start the application with database initialization
-CMD ["sh", "-c", "npx prisma db push --force-reset --accept-data-loss && npm start"]
+# Start the application ensuring migrations are applied
+CMD ["sh", "-c", "npx prisma migrate deploy && npm start"]

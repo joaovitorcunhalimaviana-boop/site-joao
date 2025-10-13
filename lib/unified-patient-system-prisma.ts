@@ -156,7 +156,20 @@ export interface UnifiedAppointment {
 export async function getAllCommunicationContacts(): Promise<CommunicationContact[]> {
   try {
     const contacts = await prisma.communicationContact.findMany({
-      orderBy: { name: 'asc' }
+      orderBy: { name: 'asc' },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        whatsapp: true,
+        birthDate: true,
+        registrationSources: true,
+        emailPreferences: true,
+        whatsappPreferences: true,
+        reviewData: true,
+        createdAt: true,
+        updatedAt: true
+      }
     })
     
     return contacts.map(contact => ({
@@ -224,13 +237,15 @@ export async function createOrUpdateCommunicationContact(
 
     if (contactData.email) {
       existingContact = await prisma.communicationContact.findFirst({
-        where: { email: contactData.email }
+        where: { email: contactData.email },
+        select: { id: true, name: true, email: true, whatsapp: true, birthDate: true }
       })
     }
 
     if (!existingContact && contactData.whatsapp) {
       existingContact = await prisma.communicationContact.findFirst({
-        where: { whatsapp: contactData.whatsapp }
+        where: { whatsapp: contactData.whatsapp },
+        select: { id: true, name: true, email: true, whatsapp: true, birthDate: true }
       })
     }
 
@@ -243,7 +258,6 @@ export async function createOrUpdateCommunicationContact(
         data: {
           name: contactData.name,
           email: contactData.email,
-          phone: contactData.phone,
           whatsapp: contactData.whatsapp,
           birthDate: contactData.birthDate,
           // Update individual preference fields based on the actual schema
@@ -258,7 +272,8 @@ export async function createOrUpdateCommunicationContact(
           whatsappPromotions: contactData.whatsappPreferences?.promotions ?? false,
           emailSubscribedAt: contactData.email ? new Date() : undefined,
           whatsappSubscribedAt: contactData.whatsapp ? new Date() : undefined
-        }
+        },
+        select: { id: true, name: true, email: true, whatsapp: true, birthDate: true, createdAt: true, updatedAt: true }
       })
     } else {
       // Criar novo contato
@@ -266,7 +281,6 @@ export async function createOrUpdateCommunicationContact(
         data: {
           name: contactData.name,
           email: contactData.email,
-          phone: contactData.phone,
           whatsapp: contactData.whatsapp,
           birthDate: contactData.birthDate,
           // Set individual preference fields based on the actual schema
@@ -281,7 +295,8 @@ export async function createOrUpdateCommunicationContact(
           whatsappPromotions: contactData.whatsappPreferences?.promotions ?? false,
           emailSubscribedAt: contactData.email ? new Date() : undefined,
           whatsappSubscribedAt: contactData.whatsapp ? new Date() : undefined
-        }
+        },
+        select: { id: true, name: true, email: true, whatsapp: true, birthDate: true, createdAt: true, updatedAt: true }
       })
     }
 
@@ -299,7 +314,7 @@ export async function createOrUpdateCommunicationContact(
       id: updatedContact.id,
       name: updatedContact.name,
       email: updatedContact.email || undefined,
-      phone: updatedContact.phone || undefined,
+      phone: updatedContact.whatsapp || undefined,
       whatsapp: updatedContact.whatsapp || undefined,
       birthDate: updatedContact.birthDate || undefined,
       registrationSources: [contactData.source] as any,
@@ -337,7 +352,8 @@ export async function createOrUpdateCommunicationContact(
 export async function getCommunicationContactById(id: string): Promise<CommunicationContact | null> {
   try {
     const contact = await prisma.communicationContact.findUnique({
-      where: { id }
+      where: { id },
+      select: { id: true, name: true, email: true, whatsapp: true, birthDate: true, registrationSources: true, emailPreferences: true, whatsappPreferences: true, reviewData: true, createdAt: true, updatedAt: true }
     })
     
     if (!contact) return null
@@ -370,7 +386,8 @@ export async function getCommunicationContactByEmail(email: string): Promise<Com
           equals: email,
           mode: 'insensitive'
         }
-      }
+      },
+      select: { id: true, name: true, email: true, whatsapp: true, birthDate: true, registrationSources: true, emailPreferences: true, whatsappPreferences: true, reviewData: true, createdAt: true, updatedAt: true }
     })
     
     if (!contact) return null
@@ -403,7 +420,8 @@ export async function getCommunicationContactByPhone(phone: string): Promise<Com
         whatsapp: {
           contains: phoneClean
         }
-      }
+      },
+      select: { id: true, name: true, email: true, whatsapp: true, birthDate: true, registrationSources: true, emailPreferences: true, whatsappPreferences: true, reviewData: true, createdAt: true, updatedAt: true }
     })
     
     if (!contact) return null
@@ -437,7 +455,9 @@ export async function getAllMedicalPatients(): Promise<MedicalPatient[]> {
         isActive: true
       },
       include: {
-        communicationContact: true
+        communicationContact: {
+          select: { whatsapp: true, email: true, birthDate: true }
+        }
       },
       orderBy: { createdAt: 'desc' }
     })
@@ -472,7 +492,9 @@ export async function getMedicalPatientById(id: string): Promise<MedicalPatient 
     const patient = await prisma.medicalPatient.findUnique({
       where: { id },
       include: {
-        communicationContact: true
+        communicationContact: {
+          select: { birthDate: true, whatsapp: true, email: true }
+        }
       }
     })
     
@@ -593,8 +615,12 @@ export async function getAllAppointments(): Promise<UnifiedAppointment[]> {
   try {
     const appointments = await prisma.appointment.findMany({
       include: {
-        communicationContact: true,
-        medicalPatient: true
+        communicationContact: {
+          select: { whatsapp: true, email: true, name: true }
+        },
+        medicalPatient: {
+          select: { fullName: true, cpf: true, insuranceType: true, insurancePlan: true }
+        }
       },
       orderBy: { appointmentDate: 'desc' }
     })
@@ -638,8 +664,12 @@ export async function getAppointmentsByDate(date: string): Promise<UnifiedAppoin
     const appointments = await prisma.appointment.findMany({
       where: { appointmentDate: date },
       include: {
-        communicationContact: true,
-        medicalPatient: true
+        communicationContact: {
+          select: { whatsapp: true, email: true, name: true }
+        },
+        medicalPatient: {
+          select: { fullName: true, cpf: true, insuranceType: true, insurancePlan: true }
+        }
       },
       orderBy: { appointmentTime: 'asc' }
     })
@@ -1456,7 +1486,8 @@ export async function createOrUpdatePatient(patientData: any): Promise<{ success
     
     // Buscar dados do contato de comunicação para incluir telefone e whatsapp corretos
     const communicationContact = await prisma.communicationContact.findUnique({
-      where: { id: newPatient.communicationContactId }
+      where: { id: newPatient.communicationContactId },
+      select: { email: true, whatsapp: true, birthDate: true }
     })
     
     return {
@@ -1471,8 +1502,8 @@ export async function createOrUpdatePatient(patientData: any): Promise<{ success
             city: newPatient.city,
             state: newPatient.state,
             zipCode: newPatient.zipCode,
-            telefone: communicationContact?.phone || communicationContact?.whatsapp || '',
-            whatsapp: communicationContact?.whatsapp || communicationContact?.phone || '',
+            telefone: communicationContact?.whatsapp || '',
+            whatsapp: communicationContact?.whatsapp || '',
             email: communicationContact?.email || patientData.email,
             birthDate: communicationContact?.birthDate || patientData.birthDate,
             insurance: {
