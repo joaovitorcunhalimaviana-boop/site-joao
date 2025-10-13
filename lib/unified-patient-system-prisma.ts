@@ -234,50 +234,56 @@ export async function createOrUpdateCommunicationContact(
       })
     }
 
-    // Use Prisma's cuid() instead of custom generateId
-    const updatedContact = await prisma.communicationContact.upsert({
-      where: { 
-        id: existingContact?.id || 'new-contact-id' // This will be ignored for create
-      },
-      update: {
-        name: contactData.name,
-        email: contactData.email,
-        phone: contactData.phone,
-        whatsapp: contactData.whatsapp,
-        birthDate: contactData.birthDate,
-        // Update individual preference fields based on the actual schema
-        emailSubscribed: contactData.emailPreferences?.subscribed ?? true,
-        emailNewsletter: contactData.emailPreferences?.newsletter ?? false,
-        emailHealthTips: contactData.emailPreferences?.healthTips ?? true,
-        emailAppointments: contactData.emailPreferences?.appointments ?? true,
-        emailPromotions: contactData.emailPreferences?.promotions ?? false,
-        whatsappSubscribed: contactData.whatsappPreferences?.subscribed ?? true,
-        whatsappAppointments: contactData.whatsappPreferences?.appointments ?? true,
-        whatsappReminders: contactData.whatsappPreferences?.reminders ?? true,
-        whatsappPromotions: contactData.whatsappPreferences?.promotions ?? false,
-        emailSubscribedAt: contactData.email ? new Date() : undefined,
-        whatsappSubscribedAt: contactData.whatsapp ? new Date() : undefined
-      },
-      create: {
-        name: contactData.name,
-        email: contactData.email,
-        phone: contactData.phone,
-        whatsapp: contactData.whatsapp,
-        birthDate: contactData.birthDate,
-        // Set individual preference fields based on the actual schema
-        emailSubscribed: contactData.emailPreferences?.subscribed ?? true,
-        emailNewsletter: contactData.emailPreferences?.newsletter ?? false,
-        emailHealthTips: contactData.emailPreferences?.healthTips ?? true,
-        emailAppointments: contactData.emailPreferences?.appointments ?? true,
-        emailPromotions: contactData.emailPreferences?.promotions ?? false,
-        whatsappSubscribed: contactData.whatsappPreferences?.subscribed ?? true,
-        whatsappAppointments: contactData.whatsappPreferences?.appointments ?? true,
-        whatsappReminders: contactData.whatsappPreferences?.reminders ?? true,
-        whatsappPromotions: contactData.whatsappPreferences?.promotions ?? false,
-        emailSubscribedAt: contactData.email ? new Date() : undefined,
-        whatsappSubscribedAt: contactData.whatsapp ? new Date() : undefined
-      }
-    })
+    let updatedContact
+    
+    if (existingContact) {
+      // Atualizar contato existente
+      updatedContact = await prisma.communicationContact.update({
+        where: { id: existingContact.id },
+        data: {
+          name: contactData.name,
+          email: contactData.email,
+          phone: contactData.phone,
+          whatsapp: contactData.whatsapp,
+          birthDate: contactData.birthDate,
+          // Update individual preference fields based on the actual schema
+          emailSubscribed: contactData.emailPreferences?.subscribed ?? true,
+          emailNewsletter: contactData.emailPreferences?.newsletter ?? false,
+          emailHealthTips: contactData.emailPreferences?.healthTips ?? true,
+          emailAppointments: contactData.emailPreferences?.appointments ?? true,
+          emailPromotions: contactData.emailPreferences?.promotions ?? false,
+          whatsappSubscribed: contactData.whatsappPreferences?.subscribed ?? true,
+          whatsappAppointments: contactData.whatsappPreferences?.appointments ?? true,
+          whatsappReminders: contactData.whatsappPreferences?.reminders ?? true,
+          whatsappPromotions: contactData.whatsappPreferences?.promotions ?? false,
+          emailSubscribedAt: contactData.email ? new Date() : undefined,
+          whatsappSubscribedAt: contactData.whatsapp ? new Date() : undefined
+        }
+      })
+    } else {
+      // Criar novo contato
+      updatedContact = await prisma.communicationContact.create({
+        data: {
+          name: contactData.name,
+          email: contactData.email,
+          phone: contactData.phone,
+          whatsapp: contactData.whatsapp,
+          birthDate: contactData.birthDate,
+          // Set individual preference fields based on the actual schema
+          emailSubscribed: contactData.emailPreferences?.subscribed ?? true,
+          emailNewsletter: contactData.emailPreferences?.newsletter ?? false,
+          emailHealthTips: contactData.emailPreferences?.healthTips ?? true,
+          emailAppointments: contactData.emailPreferences?.appointments ?? true,
+          emailPromotions: contactData.emailPreferences?.promotions ?? false,
+          whatsappSubscribed: contactData.whatsappPreferences?.subscribed ?? true,
+          whatsappAppointments: contactData.whatsappPreferences?.appointments ?? true,
+          whatsappReminders: contactData.whatsappPreferences?.reminders ?? true,
+          whatsappPromotions: contactData.whatsappPreferences?.promotions ?? false,
+          emailSubscribedAt: contactData.email ? new Date() : undefined,
+          whatsappSubscribedAt: contactData.whatsapp ? new Date() : undefined
+        }
+      })
+    }
 
     // Create registration source entry separately
     if (updatedContact.id) {
