@@ -40,8 +40,13 @@ const publicRoutes = [
   '/api/daily-agenda',
   '/api/newsletter',
   '/api/reviews',
+  '/api/schedule-slots',
   '/_next/*',
   '/favicon.ico',
+  '/dr-joao-vitor.jpg',
+  '/congress-photo.jpeg',
+  '/doctor-photo.svg',
+  '/logo.svg',
 ]
 
 // Rotas protegidas por área

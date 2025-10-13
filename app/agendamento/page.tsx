@@ -277,7 +277,7 @@ const AgendamentoPage = () => {
                     <h3 className='text-lg font-semibold text-white mb-3'>
                       Valor da Consulta
                     </h3>
-                    <div className='text-2xl font-bold text-white'>
+                    <div className='text-xl font-bold text-white'>
                       R$ 400,00
                     </div>
                     <p className='text-gray-400 text-sm mt-2'>

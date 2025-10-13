@@ -139,7 +139,7 @@ export default function AboutSection() {
                 >
                   {/* Foto do Congresso */}
                   <Image
-                    src='/congress photo.jpeg'
+                    src='/congress-photo.jpeg'
                     alt='Dr. João Vítor Viana - 73º Congresso Brasileiro de Coloproctologia'
                     width={400}
                     height={300}
