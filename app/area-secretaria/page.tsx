@@ -105,6 +105,16 @@ export default function AreaSecretaria() {
     })
   }, [consultations])
 
+  // Filtrar consultas pelo dia selecionado no calendário/data picker
+  const selectedDayConsultations = useMemo(() => {
+    return consultations.filter((consultation) => {
+      const consultationDate = consultation.date
+      const selected = selectedDate
+      // Mostrar todas as consultas do dia selecionado, independentemente do status
+      return consultationDate === selected
+    })
+  }, [consultations, selectedDate])
+
   const loadData = useCallback(async () => {
     setIsLoading(true)
     try {
@@ -431,16 +441,25 @@ export default function AreaSecretaria() {
       })
 
       if (response.ok) {
-        const createdConsultation = await response.json()
+        const result = await response.json()
+        const created = result.appointment || result
+
+        // Mapear status para o formato exibido na tela
+        let mappedStatus = created.status
+        if (mappedStatus === 'SCHEDULED' || mappedStatus === 'scheduled') mappedStatus = 'agendada'
+        if (mappedStatus === 'CONFIRMED' || mappedStatus === 'confirmed') mappedStatus = 'confirmada'
+        if (mappedStatus === 'COMPLETED' || mappedStatus === 'completed') mappedStatus = 'concluida'
+        if (mappedStatus === 'CANCELLED' || mappedStatus === 'cancelled') mappedStatus = 'cancelada'
+
         const newConsultationFormatted: Consultation = {
-          id: createdConsultation.id,
-          patientId: createdConsultation.patientId || createdConsultation.communicationContactId || createdConsultation.medicalPatientId,
-          patientName: createdConsultation.patientName,
-          date: createdConsultation.date || createdConsultation.appointmentDate,
-          time: createdConsultation.time || createdConsultation.appointmentTime,
-          type: createdConsultation.type || createdConsultation.appointmentType || 'CONSULTATION',
-          status: createdConsultation.status,
-          notes: createdConsultation.notes || '',
+          id: created.id,
+          patientId: patientId || created.patientId || created.communicationContactId || created.medicalPatientId,
+          patientName: selectedPatient?.name || newConsultation.patientName || created.patientName || 'Paciente',
+          date: created.date || created.appointmentDate || newConsultation.date,
+          time: created.time || created.appointmentTime || newConsultation.time,
+          type: created.type || created.appointmentType || 'CONSULTATION',
+          status: mappedStatus as any,
+          notes: created.notes || '',
         }
 
         setConsultations([...consultations, newConsultationFormatted])
@@ -564,7 +583,7 @@ export default function AreaSecretaria() {
   }
 
   const getCurrentConsultations = () => {
-    return todayConsultations
+    return selectedDayConsultations
   }
 
   if (isLoading) {
@@ -801,7 +820,7 @@ export default function AreaSecretaria() {
             {/* Título da seção */}
             <div className='p-6 border-b border-gray-700'>
               <h3 className='text-lg font-semibold text-white'>
-                Consultas Totais ({todayConsultations.length})
+                Consultas Totais ({selectedDayConsultations.length})
               </h3>
             </div>
 

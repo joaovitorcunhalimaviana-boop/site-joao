@@ -3,12 +3,13 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import Header from '../../components/ui/header'
-import BackgroundPattern from '../../components/ui/background-pattern'
-import BrazilianDatePicker from '../../components/ui/brazilian-date-picker'
-import { TimePicker } from '../../components/ui/time-picker'
-import MedicalAreaMenu from '../../components/ui/medical-area-menu'
-import { getTodayISO } from '../../lib/date-utils'
-import { format } from 'date-fns'
+  import BackgroundPattern from '../../components/ui/background-pattern'
+  import BrazilianDatePicker from '../../components/ui/brazilian-date-picker'
+  import { TimePicker } from '../../components/ui/time-picker'
+  import MedicalAreaMenu from '../../components/ui/medical-area-menu'
+  import { getTodayISO } from '../../lib/date-utils'
+  import { format } from 'date-fns'
+  import { useToast } from '@/hooks/use-toast'
 import {
   UserGroupIcon,
   CalendarDaysIcon,
@@ -29,24 +30,26 @@ interface Doctor {
   crm: string
 }
 
-interface Patient {
-  id: string
-  name: string
-  phone: string
-  whatsapp: string
-  cpf?: string
-  insurance: {
-    type: 'particular' | 'unimed' | 'outro'
-    plan?: string
-  }
-  birthDate?: string
-  consultation?: {
+  interface Patient {
     id: string
-    time: string
-    type: string
-    status: string
+    name: string
+    phone: string
+    whatsapp: string
+    cpf?: string
+    insurance: {
+      type: 'particular' | 'unimed' | 'outro'
+      plan?: string
+    }
+    birthDate?: string
+    consultation?: {
+      id: string
+      time: string
+      type: string
+      status: string
+      medicalPatientId?: string
+      communicationContactId?: string
+    }
   }
-}
 
 interface DashboardStats {
   totalPatients: number
@@ -54,7 +57,21 @@ interface DashboardStats {
   completedToday: number
 }
 
-export default function AreaMedicaPage() {
+  export default function AreaMedicaPage() {
+    const getInsuranceLabel = (insurance?: { type?: string; plan?: string }) => {
+      const type = insurance?.type?.toLowerCase()
+      switch (type) {
+        case 'particular':
+          return 'Particular'
+        case 'unimed':
+          return `Unimed${insurance?.plan ? ` - ${insurance.plan}` : ''}`
+        case 'outro':
+          return insurance?.plan || 'Outro convênio'
+        default:
+          return 'Não informado'
+      }
+    }
+    const { toast } = useToast()
   const [doctor, setDoctor] = useState<Doctor | null>(null)
   const [patients, setPatients] = useState<Patient[]>([])
   const [todayPatients, setTodayPatients] = useState<Patient[]>([])
@@ -243,7 +260,8 @@ export default function AreaMedicaPage() {
             console.log('🔍 [DEBUG] Criando paciente a partir dos dados do agendamento:', appointment.patientName)
             
             patient = {
-              id: appointment.patientId || appointment.communicationContactId || `temp-${appointment.id}`,
+              // Preferir sempre o ID de paciente médico quando disponível
+              id: appointment.medicalPatientId || appointment.patientId || appointment.communicationContactId || `temp-${appointment.id}`,
               name: appointment.patientName,
               fullName: appointment.patientName,
               phone: appointment.patientPhone,
@@ -274,7 +292,9 @@ export default function AreaMedicaPage() {
               time: appointment.appointmentTime,
               type: appointment.appointmentType,
               status: mappedStatus,
-              notes: appointment.notes
+              notes: appointment.notes,
+              medicalPatientId: appointment.medicalPatientId,
+              communicationContactId: appointment.communicationContactId
             }
           }
         }).filter(Boolean)
@@ -1065,13 +1085,7 @@ export default function AreaMedicaPage() {
                             {patient.whatsapp}
                           </td>
                           <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>
-                            {patient.insurance?.type === 'particular'
-                              ? 'Particular'
-                              : patient.insurance?.type === 'unimed'
-                                ? 'UNIMED'
-                                : patient.insurance?.plan ||
-                                  patient.insurance?.type ||
-                                  'N/A'}
+                            {getInsuranceLabel(patient.insurance)}
                           </td>
                           {activeTab === 'today' && (
                             <td className='px-6 py-4 whitespace-nowrap'>
@@ -1102,10 +1116,28 @@ export default function AreaMedicaPage() {
                           )}
                           <td className='px-6 py-4 whitespace-nowrap text-sm font-medium'>
                             <button
-                              onClick={() =>
-                                router.push(`/prontuario/${patient.id}`)
-                              }
-                              className='text-blue-400 hover:text-blue-300 mr-3 transition-colors duration-200'
+                              onClick={() => {
+                                // Abrir prontuário usando o ID do paciente médico
+                                // Preferir o ID vindo da consulta; se ausente, usar o ID do paciente mapeado
+                                const medicalId = patient.consultation?.medicalPatientId || patient.id
+                                if (!medicalId) {
+                                  toast({
+                                    title: 'Prontuário indisponível',
+                                    description:
+                                      'Não foi possível identificar o paciente médico. Verifique se o cadastro foi concluído na área da secretária.',
+                                    variant: 'destructive',
+                                  })
+                                  return
+                                }
+                                router.push(`/prontuario/${medicalId}`)
+                              }}
+                              disabled={!(patient.consultation?.medicalPatientId || patient.id)}
+                              title={!(patient.consultation?.medicalPatientId || patient.id) ? 'Requer paciente médico para abrir o prontuário' : 'Abrir prontuário'}
+                              className={`mr-3 transition-colors duration-200 ${
+                                !(patient.consultation?.medicalPatientId || patient.id)
+                                  ? 'text-gray-500 cursor-not-allowed'
+                                  : 'text-blue-400 hover:text-blue-300'
+                              }`}
                             >
                               Ver Prontuário
                             </button>

@@ -5,7 +5,7 @@ import {
   createOrUpdatePatient,
   UnifiedPatient,
 } from '@/lib/prisma-service'
-import { getAllMedicalPatients } from '@/lib/unified-patient-system-prisma'
+import { getAllMedicalPatients, getMedicalPatientById, getCommunicationContactById } from '@/lib/unified-patient-system-prisma'
 import { AuthMiddleware } from '@/lib/auth-middleware'
 import { prisma } from '@/lib/prisma'
 
@@ -33,7 +33,85 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       // Buscar por ID
       const patient = await getPatientById(id)
 
-      if (!patient) {
+      if (patient) {
+        // Fallback: usar histórico de agendamentos priorizando "unimed" por ordem de atualização
+        let finalInsurance = patient.insurance || { type: 'particular', plan: undefined }
+        try {
+          const linkedMedicalPatient = await getMedicalPatientById(id)
+          const whereClause = linkedMedicalPatient
+            ? {
+                OR: [
+                  { medicalPatientId: linkedMedicalPatient.id },
+                  { communicationContactId: linkedMedicalPatient.communicationContactId },
+                ],
+              }
+            : { communicationContactId: id }
+
+          const normalizeType = (t?: any) => (t ? String(t).toLowerCase() : undefined)
+
+          // Buscar o mais recente com Unimed, senão Particular, senão Outro
+          const preferredUnimed = await prisma.appointment.findFirst({
+            where: {
+              ...whereClause,
+              insuranceType: { in: ['UNIMED', 'unimed', 'Unimed'] },
+            },
+            orderBy: { updatedAt: 'desc' },
+            select: { insuranceType: true, insurancePlan: true }
+          })
+
+          const preferredParticular = !preferredUnimed
+            ? await prisma.appointment.findFirst({
+                where: {
+                  ...whereClause,
+                  insuranceType: { in: ['PARTICULAR', 'particular', 'Particular'] },
+                },
+                orderBy: { updatedAt: 'desc' },
+                select: { insuranceType: true, insurancePlan: true }
+              })
+            : null
+
+          const preferredOutro = !preferredUnimed && !preferredParticular
+            ? await prisma.appointment.findFirst({
+                where: {
+                  ...whereClause,
+                  insuranceType: { in: ['OUTRO', 'outro', 'Outro'] },
+                },
+                orderBy: { updatedAt: 'desc' },
+                select: { insuranceType: true, insurancePlan: true }
+              })
+            : null
+
+          const preferred = preferredUnimed || preferredParticular || preferredOutro
+          if (preferred) {
+            const typeFromApt = normalizeType(preferred.insuranceType)
+            const planFromApt = preferred.insurancePlan || undefined
+            if (typeFromApt) {
+              finalInsurance = {
+                type: (typeFromApt as 'unimed' | 'particular' | 'outro') || finalInsurance.type || 'particular',
+                plan: planFromApt ?? finalInsurance.plan,
+              }
+            }
+          }
+        } catch (err) {
+          console.warn('⚠️ Falha ao obter convênios de agendamentos:', err)
+        }
+
+        const patientWithEnhancedInsurance = { ...patient, insurance: finalInsurance }
+
+        return NextResponse.json(
+          {
+            success: true,
+            patient: patientWithEnhancedInsurance,
+            message: 'Paciente encontrado com sucesso',
+          },
+          { status: 200 }
+        )
+      }
+
+      // Fallback: buscar paciente do sistema unificado (medicalPatient) e montar dados com contato
+      const medicalPatient = await getMedicalPatientById(id)
+
+      if (!medicalPatient) {
         return NextResponse.json(
           {
             success: false,
@@ -43,11 +121,93 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         )
       }
 
+      const contact = medicalPatient.communicationContactId
+        ? await getCommunicationContactById(medicalPatient.communicationContactId)
+        : null
+
+      let unifiedPatient = {
+        id: medicalPatient.id,
+        fullName: medicalPatient.fullName,
+        name: medicalPatient.fullName,
+        cpf: medicalPatient.cpf,
+        phone: contact?.phone || contact?.whatsapp || medicalPatient.phone || medicalPatient.whatsapp || '',
+        whatsapp: contact?.whatsapp || contact?.phone || medicalPatient.whatsapp || medicalPatient.phone || '',
+        email: contact?.email || '',
+        birthDate: contact?.birthDate || medicalPatient.birthDate || '',
+        insurance: {
+          type: (medicalPatient.insuranceType?.toLowerCase() || 'particular') as 'unimed' | 'particular' | 'outro',
+          plan: medicalPatient.insurancePlan || '',
+        },
+        createdAt: medicalPatient.createdAt,
+        updatedAt: medicalPatient.updatedAt,
+        isActive: medicalPatient.isActive,
+      }
+
+      // Fallback adicional: usar convênio do histórico por ordem de atualização e priorizar "unimed"
+      try {
+        const whereClause = {
+          OR: [
+            { medicalPatientId: medicalPatient.id },
+            { communicationContactId: medicalPatient.communicationContactId },
+          ],
+        }
+
+        const normalizeType = (t?: any) => (t ? String(t).toLowerCase() : undefined)
+
+        const preferredUnimed = await prisma.appointment.findFirst({
+          where: {
+            ...whereClause,
+            insuranceType: { in: ['UNIMED', 'unimed', 'Unimed'] },
+          },
+          orderBy: { updatedAt: 'desc' },
+          select: { insuranceType: true, insurancePlan: true }
+        })
+
+        const preferredParticular = !preferredUnimed
+          ? await prisma.appointment.findFirst({
+              where: {
+                ...whereClause,
+                insuranceType: { in: ['PARTICULAR', 'particular', 'Particular'] },
+              },
+              orderBy: { updatedAt: 'desc' },
+              select: { insuranceType: true, insurancePlan: true }
+            })
+          : null
+
+        const preferredOutro = !preferredUnimed && !preferredParticular
+          ? await prisma.appointment.findFirst({
+              where: {
+                ...whereClause,
+                insuranceType: { in: ['OUTRO', 'outro', 'Outro'] },
+              },
+              orderBy: { updatedAt: 'desc' },
+              select: { insuranceType: true, insurancePlan: true }
+            })
+          : null
+
+        const preferred = preferredUnimed || preferredParticular || preferredOutro
+        if (preferred) {
+          const typeFromApt = normalizeType(preferred.insuranceType)
+          const planFromApt = preferred.insurancePlan || undefined
+          if (typeFromApt) {
+            unifiedPatient = {
+              ...unifiedPatient,
+              insurance: {
+                type: (typeFromApt as 'unimed' | 'particular' | 'outro') || unifiedPatient.insurance.type,
+                plan: planFromApt ?? unifiedPatient.insurance.plan,
+              },
+            }
+          }
+        }
+      } catch (err) {
+        console.warn('⚠️ Falha ao aplicar fallback de convênio via agendamentos:', err)
+      }
+
       return NextResponse.json(
         {
           success: true,
-          patient,
-          message: 'Paciente encontrado com sucesso',
+          patient: unifiedPatient,
+          message: 'Paciente encontrado com sucesso (via sistema unificado)',
         },
         { status: 200 }
       )
@@ -88,7 +248,61 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
           const contact = await prisma.communicationContact.findUnique({
             where: { id: patient.communicationContactId }
           })
-          
+
+          // Base insurance from medical patient
+          let finalInsurance: { type: 'unimed' | 'particular' | 'outro'; plan?: string } = {
+            type: (patient.insuranceType?.toLowerCase() || 'particular') as 'unimed' | 'particular' | 'outro',
+            plan: patient.insurancePlan || undefined
+          }
+
+          // Fallback via histórico de agendamentos: prioriza Unimed > Particular > Outro
+          try {
+            const whereClause = {
+              OR: [
+                { medicalPatientId: patient.id },
+                { communicationContactId: patient.communicationContactId },
+              ],
+            }
+
+            const normalizeType = (t?: any) => (t ? String(t).toLowerCase() : undefined)
+
+            const preferredUnimed = await prisma.appointment.findFirst({
+              where: { ...whereClause, insuranceType: { in: ['UNIMED', 'unimed', 'Unimed'] } },
+              orderBy: { updatedAt: 'desc' },
+              select: { insuranceType: true, insurancePlan: true }
+            })
+
+            const preferredParticular = !preferredUnimed
+              ? await prisma.appointment.findFirst({
+                  where: { ...whereClause, insuranceType: { in: ['PARTICULAR', 'particular', 'Particular'] } },
+                  orderBy: { updatedAt: 'desc' },
+                  select: { insuranceType: true, insurancePlan: true }
+                })
+              : null
+
+            const preferredOutro = !preferredUnimed && !preferredParticular
+              ? await prisma.appointment.findFirst({
+                  where: { ...whereClause, insuranceType: { in: ['OUTRO', 'outro', 'Outro'] } },
+                  orderBy: { updatedAt: 'desc' },
+                  select: { insuranceType: true, insurancePlan: true }
+                })
+              : null
+
+            const preferred = preferredUnimed || preferredParticular || preferredOutro
+            if (preferred) {
+              const typeFromApt = normalizeType(preferred.insuranceType) as 'unimed' | 'particular' | 'outro' | undefined
+              const planFromApt = preferred.insurancePlan || undefined
+              if (typeFromApt) {
+                finalInsurance = {
+                  type: typeFromApt,
+                  plan: planFromApt ?? finalInsurance.plan,
+                }
+              }
+            }
+          } catch (err) {
+            console.warn('⚠️ Falha ao obter convênio por agendamentos (lista):', err)
+          }
+
           return {
             id: patient.id,
             name: patient.fullName,
@@ -98,10 +312,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
             whatsapp: contact?.whatsapp || contact?.phone || '',
             email: contact?.email || '',
             birthDate: contact?.birthDate || '',
-            insurance: {
-              type: (patient.insuranceType?.toLowerCase() || 'particular') as 'unimed' | 'particular' | 'outro',
-              plan: patient.insurancePlan || undefined
-            },
+            insurance: finalInsurance,
             registrationSources: [],
             emailPreferences: {
               healthTips: false,
@@ -117,6 +328,56 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
           }
         } catch (error) {
           console.error('Erro ao buscar contato para paciente:', patient.id, error)
+
+          // Mesmo com erro no contato, aplicar a mesma lógica de fallback de convênio
+          let finalInsurance: { type: 'unimed' | 'particular' | 'outro'; plan?: string } = {
+            type: (patient.insuranceType?.toLowerCase() || 'particular') as 'unimed' | 'particular' | 'outro',
+            plan: patient.insurancePlan || undefined
+          }
+          try {
+            const whereClause = {
+              OR: [
+                { medicalPatientId: patient.id },
+                { communicationContactId: patient.communicationContactId },
+              ],
+            }
+            const normalizeType = (t?: any) => (t ? String(t).toLowerCase() : undefined)
+
+            const preferredUnimed = await prisma.appointment.findFirst({
+              where: { ...whereClause, insuranceType: { in: ['UNIMED', 'unimed', 'Unimed'] } },
+              orderBy: { updatedAt: 'desc' },
+              select: { insuranceType: true, insurancePlan: true }
+            })
+            const preferredParticular = !preferredUnimed
+              ? await prisma.appointment.findFirst({
+                  where: { ...whereClause, insuranceType: { in: ['PARTICULAR', 'particular', 'Particular'] } },
+                  orderBy: { updatedAt: 'desc' },
+                  select: { insuranceType: true, insurancePlan: true }
+                })
+              : null
+            const preferredOutro = !preferredUnimed && !preferredParticular
+              ? await prisma.appointment.findFirst({
+                  where: { ...whereClause, insuranceType: { in: ['OUTRO', 'outro', 'Outro'] } },
+                  orderBy: { updatedAt: 'desc' },
+                  select: { insuranceType: true, insurancePlan: true }
+                })
+              : null
+
+            const preferred = preferredUnimed || preferredParticular || preferredOutro
+            if (preferred) {
+              const typeFromApt = normalizeType(preferred.insuranceType) as 'unimed' | 'particular' | 'outro' | undefined
+              const planFromApt = preferred.insurancePlan || undefined
+              if (typeFromApt) {
+                finalInsurance = {
+                  type: typeFromApt,
+                  plan: planFromApt ?? finalInsurance.plan,
+                }
+              }
+            }
+          } catch (err) {
+            console.warn('⚠️ Falha ao obter convênio por agendamentos (lista, fallback):', err)
+          }
+
           return {
             id: patient.id,
             name: patient.fullName,
@@ -126,10 +387,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
             whatsapp: '',
             email: '',
             birthDate: '',
-            insurance: {
-              type: (patient.insuranceType?.toLowerCase() || 'particular') as 'unimed' | 'particular' | 'outro',
-              plan: patient.insurancePlan || undefined
-            },
+            insurance: finalInsurance,
             registrationSources: [],
             emailPreferences: {
               healthTips: false,
@@ -278,6 +536,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         phone: body.phone?.trim() || existingPatient.phone,
         whatsapp: body.whatsapp?.trim() || body.phone?.trim() || existingPatient.whatsapp,
         email: body.email?.trim() || existingPatient.email,
+        birthDate: body.birthDate?.trim() || existingPatient.birthDate,
         insurance: {
           type: body.insurance?.type || existingPatient.insurance?.type || 'particular',
           plan: body.insurance?.plan?.trim() || existingPatient.insurance?.plan,
@@ -310,6 +569,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       phone: body.phone?.trim(),
       whatsapp: body.whatsapp?.trim() || body.phone?.trim(),
       email: body.email?.trim(),
+      birthDate: body.birthDate?.trim(),
       insurance: {
         type: body.insurance?.type || 'particular',
         plan: body.insurance?.plan?.trim(),
@@ -434,6 +694,7 @@ export async function PUT(request: NextRequest): Promise<NextResponse> {
       cep: body.zipCode?.replace(/\D/g, '') || patient.cep,
       telefone: body.phone?.trim() || patient.telefone,
       email: body.email?.trim() || patient.email,
+      birthDate: body.birthDate?.trim() || patient.birthDate,
       insurance: {
         ...patient.insurance,
         ...body.insurance,

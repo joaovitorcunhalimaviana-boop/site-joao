@@ -10,6 +10,7 @@ import {
   deleteMedicalAttachment,
   getAllMedicalAttachments
 } from '@/lib/medical-attachments-temp'
+import AuthMiddleware from '@/lib/auth-middleware'
 
 const ATTACHMENTS_DIR = path.join(process.cwd(), 'data', 'medical-attachments')
 
@@ -26,6 +27,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const consultationId = searchParams.get('consultationId')
     const attachmentId = searchParams.get('id')
+    const download = searchParams.get('download') === '1'
     
     if (attachmentId) {
       // Buscar anexo específico por ID
@@ -36,6 +38,41 @@ export async function GET(request: NextRequest) {
           { status: 404 }
         )
       }
+
+      // Se download solicitado, tentar servir o arquivo
+      if (download) {
+        try {
+          // Caminho pode ser absoluto ou relativo; normalizar
+          const filePath = attachment.path.startsWith('.') || attachment.path.startsWith('/') || attachment.path.includes(':')
+            ? attachment.path
+            : path.join(ATTACHMENTS_DIR, attachment.path)
+
+          if (!fs.existsSync(filePath)) {
+            return NextResponse.json(
+              { success: false, error: 'Arquivo não encontrado' },
+              { status: 404 }
+            )
+          }
+
+          const fileBuffer = fs.readFileSync(filePath)
+          const contentType = attachment.mimeType || 'application/octet-stream'
+          return new NextResponse(fileBuffer, {
+            status: 200,
+            headers: {
+              'Content-Type': contentType,
+              'Content-Disposition': `inline; filename="${attachment.originalName || 'arquivo'}"`
+            }
+          })
+        } catch (err) {
+          console.error('Erro ao servir arquivo de anexo:', err)
+          return NextResponse.json(
+            { success: false, error: 'Erro ao abrir arquivo' },
+            { status: 500 }
+          )
+        }
+      }
+
+      // Caso contrário, retornar metadados do anexo
       return NextResponse.json({
         success: true,
         attachment
@@ -68,6 +105,16 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     console.log('📎 [Upload] Iniciando upload de anexo médico')
+
+    // Autenticação: exigir DOCTOR ou ADMIN conforme permissões
+    const auth = await AuthMiddleware.authenticate(request)
+    if (!auth.success || !auth.user) {
+      return auth.response || NextResponse.json(
+        { success: false, error: auth.error || 'Não autenticado' },
+        { status: 401 }
+      )
+    }
+
     const formData = await request.formData()
     const file = formData.get('file') as File
     const consultationId = formData.get('consultationId') as string
@@ -106,12 +153,20 @@ export async function POST(request: NextRequest) {
       if (appointment) {
         console.log('📎 [Upload] Appointment encontrado, criando consulta...')
         // Criar consulta baseada no appointment
+        const doctorIdFromUser = auth.user.role === 'DOCTOR' ? auth.user.id : undefined
+        const doctorIdToUse = doctorIdFromUser || appointment.createdBy
+        if (!doctorIdToUse) {
+          return NextResponse.json(
+            { success: false, error: 'doctorId ausente. Faça login como médico ou informe um appointment com criador válido.' },
+            { status: 400 }
+          )
+        }
         consultation = await prisma.consultation.create({
           data: {
             id: consultationId, // Usar o mesmo ID do appointment
             appointmentId: consultationId,
             medicalPatientId: appointment.medicalPatientId,
-            doctorId: appointment.createdBy || 'cmgnckun90000vdggz430loes', // ID padrão do Dr. João
+            doctorId: doctorIdToUse,
             status: 'IN_PROGRESS'
           }
         })
@@ -127,17 +182,15 @@ export async function POST(request: NextRequest) {
       console.log('✅ [Upload] Consulta encontrada:', consultation.id)
     }
 
-    // Validar tipo de arquivo
-    const allowedTypes = [
-      'image/jpeg',
-      'image/png',
-      'image/gif',
+    // Validar tipo de arquivo: qualquer imagem (image/*) + documentos comuns
+    const isImage = file.type?.startsWith('image/')
+    const allowedDocTypes = new Set([
       'application/pdf',
       'text/plain',
       'application/msword',
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-    ]
-    if (!allowedTypes.includes(file.type)) {
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    ])
+    if (!isImage && !allowedDocTypes.has(file.type)) {
       return NextResponse.json(
         { success: false, error: 'Tipo de arquivo não permitido' },
         { status: 400 }

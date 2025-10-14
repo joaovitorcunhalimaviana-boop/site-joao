@@ -8,6 +8,7 @@ import {
   deleteMedicalRecord,
   type MedicalRecord,
 } from '@/lib/unified-patient-system-prisma'
+import { AuthMiddleware } from '@/lib/auth-middleware'
 
 // GET - Buscar prontuários por paciente
 export async function GET(request: NextRequest) {
@@ -129,6 +130,12 @@ export async function GET(request: NextRequest) {
 // POST - Criar novo prontuário
 export async function POST(request: NextRequest) {
   try {
+    // Autenticar e obter médico responsável
+    const auth = await AuthMiddleware.authenticate(request)
+    if (!auth.success || !auth.user) {
+      return auth.response || NextResponse.json({ error: 'Não autenticado' }, { status: 401 })
+    }
+
     const body = await request.json()
     console.log('🔍 API medical-records POST - Dados recebidos:', body)
 
@@ -180,8 +187,9 @@ export async function POST(request: NextRequest) {
       treatment: treatment || '',
       prescription: prescription || '',
       observations: observations || '',
-      doctorName: doctorName || '',
+      doctorName: auth.user.name || doctorName || '',
       doctorCrm: doctorCrm || '',
+      doctorId: auth.user.id,
       calculatorResults: calculatorResults || [],
       attachments: attachments || [],
       diagnosticHypotheses: diagnosticHypotheses || [],

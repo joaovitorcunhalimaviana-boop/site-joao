@@ -347,7 +347,7 @@ export async function getAllAppointments(): Promise<UnifiedAppointment[]> {
       patientPhone: appointment.medicalPatient?.communicationContact?.whatsapp || '',
       patientWhatsapp: appointment.medicalPatient?.communicationContact?.whatsapp || '',
       patientEmail: appointment.medicalPatient?.communicationContact?.email,
-      patientBirthDate: appointment.medicalPatient?.communicationContact?.birthDate,
+      patientBirthDate: appointment.medicalPatient?.communicationContact?.birthDate || (appointment.medicalPatient?.birthDate ? appointment.medicalPatient.birthDate.toISOString().split('T')[0] : undefined),
       insuranceType: appointment.medicalPatient?.insurance?.type as 'unimed' | 'particular' | 'outro' || 'particular',
       insurancePlan: appointment.medicalPatient?.insurance?.plan,
       appointmentDate: appointment.appointmentDate,

@@ -133,38 +133,59 @@ export default function NewsletterEditor({
 
   const loadPatients = async () => {
     try {
-      console.log('🚀 Iniciando carregamento de todos os contatos para Newsletter...')
-      const response = await fetch('/api/unified-system/communication')
-      console.log('📡 Response status:', response.status)
-      
-      if (response.ok) {
-        const data = await response.json()
-        console.log('🔍 Newsletter Debug - Dados da API:', data)
-        
-        // A API retorna um objeto com {contacts: array, total: number}
-        const contactsList = data.contacts || data // Fallback para compatibilidade
-        
-        console.log('📊 Total de contatos recebidos:', contactsList.length)
-        
-        // Mostrar TODOS os contatos cadastrados no sistema
-        // Não filtrar por email - mostrar todos para que o usuário possa ver todos os contatos
-        const allContacts = contactsList.map((contact: any) => ({
-          ...contact,
-          // Se não tem email, marcar como "Não informado" para exibição
-          displayEmail: contact.email && contact.email.trim() !== '' ? contact.email : 'Não informado'
-        }))
-        
-        console.log('✅ Todos os contatos carregados:', allContacts.length)
-        console.log('📋 Lista completa de contatos:', allContacts)
-        
-        setPatients(allContacts)
-        // Selecionar todos os contatos por padrão
-        setSelectedPatients(allContacts.map((c: any) => c.id))
-      } else {
-        console.error('❌ Erro na resposta da API:', response.status)
+      console.log('🚀 Iniciando carregamento de contatos e pacientes para Newsletter...')
+
+      // Buscar contatos de comunicação
+      const commRes = await fetch('/api/unified-system/communication')
+      const commData = commRes.ok ? await commRes.json() : { contacts: [] }
+
+      // Buscar pacientes médicos
+      const medRes = await fetch('/api/unified-system/medical-patients')
+      const medData = medRes.ok ? await medRes.json() : { patients: [] }
+
+      // Normalizar contatos de comunicação
+      const normalizedContacts: Patient[] = (commData?.contacts || []).map((c: any) => ({
+        id: c.id,
+        name: c.name || c.fullName || 'Sem nome',
+        email: c.email || '',
+      }))
+
+      // Normalizar pacientes médicos
+      const normalizedPatients: Patient[] = (medData?.patients || medData || []).map((p: any) => ({
+        id: p.id,
+        name: p.fullName || p.name || 'Sem nome',
+        email: p.email || (p.communicationContact?.email ?? ''),
+      }))
+
+      // Unir por chave (prioridade: email -> id)
+      const byKey = new Map<string, Patient>()
+      const makeKey = (item: Patient) => item.email || item.id
+
+      for (const c of normalizedContacts) {
+        byKey.set(makeKey(c), c)
       }
+      for (const p of normalizedPatients) {
+        const key = makeKey(p)
+        if (byKey.has(key)) {
+          const existing = byKey.get(key)!
+          byKey.set(key, {
+            ...existing,
+            name: p.name || existing.name,
+            email: p.email || existing.email,
+          })
+        } else {
+          byKey.set(key, p)
+        }
+      }
+
+      const merged = Array.from(byKey.values())
+      console.log('✅ Contatos + Pacientes unificados para Newsletter:', merged.length)
+
+      setPatients(merged)
+      // Selecionar todos por padrão
+      setSelectedPatients(merged.map((c: any) => c.id))
     } catch (error) {
-      console.error('❌ Erro ao carregar contatos:', error)
+      console.error('❌ Erro ao carregar destinatários da Newsletter:', error)
     }
   }
 
@@ -320,7 +341,10 @@ export default function NewsletterEditor({
       )
       
       // Criar lista de emails para o Gmail
-      const recipients = selectedPatientsData.map(p => p.email).join(',')
+      const recipients = selectedPatientsData
+        .map(p => p.email?.trim())
+        .filter(email => !!email)
+        .join(',')
       
       // Criar conteúdo personalizado (usando o primeiro paciente como exemplo)
       let emailContent = htmlContent.replace(

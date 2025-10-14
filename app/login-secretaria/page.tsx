@@ -43,9 +43,17 @@ export default function LoginSecretaria() {
     setError('')
 
     try {
+      // Normalizar o username para evitar erros de digitação (acentos, espaços, maiúsculas)
+      const normalize = (s: string) =>
+        s
+          .trim()
+          .toLowerCase()
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '') // remover diacríticos (acentos)
+
       // Enviar username como email (backend aceita ambos)
       const loginData = {
-        email: formData.username,
+        email: normalize(formData.username),
         password: formData.password
       }
 

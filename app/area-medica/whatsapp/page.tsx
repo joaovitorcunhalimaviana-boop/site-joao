@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useState, useEffect } from 'react'
 import Header from '../../../components/ui/header'
@@ -46,7 +46,7 @@ export default function WhatsAppPage() {
   const [selectedPatients, setSelectedPatients] = useState<string[]>([])
   const [searchTerm, setSearchTerm] = useState('')
   const [ageFilter, setAgeFilter] = useState('')
-  const [whatsappOnly, setWhatsappOnly] = useState(true)
+  const [whatsappOnly, setWhatsappOnly] = useState(false)
   const [loading, setLoading] = useState(true)
   const [broadcastList, setBroadcastList] = useState('')
 
@@ -54,32 +54,90 @@ export default function WhatsAppPage() {
   useEffect(() => {
     const loadPatients = async () => {
       try {
-        console.log('🚀 Iniciando carregamento de todos os contatos para WhatsApp...')
-        const response = await fetch('/api/unified-system/communication')
-        console.log('📡 Response status:', response.status)
-        
-        const data = await response.json()
-        console.log('🔍 WhatsApp Debug - Dados da API:', data)
-        
-        if (data.success && data.contacts) {
-          console.log('📊 Total de contatos recebidos:', data.contacts.length)
-          
-          // Mostrar TODOS os contatos cadastrados no sistema
-          // Não filtrar por WhatsApp - mostrar todos para que o usuário possa ver todos os contatos
-          const allContacts = data.contacts.map((c: Patient) => ({
-            ...c,
-            // Se não tem WhatsApp, marcar como "Não informado" para exibição
-            displayWhatsApp: c.whatsapp && c.whatsapp.trim() !== '' ? c.whatsapp : 'Não informado'
-          }))
-          
-          console.log('✅ Todos os contatos carregados:', allContacts.length)
-          console.log('📋 Lista completa de contatos:', allContacts)
-          
-          setPatients(allContacts)
-          setFilteredPatients(allContacts)
-        } else {
-          console.error('❌ Erro na estrutura da resposta:', data)
+        console.log('🚀 Iniciando carregamento de contatos e pacientes para WhatsApp...')
+
+        // Buscar contatos de comunicação
+        const commRes = await fetch('/api/unified-system/communication')
+        const commData = await commRes.json()
+
+        // Buscar pacientes médicos
+        const medRes = await fetch('/api/unified-system/medical-patients')
+        const medData = await medRes.json()
+
+        // Normalizar contatos
+        const normalizedContacts: Patient[] = (commData?.contacts || []).map((c: any) => ({
+          id: c.id,
+          name: c.name || c.fullName || 'Sem nome',
+          cpf: c.cpf || '',
+          medicalRecordNumber: c.medicalRecordNumber || 0,
+          phone: c.phone || c.whatsapp || '',
+          whatsapp: c.whatsapp || '',
+          email: c.email || '',
+          birthDate: c.birthDate || '',
+          insuranceType: c.insuranceType || 'outro',
+          insurancePlan: c.insurancePlan || '',
+          createdAt: c.createdAt || new Date().toISOString(),
+          updatedAt: c.updatedAt || new Date().toISOString(),
+          whatsappPreferences: c.whatsappPreferences || { appointments: true, reminders: true, promotions: false, subscribed: true }
+        }))
+
+        // Normalizar pacientes médicos
+        const normalizedPatients: Patient[] = (medData?.patients || medData || []).map((p: any) => ({
+          id: p.id,
+          name: p.fullName || p.name || 'Sem nome',
+          cpf: p.cpf || '',
+          medicalRecordNumber: p.medicalRecordNumber || 0,
+          phone: p.phone || p.whatsapp || '',
+          whatsapp: p.whatsapp || '',
+          email: p.email || (p.communicationContact?.email ?? ''),
+          birthDate: p.birthDate || '',
+          insuranceType: p.insuranceType || 'outro',
+          insurancePlan: p.insurancePlan || '',
+          createdAt: p.createdAt || new Date().toISOString(),
+          updatedAt: p.updatedAt || new Date().toISOString(),
+          whatsappPreferences: p.whatsappPreferences || { appointments: true, reminders: true, promotions: false, subscribed: true }
+        }))
+
+        // Unir por chave (cpf -> email -> whatsapp -> id)
+        const byKey = new Map<string, Patient>()
+        const makeKey = (item: Patient) => {
+          const normWhatsapp = (item.whatsapp || '').replace(/\D/g, '')
+          return item.cpf || item.email || normWhatsapp || item.id
         }
+
+        for (const c of normalizedContacts) {
+          byKey.set(makeKey(c), c)
+        }
+
+        for (const p of normalizedPatients) {
+          const key = makeKey(p)
+          if (byKey.has(key)) {
+            // Mesclar preenchendo campos faltantes
+            const existing = byKey.get(key)!
+            byKey.set(key, {
+              ...existing,
+              name: p.name || existing.name,
+              cpf: p.cpf || existing.cpf,
+              medicalRecordNumber: p.medicalRecordNumber || existing.medicalRecordNumber,
+              phone: p.phone || existing.phone,
+              whatsapp: p.whatsapp || existing.whatsapp,
+              email: p.email || existing.email,
+              birthDate: p.birthDate || existing.birthDate,
+              insuranceType: p.insuranceType || existing.insuranceType,
+              insurancePlan: p.insurancePlan || existing.insurancePlan,
+              createdAt: existing.createdAt,
+              updatedAt: p.updatedAt || existing.updatedAt,
+              whatsappPreferences: existing.whatsappPreferences || p.whatsappPreferences,
+            })
+          } else {
+            byKey.set(key, p)
+          }
+        }
+
+        const merged = Array.from(byKey.values())
+        console.log('✅ Contatos + Pacientes unificados:', merged.length)
+        setPatients(merged)
+        setFilteredPatients(merged)
       } catch (error) {
         console.error('❌ Erro ao carregar contatos:', error)
       } finally {

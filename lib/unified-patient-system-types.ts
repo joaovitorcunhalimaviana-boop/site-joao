@@ -8,6 +8,7 @@ export interface CommunicationContact {
   id: string
   name: string
   email?: string
+  phone?: string
   whatsapp?: string
   birthDate?: string // Para emails de aniversário
   

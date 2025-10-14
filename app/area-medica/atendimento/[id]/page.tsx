@@ -91,6 +91,8 @@ const MEDICAL_CONDITIONS = [
 ]
 
 export default function AppointmentPage() {
+  const [doctorName, setDoctorName] = useState<string>('Dr. João Vitor Viana')
+  const [doctorCrm, setDoctorCrm] = useState<string>('')
   const router = useRouter()
   const params = useParams()
   const appointmentId = params['id'] as string
@@ -316,7 +318,7 @@ export default function AppointmentPage() {
           treatment: '',
           prescription: '',
           observations: '',
-          doctorName: 'Dr. João Vitor Viana',
+          doctorName: doctorName,
           calculatorResults: [],
           diagnosticHypotheses: diagnosticHypotheses,
         }),
@@ -425,6 +427,34 @@ export default function AppointmentPage() {
     }
   }
 
+  // Abrir anexo com fallback: tenta por ID e depois por filename
+  const handleAttachmentOpen = async (attachment: any) => {
+    try {
+      if (attachment?.id) {
+        const idUrl = `/api/medical-attachments?id=${attachment.id}&download=1`
+        const head = await fetch(idUrl, { method: 'HEAD' })
+        if (head.ok) {
+          window.open(idUrl, '_blank')
+          return
+        }
+      }
+
+      // Extrair filename de diferentes campos possíveis
+      const rawPath = attachment?.path || attachment?.filePath || ''
+      const fileName = attachment?.fileName || (rawPath ? rawPath.split('\\').pop() || rawPath.split('/').pop() : '')
+      if (fileName) {
+        const fallbackUrl = `/api/medical-attachments/${encodeURIComponent(fileName)}`
+        window.open(fallbackUrl, '_blank')
+        return
+      }
+
+      alert('Arquivo não encontrado para este anexo.')
+    } catch (err) {
+      console.error('Erro ao abrir anexo:', err)
+      alert('Erro ao abrir o arquivo do anexo.')
+    }
+  }
+
   const handleSaveCalculatorResult = (calculatorName: string, result: any) => {
     console.log('🔍 Page - handleSaveCalculatorResult chamado com:', {
       calculatorName,
@@ -495,8 +525,8 @@ export default function AppointmentPage() {
           treatment: '',
           prescription: '',
           observations: '', // Removido formatCalculatorResults para evitar duplicação
-          doctorName: 'Dr. João Vitor Viana',
-          doctorCrm: '', // Adicionado campo esperado pela API
+          doctorName: doctorName,
+          doctorCrm: doctorCrm, // Adicionado campo esperado pela API
           calculatorResults: calculatorResults,
           attachments: currentConsultationAttachments,
           diagnosticHypotheses: diagnosticHypotheses,
@@ -537,6 +567,28 @@ export default function AppointmentPage() {
       setSaving(false)
     }
   }
+
+  // Buscar dados do médico logado para preencher automaticamente nome e CRM
+  useEffect(() => {
+    const fetchDoctor = async () => {
+      try {
+        const res = await fetch('/api/auth/check', { credentials: 'include' })
+        if (!res.ok) return
+        const data = await res.json()
+        const name = data?.user?.name
+        const crm = data?.user?.crm
+        if (name && typeof name === 'string' && name.trim()) {
+          setDoctorName(name)
+        }
+        if (crm && typeof crm === 'string') {
+          setDoctorCrm(crm)
+        }
+      } catch (e) {
+        // Mantém valores padrão caso a checagem falhe
+      }
+    }
+    fetchDoctor()
+  }, [])
 
   const handleTimerUpdate = (time: number) => {
     setTimerTime(time)
@@ -804,19 +856,12 @@ export default function AppointmentPage() {
                                   <div className='space-y-1'>
                                     {consultation.calculatorResults.map(
                                       (calc: any, index: number) => {
-                                        const name =
-                                          calc.calculatorName ||
-                                          (calc.result?.type === 'st-marks'
-                                            ? "Escala de St. Mark's"
-                                            : 'Calculadora')
-                                        const score =
-                                          calc.result?.score ||
-                                          calc.result?.type ||
-                                          'N/A'
-                                        const interpretation =
-                                          calc.result?.interpretation ||
-                                          calc.result?.description ||
-                                          'N/A'
+                                        const name = getCalculatorDisplayName(calc)
+                                        const score = getCalculatorScore(calc.result)
+                                        const interpretation = getCalculatorInterpretation(
+                                          calc,
+                                          calc.result
+                                        )
 
                                         return (
                                           <div
@@ -847,7 +892,7 @@ export default function AppointmentPage() {
                                     {consultation.diagnosticHypotheses.map(
                                       (hypothesis: string, index: number) => (
                                         <Badge
-                                          key={index}
+                                          key={`${hypothesis}-${index}`}
                                           variant='secondary'
                                           className='bg-blue-900/30 text-blue-300 border-blue-700'
                                         >
@@ -869,7 +914,7 @@ export default function AppointmentPage() {
                                     {consultation.attachments.map(
                                       (attachment: any, index: number) => (
                                         <div
-                                          key={index}
+                                          key={attachment.id || index}
                                           className='text-sm text-gray-300 flex items-center'
                                         >
                                           <svg
@@ -887,8 +932,8 @@ export default function AppointmentPage() {
                                           </svg>
                                           <button
                                             onClick={e => {
-                                              const fileUrl = `/api/medical-attachments/${attachment.fileName}`
-                                              window.open(fileUrl, '_blank')
+                                              e.stopPropagation()
+                                              handleAttachmentOpen(attachment)
                                             }}
                                             className='text-blue-400 hover:text-blue-300 underline cursor-pointer transition-colors'
                                           >
@@ -1151,8 +1196,19 @@ export default function AppointmentPage() {
                                 </p>
                               </div>
                             </div>
-                            <div className='text-sm text-green-600 font-medium'>
-                              ✅ Salvo
+                            <div className='flex items-center gap-3'>
+                              <button
+                                onClick={() => {
+                                  const url = `/api/medical-attachments?id=${attachment.id}&download=1`
+                                  window.open(url, '_blank')
+                                }}
+                                className='text-sm text-blue-600 hover:text-blue-800 underline'
+                              >
+                                Abrir
+                              </button>
+                              <span className='text-sm text-green-600 font-medium'>
+                                ✅ Salvo
+                              </span>
                             </div>
                           </div>
                         ))}

@@ -10,8 +10,10 @@ import {
   createOrUpdatePatient,
   getMedicalPatientById,
   getCommunicationContactById,
+  createOrUpdateCommunicationContact,
   canPatientScheduleNewAppointment,
 } from '../../../lib/unified-patient-system-prisma'
+import { sendTelegramAppointmentNotification, convertPrismaToNotificationData } from '../../../lib/telegram-notifications'
 
 // GET - Obter agendamentos, agenda diária ou estatísticas
 export async function GET(request: NextRequest) {
@@ -129,7 +131,7 @@ export async function GET(request: NextRequest) {
           phone: patientContact?.whatsapp || '',
           whatsapp: patientContact?.whatsapp || '',
           email: patientContact?.email || '',
-          birthDate: patientContact?.birthDate || '',
+          birthDate: patientContact?.birthDate || medicalPatient.birthDate || '',
           insuranceType: medicalPatient.insuranceType,
           insurancePlan: medicalPatient.insurancePlan,
           createdAt: medicalPatient.createdAt,
@@ -386,16 +388,50 @@ export async function POST(request: NextRequest) {
           )
         }
 
-        // Buscar dados do contato de comunicação para campos adicionais
-        const patientContact = await getCommunicationContactById(patientData.communicationContactId)
+        // Buscar dados do contato de comunicação para campos adicionais (com fallback)
+        let patientContact = await getCommunicationContactById(patientData.communicationContactId)
         if (!patientContact) {
-          return NextResponse.json(
-            {
-              success: false,
-              error: 'Dados de contato do paciente não encontrados',
-            },
-            { status: 404 }
-          )
+          const fallbackWhatsapp =
+            patientWhatsapp || patientPhone || patientData.whatsapp || patientData.phone || ''
+          const fallbackEmail = patientEmail || ''
+
+          if (!fallbackWhatsapp) {
+            return NextResponse.json(
+              {
+                success: false,
+                error: 'Erro ao agendar consulta: Telefone/WhatsApp do paciente ausente',
+              },
+              { status: 400 }
+            )
+          }
+
+          try {
+            const contactResult = await createOrUpdateCommunicationContact({
+              name: patientData.fullName || patientName,
+              whatsapp: fallbackWhatsapp,
+              email: fallbackEmail,
+              source: 'secretary_area',
+            })
+            if (contactResult?.contact) {
+              patientContact = contactResult.contact as any
+            } else {
+              // Fallback em memória
+              patientContact = {
+                id: '',
+                whatsapp: fallbackWhatsapp,
+                phone: fallbackWhatsapp,
+                email: fallbackEmail,
+              } as any
+            }
+          } catch (err) {
+            // Não bloquear: usar fallback em memória
+            patientContact = {
+              id: '',
+              whatsapp: fallbackWhatsapp,
+              phone: fallbackWhatsapp,
+              email: fallbackEmail,
+            } as any
+          }
         }
 
         // Verificar se o paciente pode agendar uma nova consulta
@@ -411,7 +447,7 @@ export async function POST(request: NextRequest) {
         }
 
         const appointmentResult = await createAppointment({
-          communicationContactId: patientData.communicationContactId,
+          communicationContactId: patientContact?.id || patientData.communicationContactId,
           medicalPatientId: patientData.id,
           patientId: patientId,
           appointmentDate: appointmentDate,
@@ -428,6 +464,17 @@ export async function POST(request: NextRequest) {
           insuranceType: patientData.insuranceType?.toLowerCase() || 'particular',
           source: source || 'secretary',
         })
+
+        // Enviar notificação via Telegram (não bloquear fluxo principal)
+        try {
+          const notificationData = convertPrismaToNotificationData(
+            patientContact as any,
+            appointmentResult as any
+          )
+          await sendTelegramAppointmentNotification(notificationData)
+        } catch (notifyErr) {
+          console.warn('⚠️ Falha ao enviar notificação Telegram:', notifyErr)
+        }
 
         return NextResponse.json({
           success: true,

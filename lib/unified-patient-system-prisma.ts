@@ -13,7 +13,8 @@ import {
   AppointmentStatus,
   AppointmentSource,
   AppointmentType,
-  InsuranceType
+  InsuranceType,
+  Prisma
 } from '@prisma/client'
 
 // ==================== INTERFACES UNIFICADAS ====================
@@ -161,6 +162,7 @@ export async function getAllCommunicationContacts(): Promise<CommunicationContac
         id: true,
         name: true,
         email: true,
+        phone: true,
         whatsapp: true,
         birthDate: true,
         registrationSources: true,
@@ -177,7 +179,7 @@ export async function getAllCommunicationContacts(): Promise<CommunicationContac
       name: contact.name,
       email: contact.email || undefined,
       whatsapp: contact.whatsapp || undefined,
-      phone: contact.whatsapp || undefined, // Alias for compatibility
+      phone: contact.phone || undefined,
       birthDate: contact.birthDate || undefined,
       registrationSources: (contact.registrationSources as string[]) || [],
       emailPreferences: contact.emailPreferences as any || {
@@ -353,7 +355,7 @@ export async function getCommunicationContactById(id: string): Promise<Communica
   try {
     const contact = await prisma.communicationContact.findUnique({
       where: { id },
-      select: { id: true, name: true, email: true, whatsapp: true, birthDate: true, registrationSources: true, emailPreferences: true, whatsappPreferences: true, reviewData: true, createdAt: true, updatedAt: true }
+      select: { id: true, name: true, email: true, phone: true, whatsapp: true, birthDate: true, registrationSources: true, emailPreferences: true, whatsappPreferences: true, reviewData: true, createdAt: true, updatedAt: true }
     })
     
     if (!contact) return null
@@ -363,7 +365,7 @@ export async function getCommunicationContactById(id: string): Promise<Communica
       name: contact.name,
       email: contact.email || undefined,
       whatsapp: contact.whatsapp || undefined,
-      phone: contact.whatsapp || undefined,
+      phone: contact.phone || undefined,
       birthDate: contact.birthDate || undefined,
       registrationSources: contact.registrationSources as ('newsletter' | 'public_appointment' | 'doctor_area' | 'secretary_area' | 'review')[],
       emailPreferences: contact.emailPreferences as any,
@@ -387,7 +389,7 @@ export async function getCommunicationContactByEmail(email: string): Promise<Com
           mode: 'insensitive'
         }
       },
-      select: { id: true, name: true, email: true, whatsapp: true, birthDate: true, registrationSources: true, emailPreferences: true, whatsappPreferences: true, reviewData: true, createdAt: true, updatedAt: true }
+      select: { id: true, name: true, email: true, phone: true, whatsapp: true, birthDate: true, registrationSources: true, emailPreferences: true, whatsappPreferences: true, reviewData: true, createdAt: true, updatedAt: true }
     })
     
     if (!contact) return null
@@ -397,7 +399,7 @@ export async function getCommunicationContactByEmail(email: string): Promise<Com
       name: contact.name,
       email: contact.email || undefined,
       whatsapp: contact.whatsapp || undefined,
-      phone: contact.whatsapp || undefined,
+      phone: contact.phone || undefined,
       birthDate: contact.birthDate || undefined,
       registrationSources: contact.registrationSources as ('newsletter' | 'public_appointment' | 'doctor_area' | 'secretary_area' | 'review')[],
       emailPreferences: contact.emailPreferences as any,
@@ -415,30 +417,57 @@ export async function getCommunicationContactByEmail(email: string): Promise<Com
 export async function getCommunicationContactByPhone(phone: string): Promise<CommunicationContact | null> {
   try {
     const phoneClean = phone.replace(/\D/g, '')
-    const contact = await prisma.communicationContact.findFirst({
-      where: { 
-        whatsapp: {
-          contains: phoneClean
+    try {
+      const contact = await prisma.communicationContact.findFirst({
+        where: { 
+          OR: [
+            { phone: { contains: phoneClean } },
+            { whatsapp: { contains: phoneClean } }
+          ]
+        },
+        select: { id: true, name: true, email: true, phone: true, whatsapp: true, birthDate: true, registrationSources: true, emailPreferences: true, whatsappPreferences: true, reviewData: true, createdAt: true, updatedAt: true }
+      })
+
+      if (!contact) return null
+
+      return {
+        id: contact.id,
+        name: contact.name,
+        email: contact.email || undefined,
+        whatsapp: contact.whatsapp || undefined,
+        phone: contact.phone || undefined,
+        birthDate: contact.birthDate || undefined,
+        registrationSources: contact.registrationSources as ('newsletter' | 'public_appointment' | 'doctor_area' | 'secretary_area' | 'review')[],
+        emailPreferences: contact.emailPreferences as any,
+        whatsappPreferences: contact.whatsappPreferences as any,
+        reviewData: contact.reviewData as any,
+        createdAt: contact.createdAt.toISOString(),
+        updatedAt: contact.updatedAt.toISOString(),
+      }
+    } catch (error: any) {
+      // Fallback para ambientes onde a coluna 'phone' ainda não existe (P2022)
+      if (error instanceof Prisma.PrismaClientKnownRequestError && (error.code === 'P2022' || error.code === 'P2021')) {
+        const contact = await prisma.communicationContact.findFirst({
+          where: { whatsapp: { contains: phoneClean } },
+          select: { id: true, name: true, email: true, whatsapp: true, birthDate: true, registrationSources: true, emailPreferences: true, whatsappPreferences: true, reviewData: true, createdAt: true, updatedAt: true }
+        })
+        if (!contact) return null
+        return {
+          id: contact.id,
+          name: contact.name,
+          email: contact.email || undefined,
+          whatsapp: contact.whatsapp || undefined,
+          phone: contact.whatsapp || undefined, // usar whatsapp como alias até coluna existir
+          birthDate: contact.birthDate || undefined,
+          registrationSources: contact.registrationSources as ('newsletter' | 'public_appointment' | 'doctor_area' | 'secretary_area' | 'review')[],
+          emailPreferences: contact.emailPreferences as any,
+          whatsappPreferences: contact.whatsappPreferences as any,
+          reviewData: contact.reviewData as any,
+          createdAt: contact.createdAt.toISOString(),
+          updatedAt: contact.updatedAt.toISOString(),
         }
-      },
-      select: { id: true, name: true, email: true, whatsapp: true, birthDate: true, registrationSources: true, emailPreferences: true, whatsappPreferences: true, reviewData: true, createdAt: true, updatedAt: true }
-    })
-    
-    if (!contact) return null
-    
-    return {
-      id: contact.id,
-      name: contact.name,
-      email: contact.email || undefined,
-      whatsapp: contact.whatsapp || undefined,
-      phone: contact.whatsapp || undefined,
-      birthDate: contact.birthDate || undefined,
-      registrationSources: contact.registrationSources as ('newsletter' | 'public_appointment' | 'doctor_area' | 'secretary_area' | 'review')[],
-      emailPreferences: contact.emailPreferences as any,
-      whatsappPreferences: contact.whatsappPreferences as any,
-      reviewData: contact.reviewData as any,
-      createdAt: contact.createdAt.toISOString(),
-      updatedAt: contact.updatedAt.toISOString(),
+      }
+      throw error
     }
   } catch (error) {
     console.error('❌ Erro ao buscar contato por telefone:', error)
@@ -456,7 +485,7 @@ export async function getAllMedicalPatients(): Promise<MedicalPatient[]> {
       },
       include: {
         communicationContact: {
-          select: { whatsapp: true, email: true, birthDate: true }
+          select: { phone: true, whatsapp: true, email: true, birthDate: true }
         }
       },
       orderBy: { createdAt: 'desc' }
@@ -493,7 +522,7 @@ export async function getMedicalPatientById(id: string): Promise<MedicalPatient 
       where: { id },
       include: {
         communicationContact: {
-          select: { birthDate: true, whatsapp: true, email: true }
+          select: { birthDate: true, phone: true, whatsapp: true, email: true }
         }
       }
     })
@@ -515,8 +544,8 @@ export async function getMedicalPatientById(id: string): Promise<MedicalPatient 
       fullName: patient.fullName,
       cpf: patient.cpf,
       rg: patient.rg || undefined,
-      birthDate: patient.communicationContact?.birthDate,
-      phone: patient.communicationContact?.whatsapp,
+      birthDate: patient.communicationContact?.birthDate || (patient.birthDate ? patient.birthDate.toISOString().split('T')[0] : ''),
+      phone: patient.communicationContact?.phone,
       whatsapp: patient.communicationContact?.whatsapp,
       gender: patient.gender as 'M' | 'F' | 'Other' | undefined,
       maritalStatus: patient.maritalStatus || undefined,
@@ -1023,7 +1052,11 @@ export async function getMedicalRecordsByPatientId(patientId: string): Promise<M
         medicalPatientId: patientId
       },
       include: {
-        consultation: true,
+        consultation: {
+          include: {
+            attachments: true
+          }
+        },
         doctor: true
       },
       orderBy: {
@@ -1060,7 +1093,18 @@ export async function getMedicalRecordsByPatientId(patientId: string): Promise<M
         observations: parsedContent.observations || '',
         calculatorResults: parsedContent.calculatorResults || [],
         diagnosticHypotheses: parsedContent.diagnosticHypotheses || [],
-        doctorName: record.doctor?.name || 'Dr. João Vitor Viana',
+        attachments: (parsedContent.attachments || record.consultation?.attachments || []).map((att: any) => ({
+          id: att.id,
+          fileName: att.fileName || att.filename || att.originalName || `arquivo-${att.id}`,
+          originalName: att.originalName || att.fileName || att.filename || 'Arquivo',
+          fileType: att.fileType || att.mimeType || att.contentType || '',
+          fileSize: att.fileSize,
+          category: att.category || 'documento',
+          description: att.description,
+          uploadedAt: att.uploadedAt?.toISOString ? att.uploadedAt.toISOString() : att.uploadedAt,
+          filePath: att.filePath
+        })),
+        doctorName: record.doctor?.name || parsedContent.doctorName || 'Dr. João Vítor Viana',
         createdAt: record.createdAt.toISOString(),
         updatedAt: record.updatedAt.toISOString(),
       }
@@ -1078,16 +1122,22 @@ export async function createMedicalRecord(recordData: any): Promise<{ success: b
   try {
     console.log('📋 Criando prontuário médico:', recordData)
 
-    // Buscar o ID do médico ativo
-    const doctor = await prisma.user.findFirst({
-      where: {
-        role: 'DOCTOR',
-        isActive: true
-      }
-    })
+    // Determinar o médico responsável
+    let doctorIdToUse: string | null = recordData.doctorId || null
+    let doctorNameToUse: string | undefined = recordData.doctorName
 
-    if (!doctor) {
-      throw new Error('Nenhum médico ativo encontrado no sistema')
+    if (!doctorIdToUse) {
+      const doctor = await prisma.user.findFirst({
+        where: {
+          role: 'DOCTOR',
+          isActive: true
+        }
+      })
+      if (!doctor) {
+        throw new Error('Nenhum médico ativo encontrado no sistema')
+      }
+      doctorIdToUse = doctor.id
+      doctorNameToUse = doctor.name
     }
 
     // Primeiro, criar uma consulta se não existir
@@ -1096,7 +1146,7 @@ export async function createMedicalRecord(recordData: any): Promise<{ success: b
       const consultation = await prisma.consultation.create({
         data: {
           medicalPatientId: recordData.medicalPatientId,
-          doctorId: doctor.id,
+          doctorId: doctorIdToUse!,
           startTime: new Date(`${recordData.consultationDate}T${recordData.consultationTime}:00`),
           status: 'COMPLETED',
           anamnese: recordData.anamnesis
@@ -1122,7 +1172,7 @@ export async function createMedicalRecord(recordData: any): Promise<{ success: b
       data: {
         consultationId: consultationId,
         medicalPatientId: recordData.medicalPatientId,
-        doctorId: doctor.id,
+        doctorId: doctorIdToUse!,
         content: content,
         summary: recordData.diagnosis || recordData.anamnesis?.substring(0, 200) || '',
         category: 'consultation',
@@ -1154,7 +1204,7 @@ export async function createMedicalRecord(recordData: any): Promise<{ success: b
       treatment: recordData.treatment,
       medications: [],
       notes: recordData.observations,
-      doctorName: recordData.doctorName,
+      doctorName: doctorNameToUse || recordData.doctorName,
       createdAt: medicalRecord.createdAt.toISOString(),
       updatedAt: medicalRecord.updatedAt.toISOString(),
     }
@@ -1291,24 +1341,75 @@ export async function getMedicalRecordsByPatient(patientId: string): Promise<Med
         date: record.createdAt.toISOString().split('T')[0], // YYYY-MM-DD
         time: record.createdAt.toTimeString().split(' ')[0], // HH:MM:SS
         anamnesis: parsedContent.anamnesis || record.consultation?.anamnese || '',
-        physicalExamination: parsedContent.physicalExamination || '',
+        examination: parsedContent.examination || parsedContent.physicalExamination || '',
         diagnosis: parsedContent.diagnosis || '',
         treatment: parsedContent.treatment || '',
         prescription: parsedContent.prescription || record.consultation?.prescriptions?.[0]?.medications || '',
         observations: parsedContent.observations || '',
-        attachments: parsedContent.attachments || patientAttachments.map(att => ({
-          id: att.id,
-          fileName: att.path.split('\\').pop() || att.path.split('/').pop() || att.filename,
-          originalName: att.originalName,
-          fileType: att.mimeType,
-          fileSize: att.size,
-          category: att.category.toLowerCase() as 'exame' | 'foto' | 'documento' | 'outro',
-          description: att.description || '',
-          uploadedAt: att.uploadedAt.toISOString(),
-          filePath: att.path
-        })) || [],
-        calculatorResults: parsedContent.calculatorResults || [],
-        diagnosticHypotheses: parsedContent.diagnosticHypotheses || [],
+        attachments: (() => {
+          // Normalize attachments possibly saved in content (may be empty or wrapped)
+          const contentAttachments = Array.isArray(parsedContent.attachments)
+            ? parsedContent.attachments
+            : []
+
+          const normalizedFromContent = contentAttachments
+            .map((att: any) => {
+              // Some flows save as { success, attachment } – unwrap if present
+              const a = att && att.attachment ? att.attachment : att
+              if (!a || !a.id) return null
+              return {
+                id: a.id,
+                fileName: (a.path?.split('\\').pop() || a.path?.split('/').pop() || a.filename || a.originalName) || '',
+                originalName: a.originalName || a.filename || '',
+                fileType: a.mimeType || a.fileType || '',
+                fileSize: a.size || a.fileSize || 0,
+                category: (a.category?.toLowerCase?.() || 'outro') as 'exame' | 'foto' | 'documento' | 'outro',
+                description: a.description || '',
+                uploadedAt: typeof a.uploadedAt === 'string' ? a.uploadedAt : (a.uploadedAt?.toISOString?.() || ''),
+                filePath: a.path || a.filePath || ''
+              }
+            })
+            .filter(Boolean)
+
+          // Prefer content attachments only if there are valid ones
+          if (normalizedFromContent.length > 0) {
+            return normalizedFromContent as any
+          }
+
+          // Otherwise, use attachments from the consultation relation
+          const consultationAttachments = Array.isArray(record.consultation?.attachments)
+            ? record.consultation!.attachments
+            : []
+
+          if (consultationAttachments.length > 0) {
+            return consultationAttachments.map(att => ({
+              id: att.id,
+              fileName: att.path.split('\\').pop() || att.path.split('/').pop() || (att as any).filename,
+              originalName: att.originalName,
+              fileType: att.mimeType,
+              fileSize: att.size,
+              category: (att.category as any).toLowerCase() as 'exame' | 'foto' | 'documento' | 'outro',
+              description: att.description || '',
+              uploadedAt: att.uploadedAt.toISOString(),
+              filePath: att.path
+            })) as any
+          }
+
+          // As a final fallback, use all patient attachments (older behavior)
+          return patientAttachments.map(att => ({
+            id: att.id,
+            fileName: att.path.split('\\').pop() || att.path.split('/').pop() || att.filename,
+            originalName: att.originalName,
+            fileType: att.mimeType,
+            fileSize: att.size,
+            category: att.category.toLowerCase() as 'exame' | 'foto' | 'documento' | 'outro',
+            description: att.description || '',
+            uploadedAt: att.uploadedAt.toISOString(),
+            filePath: att.path
+          }))
+        })(),
+        calculatorResults: Array.isArray(parsedContent.calculatorResults) ? parsedContent.calculatorResults : [],
+        diagnosticHypotheses: Array.isArray(parsedContent.diagnosticHypotheses) ? parsedContent.diagnosticHypotheses : [],
         createdAt: record.createdAt.toISOString(),
         updatedAt: record.updatedAt.toISOString()
       }
@@ -1373,6 +1474,18 @@ export async function createOrUpdatePatient(patientData: any): Promise<{ success
             updatedAt: new Date()
           }
         })
+
+        // Sync birthDate to CommunicationContact to keep data consistent
+        if (patientData.birthDate && updatedPatient.communicationContactId) {
+          try {
+            await prisma.communicationContact.update({
+              where: { id: updatedPatient.communicationContactId },
+              data: { birthDate: patientData.birthDate }
+            })
+          } catch (syncError) {
+            console.warn('⚠️ Falha ao sincronizar birthDate para CommunicationContact:', syncError)
+          }
+        }
         
         return {
           success: true,

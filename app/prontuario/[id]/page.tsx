@@ -66,6 +66,20 @@ interface MedicalRecord {
   createdAt: string
 }
 
+function getInsuranceLabel(insurance: { type?: string; plan?: string } | undefined) {
+  const type = insurance?.type?.toLowerCase()
+  switch (type) {
+    case 'particular':
+      return 'Particular'
+    case 'unimed':
+      return `Unimed${insurance?.plan ? ` - ${insurance.plan}` : ''}`
+    case 'outro':
+      return insurance?.plan || 'Outro convênio'
+    default:
+      return 'Não informado'
+  }
+}
+
 export default function ProntuarioPage() {
   const [patient, setPatient] = useState<Patient | null>(null)
   const [medicalRecords, setMedicalRecords] = useState<MedicalRecord[]>([])
@@ -166,15 +180,50 @@ export default function ProntuarioPage() {
         plan: patientData.insurance?.plan
       })
       
+      // Normalizar telefone/WhatsApp e convênio para múltiplos formatos possíveis
+      const phoneNormalized =
+        // Preferir telefone, depois fallback para WhatsApp se telefone vier vazio
+        patientData.phone ||
+        patientData.telefone ||
+        patientData.whatsapp ||
+        ''
+
+      const whatsappNormalized =
+        // Preferir WhatsApp, com fallback para telefone
+        patientData.whatsapp ||
+        patientData.telefone ||
+        patientData.phone ||
+        ''
+
+      const birthDateNormalized =
+        patientData.birthDate || patientData.dataNascimento || ''
+
+      const rawInsuranceType =
+        (patientData.insurance?.type ||
+          patientData.insuranceType ||
+          patientData.insurance?.originalType ||
+          '').toString()
+
+      const insuranceTypeNormalized = (() => {
+        const t = rawInsuranceType.trim().toLowerCase()
+        if (!t) return 'particular'
+        if (t.includes('unimed')) return 'unimed'
+        if (t.includes('particular')) return 'particular'
+        return t === 'outro' ? 'outro' : 'particular'
+      })()
+
+      const insurancePlanNormalized =
+        patientData.insurance?.planType || patientData.insurancePlan || patientData.insurance?.plan || ''
+
       const mappedPatient = {
         id: patientData.id || patientId,
         name: patientData.fullName || patientData.name || 'Nome não disponível',
-        phone: patientData.phone || '',
-        whatsapp: patientData.whatsapp || '',
-        birthDate: patientData.birthDate || '',
+        phone: phoneNormalized,
+        whatsapp: whatsappNormalized,
+        birthDate: birthDateNormalized,
         insurance: {
-          type: patientData.insurance?.type || 'particular',
-          plan: patientData.insurance?.planType || patientData.insurance?.plan || ''
+          type: insuranceTypeNormalized as 'particular' | 'unimed' | 'outro',
+          plan: insurancePlanNormalized
         },
         status: 'aguardando', // Status padrão
         createdAt: patientData.createdAt || new Date().toISOString(),
@@ -202,7 +251,12 @@ export default function ProntuarioPage() {
         const data = await response.json()
         console.log('🔍 Dados recebidos da API medical-records:', data)
         // A API retorna os registros diretamente, não em data.records
-        setMedicalRecords(Array.isArray(data) ? data : [])
+        const records = Array.isArray(data) ? data : []
+        setMedicalRecords(records)
+        // Selecionar automaticamente o primeiro registro para exibir detalhes
+        if (records.length > 0) {
+          setSelectedRecord(records[0])
+        }
       } else {
         console.error('Erro na resposta da API:', response.status, response.statusText)
         setMedicalRecords([])
@@ -210,6 +264,31 @@ export default function ProntuarioPage() {
     } catch (error) {
       console.error('Erro ao carregar prontuários:', error)
       setMedicalRecords([])
+    }
+  }
+
+  // Abrir anexo com fallback de rota por ID e por filename
+  const handleAttachmentOpen = async (attachment: MedicalAttachment) => {
+    try {
+      const idUrl = `/api/medical-attachments?id=${attachment.id}&download=1`
+      // Tentar primeiro pela rota de ID
+      const res = await fetch(idUrl, { method: 'HEAD' })
+      if (res.ok) {
+        window.open(idUrl, '_blank')
+        return
+      }
+
+      // Fallback: abrir pelo filename direto na pasta de anexos
+      const filename = attachment.fileName || (attachment.filePath?.split('\\').pop() || attachment.filePath?.split('/').pop() || '')
+      if (filename) {
+        const fileUrl = `/api/medical-attachments/${encodeURIComponent(filename)}`
+        window.open(fileUrl, '_blank')
+        return
+      }
+
+      console.error('Não foi possível determinar o arquivo do anexo para abrir:', attachment)
+    } catch (error) {
+      console.error('Erro ao tentar abrir anexo:', error)
     }
   }
 
@@ -300,7 +379,7 @@ export default function ProntuarioPage() {
 
                 <div>
                   <p className='text-sm text-gray-300'>Telefone</p>
-                  <p className='text-white'>{patient.phone}</p>
+                  <p className='text-white'>{patient.phone || 'Não informado'}</p>
                 </div>
 
                 <div>
@@ -332,8 +411,7 @@ export default function ProntuarioPage() {
                         : patient.insurance?.type === 'outro'
                           ? patient.insurance?.plan || 'Outro'
                           : patient.insurance?.plan ||
-                            patient.insurance?.type ||
-                            'Não informado'}
+                            getInsuranceLabel(patient.insurance)}
                   </p>
                 </div>
 
@@ -384,9 +462,7 @@ export default function ProntuarioPage() {
                       key={record.id}
                       className='border border-gray-600 rounded-lg p-4 hover:bg-gray-700 transition-colors cursor-pointer'
                       onClick={() =>
-                        setSelectedRecord(
-                          selectedRecord?.id === record.id ? null : record
-                        )
+                        setSelectedRecord(prev => (prev?.id === record.id ? null : record))
                       }
                     >
                       <div className='flex items-center justify-between mb-2'>
@@ -480,31 +556,43 @@ export default function ProntuarioPage() {
                                 </p>
                                 <div className='text-gray-300 text-sm whitespace-pre-line'>
                                   {record.calculatorResults.map((result, index) => {
-                                    // Renderizar resultado baseado na estrutura dos dados
+                                    const isWexner = (result.calculatorName || '').toLowerCase().includes('wexner')
+
                                     const renderResult = () => {
                                       if (typeof result.result === 'object' && result.result !== null) {
-                                        // Se result.result é um objeto, extrair informações relevantes
+                                        // Wexner: mostrar pontuação e interpretação uma vez
+                                        if (isWexner) {
+                                          const score = 
+                                            // Vários formatos possíveis (duas implementações de Wexner coexistem)
+                                            (result.result.totalScore ?? result.result.score ?? result.totalScore ?? result.score)
+                                          const interp = result.result.interpretation || result.interpretation || ''
+                                          if (score !== undefined) {
+                                            return `${score}/20${interp ? ' - ' + interp : ''}`
+                                          }
+                                        }
+
+                                        // Outros: extrair informações relevantes
                                         if (result.result.bmi) {
                                           return `IMC: ${result.result.bmi} (${result.result.category})`
                                         }
                                         if (result.result.score !== undefined) {
-                                          return `Score: ${result.result.score}`
+                                          return `${result.result.score}`
                                         }
                                         if (result.result.interpretation) {
                                           return result.result.interpretation
                                         }
-                                        // Fallback para outros objetos
                                         return JSON.stringify(result.result)
                                       }
-                                      // Se result.result é string/number, renderizar diretamente
                                       return result.result
                                     }
 
-                                    const interpretation = result.interpretation || 
-                                      (result.result && typeof result.result === 'object' ? result.result.interpretation : '')
+                                    // Evitar duplicação da interpretação
+                                    const interpretation = !isWexner
+                                      ? result.interpretation || (result.result && typeof result.result === 'object' ? result.result.interpretation : '')
+                                      : ''
 
                                     return (
-                                      <div key={index}>
+                                      <div key={result.timestamp || `${result.calculatorName}-${index}`}>
                                         - {result.calculatorName}: {renderResult()}
                                         {interpretation && ` - ${interpretation}`}
                                       </div>
@@ -523,7 +611,7 @@ export default function ProntuarioPage() {
                                 </p>
                                 <div className='text-gray-300 text-sm whitespace-pre-line'>
                                   {record.diagnosticHypotheses.map((hypothesis, index) => (
-                                    <div key={index}>
+                                    <div key={`${hypothesis}-${index}`}>
                                       - {hypothesis}
                                     </div>
                                   ))}
@@ -544,18 +632,16 @@ export default function ProntuarioPage() {
                                     <div
                                       key={attachment.id}
                                       className='bg-gray-700 rounded-lg p-3 border border-gray-600 hover:border-blue-500 transition-colors cursor-pointer group'
-                                      onClick={() =>
-                                        window.open(
-                                          `/api/medical-attachments/${attachment.fileName}`,
-                                          '_blank'
-                                        )
-                                      }
+                                      onClick={(e) => {
+                                        e.stopPropagation()
+                                        handleAttachmentOpen(attachment)
+                                      }}
                                     >
                                       <div className='flex items-center justify-between mb-2'>
                                         <div className='flex items-center'>
-                                          {attachment.fileType.startsWith(
+                                          {(attachment.fileType?.startsWith(
                                             'image/'
-                                          ) ? (
+                                          )) ? (
                                             <PhotoIcon className='h-5 w-5 text-blue-400' />
                                           ) : (
                                             <PaperClipIcon className='h-5 w-5 text-gray-400' />

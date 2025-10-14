@@ -214,8 +214,34 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({
         }),
       })
 
-      const appointmentResult = await response.json()
+      // Robustez: garantir que a resposta seja JSON antes de tentar parsear
+      const contentType = response.headers.get('content-type') || ''
+      let appointmentResult: any = null
+      try {
+        if (contentType.includes('application/json')) {
+          appointmentResult = await response.json()
+        } else {
+          const rawText = await response.text()
+          console.error('⚠️ Resposta não-JSON da API /public-appointment:', rawText)
+          throw new Error(rawText || 'Erro interno do servidor')
+        }
+      } catch (parseError) {
+        console.error('⚠️ Falha ao interpretar resposta da API:', parseError)
+        // Fallback: tentar obter texto bruto
+        try {
+          const rawText = await response.text()
+          throw new Error(rawText || 'Erro interno do servidor')
+        } catch {
+          throw parseError
+        }
+      }
+
       console.log('📊 Resultado da API:', appointmentResult)
+
+      if (!response.ok) {
+        const message = appointmentResult?.error || 'Erro ao criar agendamento'
+        throw new Error(message)
+      }
 
       if (!appointmentResult.success) {
         console.log(
@@ -304,7 +330,8 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({
     } catch (error) {
       console.error('❌ Erro crítico no agendamento:', error)
       setIsSubmitting(false)
-      alert('Erro ao criar agendamento. Tente novamente.')
+      const message = error instanceof Error ? error.message : 'Tente novamente.'
+      alert(`Erro ao criar agendamento: ${message}`)
     }
   }
 
@@ -388,7 +415,27 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({
         }),
       })
 
-      const appointmentResult = await response.json()
+      // Robustez: garantir que a resposta seja JSON antes de tentar parsear
+      const contentType = response.headers.get('content-type') || ''
+      let appointmentResult: any = null
+      try {
+        if (contentType.includes('application/json')) {
+          appointmentResult = await response.json()
+        } else {
+          const rawText = await response.text()
+          console.error('⚠️ Resposta não-JSON da API /public-appointment (reagendar):', rawText)
+          throw new Error(rawText || 'Erro interno do servidor')
+        }
+      } catch (parseError) {
+        console.error('⚠️ Falha ao interpretar resposta da API (reagendar):', parseError)
+        // Fallback: tentar obter texto bruto
+        try {
+          const rawText = await response.text()
+          throw new Error(rawText || 'Erro interno do servidor')
+        } catch {
+          throw parseError
+        }
+      }
 
       if (!appointmentResult.success) {
         throw new Error(

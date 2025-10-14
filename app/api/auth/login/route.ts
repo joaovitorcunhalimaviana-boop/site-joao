@@ -16,6 +16,14 @@ export async function POST(request: NextRequest) {
     let email: string = ''
     let password: string = ''
 
+    // Função para normalizar o identificador de login (username/email)
+    const normalizeLogin = (s: string) =>
+      s
+        .trim()
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+
     try {
       // Primeiro, tentar JSON
       credentials = await request.json()
@@ -37,6 +45,9 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Padronizar o identificador de login
+    email = normalizeLogin(email)
+
     console.log('📝 [Login API] Credenciais finais:', { 
       email: email ? 'presente' : 'ausente',
       password: password ? 'presente' : 'ausente',
@@ -52,18 +63,175 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Buscar usuário
+    // Utilitário: usuários de desenvolvimento (fallback quando DB indisponível)
+    const isDev = process.env['NODE_ENV'] !== 'production'
+    const getDevUser = (loginEmail: string, loginPassword: string) => {
+      const devUsers = [
+        {
+          id: 'dev-zeta',
+          username: 'zeta.secretaria',
+          email: 'zeta.secretaria',
+          role: 'SECRETARY',
+          name: 'Zeta Secretária',
+          isActive: true,
+          password: 'zeta123',
+        },
+        {
+          id: 'dev-joao',
+          username: 'joao.viana',
+          email: 'joao.viana',
+          role: 'DOCTOR',
+          name: 'João Viana',
+          isActive: true,
+          password: 'Logos1.1',
+        },
+      ]
+      const found = devUsers.find(
+        u => (u.email === loginEmail || u.username === loginEmail) && u.password === loginPassword
+      )
+      return found
+    }
+
+    // Buscar usuário (tentar DB primeiro)
     console.log('🔍 [Login API] Buscando usuário...')
-    const user = await prisma.user.findFirst({
-      where: {
-        OR: [
-          { email: email },
-          { username: email }
-        ]
+    let user: any = null
+    try {
+      user = await prisma.user.findFirst({
+        where: {
+          OR: [
+            { email: email },
+            { username: email }
+          ]
+        }
+      })
+    } catch (dbError) {
+      console.warn('⚠️ [Login API] Erro ao acessar o banco, avaliando fallback de desenvolvimento:', dbError)
+      if (isDev) {
+        const devUser = getDevUser(email, password)
+        if (devUser) {
+          console.log('🛟 [Login API] Usando usuário de desenvolvimento (fallback):', devUser.username)
+          // Gerar tokens e responder sem acessar DB
+          const accessToken = jwt.sign(
+            {
+              userId: devUser.id,
+              username: devUser.username,
+              email: devUser.email,
+              role: devUser.role,
+              name: devUser.name,
+              type: 'access'
+            },
+            JWT_SECRET,
+            { expiresIn: '7d' }
+          )
+
+          const refreshToken = jwt.sign(
+            {
+              userId: devUser.id,
+              type: 'refresh'
+            },
+            JWT_SECRET,
+            { expiresIn: '30d' }
+          )
+
+          const response = NextResponse.json({
+            success: true,
+            user: {
+              id: devUser.id,
+              username: devUser.username,
+              email: devUser.email,
+              role: devUser.role,
+              name: devUser.name,
+              isActive: devUser.isActive,
+            },
+            message: 'Login (dev) realizado com sucesso'
+          })
+
+          response.cookies.set('auth-token', accessToken, {
+            httpOnly: true,
+            secure: process.env['NODE_ENV'] === 'production',
+            sameSite: 'lax',
+            maxAge: 7 * 24 * 60 * 60
+          })
+
+          response.cookies.set('refresh-token', refreshToken, {
+            httpOnly: true,
+            secure: process.env['NODE_ENV'] === 'production',
+            sameSite: 'lax',
+            maxAge: 30 * 24 * 60 * 60
+          })
+
+          return response
+        }
       }
-    })
+
+      // Sem fallback aplicável
+      console.error('❌ [Login API] Banco indisponível e nenhum fallback aplicável')
+      return NextResponse.json(
+        { error: 'Serviço de autenticação indisponível no momento' },
+        { status: 503 }
+      )
+    }
 
     if (!user) {
+      // Tentar fallback em desenvolvimento mesmo que o DB esteja acessível
+      if (isDev) {
+        const devUser = getDevUser(email, password)
+        if (devUser) {
+          console.log('🛟 [Login API] Usando usuário de desenvolvimento (fallback - usuário não encontrado):', devUser.username)
+
+          const accessToken = jwt.sign(
+            {
+              userId: devUser.id,
+              username: devUser.username,
+              email: devUser.email,
+              role: devUser.role,
+              name: devUser.name,
+              type: 'access'
+            },
+            JWT_SECRET,
+            { expiresIn: '7d' }
+          )
+
+          const refreshToken = jwt.sign(
+            {
+              userId: devUser.id,
+              type: 'refresh'
+            },
+            JWT_SECRET,
+            { expiresIn: '30d' }
+          )
+
+          const response = NextResponse.json({
+            success: true,
+            user: {
+              id: devUser.id,
+              username: devUser.username,
+              email: devUser.email,
+              role: devUser.role,
+              name: devUser.name,
+              isActive: devUser.isActive,
+            },
+            message: 'Login (dev) realizado com sucesso'
+          })
+
+          response.cookies.set('auth-token', accessToken, {
+            httpOnly: true,
+            secure: process.env['NODE_ENV'] === 'production',
+            sameSite: 'lax',
+            maxAge: 7 * 24 * 60 * 60
+          })
+
+          response.cookies.set('refresh-token', refreshToken, {
+            httpOnly: true,
+            secure: process.env['NODE_ENV'] === 'production',
+            sameSite: 'lax',
+            maxAge: 30 * 24 * 60 * 60
+          })
+
+          return response
+        }
+      }
+
       console.log('❌ [Login API] Usuário não encontrado')
       return NextResponse.json(
         { error: 'Usuário não encontrado' },

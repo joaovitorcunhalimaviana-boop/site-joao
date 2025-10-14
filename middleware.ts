@@ -30,11 +30,14 @@ const publicRoutes = [
   '/api/auth/login',
   '/api/public-appointment',
   '/api/admin/clear-data',
+  '/api/admin/apply-db-fixes',
+  '/api/admin/apply-db-fixes',
   '/api/unified-system/*',
   '/api/unified-appointments',
   '/api/data-integrity',
   '/api/emergency-dashboard',
   '/api/protection-manager',
+  '/api/backup-emergency',
   '/api/health',
   '/api/cron-control',
   '/api/daily-agenda',
@@ -42,6 +45,7 @@ const publicRoutes = [
   '/api/reviews',
   '/api/schedule-slots',
   '/_next/*',
+  '/@vite/*',
   '/favicon.ico',
   '/dr-joao-vitor.jpg',
   '/congress-photo.jpeg',
@@ -67,6 +71,12 @@ export const config = {
 
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname
+  const isInternalCron = request.headers.get('x-internal-cron') === 'true'
+
+  // Permitir requests internos de cron/scheduler sem autenticação
+  if (isInternalCron) {
+    return NextResponse.next()
+  }
 
   // Permitir rotas públicas
   if (isPublicRoute(pathname)) {
@@ -98,10 +108,8 @@ export async function middleware(request: NextRequest) {
     try {
       console.log('🔐 [Middleware] Verificando autenticação com token:', token)
       
-      // Em produção (Railway), usar localhost interno
-      const baseUrl = process.env.NODE_ENV === 'production' 
-        ? 'http://localhost:8080' 
-        : request.url.split('/').slice(0, 3).join('/')
+      // Usar a origem da própria requisição para evitar porta fixa
+      const baseUrl = request.nextUrl.origin
       
       const checkUrl = new URL('/api/auth/check', baseUrl)
       console.log('📡 [Middleware] Chamando API:', checkUrl.toString())

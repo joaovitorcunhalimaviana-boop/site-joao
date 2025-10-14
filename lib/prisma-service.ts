@@ -212,6 +212,44 @@ export async function getPatientById(id: string): Promise<UnifiedPatient | null>
     if (medicalPatient) {
       const contact = await getCommunicationContactById(medicalPatient.communicationContactId)
       if (contact) {
+        // Buscar convênio a partir dos agendamentos recentes e priorizar "unimed"
+        let finalInsurance: { type: 'unimed' | 'particular' | 'outro'; plan?: string } = {
+          type: (medicalPatient.insuranceType?.toLowerCase() || 'particular') as 'unimed' | 'particular' | 'outro',
+          plan: medicalPatient.insurancePlan || undefined
+        }
+        try {
+          const recentAppointments = await prisma.appointment.findMany({
+            where: {
+              OR: [
+                { medicalPatientId: medicalPatient.id },
+                { communicationContactId: medicalPatient.communicationContactId },
+              ],
+            },
+            orderBy: { updatedAt: 'desc' },
+            take: 5,
+            select: { insuranceType: true, insurancePlan: true }
+          })
+
+          const normalizeType = (t?: any) => (t ? String(t).toLowerCase() : undefined)
+          const preferred =
+            recentAppointments.find(a => normalizeType(a.insuranceType) === 'unimed') ||
+            recentAppointments.find(a => normalizeType(a.insuranceType) === 'particular') ||
+            recentAppointments.find(a => normalizeType(a.insuranceType) === 'outro')
+
+          if (preferred) {
+            const aptType = normalizeType(preferred.insuranceType) as 'unimed' | 'particular' | 'outro' | undefined
+            const aptPlan = preferred.insurancePlan || undefined
+            if (aptType) {
+              finalInsurance = {
+                type: aptType,
+                plan: aptPlan ?? finalInsurance.plan
+              }
+            }
+          }
+        } catch (e) {
+          console.warn('Falha ao obter convênio por agendamentos em prisma-service:', e)
+        }
+
         return {
           id: medicalPatient.id,
           name: medicalPatient.fullName,
@@ -221,10 +259,7 @@ export async function getPatientById(id: string): Promise<UnifiedPatient | null>
           whatsapp: contact.whatsapp || '',
           email: contact.email,
           birthDate: contact.birthDate,
-          insurance: {
-            type: (medicalPatient.insuranceType?.toLowerCase() || 'particular') as 'unimed' | 'particular' | 'outro',
-            plan: medicalPatient.insurancePlan || undefined
-          },
+          insurance: finalInsurance,
           registrationSources: contact.registrationSources,
           emailPreferences: {
             healthTips: contact.emailPreferences?.healthTips ?? false,
@@ -244,6 +279,31 @@ export async function getPatientById(id: string): Promise<UnifiedPatient | null>
     // Se não for paciente médico, tenta buscar como contato de comunicação
     const contact = await getCommunicationContactById(id)
     if (contact) {
+      // Buscar convênio pelos agendamentos ligados ao contato
+      let finalInsurance: { type: 'unimed' | 'particular' | 'outro'; plan?: string } = { type: 'particular', plan: undefined }
+      try {
+        const recentAppointments = await prisma.appointment.findMany({
+          where: { communicationContactId: contact.id },
+          orderBy: { updatedAt: 'desc' },
+          take: 5,
+          select: { insuranceType: true, insurancePlan: true }
+        })
+        const normalizeType = (t?: any) => (t ? String(t).toLowerCase() : undefined)
+        const preferred =
+          recentAppointments.find(a => normalizeType(a.insuranceType) === 'unimed') ||
+          recentAppointments.find(a => normalizeType(a.insuranceType) === 'particular') ||
+          recentAppointments.find(a => normalizeType(a.insuranceType) === 'outro')
+        if (preferred) {
+          const aptType = normalizeType(preferred.insuranceType) as 'unimed' | 'particular' | 'outro' | undefined
+          const aptPlan = preferred.insurancePlan || undefined
+          if (aptType) {
+            finalInsurance = { type: aptType, plan: aptPlan }
+          }
+        }
+      } catch (e) {
+        console.warn('Falha ao obter convênio por agendamentos (contato) em prisma-service:', e)
+      }
+
       return {
         id: contact.id,
         name: contact.name,
@@ -253,10 +313,7 @@ export async function getPatientById(id: string): Promise<UnifiedPatient | null>
         whatsapp: contact.whatsapp || '',
         email: contact.email,
         birthDate: contact.birthDate,
-        insurance: {
-          type: 'particular',
-          plan: undefined
-        },
+        insurance: finalInsurance,
         registrationSources: contact.registrationSources,
         emailPreferences: {
           healthTips: contact.emailPreferences.healthTips,

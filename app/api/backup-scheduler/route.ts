@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { PrismaClient } from '@prisma/client'
+import { enhancedBackupSystem } from '@/lib/enhanced-backup-system'
 
 const prisma = new PrismaClient()
 
@@ -17,32 +18,40 @@ class EmergencyBackupScheduler {
     return EmergencyBackupScheduler.instance
   }
 
-  // Executar backup de emergência
+  // Executar backup de emergência (com verificação de saúde)
   private async executeEmergencyBackup(): Promise<void> {
     try {
       console.log('🚨 EXECUTANDO BACKUP AUTOMÁTICO DE EMERGÊNCIA...')
 
+      // Base unificada: prioriza NEXTAUTH_URL, depois NEXT_PUBLIC_BASE_URL/NEXT_PUBLIC_APP_URL
       const baseUrl =
         process.env.NODE_ENV === 'development'
           ? 'http://localhost:3002'
-          : process.env['NEXT_PUBLIC_BASE_URL'] ||
+          : process.env['NEXTAUTH_URL'] ||
+            process.env['NEXT_PUBLIC_BASE_URL'] ||
+            process.env['NEXT_PUBLIC_APP_URL'] ||
             'https://www.joaovitorviana.com.br'
-      const response = await fetch(`${baseUrl}/api/backup-emergency`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      })
 
-      if (response.ok) {
-        const result = await response.json()
+      // Verificar health antes de executar o backup
+      try {
+        const health = await fetch(`${baseUrl}/api/health`, { method: 'GET' })
+        if (!health.ok) {
+          throw new Error(`Healthcheck falhou: ${health.status}`)
+        }
+      } catch (healthErr) {
+        console.error('❌ Healthcheck indisponível, adiando backup:', healthErr)
+        return
+      }
+      // Executar backup diretamente pela lógica interna (evita middleware)
+      const result = await enhancedBackupSystem.performEmergencyBackup()
+      if (result.success && result.data) {
         console.log('✅ BACKUP AUTOMÁTICO CONCLUÍDO:', result.data)
         this.lastBackupTime = new Date()
 
         // Salvar log do backup automático
         await this.saveBackupLog(result.data)
       } else {
-        throw new Error(`Falha no backup: ${response.statusText}`)
+        throw new Error(`Falha no backup: ${result.message || 'Unknown error'}`)
       }
     } catch (error) {
       console.error('❌ ERRO NO BACKUP AUTOMÁTICO:', error)
@@ -128,8 +137,10 @@ class EmergencyBackupScheduler {
 
     this.isRunning = true
 
-    // Executar backup imediatamente
-    this.executeEmergencyBackup()
+    // Executar backup com pequeno delay inicial para evitar 405 após boot
+    setTimeout(() => {
+      this.executeEmergencyBackup()
+    }, 60 * 1000) // 60 segundos
 
     // Agendar backups a cada 6 horas (21600000 ms)
     this.intervalId = setInterval(

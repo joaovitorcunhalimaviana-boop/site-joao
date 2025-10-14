@@ -39,7 +39,9 @@ export function convertPrismaToNotificationData(
     patientWhatsapp: contact.whatsapp || contact.phone || '',
     appointmentDate: appointment.appointmentDate,
     appointmentTime: appointment.appointmentTime,
-    insuranceType: appointment.insuranceType || 'particular',
+    insuranceType:
+      (appointment.insuranceType || 'particular').toLowerCase() as
+        'unimed' | 'particular' | 'outro',
     appointmentType: appointment.type,
     source: appointment.source,
     notes: appointment.observations
@@ -427,7 +429,8 @@ function formatDateForDisplay(dateString: string): string {
 }
 
 function getInsuranceDisplayName(insuranceType: string): string {
-  switch (insuranceType) {
+  const type = (insuranceType || '').toLowerCase()
+  switch (type) {
     case 'unimed':
       return 'Unimed'
     case 'particular':
@@ -435,7 +438,7 @@ function getInsuranceDisplayName(insuranceType: string): string {
     case 'outro':
       return 'Outro'
     default:
-      return insuranceType || 'Não informado'
+      return 'Não informado'
   }
 }
 

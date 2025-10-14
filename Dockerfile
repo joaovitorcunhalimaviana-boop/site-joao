@@ -21,5 +21,5 @@ RUN npm run build
 # Expose port (Railway will set PORT env var)
 EXPOSE $PORT
 
-# Start the application ensuring migrations are applied
-CMD ["sh", "-c", "npx prisma migrate deploy && npm start"]
+# Start the application (migrations handled by scripts/safe-migrate.js via npm start)
+CMD ["sh", "-c", "npm start"]

@@ -25,9 +25,37 @@ export default function NewsletterPage() {
   const [savedDrafts, setSavedDrafts] = useState<NewsletterData[]>([])
   const [currentDraft, setCurrentDraft] = useState<NewsletterData | null>(null)
   const [isClient, setIsClient] = useState(false)
+  const [subscribers, setSubscribers] = useState<any[]>([])
+  const [loadingSubscribers, setLoadingSubscribers] = useState(true)
 
   useEffect(() => {
     setIsClient(true)
+    // Carregar TODOS os contatos do sistema unificado (sem filtrar por subscribed)
+    const loadSubscribers = async () => {
+      try {
+        const response = await fetch('/api/unified-system/communication')
+        const data = await response.json()
+
+        if (data.success && Array.isArray(data.contacts)) {
+          const normalized = data.contacts.map((c: any) => ({
+            id: c.id,
+            name: c.name || c.fullName || 'Sem nome',
+            email: c.email || '',
+            whatsapp: c.whatsapp || '',
+            birthDate: c.birthDate || '',
+          }))
+          setSubscribers(normalized)
+        } else {
+          console.error('Erro ao carregar assinantes:', data)
+        }
+      } catch (error) {
+        console.error('Erro ao buscar assinantes:', error)
+      } finally {
+        setLoadingSubscribers(false)
+      }
+    }
+
+    loadSubscribers()
   }, [])
 
   const handleSave = async (data: NewsletterData) => {
@@ -156,6 +184,34 @@ export default function NewsletterPage() {
             className='w-full'
           />
         </div>
+
+        {/* Destinatários (assinantes) */}
+        <Card className='mb-8 bg-gray-900/50 border-gray-700'>
+          <CardHeader>
+            <CardTitle className='text-white'>Destinatários</CardTitle>
+            <CardDescription className='text-gray-400'>Assinantes da newsletter e contatos com email</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {loadingSubscribers ? (
+              <div className='text-gray-300'>Carregando assinantes...</div>
+            ) : (
+              <div className='space-y-4'>
+                <div className='text-white'>Total de assinantes: {subscribers.length}</div>
+                <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3'>
+                  {subscribers.slice(0, 12).map(sub => (
+                    <div key={sub.id} className='p-3 border border-gray-700 rounded-md bg-gray-800/30'>
+                      <div className='text-white text-sm font-medium'>{sub.name}</div>
+                      <div className='text-gray-300 text-sm'>{sub.email || 'Email não informado'}</div>
+                      {sub.whatsapp && (
+                        <div className='text-gray-400 text-xs'>WhatsApp: {sub.whatsapp}</div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
         {/* Saved Drafts */}
         {savedDrafts.length > 0 && (
