@@ -629,7 +629,6 @@ export default function ProntuarioPage() {
                                     </div>
                                   ))}
                                 </div>
-                                )}
                               </div>
                             )}
 
@@ -652,56 +651,57 @@ export default function ProntuarioPage() {
                                 </button>
                                 {showAttachments && (
                                   <div className='grid grid-cols-2 md:grid-cols-3 gap-3'>
-                                  {record.attachments.map(attachment => (
-                                    <div
-                                      key={attachment.id}
-                                      className='bg-gray-700 rounded-lg p-3 border border-gray-600 hover:border-blue-500 transition-colors cursor-pointer group'
-                                      onClick={(e) => {
-                                        e.stopPropagation()
-                                        handleAttachmentOpen(attachment)
-                                      }}
-                                    >
-                                      <div className='flex items-center justify-between mb-2'>
-                                        <div className='flex items-center'>
-                                          {(attachment.fileType?.startsWith(
-                                            'image/'
-                                          )) ? (
-                                            <PhotoIcon className='h-5 w-5 text-blue-400' />
-                                          ) : (
-                                            <PaperClipIcon className='h-5 w-5 text-gray-400' />
+                                    {record.attachments.map(attachment => (
+                                      <div
+                                        key={attachment.id}
+                                        className='bg-gray-700 rounded-lg p-3 border border-gray-600 hover:border-blue-500 transition-colors cursor-pointer group'
+                                        onClick={(e) => {
+                                          e.stopPropagation()
+                                          handleAttachmentOpen(attachment)
+                                        }}
+                                      >
+                                        <div className='flex items-center justify-between mb-2'>
+                                          <div className='flex items-center'>
+                                            {attachment.fileType?.startsWith(
+                                              'image/'
+                                            ) ? (
+                                              <PhotoIcon className='h-5 w-5 text-blue-400' />
+                                            ) : (
+                                              <PaperClipIcon className='h-5 w-5 text-gray-400' />
+                                            )}
+                                          </div>
+                                          <EyeIcon className='h-4 w-4 text-gray-400 group-hover:text-blue-400 transition-colors' />
+                                        </div>
+
+                                        <div className='space-y-1'>
+                                          <p
+                                            className='text-xs text-white font-medium truncate'
+                                            title={attachment.originalName}
+                                          >
+                                            {attachment.originalName}
+                                          </p>
+                                          <p className='text-xs text-gray-400 capitalize'>
+                                            {attachment.category}
+                                          </p>
+                                          <p className='text-xs text-gray-500'>
+                                            {(attachment.fileSize / 1024).toFixed(
+                                              1
+                                            )}{' '}
+                                            KB
+                                          </p>
+                                          {attachment.description && (
+                                            <p
+                                              className='text-xs text-gray-400 truncate'
+                                              title={attachment.description}
+                                            >
+                                              {attachment.description}
+                                            </p>
                                           )}
                                         </div>
-                                        <EyeIcon className='h-4 w-4 text-gray-400 group-hover:text-blue-400 transition-colors' />
                                       </div>
-
-                                      <div className='space-y-1'>
-                                        <p
-                                          className='text-xs text-white font-medium truncate'
-                                          title={attachment.originalName}
-                                        >
-                                          {attachment.originalName}
-                                        </p>
-                                        <p className='text-xs text-gray-400 capitalize'>
-                                          {attachment.category}
-                                        </p>
-                                        <p className='text-xs text-gray-500'>
-                                          {(attachment.fileSize / 1024).toFixed(
-                                            1
-                                          )}{' '}
-                                          KB
-                                        </p>
-                                        {attachment.description && (
-                                          <p
-                                            className='text-xs text-gray-400 truncate'
-                                            title={attachment.description}
-                                          >
-                                            {attachment.description}
-                                          </p>
-                                        )}
-                                      </div>
-                                    </div>
-                                  ))}
-                                </div>
+                                    ))}
+                                  </div>
+                                )}
                               </div>
                             )}
                         </div>

@@ -7,7 +7,11 @@ function log(msg) {
 
 try {
   const dbUrl = process.env.DATABASE_URL
-  if (!dbUrl) {
+  const skipMigrations = String(process.env.MIGRATIONS_DISABLED || '').toLowerCase() === 'true'
+
+  if (skipMigrations) {
+    log('MIGRATIONS_DISABLED=true detectado. Pulando prisma migrate deploy.')
+  } else if (!dbUrl) {
     log('DATABASE_URL não definida. Pulando prisma migrate deploy.')
   } else {
     log('Executando prisma migrate deploy...')

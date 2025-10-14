@@ -108,8 +108,12 @@ export async function middleware(request: NextRequest) {
     try {
       console.log('🔐 [Middleware] Verificando autenticação com token:', token)
       
-      // Usar a origem da própria requisição para evitar porta fixa
-      const baseUrl = request.nextUrl.origin
+      // Usar a origem real da requisição, considerando proxies (Railway/Vercel)
+      const forwardedHost = request.headers.get('x-forwarded-host')
+      const forwardedProto = request.headers.get('x-forwarded-proto') ?? 'https'
+      const baseUrl = forwardedHost
+        ? `${forwardedProto}://${forwardedHost}`
+        : new URL(request.url).origin
       
       const checkUrl = new URL('/api/auth/check', baseUrl)
       console.log('📡 [Middleware] Chamando API:', checkUrl.toString())

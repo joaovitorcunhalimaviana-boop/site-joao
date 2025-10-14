@@ -329,19 +329,24 @@ export async function POST(request: NextRequest) {
       message: 'Login realizado com sucesso'
     })
 
-    // Definir cookies
-    response.cookies.set('auth-token', accessToken, {
+    // Definir cookies com path explícito e domínio opcional
+    const cookieDomain = process.env['COOKIE_DOMAIN'] || undefined
+    const baseCookieOptions = {
       httpOnly: true,
       secure: process.env['NODE_ENV'] === 'production',
-      sameSite: 'lax',
-      maxAge: 7 * 24 * 60 * 60 // 7 dias
+      sameSite: 'lax' as const,
+      path: '/',
+      domain: cookieDomain,
+    }
+
+    response.cookies.set('auth-token', accessToken, {
+      ...baseCookieOptions,
+      maxAge: 7 * 24 * 60 * 60, // 7 dias
     })
 
     response.cookies.set('refresh-token', refreshToken, {
-      httpOnly: true,
-      secure: process.env['NODE_ENV'] === 'production',
-      sameSite: 'lax',
-      maxAge: 30 * 24 * 60 * 60 // 30 dias
+      ...baseCookieOptions,
+      maxAge: 30 * 24 * 60 * 60, // 30 dias
     })
 
     console.log('🍪 [Login API] Cookies definidos')

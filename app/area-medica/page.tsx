@@ -36,6 +36,8 @@ interface Doctor {
     phone: string
     whatsapp: string
     cpf?: string
+    email?: string
+    medicalRecordNumber?: number
     insurance: {
       type: 'particular' | 'unimed' | 'outro'
       plan?: string
@@ -268,8 +270,11 @@ interface DashboardStats {
               whatsapp: appointment.patientWhatsapp,
               email: appointment.patientEmail,
               cpf: appointment.patientCpf,
+              birthDate: appointment.patientBirthDate,
+              medicalRecordNumber: appointment.patientMedicalRecordNumber,
               insurance: {
-                type: appointment.insuranceType || 'particular'
+                type: appointment.insuranceType || 'particular',
+                plan: appointment.insurancePlan || ''
               }
             }
           }
@@ -319,7 +324,14 @@ interface DashboardStats {
           ...patient,
           name: patient.name || patient.fullName,
           phone: patient.phone || patient.whatsapp,
-          whatsapp: patient.whatsapp || patient.phone
+          whatsapp: patient.whatsapp || patient.phone,
+          email: patient.email,
+          medicalRecordNumber: patient.medicalRecordNumber || patient.recordNumber,
+          birthDate: patient.birthDate,
+          insurance: {
+            type: patient.insurance?.type || patient.insuranceType || 'particular',
+            plan: patient.insurance?.plan || patient.insurancePlan || ''
+          }
         }))
         
         const uniqueAllPatients = processedAllPatients.filter((patient, index, self) => 
@@ -391,7 +403,7 @@ interface DashboardStats {
     return filtered
   }, [activeTab, todayPatients, attendedPatients, patients, searchTerm])
 
-  // MemoizaÃ§Ã£o das funÃ§Ãµes de formataÃ§Ã£o
+  // MemoizaÃ§Ã£o das funÃ§Ã£o de formataÃ§Ã£o
   const formatTime = useCallback((time: string) => {
     return time.substring(0, 5) // HH:MM
   }, [])
@@ -540,7 +552,7 @@ interface DashboardStats {
     )
     if (!confirmDelete) return
 
-    // Segunda confirmaÃ§Ã£o para aÃ§Ãµes crÃ­ticas
+    // Segunda confirmaÃ§Ã£o para aÃ§Ã£o crÃ­ticas
     const doubleConfirm = window.confirm(
       'ATENÃ‡ÃƒO: Esta Ã© uma aÃ§Ã£o irreversÃ­vel!\n\nDigite "CONFIRMAR" para prosseguir com a exclusÃ£o.'
     )
@@ -1025,10 +1037,10 @@ interface DashboardStats {
                         Paciente
                       </th>
                       <th className='px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider'>
-                        Telefone
+                        WhatsApp
                       </th>
                       <th className='px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider'>
-                        WhatsApp
+                        Data Nascimento
                       </th>
                       <th className='px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider'>
                         Convênio
@@ -1070,19 +1082,24 @@ interface DashboardStats {
                         >
                           <td className='px-6 py-4 whitespace-nowrap'>
                             <div>
-                              <div className='text-sm font-medium text-white'>
+                              <div className='text-sm font-medium text-white flex items-center gap-2'>
                                 {patient.name}
+                                {patient.medicalRecordNumber && (
+                                  <span className='text-xs text-gray-400 bg-gray-700 px-2 py-1 rounded'>
+                                    #{patient.medicalRecordNumber}
+                                  </span>
+                                )}
                               </div>
                               <div className='text-sm text-gray-300'>
-                                {patient.phone}
+                                {patient.email || 'Email não informado'}
                               </div>
                             </div>
                           </td>
                           <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>
-                            {patient.phone}
+                            {patient.whatsapp || 'Não informado'}
                           </td>
                           <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>
-                            {patient.whatsapp}
+                            {patient.birthDate ? new Date(patient.birthDate).toLocaleDateString('pt-BR') : 'Não informado'}
                           </td>
                           <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>
                             {getInsuranceLabel(patient.insurance)}

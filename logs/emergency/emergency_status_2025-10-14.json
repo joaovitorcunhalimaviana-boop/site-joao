@@ -1,6 +1,6 @@
 [
   {
-    "timestamp": "2025-10-14T03:03:25.905Z",
+    "timestamp": "2025-10-14T20:47:40.565Z",
     "overallStatus": "HEALTHY",
     "alerts": [],
     "systemHealth": {
@@ -8,20 +8,68 @@
       "api": "ONLINE",
       "backupSystem": "ONLINE",
       "auditSystem": "ONLINE",
-      "lastCheck": "2025-10-14T03:03:25.881Z",
-      "uptime": 14168.5181964,
+      "lastCheck": "2025-10-14T20:47:39.849Z",
+      "uptime": 41804.3400406,
+      "responseTime": 328
+    },
+    "dataIntegrity": {
+      "status": "HEALTHY",
+      "lastCheck": "2025-10-14T20:47:40.562Z",
+      "issues": 0,
+      "criticalIssues": 0,
+      "recordCount": 0,
+      "orphanedRecords": 0
+    },
+    "backupStatus": {
+      "status": "WARNING",
+      "lastBackup": "2025-10-13T08:28:28.399Z",
+      "nextScheduled": "2025-10-15T05:00:00.000Z",
+      "successRate": 100,
+      "totalBackups": 336,
+      "failedBackups": 0,
+      "cloudProviders": {
+        "github": true,
+        "dropbox": false,
+        "googleDrive": false
+      }
+    },
+    "securityStatus": {
+      "status": "SECURE",
+      "lastSecurityCheck": "2025-10-14T20:47:40.565Z",
+      "suspiciousActivity": 0,
+      "failedLogins": 0,
+      "dataAccess": 0,
+      "encryptionStatus": true
+    },
+    "recommendations": [
+      "✅ Sistema funcionando normalmente",
+      "📊 Continue monitoramento regular",
+      "🔄 Mantenha backups atualizados"
+    ]
+  },
+  {
+    "timestamp": "2025-10-14T20:52:33.405Z",
+    "overallStatus": "HEALTHY",
+    "alerts": [],
+    "systemHealth": {
+      "database": "ONLINE",
+      "api": "ONLINE",
+      "backupSystem": "ONLINE",
+      "auditSystem": "ONLINE",
+      "lastCheck": "2025-10-14T20:52:33.364Z",
+      "uptime": 42097.8550688,
       "responseTime": 4
     },
     "dataIntegrity": {
       "status": "HEALTHY",
-      "lastCheck": "2025-10-14T03:03:25.902Z",
+      "lastCheck": "2025-10-14T20:52:33.398Z",
       "issues": 0,
       "criticalIssues": 0,
       "recordCount": 0,
       "orphanedRecords": 0
     },
     "backupStatus": {
-      "status": "HEALTHY",
+      "status": "WARNING",
       "lastBackup": "2025-10-13T08:28:28.399Z",
       "nextScheduled": "2025-10-15T05:00:00.000Z",
       "successRate": 100,
@@ -35,7 +83,7 @@
     },
     "securityStatus": {
       "status": "SECURE",
-      "lastSecurityCheck": "2025-10-14T03:03:25.905Z",
+      "lastSecurityCheck": "2025-10-14T20:52:33.405Z",
       "suspiciousActivity": 0,
       "failedLogins": 0,
       "dataAccess": 0,
@@ -48,7 +96,7 @@
     ]
   },
   {
-    "timestamp": "2025-10-14T03:07:46.342Z",
+    "timestamp": "2025-10-14T20:57:35.660Z",
     "overallStatus": "HEALTHY",
     "alerts": [],
     "systemHealth": {
@@ -56,20 +104,20 @@
       "api": "ONLINE",
       "backupSystem": "ONLINE",
       "auditSystem": "ONLINE",
-      "lastCheck": "2025-10-14T03:07:45.718Z",
-      "uptime": 14428.3549377,
-      "responseTime": 290
+      "lastCheck": "2025-10-14T20:57:35.075Z",
+      "uptime": 42399.5663876,
+      "responseTime": 317
     },
     "dataIntegrity": {
       "status": "HEALTHY",
-      "lastCheck": "2025-10-14T03:07:46.338Z",
+      "lastCheck": "2025-10-14T20:57:35.658Z",
       "issues": 0,
       "criticalIssues": 0,
-      "recordCount": 2,
+      "recordCount": 0,
       "orphanedRecords": 0
     },
     "backupStatus": {
-      "status": "HEALTHY",
+      "status": "WARNING",
       "lastBackup": "2025-10-13T08:28:28.399Z",
       "nextScheduled": "2025-10-15T05:00:00.000Z",
       "successRate": 100,
@@ -83,7 +131,7 @@
     },
     "securityStatus": {
       "status": "SECURE",
-      "lastSecurityCheck": "2025-10-14T03:07:46.341Z",
+      "lastSecurityCheck": "2025-10-14T20:57:35.660Z",
       "suspiciousActivity": 0,
       "failedLogins": 0,
       "dataAccess": 0,
@@ -96,7 +144,7 @@
     ]
   },
   {
-    "timestamp": "2025-10-14T03:12:15.198Z",
+    "timestamp": "2025-10-14T21:02:33.219Z",
     "overallStatus": "HEALTHY",
     "alerts": [],
     "systemHealth": {
@@ -104,644 +152,20 @@
       "api": "ONLINE",
       "backupSystem": "ONLINE",
       "auditSystem": "ONLINE",
-      "lastCheck": "2025-10-14T03:12:14.585Z",
-      "uptime": 14697.2233551,
-      "responseTime": 366
-    },
-    "dataIntegrity": {
-      "status": "HEALTHY",
-      "lastCheck": "2025-10-14T03:12:15.193Z",
-      "issues": 0,
-      "criticalIssues": 0,
-      "recordCount": 2,
-      "orphanedRecords": 0
-    },
-    "backupStatus": {
-      "status": "HEALTHY",
-      "lastBackup": "2025-10-13T08:28:28.399Z",
-      "nextScheduled": "2025-10-15T05:00:00.000Z",
-      "successRate": 100,
-      "totalBackups": 336,
-      "failedBackups": 0,
-      "cloudProviders": {
-        "github": true,
-        "dropbox": false,
-        "googleDrive": false
-      }
-    },
-    "securityStatus": {
-      "status": "SECURE",
-      "lastSecurityCheck": "2025-10-14T03:12:15.197Z",
-      "suspiciousActivity": 0,
-      "failedLogins": 0,
-      "dataAccess": 0,
-      "encryptionStatus": true
-    },
-    "recommendations": [
-      "✅ Sistema funcionando normalmente",
-      "📊 Continue monitoramento regular",
-      "🔄 Mantenha backups atualizados"
-    ]
-  },
-  {
-    "timestamp": "2025-10-14T03:16:51.958Z",
-    "overallStatus": "HEALTHY",
-    "alerts": [],
-    "systemHealth": {
-      "database": "ONLINE",
-      "api": "ONLINE",
-      "backupSystem": "ONLINE",
-      "auditSystem": "ONLINE",
-      "lastCheck": "2025-10-14T03:16:51.926Z",
-      "uptime": 14974.5641603,
+      "lastCheck": "2025-10-14T21:02:33.191Z",
+      "uptime": 42697.682809,
       "responseTime": 3
     },
     "dataIntegrity": {
       "status": "HEALTHY",
-      "lastCheck": "2025-10-14T03:16:51.955Z",
-      "issues": 0,
-      "criticalIssues": 0,
-      "recordCount": 2,
-      "orphanedRecords": 0
-    },
-    "backupStatus": {
-      "status": "HEALTHY",
-      "lastBackup": "2025-10-13T08:28:28.399Z",
-      "nextScheduled": "2025-10-15T05:00:00.000Z",
-      "successRate": 100,
-      "totalBackups": 336,
-      "failedBackups": 0,
-      "cloudProviders": {
-        "github": true,
-        "dropbox": false,
-        "googleDrive": false
-      }
-    },
-    "securityStatus": {
-      "status": "SECURE",
-      "lastSecurityCheck": "2025-10-14T03:16:51.958Z",
-      "suspiciousActivity": 0,
-      "failedLogins": 0,
-      "dataAccess": 0,
-      "encryptionStatus": true
-    },
-    "recommendations": [
-      "✅ Sistema funcionando normalmente",
-      "📊 Continue monitoramento regular",
-      "🔄 Mantenha backups atualizados"
-    ]
-  },
-  {
-    "timestamp": "2025-10-14T03:17:29.112Z",
-    "overallStatus": "HEALTHY",
-    "alerts": [],
-    "systemHealth": {
-      "database": "ONLINE",
-      "api": "ONLINE",
-      "backupSystem": "ONLINE",
-      "auditSystem": "ONLINE",
-      "lastCheck": "2025-10-14T03:17:28.486Z",
-      "uptime": 15011.1232693,
-      "responseTime": 303
-    },
-    "dataIntegrity": {
-      "status": "HEALTHY",
-      "lastCheck": "2025-10-14T03:17:29.109Z",
-      "issues": 0,
-      "criticalIssues": 0,
-      "recordCount": 2,
-      "orphanedRecords": 0
-    },
-    "backupStatus": {
-      "status": "HEALTHY",
-      "lastBackup": "2025-10-13T08:28:28.399Z",
-      "nextScheduled": "2025-10-15T05:00:00.000Z",
-      "successRate": 100,
-      "totalBackups": 336,
-      "failedBackups": 0,
-      "cloudProviders": {
-        "github": true,
-        "dropbox": false,
-        "googleDrive": false
-      }
-    },
-    "securityStatus": {
-      "status": "SECURE",
-      "lastSecurityCheck": "2025-10-14T03:17:29.112Z",
-      "suspiciousActivity": 0,
-      "failedLogins": 0,
-      "dataAccess": 0,
-      "encryptionStatus": true
-    },
-    "recommendations": [
-      "✅ Sistema funcionando normalmente",
-      "📊 Continue monitoramento regular",
-      "🔄 Mantenha backups atualizados"
-    ]
-  },
-  {
-    "timestamp": "2025-10-14T03:22:06.893Z",
-    "overallStatus": "HEALTHY",
-    "alerts": [],
-    "systemHealth": {
-      "database": "ONLINE",
-      "api": "ONLINE",
-      "backupSystem": "ONLINE",
-      "auditSystem": "ONLINE",
-      "lastCheck": "2025-10-14T03:22:06.327Z",
-      "uptime": 15288.9638849,
-      "responseTime": 92
-    },
-    "dataIntegrity": {
-      "status": "HEALTHY",
-      "lastCheck": "2025-10-14T03:22:06.890Z",
-      "issues": 0,
-      "criticalIssues": 0,
-      "recordCount": 2,
-      "orphanedRecords": 0
-    },
-    "backupStatus": {
-      "status": "HEALTHY",
-      "lastBackup": "2025-10-13T08:28:28.399Z",
-      "nextScheduled": "2025-10-15T05:00:00.000Z",
-      "successRate": 100,
-      "totalBackups": 336,
-      "failedBackups": 0,
-      "cloudProviders": {
-        "github": true,
-        "dropbox": false,
-        "googleDrive": false
-      }
-    },
-    "securityStatus": {
-      "status": "SECURE",
-      "lastSecurityCheck": "2025-10-14T03:22:06.892Z",
-      "suspiciousActivity": 0,
-      "failedLogins": 0,
-      "dataAccess": 0,
-      "encryptionStatus": true
-    },
-    "recommendations": [
-      "✅ Sistema funcionando normalmente",
-      "📊 Continue monitoramento regular",
-      "🔄 Mantenha backups atualizados"
-    ]
-  },
-  {
-    "timestamp": "2025-10-14T03:44:13.518Z",
-    "overallStatus": "HEALTHY",
-    "alerts": [],
-    "systemHealth": {
-      "database": "ONLINE",
-      "api": "ONLINE",
-      "backupSystem": "ONLINE",
-      "auditSystem": "ONLINE",
-      "lastCheck": "2025-10-14T03:44:12.278Z",
-      "uptime": 16614.9146707,
-      "responseTime": 1068
-    },
-    "dataIntegrity": {
-      "status": "HEALTHY",
-      "lastCheck": "2025-10-14T03:44:13.390Z",
-      "issues": 0,
-      "criticalIssues": 0,
-      "recordCount": 2,
-      "orphanedRecords": 0
-    },
-    "backupStatus": {
-      "status": "HEALTHY",
-      "lastBackup": "2025-10-13T08:28:28.399Z",
-      "nextScheduled": "2025-10-15T05:00:00.000Z",
-      "successRate": 100,
-      "totalBackups": 336,
-      "failedBackups": 0,
-      "cloudProviders": {
-        "github": true,
-        "dropbox": false,
-        "googleDrive": false
-      }
-    },
-    "securityStatus": {
-      "status": "SECURE",
-      "lastSecurityCheck": "2025-10-14T03:44:13.412Z",
-      "suspiciousActivity": 0,
-      "failedLogins": 0,
-      "dataAccess": 0,
-      "encryptionStatus": true
-    },
-    "recommendations": [
-      "✅ Sistema funcionando normalmente",
-      "📊 Continue monitoramento regular",
-      "🔄 Mantenha backups atualizados"
-    ]
-  },
-  {
-    "timestamp": "2025-10-14T03:48:33.101Z",
-    "overallStatus": "HEALTHY",
-    "alerts": [],
-    "systemHealth": {
-      "database": "ONLINE",
-      "api": "ONLINE",
-      "backupSystem": "ONLINE",
-      "auditSystem": "ONLINE",
-      "lastCheck": "2025-10-14T03:48:32.298Z",
-      "uptime": 16874.9350091,
-      "responseTime": 342
-    },
-    "dataIntegrity": {
-      "status": "HEALTHY",
-      "lastCheck": "2025-10-14T03:48:33.096Z",
-      "issues": 0,
-      "criticalIssues": 0,
-      "recordCount": 2,
-      "orphanedRecords": 0
-    },
-    "backupStatus": {
-      "status": "HEALTHY",
-      "lastBackup": "2025-10-13T08:28:28.399Z",
-      "nextScheduled": "2025-10-15T05:00:00.000Z",
-      "successRate": 100,
-      "totalBackups": 336,
-      "failedBackups": 0,
-      "cloudProviders": {
-        "github": true,
-        "dropbox": false,
-        "googleDrive": false
-      }
-    },
-    "securityStatus": {
-      "status": "SECURE",
-      "lastSecurityCheck": "2025-10-14T03:48:33.100Z",
-      "suspiciousActivity": 0,
-      "failedLogins": 0,
-      "dataAccess": 0,
-      "encryptionStatus": true
-    },
-    "recommendations": [
-      "✅ Sistema funcionando normalmente",
-      "📊 Continue monitoramento regular",
-      "🔄 Mantenha backups atualizados"
-    ]
-  },
-  {
-    "timestamp": "2025-10-14T04:02:16.597Z",
-    "overallStatus": "HEALTHY",
-    "alerts": [],
-    "systemHealth": {
-      "database": "ONLINE",
-      "api": "ONLINE",
-      "backupSystem": "ONLINE",
-      "auditSystem": "ONLINE",
-      "lastCheck": "2025-10-14T04:02:16.087Z",
-      "uptime": 336.9405486,
-      "responseTime": 296
-    },
-    "dataIntegrity": {
-      "status": "HEALTHY",
-      "lastCheck": "2025-10-14T04:02:16.593Z",
-      "issues": 0,
-      "criticalIssues": 0,
-      "recordCount": 3,
-      "orphanedRecords": 0
-    },
-    "backupStatus": {
-      "status": "HEALTHY",
-      "lastBackup": "2025-10-13T08:28:28.399Z",
-      "nextScheduled": "2025-10-15T05:00:00.000Z",
-      "successRate": 100,
-      "totalBackups": 336,
-      "failedBackups": 0,
-      "cloudProviders": {
-        "github": true,
-        "dropbox": false,
-        "googleDrive": false
-      }
-    },
-    "securityStatus": {
-      "status": "SECURE",
-      "lastSecurityCheck": "2025-10-14T04:02:16.597Z",
-      "suspiciousActivity": 0,
-      "failedLogins": 0,
-      "dataAccess": 0,
-      "encryptionStatus": true
-    },
-    "recommendations": [
-      "✅ Sistema funcionando normalmente",
-      "📊 Continue monitoramento regular",
-      "🔄 Mantenha backups atualizados"
-    ]
-  },
-  {
-    "timestamp": "2025-10-14T04:06:09.470Z",
-    "overallStatus": "HEALTHY",
-    "alerts": [],
-    "systemHealth": {
-      "database": "ONLINE",
-      "api": "ONLINE",
-      "backupSystem": "ONLINE",
-      "auditSystem": "ONLINE",
-      "lastCheck": "2025-10-14T04:06:08.982Z",
-      "uptime": 41.1868053,
-      "responseTime": 282
-    },
-    "dataIntegrity": {
-      "status": "HEALTHY",
-      "lastCheck": "2025-10-14T04:06:09.467Z",
-      "issues": 0,
-      "criticalIssues": 0,
-      "recordCount": 3,
-      "orphanedRecords": 0
-    },
-    "backupStatus": {
-      "status": "HEALTHY",
-      "lastBackup": "2025-10-13T08:28:28.399Z",
-      "nextScheduled": "2025-10-15T05:00:00.000Z",
-      "successRate": 100,
-      "totalBackups": 336,
-      "failedBackups": 0,
-      "cloudProviders": {
-        "github": true,
-        "dropbox": false,
-        "googleDrive": false
-      }
-    },
-    "securityStatus": {
-      "status": "SECURE",
-      "lastSecurityCheck": "2025-10-14T04:06:09.469Z",
-      "suspiciousActivity": 0,
-      "failedLogins": 0,
-      "dataAccess": 0,
-      "encryptionStatus": true
-    },
-    "recommendations": [
-      "✅ Sistema funcionando normalmente",
-      "📊 Continue monitoramento regular",
-      "🔄 Mantenha backups atualizados"
-    ]
-  },
-  {
-    "timestamp": "2025-10-14T04:15:02.272Z",
-    "overallStatus": "HEALTHY",
-    "alerts": [],
-    "systemHealth": {
-      "database": "ONLINE",
-      "api": "ONLINE",
-      "backupSystem": "ONLINE",
-      "auditSystem": "ONLINE",
-      "lastCheck": "2025-10-14T04:15:01.753Z",
-      "uptime": 573.9573234,
-      "responseTime": 287
-    },
-    "dataIntegrity": {
-      "status": "HEALTHY",
-      "lastCheck": "2025-10-14T04:15:02.269Z",
-      "issues": 0,
-      "criticalIssues": 0,
-      "recordCount": 3,
-      "orphanedRecords": 0
-    },
-    "backupStatus": {
-      "status": "HEALTHY",
-      "lastBackup": "2025-10-13T08:28:28.399Z",
-      "nextScheduled": "2025-10-15T05:00:00.000Z",
-      "successRate": 100,
-      "totalBackups": 336,
-      "failedBackups": 0,
-      "cloudProviders": {
-        "github": true,
-        "dropbox": false,
-        "googleDrive": false
-      }
-    },
-    "securityStatus": {
-      "status": "SECURE",
-      "lastSecurityCheck": "2025-10-14T04:15:02.272Z",
-      "suspiciousActivity": 0,
-      "failedLogins": 0,
-      "dataAccess": 0,
-      "encryptionStatus": true
-    },
-    "recommendations": [
-      "✅ Sistema funcionando normalmente",
-      "📊 Continue monitoramento regular",
-      "🔄 Mantenha backups atualizados"
-    ]
-  },
-  {
-    "timestamp": "2025-10-14T04:15:12.188Z",
-    "overallStatus": "HEALTHY",
-    "alerts": [],
-    "systemHealth": {
-      "database": "ONLINE",
-      "api": "ONLINE",
-      "backupSystem": "ONLINE",
-      "auditSystem": "ONLINE",
-      "lastCheck": "2025-10-14T04:15:11.674Z",
-      "uptime": 583.8777306,
-      "responseTime": 302
-    },
-    "dataIntegrity": {
-      "status": "HEALTHY",
-      "lastCheck": "2025-10-14T04:15:12.184Z",
-      "issues": 0,
-      "criticalIssues": 0,
-      "recordCount": 3,
-      "orphanedRecords": 0
-    },
-    "backupStatus": {
-      "status": "HEALTHY",
-      "lastBackup": "2025-10-13T08:28:28.399Z",
-      "nextScheduled": "2025-10-15T05:00:00.000Z",
-      "successRate": 100,
-      "totalBackups": 336,
-      "failedBackups": 0,
-      "cloudProviders": {
-        "github": true,
-        "dropbox": false,
-        "googleDrive": false
-      }
-    },
-    "securityStatus": {
-      "status": "SECURE",
-      "lastSecurityCheck": "2025-10-14T04:15:12.187Z",
-      "suspiciousActivity": 0,
-      "failedLogins": 0,
-      "dataAccess": 0,
-      "encryptionStatus": true
-    },
-    "recommendations": [
-      "✅ Sistema funcionando normalmente",
-      "📊 Continue monitoramento regular",
-      "🔄 Mantenha backups atualizados"
-    ]
-  },
-  {
-    "timestamp": "2025-10-14T06:06:03.819Z",
-    "overallStatus": "HEALTHY",
-    "alerts": [],
-    "systemHealth": {
-      "database": "ONLINE",
-      "api": "ONLINE",
-      "backupSystem": "ONLINE",
-      "auditSystem": "ONLINE",
-      "lastCheck": "2025-10-14T06:06:03.141Z",
-      "uptime": 1080.6766617,
-      "responseTime": 325
-    },
-    "dataIntegrity": {
-      "status": "HEALTHY",
-      "lastCheck": "2025-10-14T06:06:03.814Z",
-      "issues": 0,
-      "criticalIssues": 0,
-      "recordCount": 2,
-      "orphanedRecords": 0
-    },
-    "backupStatus": {
-      "status": "HEALTHY",
-      "lastBackup": "2025-10-13T08:28:28.399Z",
-      "nextScheduled": "2025-10-15T05:00:00.000Z",
-      "successRate": 100,
-      "totalBackups": 336,
-      "failedBackups": 0,
-      "cloudProviders": {
-        "github": true,
-        "dropbox": false,
-        "googleDrive": false
-      }
-    },
-    "securityStatus": {
-      "status": "SECURE",
-      "lastSecurityCheck": "2025-10-14T06:06:03.818Z",
-      "suspiciousActivity": 0,
-      "failedLogins": 0,
-      "dataAccess": 0,
-      "encryptionStatus": true
-    },
-    "recommendations": [
-      "✅ Sistema funcionando normalmente",
-      "📊 Continue monitoramento regular",
-      "🔄 Mantenha backups atualizados"
-    ]
-  },
-  {
-    "timestamp": "2025-10-14T06:31:12.242Z",
-    "overallStatus": "HEALTHY",
-    "alerts": [],
-    "systemHealth": {
-      "database": "ONLINE",
-      "api": "ONLINE",
-      "backupSystem": "ONLINE",
-      "auditSystem": "ONLINE",
-      "lastCheck": "2025-10-14T06:31:11.729Z",
-      "uptime": 85.6923168,
-      "responseTime": 298
-    },
-    "dataIntegrity": {
-      "status": "HEALTHY",
-      "lastCheck": "2025-10-14T06:31:12.238Z",
-      "issues": 0,
-      "criticalIssues": 0,
-      "recordCount": 3,
-      "orphanedRecords": 0
-    },
-    "backupStatus": {
-      "status": "HEALTHY",
-      "lastBackup": "2025-10-13T08:28:28.399Z",
-      "nextScheduled": "2025-10-15T05:00:00.000Z",
-      "successRate": 100,
-      "totalBackups": 336,
-      "failedBackups": 0,
-      "cloudProviders": {
-        "github": true,
-        "dropbox": false,
-        "googleDrive": false
-      }
-    },
-    "securityStatus": {
-      "status": "SECURE",
-      "lastSecurityCheck": "2025-10-14T06:31:12.241Z",
-      "suspiciousActivity": 0,
-      "failedLogins": 0,
-      "dataAccess": 0,
-      "encryptionStatus": true
-    },
-    "recommendations": [
-      "✅ Sistema funcionando normalmente",
-      "📊 Continue monitoramento regular",
-      "🔄 Mantenha backups atualizados"
-    ]
-  },
-  {
-    "timestamp": "2025-10-14T07:17:05.819Z",
-    "overallStatus": "HEALTHY",
-    "alerts": [],
-    "systemHealth": {
-      "database": "ONLINE",
-      "api": "ONLINE",
-      "backupSystem": "ONLINE",
-      "auditSystem": "ONLINE",
-      "lastCheck": "2025-10-14T07:17:05.290Z",
-      "uptime": 72.360698,
-      "responseTime": 391
-    },
-    "dataIntegrity": {
-      "status": "HEALTHY",
-      "lastCheck": "2025-10-14T07:17:05.815Z",
-      "issues": 0,
-      "criticalIssues": 0,
-      "recordCount": 4,
-      "orphanedRecords": 0
-    },
-    "backupStatus": {
-      "status": "HEALTHY",
-      "lastBackup": "2025-10-13T08:28:28.399Z",
-      "nextScheduled": "2025-10-15T05:00:00.000Z",
-      "successRate": 100,
-      "totalBackups": 336,
-      "failedBackups": 0,
-      "cloudProviders": {
-        "github": true,
-        "dropbox": false,
-        "googleDrive": false
-      }
-    },
-    "securityStatus": {
-      "status": "SECURE",
-      "lastSecurityCheck": "2025-10-14T07:17:05.819Z",
-      "suspiciousActivity": 0,
-      "failedLogins": 0,
-      "dataAccess": 0,
-      "encryptionStatus": true
-    },
-    "recommendations": [
-      "✅ Sistema funcionando normalmente",
-      "📊 Continue monitoramento regular",
-      "🔄 Mantenha backups atualizados"
-    ]
-  },
-  {
-    "timestamp": "2025-10-14T07:40:56.385Z",
-    "overallStatus": "HEALTHY",
-    "alerts": [],
-    "systemHealth": {
-      "database": "ONLINE",
-      "api": "ONLINE",
-      "backupSystem": "ONLINE",
-      "auditSystem": "ONLINE",
-      "lastCheck": "2025-10-14T07:40:55.854Z",
-      "uptime": 729.6587194,
-      "responseTime": 295
-    },
-    "dataIntegrity": {
-      "status": "HEALTHY",
-      "lastCheck": "2025-10-14T07:40:56.381Z",
+      "lastCheck": "2025-10-14T21:02:33.217Z",
       "issues": 0,
       "criticalIssues": 0,
       "recordCount": 0,
       "orphanedRecords": 0
     },
     "backupStatus": {
-      "status": "HEALTHY",
+      "status": "WARNING",
       "lastBackup": "2025-10-13T08:28:28.399Z",
       "nextScheduled": "2025-10-15T05:00:00.000Z",
       "successRate": 100,
@@ -755,7 +179,7 @@
     },
     "securityStatus": {
       "status": "SECURE",
-      "lastSecurityCheck": "2025-10-14T07:40:56.384Z",
+      "lastSecurityCheck": "2025-10-14T21:02:33.219Z",
       "suspiciousActivity": 0,
       "failedLogins": 0,
       "dataAccess": 0,
@@ -768,7 +192,7 @@
     ]
   },
   {
-    "timestamp": "2025-10-14T07:45:49.665Z",
+    "timestamp": "2025-10-14T21:08:53.081Z",
     "overallStatus": "HEALTHY",
     "alerts": [],
     "systemHealth": {
@@ -776,20 +200,20 @@
       "api": "ONLINE",
       "backupSystem": "ONLINE",
       "auditSystem": "ONLINE",
-      "lastCheck": "2025-10-14T07:45:49.643Z",
-      "uptime": 1023.4482043,
-      "responseTime": 3
+      "lastCheck": "2025-10-14T21:08:52.102Z",
+      "uptime": 43076.5943581,
+      "responseTime": 364
     },
     "dataIntegrity": {
       "status": "HEALTHY",
-      "lastCheck": "2025-10-14T07:45:49.663Z",
+      "lastCheck": "2025-10-14T21:08:53.077Z",
       "issues": 0,
       "criticalIssues": 0,
       "recordCount": 0,
       "orphanedRecords": 0
     },
     "backupStatus": {
-      "status": "HEALTHY",
+      "status": "WARNING",
       "lastBackup": "2025-10-13T08:28:28.399Z",
       "nextScheduled": "2025-10-15T05:00:00.000Z",
       "successRate": 100,
@@ -803,7 +227,7 @@
     },
     "securityStatus": {
       "status": "SECURE",
-      "lastSecurityCheck": "2025-10-14T07:45:49.665Z",
+      "lastSecurityCheck": "2025-10-14T21:08:53.080Z",
       "suspiciousActivity": 0,
       "failedLogins": 0,
       "dataAccess": 0,
@@ -816,7 +240,7 @@
     ]
   },
   {
-    "timestamp": "2025-10-14T07:50:51.816Z",
+    "timestamp": "2025-10-14T21:13:47.125Z",
     "overallStatus": "HEALTHY",
     "alerts": [],
     "systemHealth": {
@@ -824,253 +248,13 @@
       "api": "ONLINE",
       "backupSystem": "ONLINE",
       "auditSystem": "ONLINE",
-      "lastCheck": "2025-10-14T07:50:51.306Z",
-      "uptime": 1325.1113012,
-      "responseTime": 297
-    },
-    "dataIntegrity": {
-      "status": "HEALTHY",
-      "lastCheck": "2025-10-14T07:50:51.814Z",
-      "issues": 0,
-      "criticalIssues": 0,
-      "recordCount": 0,
-      "orphanedRecords": 0
-    },
-    "backupStatus": {
-      "status": "HEALTHY",
-      "lastBackup": "2025-10-13T08:28:28.399Z",
-      "nextScheduled": "2025-10-15T05:00:00.000Z",
-      "successRate": 100,
-      "totalBackups": 336,
-      "failedBackups": 0,
-      "cloudProviders": {
-        "github": true,
-        "dropbox": false,
-        "googleDrive": false
-      }
-    },
-    "securityStatus": {
-      "status": "SECURE",
-      "lastSecurityCheck": "2025-10-14T07:50:51.816Z",
-      "suspiciousActivity": 0,
-      "failedLogins": 0,
-      "dataAccess": 0,
-      "encryptionStatus": true
-    },
-    "recommendations": [
-      "✅ Sistema funcionando normalmente",
-      "📊 Continue monitoramento regular",
-      "🔄 Mantenha backups atualizados"
-    ]
-  },
-  {
-    "timestamp": "2025-10-14T07:55:49.728Z",
-    "overallStatus": "HEALTHY",
-    "alerts": [],
-    "systemHealth": {
-      "database": "ONLINE",
-      "api": "ONLINE",
-      "backupSystem": "ONLINE",
-      "auditSystem": "ONLINE",
-      "lastCheck": "2025-10-14T07:55:49.692Z",
-      "uptime": 1623.496784,
+      "lastCheck": "2025-10-14T21:13:47.088Z",
+      "uptime": 43371.5794496,
       "responseTime": 5
     },
     "dataIntegrity": {
       "status": "HEALTHY",
-      "lastCheck": "2025-10-14T07:55:49.725Z",
-      "issues": 0,
-      "criticalIssues": 0,
-      "recordCount": 0,
-      "orphanedRecords": 0
-    },
-    "backupStatus": {
-      "status": "HEALTHY",
-      "lastBackup": "2025-10-13T08:28:28.399Z",
-      "nextScheduled": "2025-10-15T05:00:00.000Z",
-      "successRate": 100,
-      "totalBackups": 336,
-      "failedBackups": 0,
-      "cloudProviders": {
-        "github": true,
-        "dropbox": false,
-        "googleDrive": false
-      }
-    },
-    "securityStatus": {
-      "status": "SECURE",
-      "lastSecurityCheck": "2025-10-14T07:55:49.728Z",
-      "suspiciousActivity": 0,
-      "failedLogins": 0,
-      "dataAccess": 0,
-      "encryptionStatus": true
-    },
-    "recommendations": [
-      "✅ Sistema funcionando normalmente",
-      "📊 Continue monitoramento regular",
-      "🔄 Mantenha backups atualizados"
-    ]
-  },
-  {
-    "timestamp": "2025-10-14T08:00:51.542Z",
-    "overallStatus": "HEALTHY",
-    "alerts": [],
-    "systemHealth": {
-      "database": "ONLINE",
-      "api": "ONLINE",
-      "backupSystem": "ONLINE",
-      "auditSystem": "ONLINE",
-      "lastCheck": "2025-10-14T08:00:51.061Z",
-      "uptime": 1924.866208,
-      "responseTime": 268
-    },
-    "dataIntegrity": {
-      "status": "HEALTHY",
-      "lastCheck": "2025-10-14T08:00:51.539Z",
-      "issues": 0,
-      "criticalIssues": 0,
-      "recordCount": 0,
-      "orphanedRecords": 0
-    },
-    "backupStatus": {
-      "status": "HEALTHY",
-      "lastBackup": "2025-10-13T08:28:28.399Z",
-      "nextScheduled": "2025-10-15T05:00:00.000Z",
-      "successRate": 100,
-      "totalBackups": 336,
-      "failedBackups": 0,
-      "cloudProviders": {
-        "github": true,
-        "dropbox": false,
-        "googleDrive": false
-      }
-    },
-    "securityStatus": {
-      "status": "SECURE",
-      "lastSecurityCheck": "2025-10-14T08:00:51.542Z",
-      "suspiciousActivity": 0,
-      "failedLogins": 0,
-      "dataAccess": 0,
-      "encryptionStatus": true
-    },
-    "recommendations": [
-      "✅ Sistema funcionando normalmente",
-      "📊 Continue monitoramento regular",
-      "🔄 Mantenha backups atualizados"
-    ]
-  },
-  {
-    "timestamp": "2025-10-14T08:05:54.330Z",
-    "overallStatus": "HEALTHY",
-    "alerts": [],
-    "systemHealth": {
-      "database": "ONLINE",
-      "api": "ONLINE",
-      "backupSystem": "ONLINE",
-      "auditSystem": "ONLINE",
-      "lastCheck": "2025-10-14T08:05:53.753Z",
-      "uptime": 2227.557885,
-      "responseTime": 304
-    },
-    "dataIntegrity": {
-      "status": "HEALTHY",
-      "lastCheck": "2025-10-14T08:05:54.326Z",
-      "issues": 0,
-      "criticalIssues": 0,
-      "recordCount": 0,
-      "orphanedRecords": 0
-    },
-    "backupStatus": {
-      "status": "HEALTHY",
-      "lastBackup": "2025-10-13T08:28:28.399Z",
-      "nextScheduled": "2025-10-15T05:00:00.000Z",
-      "successRate": 100,
-      "totalBackups": 336,
-      "failedBackups": 0,
-      "cloudProviders": {
-        "github": true,
-        "dropbox": false,
-        "googleDrive": false
-      }
-    },
-    "securityStatus": {
-      "status": "SECURE",
-      "lastSecurityCheck": "2025-10-14T08:05:54.329Z",
-      "suspiciousActivity": 0,
-      "failedLogins": 0,
-      "dataAccess": 0,
-      "encryptionStatus": true
-    },
-    "recommendations": [
-      "✅ Sistema funcionando normalmente",
-      "📊 Continue monitoramento regular",
-      "🔄 Mantenha backups atualizados"
-    ]
-  },
-  {
-    "timestamp": "2025-10-14T08:20:12.186Z",
-    "overallStatus": "HEALTHY",
-    "alerts": [],
-    "systemHealth": {
-      "database": "ONLINE",
-      "api": "ONLINE",
-      "backupSystem": "ONLINE",
-      "auditSystem": "ONLINE",
-      "lastCheck": "2025-10-14T08:20:11.676Z",
-      "uptime": 3085.4808037,
-      "responseTime": 274
-    },
-    "dataIntegrity": {
-      "status": "HEALTHY",
-      "lastCheck": "2025-10-14T08:20:12.180Z",
-      "issues": 0,
-      "criticalIssues": 0,
-      "recordCount": 0,
-      "orphanedRecords": 0
-    },
-    "backupStatus": {
-      "status": "HEALTHY",
-      "lastBackup": "2025-10-13T08:28:28.399Z",
-      "nextScheduled": "2025-10-15T05:00:00.000Z",
-      "successRate": 100,
-      "totalBackups": 336,
-      "failedBackups": 0,
-      "cloudProviders": {
-        "github": true,
-        "dropbox": false,
-        "googleDrive": false
-      }
-    },
-    "securityStatus": {
-      "status": "SECURE",
-      "lastSecurityCheck": "2025-10-14T08:20:12.185Z",
-      "suspiciousActivity": 0,
-      "failedLogins": 0,
-      "dataAccess": 0,
-      "encryptionStatus": true
-    },
-    "recommendations": [
-      "✅ Sistema funcionando normalmente",
-      "📊 Continue monitoramento regular",
-      "🔄 Mantenha backups atualizados"
-    ]
-  },
-  {
-    "timestamp": "2025-10-14T08:28:29.183Z",
-    "overallStatus": "HEALTHY",
-    "alerts": [],
-    "systemHealth": {
-      "database": "ONLINE",
-      "api": "ONLINE",
-      "backupSystem": "ONLINE",
-      "auditSystem": "ONLINE",
-      "lastCheck": "2025-10-14T08:28:28.636Z",
-      "uptime": 3582.4409663,
-      "responseTime": 289
-    },
-    "dataIntegrity": {
-      "status": "HEALTHY",
-      "lastCheck": "2025-10-14T08:28:29.180Z",
+      "lastCheck": "2025-10-14T21:13:47.121Z",
       "issues": 0,
       "criticalIssues": 0,
       "recordCount": 0,
@@ -1091,7 +275,7 @@
     },
     "securityStatus": {
       "status": "SECURE",
-      "lastSecurityCheck": "2025-10-14T08:28:29.183Z",
+      "lastSecurityCheck": "2025-10-14T21:13:47.125Z",
       "suspiciousActivity": 0,
       "failedLogins": 0,
       "dataAccess": 0,
@@ -1104,7 +288,7 @@
     ]
   },
   {
-    "timestamp": "2025-10-14T08:34:58.280Z",
+    "timestamp": "2025-10-14T21:18:51.653Z",
     "overallStatus": "HEALTHY",
     "alerts": [],
     "systemHealth": {
@@ -1112,13 +296,13 @@
       "api": "ONLINE",
       "backupSystem": "ONLINE",
       "auditSystem": "ONLINE",
-      "lastCheck": "2025-10-14T08:34:57.780Z",
-      "uptime": 3971.5844699,
-      "responseTime": 279
+      "lastCheck": "2025-10-14T21:18:50.210Z",
+      "uptime": 43674.7026726,
+      "responseTime": 587
     },
     "dataIntegrity": {
       "status": "HEALTHY",
-      "lastCheck": "2025-10-14T08:34:58.277Z",
+      "lastCheck": "2025-10-14T21:18:51.650Z",
       "issues": 0,
       "criticalIssues": 0,
       "recordCount": 0,
@@ -1139,7 +323,823 @@
     },
     "securityStatus": {
       "status": "SECURE",
-      "lastSecurityCheck": "2025-10-14T08:34:58.279Z",
+      "lastSecurityCheck": "2025-10-14T21:18:51.653Z",
+      "suspiciousActivity": 0,
+      "failedLogins": 0,
+      "dataAccess": 0,
+      "encryptionStatus": true
+    },
+    "recommendations": [
+      "✅ Sistema funcionando normalmente",
+      "📊 Continue monitoramento regular",
+      "🔄 Mantenha backups atualizados"
+    ]
+  },
+  {
+    "timestamp": "2025-10-14T21:23:55.112Z",
+    "overallStatus": "HEALTHY",
+    "alerts": [],
+    "systemHealth": {
+      "database": "ONLINE",
+      "api": "ONLINE",
+      "backupSystem": "ONLINE",
+      "auditSystem": "ONLINE",
+      "lastCheck": "2025-10-14T21:23:54.292Z",
+      "uptime": 43978.7835904,
+      "responseTime": 504
+    },
+    "dataIntegrity": {
+      "status": "HEALTHY",
+      "lastCheck": "2025-10-14T21:23:55.108Z",
+      "issues": 0,
+      "criticalIssues": 0,
+      "recordCount": 0,
+      "orphanedRecords": 0
+    },
+    "backupStatus": {
+      "status": "WARNING",
+      "lastBackup": "2025-10-13T08:28:28.399Z",
+      "nextScheduled": "2025-10-15T05:00:00.000Z",
+      "successRate": 100,
+      "totalBackups": 336,
+      "failedBackups": 0,
+      "cloudProviders": {
+        "github": true,
+        "dropbox": false,
+        "googleDrive": false
+      }
+    },
+    "securityStatus": {
+      "status": "SECURE",
+      "lastSecurityCheck": "2025-10-14T21:23:55.112Z",
+      "suspiciousActivity": 0,
+      "failedLogins": 0,
+      "dataAccess": 0,
+      "encryptionStatus": true
+    },
+    "recommendations": [
+      "✅ Sistema funcionando normalmente",
+      "📊 Continue monitoramento regular",
+      "🔄 Mantenha backups atualizados"
+    ]
+  },
+  {
+    "timestamp": "2025-10-14T21:28:46.472Z",
+    "overallStatus": "HEALTHY",
+    "alerts": [],
+    "systemHealth": {
+      "database": "ONLINE",
+      "api": "ONLINE",
+      "backupSystem": "ONLINE",
+      "auditSystem": "ONLINE",
+      "lastCheck": "2025-10-14T21:28:46.428Z",
+      "uptime": 44270.9195136,
+      "responseTime": 5
+    },
+    "dataIntegrity": {
+      "status": "HEALTHY",
+      "lastCheck": "2025-10-14T21:28:46.468Z",
+      "issues": 0,
+      "criticalIssues": 0,
+      "recordCount": 0,
+      "orphanedRecords": 0
+    },
+    "backupStatus": {
+      "status": "WARNING",
+      "lastBackup": "2025-10-13T08:28:28.399Z",
+      "nextScheduled": "2025-10-15T05:00:00.000Z",
+      "successRate": 100,
+      "totalBackups": 336,
+      "failedBackups": 0,
+      "cloudProviders": {
+        "github": true,
+        "dropbox": false,
+        "googleDrive": false
+      }
+    },
+    "securityStatus": {
+      "status": "SECURE",
+      "lastSecurityCheck": "2025-10-14T21:28:46.472Z",
+      "suspiciousActivity": 0,
+      "failedLogins": 0,
+      "dataAccess": 0,
+      "encryptionStatus": true
+    },
+    "recommendations": [
+      "✅ Sistema funcionando normalmente",
+      "📊 Continue monitoramento regular",
+      "🔄 Mantenha backups atualizados"
+    ]
+  },
+  {
+    "timestamp": "2025-10-14T21:33:49.102Z",
+    "overallStatus": "HEALTHY",
+    "alerts": [],
+    "systemHealth": {
+      "database": "ONLINE",
+      "api": "ONLINE",
+      "backupSystem": "ONLINE",
+      "auditSystem": "ONLINE",
+      "lastCheck": "2025-10-14T21:33:48.487Z",
+      "uptime": 44572.9794594,
+      "responseTime": 335
+    },
+    "dataIntegrity": {
+      "status": "HEALTHY",
+      "lastCheck": "2025-10-14T21:33:49.098Z",
+      "issues": 0,
+      "criticalIssues": 0,
+      "recordCount": 0,
+      "orphanedRecords": 0
+    },
+    "backupStatus": {
+      "status": "WARNING",
+      "lastBackup": "2025-10-13T08:28:28.399Z",
+      "nextScheduled": "2025-10-15T05:00:00.000Z",
+      "successRate": 100,
+      "totalBackups": 336,
+      "failedBackups": 0,
+      "cloudProviders": {
+        "github": true,
+        "dropbox": false,
+        "googleDrive": false
+      }
+    },
+    "securityStatus": {
+      "status": "SECURE",
+      "lastSecurityCheck": "2025-10-14T21:33:49.102Z",
+      "suspiciousActivity": 0,
+      "failedLogins": 0,
+      "dataAccess": 0,
+      "encryptionStatus": true
+    },
+    "recommendations": [
+      "✅ Sistema funcionando normalmente",
+      "📊 Continue monitoramento regular",
+      "🔄 Mantenha backups atualizados"
+    ]
+  },
+  {
+    "timestamp": "2025-10-14T21:38:46.370Z",
+    "overallStatus": "HEALTHY",
+    "alerts": [],
+    "systemHealth": {
+      "database": "ONLINE",
+      "api": "ONLINE",
+      "backupSystem": "ONLINE",
+      "auditSystem": "ONLINE",
+      "lastCheck": "2025-10-14T21:38:46.340Z",
+      "uptime": 44870.8315436,
+      "responseTime": 3
+    },
+    "dataIntegrity": {
+      "status": "HEALTHY",
+      "lastCheck": "2025-10-14T21:38:46.367Z",
+      "issues": 0,
+      "criticalIssues": 0,
+      "recordCount": 0,
+      "orphanedRecords": 0
+    },
+    "backupStatus": {
+      "status": "WARNING",
+      "lastBackup": "2025-10-13T08:28:28.399Z",
+      "nextScheduled": "2025-10-15T05:00:00.000Z",
+      "successRate": 100,
+      "totalBackups": 336,
+      "failedBackups": 0,
+      "cloudProviders": {
+        "github": true,
+        "dropbox": false,
+        "googleDrive": false
+      }
+    },
+    "securityStatus": {
+      "status": "SECURE",
+      "lastSecurityCheck": "2025-10-14T21:38:46.370Z",
+      "suspiciousActivity": 0,
+      "failedLogins": 0,
+      "dataAccess": 0,
+      "encryptionStatus": true
+    },
+    "recommendations": [
+      "✅ Sistema funcionando normalmente",
+      "📊 Continue monitoramento regular",
+      "🔄 Mantenha backups atualizados"
+    ]
+  },
+  {
+    "timestamp": "2025-10-14T21:43:49.195Z",
+    "overallStatus": "HEALTHY",
+    "alerts": [],
+    "systemHealth": {
+      "database": "ONLINE",
+      "api": "ONLINE",
+      "backupSystem": "ONLINE",
+      "auditSystem": "ONLINE",
+      "lastCheck": "2025-10-14T21:43:48.576Z",
+      "uptime": 45173.0675695,
+      "responseTime": 352
+    },
+    "dataIntegrity": {
+      "status": "HEALTHY",
+      "lastCheck": "2025-10-14T21:43:49.191Z",
+      "issues": 0,
+      "criticalIssues": 0,
+      "recordCount": 0,
+      "orphanedRecords": 0
+    },
+    "backupStatus": {
+      "status": "WARNING",
+      "lastBackup": "2025-10-13T08:28:28.399Z",
+      "nextScheduled": "2025-10-15T05:00:00.000Z",
+      "successRate": 100,
+      "totalBackups": 336,
+      "failedBackups": 0,
+      "cloudProviders": {
+        "github": true,
+        "dropbox": false,
+        "googleDrive": false
+      }
+    },
+    "securityStatus": {
+      "status": "SECURE",
+      "lastSecurityCheck": "2025-10-14T21:43:49.194Z",
+      "suspiciousActivity": 0,
+      "failedLogins": 0,
+      "dataAccess": 0,
+      "encryptionStatus": true
+    },
+    "recommendations": [
+      "✅ Sistema funcionando normalmente",
+      "📊 Continue monitoramento regular",
+      "🔄 Mantenha backups atualizados"
+    ]
+  },
+  {
+    "timestamp": "2025-10-14T21:48:46.420Z",
+    "overallStatus": "HEALTHY",
+    "alerts": [],
+    "systemHealth": {
+      "database": "ONLINE",
+      "api": "ONLINE",
+      "backupSystem": "ONLINE",
+      "auditSystem": "ONLINE",
+      "lastCheck": "2025-10-14T21:48:46.387Z",
+      "uptime": 45470.8784518,
+      "responseTime": 4
+    },
+    "dataIntegrity": {
+      "status": "HEALTHY",
+      "lastCheck": "2025-10-14T21:48:46.416Z",
+      "issues": 0,
+      "criticalIssues": 0,
+      "recordCount": 0,
+      "orphanedRecords": 0
+    },
+    "backupStatus": {
+      "status": "WARNING",
+      "lastBackup": "2025-10-13T08:28:28.399Z",
+      "nextScheduled": "2025-10-15T05:00:00.000Z",
+      "successRate": 100,
+      "totalBackups": 336,
+      "failedBackups": 0,
+      "cloudProviders": {
+        "github": true,
+        "dropbox": false,
+        "googleDrive": false
+      }
+    },
+    "securityStatus": {
+      "status": "SECURE",
+      "lastSecurityCheck": "2025-10-14T21:48:46.420Z",
+      "suspiciousActivity": 0,
+      "failedLogins": 0,
+      "dataAccess": 0,
+      "encryptionStatus": true
+    },
+    "recommendations": [
+      "✅ Sistema funcionando normalmente",
+      "📊 Continue monitoramento regular",
+      "🔄 Mantenha backups atualizados"
+    ]
+  },
+  {
+    "timestamp": "2025-10-14T21:53:49.523Z",
+    "overallStatus": "HEALTHY",
+    "alerts": [],
+    "systemHealth": {
+      "database": "ONLINE",
+      "api": "ONLINE",
+      "backupSystem": "ONLINE",
+      "auditSystem": "ONLINE",
+      "lastCheck": "2025-10-14T21:53:48.854Z",
+      "uptime": 45773.3454533,
+      "responseTime": 393
+    },
+    "dataIntegrity": {
+      "status": "HEALTHY",
+      "lastCheck": "2025-10-14T21:53:49.519Z",
+      "issues": 0,
+      "criticalIssues": 0,
+      "recordCount": 0,
+      "orphanedRecords": 0
+    },
+    "backupStatus": {
+      "status": "WARNING",
+      "lastBackup": "2025-10-13T08:28:28.399Z",
+      "nextScheduled": "2025-10-15T05:00:00.000Z",
+      "successRate": 100,
+      "totalBackups": 336,
+      "failedBackups": 0,
+      "cloudProviders": {
+        "github": true,
+        "dropbox": false,
+        "googleDrive": false
+      }
+    },
+    "securityStatus": {
+      "status": "SECURE",
+      "lastSecurityCheck": "2025-10-14T21:53:49.523Z",
+      "suspiciousActivity": 0,
+      "failedLogins": 0,
+      "dataAccess": 0,
+      "encryptionStatus": true
+    },
+    "recommendations": [
+      "✅ Sistema funcionando normalmente",
+      "📊 Continue monitoramento regular",
+      "🔄 Mantenha backups atualizados"
+    ]
+  },
+  {
+    "timestamp": "2025-10-14T21:58:46.610Z",
+    "overallStatus": "HEALTHY",
+    "alerts": [],
+    "systemHealth": {
+      "database": "ONLINE",
+      "api": "ONLINE",
+      "backupSystem": "ONLINE",
+      "auditSystem": "ONLINE",
+      "lastCheck": "2025-10-14T21:58:46.571Z",
+      "uptime": 46071.0632372,
+      "responseTime": 3
+    },
+    "dataIntegrity": {
+      "status": "HEALTHY",
+      "lastCheck": "2025-10-14T21:58:46.607Z",
+      "issues": 0,
+      "criticalIssues": 0,
+      "recordCount": 0,
+      "orphanedRecords": 0
+    },
+    "backupStatus": {
+      "status": "WARNING",
+      "lastBackup": "2025-10-13T08:28:28.399Z",
+      "nextScheduled": "2025-10-15T05:00:00.000Z",
+      "successRate": 100,
+      "totalBackups": 336,
+      "failedBackups": 0,
+      "cloudProviders": {
+        "github": true,
+        "dropbox": false,
+        "googleDrive": false
+      }
+    },
+    "securityStatus": {
+      "status": "SECURE",
+      "lastSecurityCheck": "2025-10-14T21:58:46.610Z",
+      "suspiciousActivity": 0,
+      "failedLogins": 0,
+      "dataAccess": 0,
+      "encryptionStatus": true
+    },
+    "recommendations": [
+      "✅ Sistema funcionando normalmente",
+      "📊 Continue monitoramento regular",
+      "🔄 Mantenha backups atualizados"
+    ]
+  },
+  {
+    "timestamp": "2025-10-14T22:03:50.269Z",
+    "overallStatus": "HEALTHY",
+    "alerts": [],
+    "systemHealth": {
+      "database": "ONLINE",
+      "api": "ONLINE",
+      "backupSystem": "ONLINE",
+      "auditSystem": "ONLINE",
+      "lastCheck": "2025-10-14T22:03:49.087Z",
+      "uptime": 46373.5790796,
+      "responseTime": 720
+    },
+    "dataIntegrity": {
+      "status": "HEALTHY",
+      "lastCheck": "2025-10-14T22:03:50.154Z",
+      "issues": 0,
+      "criticalIssues": 0,
+      "recordCount": 0,
+      "orphanedRecords": 0
+    },
+    "backupStatus": {
+      "status": "WARNING",
+      "lastBackup": "2025-10-13T08:28:28.399Z",
+      "nextScheduled": "2025-10-15T05:00:00.000Z",
+      "successRate": 100,
+      "totalBackups": 336,
+      "failedBackups": 0,
+      "cloudProviders": {
+        "github": true,
+        "dropbox": false,
+        "googleDrive": false
+      }
+    },
+    "securityStatus": {
+      "status": "SECURE",
+      "lastSecurityCheck": "2025-10-14T22:03:50.269Z",
+      "suspiciousActivity": 0,
+      "failedLogins": 0,
+      "dataAccess": 0,
+      "encryptionStatus": true
+    },
+    "recommendations": [
+      "✅ Sistema funcionando normalmente",
+      "📊 Continue monitoramento regular",
+      "🔄 Mantenha backups atualizados"
+    ]
+  },
+  {
+    "timestamp": "2025-10-14T22:08:46.790Z",
+    "overallStatus": "HEALTHY",
+    "alerts": [],
+    "systemHealth": {
+      "database": "ONLINE",
+      "api": "ONLINE",
+      "backupSystem": "ONLINE",
+      "auditSystem": "ONLINE",
+      "lastCheck": "2025-10-14T22:08:46.634Z",
+      "uptime": 46671.1256107,
+      "responseTime": 11
+    },
+    "dataIntegrity": {
+      "status": "HEALTHY",
+      "lastCheck": "2025-10-14T22:08:46.785Z",
+      "issues": 0,
+      "criticalIssues": 0,
+      "recordCount": 0,
+      "orphanedRecords": 0
+    },
+    "backupStatus": {
+      "status": "WARNING",
+      "lastBackup": "2025-10-13T08:28:28.399Z",
+      "nextScheduled": "2025-10-15T05:00:00.000Z",
+      "successRate": 100,
+      "totalBackups": 336,
+      "failedBackups": 0,
+      "cloudProviders": {
+        "github": true,
+        "dropbox": false,
+        "googleDrive": false
+      }
+    },
+    "securityStatus": {
+      "status": "SECURE",
+      "lastSecurityCheck": "2025-10-14T22:08:46.790Z",
+      "suspiciousActivity": 0,
+      "failedLogins": 0,
+      "dataAccess": 0,
+      "encryptionStatus": true
+    },
+    "recommendations": [
+      "✅ Sistema funcionando normalmente",
+      "📊 Continue monitoramento regular",
+      "🔄 Mantenha backups atualizados"
+    ]
+  },
+  {
+    "timestamp": "2025-10-14T22:13:49.394Z",
+    "overallStatus": "HEALTHY",
+    "alerts": [],
+    "systemHealth": {
+      "database": "ONLINE",
+      "api": "ONLINE",
+      "backupSystem": "ONLINE",
+      "auditSystem": "ONLINE",
+      "lastCheck": "2025-10-14T22:13:48.702Z",
+      "uptime": 46973.193892,
+      "responseTime": 381
+    },
+    "dataIntegrity": {
+      "status": "HEALTHY",
+      "lastCheck": "2025-10-14T22:13:49.392Z",
+      "issues": 0,
+      "criticalIssues": 0,
+      "recordCount": 0,
+      "orphanedRecords": 0
+    },
+    "backupStatus": {
+      "status": "WARNING",
+      "lastBackup": "2025-10-13T08:28:28.399Z",
+      "nextScheduled": "2025-10-15T05:00:00.000Z",
+      "successRate": 100,
+      "totalBackups": 336,
+      "failedBackups": 0,
+      "cloudProviders": {
+        "github": true,
+        "dropbox": false,
+        "googleDrive": false
+      }
+    },
+    "securityStatus": {
+      "status": "SECURE",
+      "lastSecurityCheck": "2025-10-14T22:13:49.394Z",
+      "suspiciousActivity": 0,
+      "failedLogins": 0,
+      "dataAccess": 0,
+      "encryptionStatus": true
+    },
+    "recommendations": [
+      "✅ Sistema funcionando normalmente",
+      "📊 Continue monitoramento regular",
+      "🔄 Mantenha backups atualizados"
+    ]
+  },
+  {
+    "timestamp": "2025-10-14T22:18:46.476Z",
+    "overallStatus": "HEALTHY",
+    "alerts": [],
+    "systemHealth": {
+      "database": "ONLINE",
+      "api": "ONLINE",
+      "backupSystem": "ONLINE",
+      "auditSystem": "ONLINE",
+      "lastCheck": "2025-10-14T22:18:46.442Z",
+      "uptime": 47270.9357327,
+      "responseTime": 3
+    },
+    "dataIntegrity": {
+      "status": "HEALTHY",
+      "lastCheck": "2025-10-14T22:18:46.473Z",
+      "issues": 0,
+      "criticalIssues": 0,
+      "recordCount": 0,
+      "orphanedRecords": 0
+    },
+    "backupStatus": {
+      "status": "WARNING",
+      "lastBackup": "2025-10-13T08:28:28.399Z",
+      "nextScheduled": "2025-10-15T05:00:00.000Z",
+      "successRate": 100,
+      "totalBackups": 336,
+      "failedBackups": 0,
+      "cloudProviders": {
+        "github": true,
+        "dropbox": false,
+        "googleDrive": false
+      }
+    },
+    "securityStatus": {
+      "status": "SECURE",
+      "lastSecurityCheck": "2025-10-14T22:18:46.476Z",
+      "suspiciousActivity": 0,
+      "failedLogins": 0,
+      "dataAccess": 0,
+      "encryptionStatus": true
+    },
+    "recommendations": [
+      "✅ Sistema funcionando normalmente",
+      "📊 Continue monitoramento regular",
+      "🔄 Mantenha backups atualizados"
+    ]
+  },
+  {
+    "timestamp": "2025-10-14T22:23:49.165Z",
+    "overallStatus": "HEALTHY",
+    "alerts": [],
+    "systemHealth": {
+      "database": "ONLINE",
+      "api": "ONLINE",
+      "backupSystem": "ONLINE",
+      "auditSystem": "ONLINE",
+      "lastCheck": "2025-10-14T22:23:48.525Z",
+      "uptime": 47573.017409,
+      "responseTime": 352
+    },
+    "dataIntegrity": {
+      "status": "HEALTHY",
+      "lastCheck": "2025-10-14T22:23:49.162Z",
+      "issues": 0,
+      "criticalIssues": 0,
+      "recordCount": 0,
+      "orphanedRecords": 0
+    },
+    "backupStatus": {
+      "status": "WARNING",
+      "lastBackup": "2025-10-13T08:28:28.399Z",
+      "nextScheduled": "2025-10-15T05:00:00.000Z",
+      "successRate": 100,
+      "totalBackups": 336,
+      "failedBackups": 0,
+      "cloudProviders": {
+        "github": true,
+        "dropbox": false,
+        "googleDrive": false
+      }
+    },
+    "securityStatus": {
+      "status": "SECURE",
+      "lastSecurityCheck": "2025-10-14T22:23:49.165Z",
+      "suspiciousActivity": 0,
+      "failedLogins": 0,
+      "dataAccess": 0,
+      "encryptionStatus": true
+    },
+    "recommendations": [
+      "✅ Sistema funcionando normalmente",
+      "📊 Continue monitoramento regular",
+      "🔄 Mantenha backups atualizados"
+    ]
+  },
+  {
+    "timestamp": "2025-10-14T22:28:46.578Z",
+    "overallStatus": "HEALTHY",
+    "alerts": [],
+    "systemHealth": {
+      "database": "ONLINE",
+      "api": "ONLINE",
+      "backupSystem": "ONLINE",
+      "auditSystem": "ONLINE",
+      "lastCheck": "2025-10-14T22:28:46.530Z",
+      "uptime": 47871.0221529,
+      "responseTime": 6
+    },
+    "dataIntegrity": {
+      "status": "HEALTHY",
+      "lastCheck": "2025-10-14T22:28:46.572Z",
+      "issues": 0,
+      "criticalIssues": 0,
+      "recordCount": 0,
+      "orphanedRecords": 0
+    },
+    "backupStatus": {
+      "status": "WARNING",
+      "lastBackup": "2025-10-13T08:28:28.399Z",
+      "nextScheduled": "2025-10-15T05:00:00.000Z",
+      "successRate": 100,
+      "totalBackups": 336,
+      "failedBackups": 0,
+      "cloudProviders": {
+        "github": true,
+        "dropbox": false,
+        "googleDrive": false
+      }
+    },
+    "securityStatus": {
+      "status": "SECURE",
+      "lastSecurityCheck": "2025-10-14T22:28:46.577Z",
+      "suspiciousActivity": 0,
+      "failedLogins": 0,
+      "dataAccess": 0,
+      "encryptionStatus": true
+    },
+    "recommendations": [
+      "✅ Sistema funcionando normalmente",
+      "📊 Continue monitoramento regular",
+      "🔄 Mantenha backups atualizados"
+    ]
+  },
+  {
+    "timestamp": "2025-10-14T22:33:49.115Z",
+    "overallStatus": "HEALTHY",
+    "alerts": [],
+    "systemHealth": {
+      "database": "ONLINE",
+      "api": "ONLINE",
+      "backupSystem": "ONLINE",
+      "auditSystem": "ONLINE",
+      "lastCheck": "2025-10-14T22:33:48.484Z",
+      "uptime": 48172.9757049,
+      "responseTime": 330
+    },
+    "dataIntegrity": {
+      "status": "HEALTHY",
+      "lastCheck": "2025-10-14T22:33:49.112Z",
+      "issues": 0,
+      "criticalIssues": 0,
+      "recordCount": 0,
+      "orphanedRecords": 0
+    },
+    "backupStatus": {
+      "status": "WARNING",
+      "lastBackup": "2025-10-13T08:28:28.399Z",
+      "nextScheduled": "2025-10-15T05:00:00.000Z",
+      "successRate": 100,
+      "totalBackups": 336,
+      "failedBackups": 0,
+      "cloudProviders": {
+        "github": true,
+        "dropbox": false,
+        "googleDrive": false
+      }
+    },
+    "securityStatus": {
+      "status": "SECURE",
+      "lastSecurityCheck": "2025-10-14T22:33:49.115Z",
+      "suspiciousActivity": 0,
+      "failedLogins": 0,
+      "dataAccess": 0,
+      "encryptionStatus": true
+    },
+    "recommendations": [
+      "✅ Sistema funcionando normalmente",
+      "📊 Continue monitoramento regular",
+      "🔄 Mantenha backups atualizados"
+    ]
+  },
+  {
+    "timestamp": "2025-10-14T22:38:46.565Z",
+    "overallStatus": "HEALTHY",
+    "alerts": [],
+    "systemHealth": {
+      "database": "ONLINE",
+      "api": "ONLINE",
+      "backupSystem": "ONLINE",
+      "auditSystem": "ONLINE",
+      "lastCheck": "2025-10-14T22:38:46.528Z",
+      "uptime": 48471.0201706,
+      "responseTime": 5
+    },
+    "dataIntegrity": {
+      "status": "HEALTHY",
+      "lastCheck": "2025-10-14T22:38:46.562Z",
+      "issues": 0,
+      "criticalIssues": 0,
+      "recordCount": 0,
+      "orphanedRecords": 0
+    },
+    "backupStatus": {
+      "status": "WARNING",
+      "lastBackup": "2025-10-13T08:28:28.399Z",
+      "nextScheduled": "2025-10-15T05:00:00.000Z",
+      "successRate": 100,
+      "totalBackups": 336,
+      "failedBackups": 0,
+      "cloudProviders": {
+        "github": true,
+        "dropbox": false,
+        "googleDrive": false
+      }
+    },
+    "securityStatus": {
+      "status": "SECURE",
+      "lastSecurityCheck": "2025-10-14T22:38:46.565Z",
+      "suspiciousActivity": 0,
+      "failedLogins": 0,
+      "dataAccess": 0,
+      "encryptionStatus": true
+    },
+    "recommendations": [
+      "✅ Sistema funcionando normalmente",
+      "📊 Continue monitoramento regular",
+      "🔄 Mantenha backups atualizados"
+    ]
+  },
+  {
+    "timestamp": "2025-10-14T22:43:51.387Z",
+    "overallStatus": "HEALTHY",
+    "alerts": [],
+    "systemHealth": {
+      "database": "ONLINE",
+      "api": "ONLINE",
+      "backupSystem": "ONLINE",
+      "auditSystem": "ONLINE",
+      "lastCheck": "2025-10-14T22:43:50.767Z",
+      "uptime": 48775.2582468,
+      "responseTime": 648
+    },
+    "dataIntegrity": {
+      "status": "HEALTHY",
+      "lastCheck": "2025-10-14T22:43:51.384Z",
+      "issues": 0,
+      "criticalIssues": 0,
+      "recordCount": 0,
+      "orphanedRecords": 0
+    },
+    "backupStatus": {
+      "status": "WARNING",
+      "lastBackup": "2025-10-13T08:28:28.399Z",
+      "nextScheduled": "2025-10-15T05:00:00.000Z",
+      "successRate": 100,
+      "totalBackups": 336,
+      "failedBackups": 0,
+      "cloudProviders": {
+        "github": true,
+        "dropbox": false,
+        "googleDrive": false
+      }
+    },
+    "securityStatus": {
+      "status": "SECURE",
+      "lastSecurityCheck": "2025-10-14T22:43:51.387Z",
       "suspiciousActivity": 0,
       "failedLogins": 0,
       "dataAccess": 0,
