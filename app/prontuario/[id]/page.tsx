@@ -87,7 +87,9 @@ export default function ProntuarioPage() {
   const [selectedRecord, setSelectedRecord] = useState<MedicalRecord | null>(
     null
   )
-
+  // Estados para controlar a exibição das seções
+  const [showCalculatorResults, setShowCalculatorResults] = useState(true)
+  const [showAttachments, setShowAttachments] = useState(true)
   const params = useParams()
   const patientId = params['id'] as string
 
@@ -551,10 +553,20 @@ export default function ProntuarioPage() {
                           {record.calculatorResults &&
                             record.calculatorResults.length > 0 && (
                               <div>
-                                <p className='text-white font-medium text-sm mb-1'>
-                                  Calculadoras:
-                                </p>
-                                <div className='text-gray-300 text-sm whitespace-pre-line'>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    setShowCalculatorResults(!showCalculatorResults)
+                                  }}
+                                  className='text-white font-medium text-sm mb-1 flex items-center hover:text-blue-400 transition-colors'
+                                >
+                                  <span className={`mr-1 transition-transform ${showCalculatorResults ? 'rotate-90' : ''}`}>
+                                    ▶
+                                  </span>
+                                  Calculadoras ({record.calculatorResults.length})
+                                </button>
+                                {showCalculatorResults && (
+                                  <div className='text-gray-300 text-sm whitespace-pre-line'>
                                   {record.calculatorResults.map((result, index) => {
                                     const isWexner = (result.calculatorName || '').toLowerCase().includes('wexner')
 
@@ -599,6 +611,7 @@ export default function ProntuarioPage() {
                                     )
                                   })}
                                 </div>
+                                )}
                               </div>
                             )}
 
@@ -616,6 +629,7 @@ export default function ProntuarioPage() {
                                     </div>
                                   ))}
                                 </div>
+                                )}
                               </div>
                             )}
 
@@ -623,11 +637,21 @@ export default function ProntuarioPage() {
                           {record.attachments &&
                             record.attachments.length > 0 && (
                               <div>
-                                <p className='text-white font-medium text-sm mb-2 flex items-center'>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    setShowAttachments(!showAttachments)
+                                  }}
+                                  className='text-white font-medium text-sm mb-2 flex items-center hover:text-blue-400 transition-colors'
+                                >
+                                  <span className={`mr-1 transition-transform ${showAttachments ? 'rotate-90' : ''}`}>
+                                    ▶
+                                  </span>
                                   <PaperClipIcon className='h-4 w-4 mr-1' />
                                   Anexos ({record.attachments.length})
-                                </p>
-                                <div className='grid grid-cols-2 md:grid-cols-3 gap-3'>
+                                </button>
+                                {showAttachments && (
+                                  <div className='grid grid-cols-2 md:grid-cols-3 gap-3'>
                                   {record.attachments.map(attachment => (
                                     <div
                                       key={attachment.id}
