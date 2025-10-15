@@ -16,10 +16,27 @@ export function getBrasiliaDate(): Date {
 
 /**
  * Formata uma data para o formato brasileiro (DD/MM/YYYY)
+ * Corrigido para evitar problemas de fuso horário com datas ISO
  */
 export function formatDateToBrazilian(date: Date | string): string {
-  const dateObj = typeof date === 'string' ? new Date(date) : date
-  return dateObj.toLocaleDateString(LOCALE_PT_BR, {
+  if (typeof date === 'string') {
+    // Se for string no formato ISO (YYYY-MM-DD), converter diretamente sem timezone
+    if (date.match(/^\d{4}-\d{2}-\d{2}$/)) {
+      const [year, month, day] = date.split('-')
+      return `${day}/${month}/${year}`
+    }
+    // Para outros formatos de string, usar Date
+    const dateObj = new Date(date)
+    return dateObj.toLocaleDateString(LOCALE_PT_BR, {
+      timeZone: BRASILIA_TIMEZONE,
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+    })
+  }
+  
+  // Para objetos Date, usar formatação com timezone
+  return date.toLocaleDateString(LOCALE_PT_BR, {
     timeZone: BRASILIA_TIMEZONE,
     day: '2-digit',
     month: '2-digit',
@@ -42,10 +59,30 @@ export function formatTimeToBrazilian(date: Date | string): string {
 
 /**
  * Formata data e horário completos para o formato brasileiro
+ * Corrigido para evitar problemas de fuso horário com datas ISO
  */
 export function formatDateTimeToBrazilian(date: Date | string): string {
-  const dateObj = typeof date === 'string' ? new Date(date) : date
-  return dateObj.toLocaleString(LOCALE_PT_BR, {
+  if (typeof date === 'string') {
+    // Se for string no formato ISO de data (YYYY-MM-DD), tratar apenas a data
+    if (date.match(/^\d{4}-\d{2}-\d{2}$/)) {
+      const [year, month, day] = date.split('-')
+      return `${day}/${month}/${year} 00:00`
+    }
+    // Para outros formatos de string, usar Date
+    const dateObj = new Date(date)
+    return dateObj.toLocaleString(LOCALE_PT_BR, {
+      timeZone: BRASILIA_TIMEZONE,
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+    })
+  }
+  
+  // Para objetos Date, usar formatação com timezone
+  return date.toLocaleString(LOCALE_PT_BR, {
     timeZone: BRASILIA_TIMEZONE,
     day: '2-digit',
     month: '2-digit',

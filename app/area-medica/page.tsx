@@ -1042,9 +1042,6 @@ interface DashboardStats {
                       <th className='px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider'>
                         Data Nascimento
                       </th>
-                      <th className='px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider'>
-                        Convênio
-                      </th>
                       {activeTab === 'today' && (
                         <th className='px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider'>
                           Consulta
@@ -1059,7 +1056,7 @@ interface DashboardStats {
                     {filteredPatients.length === 0 ? (
                       <tr>
                         <td
-                          colSpan={activeTab === 'today' ? 6 : 5}
+                          colSpan={activeTab === 'today' ? 5 : 4}
                           className='px-6 py-8 text-center'
                         >
                           <UserGroupIcon className='h-12 w-12 text-gray-400 mx-auto mb-4' />
@@ -1099,10 +1096,11 @@ interface DashboardStats {
                             {patient.whatsapp || 'Não informado'}
                           </td>
                           <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>
-                            {patient.birthDate ? new Date(patient.birthDate).toLocaleDateString('pt-BR') : 'Não informado'}
-                          </td>
-                          <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>
-                            {getInsuranceLabel(patient.insurance)}
+                            {patient.birthDate ? (() => {
+                              // Evitar problemas de timezone fazendo parsing manual
+                              const [year, month, day] = patient.birthDate.split('-')
+                              return new Date(parseInt(year), parseInt(month) - 1, parseInt(day)).toLocaleDateString('pt-BR')
+                            })() : 'Não informado'}
                           </td>
                           {activeTab === 'today' && (
                             <td className='px-6 py-4 whitespace-nowrap'>

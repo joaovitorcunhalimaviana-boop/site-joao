@@ -63,6 +63,7 @@ interface MedicalRecord {
     result: any
     timestamp: string
   }[]
+  diagnosticHypotheses?: string[]
   createdAt: string
 }
 
@@ -84,12 +85,7 @@ export default function ProntuarioPage() {
   const [patient, setPatient] = useState<Patient | null>(null)
   const [medicalRecords, setMedicalRecords] = useState<MedicalRecord[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const [selectedRecord, setSelectedRecord] = useState<MedicalRecord | null>(
-    null
-  )
-  // Estados para controlar a exibição das seções
-  const [showCalculatorResults, setShowCalculatorResults] = useState(true)
-  const [showAttachments, setShowAttachments] = useState(true)
+
   const params = useParams()
   const patientId = params['id'] as string
 
@@ -255,10 +251,6 @@ export default function ProntuarioPage() {
         // A API retorna os registros diretamente, não em data.records
         const records = Array.isArray(data) ? data : []
         setMedicalRecords(records)
-        // Selecionar automaticamente o primeiro registro para exibir detalhes
-        if (records.length > 0) {
-          setSelectedRecord(records[0])
-        }
       } else {
         console.error('Erro na resposta da API:', response.status, response.statusText)
         setMedicalRecords([])
@@ -269,53 +261,84 @@ export default function ProntuarioPage() {
     }
   }
 
-  // Abrir anexo com fallback de rota por ID e por filename
-  const handleAttachmentOpen = async (attachment: MedicalAttachment) => {
+  const formatDate = (dateString: string | null | undefined): string => {
+    if (!dateString || dateString === 'null') return 'Não informado'
+    
     try {
-      const idUrl = `/api/medical-attachments?id=${attachment.id}&download=1`
-      // Tentar primeiro pela rota de ID
-      const res = await fetch(idUrl, { method: 'HEAD' })
-      if (res.ok) {
-        window.open(idUrl, '_blank')
-        return
+      // Se já está no formato DD/MM/YYYY, retornar como está
+      if (dateString.includes('/') && dateString.length === 10) {
+        return dateString
       }
-
-      // Fallback: abrir pelo filename direto na pasta de anexos
-      const filename = attachment.fileName || (attachment.filePath?.split('\\').pop() || attachment.filePath?.split('/').pop() || '')
-      if (filename) {
-        const fileUrl = `/api/medical-attachments/${encodeURIComponent(filename)}`
-        window.open(fileUrl, '_blank')
-        return
+      
+      // Se está no formato ISO ou YYYY-MM-DD, converter para DD/MM/YYYY
+      const date = new Date(dateString)
+      if (!isNaN(date.getTime())) {
+        return date.toLocaleDateString('pt-BR')
       }
-
-      console.error('Não foi possível determinar o arquivo do anexo para abrir:', attachment)
+      
+      return dateString
     } catch (error) {
-      console.error('Erro ao tentar abrir anexo:', error)
+      console.error('Erro ao formatar data:', error)
+      return dateString || 'Não informado'
     }
   }
 
-  const formatDate = (dateString: string | null | undefined) => {
-    if (!dateString || dateString === 'null') return 'Data não informada'
-    // Se já está no formato DD/MM/YYYY, retorna como está
-    if (dateString.includes('/')) return dateString
-    // Se está no formato YYYY-MM-DD, converte para DD/MM/YYYY
-    if (dateString.includes('-')) {
-      return dateString.split('-').reverse().join('/')
+  const formatTime = (timeString: string): string => {
+    if (!timeString) return 'Não informado'
+    
+    try {
+      // Se já está no formato HH:MM, retornar como está
+      if (timeString.includes(':') && timeString.length <= 8) {
+        return timeString.substring(0, 5) // Pegar apenas HH:MM
+      }
+      
+      // Tentar converter de outros formatos
+      const time = new Date(`2000-01-01T${timeString}`)
+      if (!isNaN(time.getTime())) {
+        return time.toLocaleTimeString('pt-BR', { 
+          hour: '2-digit', 
+          minute: '2-digit' 
+        })
+      }
+      
+      return timeString
+    } catch (error) {
+      console.error('Erro ao formatar hora:', error)
+      return timeString
     }
-    return 'Data não informada'
   }
 
-  const formatTime = (timeString: string | undefined) => {
-    if (!timeString) return 'Horário não informado'
-    return timeString.substring(0, 5)
+  const handleAttachmentOpen = (attachment: MedicalAttachment) => {
+    console.log('Abrindo anexo:', attachment)
+    
+    // Construir URL do anexo usando a API correta
+    const attachmentUrl = `/api/medical-attachments?id=${attachment.id}&download=1`
+    
+    // Tentar abrir em nova aba
+    try {
+      const newWindow = window.open(attachmentUrl, '_blank')
+      if (!newWindow) {
+        // Se o popup foi bloqueado, tentar download direto
+        const link = document.createElement('a')
+        link.href = attachmentUrl
+        link.download = attachment.originalName || 'anexo'
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+      }
+    } catch (error) {
+      console.error('Erro ao abrir anexo:', error)
+      alert('Erro ao abrir anexo. Verifique se o arquivo existe.')
+    }
   }
 
   if (isLoading) {
     return (
       <div className='min-h-screen bg-gray-900'>
         <Header />
-        <div className='flex items-center justify-center h-64'>
-          <div className='text-white'>Carregando...</div>
+        <BackgroundPattern />
+        <div className='flex items-center justify-center min-h-screen'>
+          <div className='text-white text-lg'>Carregando...</div>
         </div>
       </div>
     )
@@ -325,32 +348,36 @@ export default function ProntuarioPage() {
     return (
       <div className='min-h-screen bg-gray-900'>
         <Header />
-        <div className='flex items-center justify-center h-64'>
-          <div className='text-white'>Paciente não encontrado</div>
+        <BackgroundPattern />
+        <div className='flex items-center justify-center min-h-screen'>
+          <div className='text-center'>
+            <h1 className='text-2xl font-bold text-white mb-4'>
+              Paciente não encontrado
+            </h1>
+            <p className='text-gray-400'>
+              O paciente solicitado não foi encontrado no sistema.
+            </p>
+          </div>
         </div>
       </div>
     )
   }
 
   return (
-    <div className='min-h-screen bg-black'>
+    <div className='min-h-screen bg-gray-900'>
+      <Header />
       <BackgroundPattern />
-      <Header currentPage='prontuario' />
 
-      {/* Cabeçalho da página */}
+      {/* Header da página */}
       <div className='bg-gray-800 border-b border-gray-700'>
         <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
-          <div className='flex justify-between items-center py-4'>
-            <div className='flex items-center'>
+          <div className='py-6'>
+            <div className='flex items-center space-x-4'>
               <button
-                onClick={() => {
-                  window.location.href = '/area-medica'
-                }}
-                className='mr-4 p-2 text-gray-400 hover:text-white transition-colors cursor-pointer relative z-50 bg-gray-700 hover:bg-gray-600 rounded-md'
-                type='button'
-                style={{ minWidth: '40px', minHeight: '40px' }}
+                onClick={() => window.history.back()}
+                className='p-2 rounded-lg bg-gray-700 hover:bg-gray-600 transition-colors'
               >
-                <ArrowLeftIcon className='h-6 w-6' />
+                <ArrowLeftIcon className='h-6 w-6 text-white' />
               </button>
               <div>
                 <h1 className='text-2xl font-bold text-white'>
@@ -405,16 +432,7 @@ export default function ProntuarioPage() {
 
                 <div>
                   <p className='text-sm text-gray-300'>Convênio</p>
-                  <p className='text-white'>
-                    {patient.insurance?.type === 'particular'
-                      ? 'Particular'
-                      : patient.insurance?.type === 'unimed'
-                        ? 'UNIMED'
-                        : patient.insurance?.type === 'outro'
-                          ? patient.insurance?.plan || 'Outro'
-                          : patient.insurance?.plan ||
-                            getInsuranceLabel(patient.insurance)}
-                  </p>
+                  <p className='text-white'>{getInsuranceLabel(patient.insurance)}</p>
                 </div>
 
                 <div>
@@ -458,16 +476,14 @@ export default function ProntuarioPage() {
                   </p>
                 </div>
               ) : (
-                <div className='space-y-4'>
+                <div className='space-y-6'>
                   {medicalRecords.map(record => (
                     <div
                       key={record.id}
-                      className='border border-gray-600 rounded-lg p-4 hover:bg-gray-700 transition-colors cursor-pointer'
-                      onClick={() =>
-                        setSelectedRecord(prev => (prev?.id === record.id ? null : record))
-                      }
+                      className='border border-gray-600 rounded-lg p-6 bg-gray-700/30'
                     >
-                      <div className='flex items-center justify-between mb-2'>
+                      {/* Cabeçalho do registro */}
+                      <div className='flex items-center justify-between mb-4 pb-3 border-b border-gray-600'>
                         <div className='flex items-center space-x-4'>
                           <div className='flex items-center text-sm text-gray-300'>
                             <CalendarIcon className='h-4 w-4 mr-1' />
@@ -483,229 +499,203 @@ export default function ProntuarioPage() {
                         </span>
                       </div>
 
-                      <div className='mb-2'>
-                        <p className='text-white font-medium text-sm mb-1'>
-                          Anamnese:
-                        </p>
-                        <p className='text-gray-300 text-sm'>
-                          {record.anamnesis}
-                        </p>
-                      </div>
+                      {/* Todas as informações sempre visíveis */}
+                      <div className='space-y-4'>
+                        {/* Anamnese */}
+                        {record.anamnesis && (
+                          <div>
+                            <p className='text-white font-medium text-sm mb-2'>
+                              Anamnese:
+                            </p>
+                            <p className='text-gray-300 text-sm whitespace-pre-line'>
+                              {record.anamnesis}
+                            </p>
+                          </div>
+                        )}
 
-                      {selectedRecord?.id === record.id && (
-                        <div className='mt-4 pt-4 border-t border-gray-600 space-y-3'>
-                          {record.examination && (
-                            <div>
-                              <p className='text-white font-medium text-sm mb-1'>
-                                Exame Físico:
-                              </p>
-                              <p className='text-gray-300 text-sm'>
-                                {record.examination}
-                              </p>
+                        {/* Exame Físico */}
+                        {record.examination && (
+                          <div>
+                            <p className='text-white font-medium text-sm mb-2'>
+                              Exame Físico:
+                            </p>
+                            <p className='text-gray-300 text-sm whitespace-pre-line'>
+                              {record.examination}
+                            </p>
+                          </div>
+                        )}
+
+                        {/* Diagnóstico */}
+                        {record.diagnosis && (
+                          <div>
+                            <p className='text-white font-medium text-sm mb-2'>
+                              Diagnóstico:
+                            </p>
+                            <p className='text-gray-300 text-sm whitespace-pre-line'>
+                              {record.diagnosis}
+                            </p>
+                          </div>
+                        )}
+
+                        {/* Hipóteses Diagnósticas */}
+                        {record.diagnosticHypotheses && record.diagnosticHypotheses.length > 0 && (
+                          <div>
+                            <p className='text-white font-medium text-sm mb-2'>
+                              Hipóteses Diagnósticas:
+                            </p>
+                            <div className='text-gray-300 text-sm'>
+                              {record.diagnosticHypotheses.map((hypothesis, index) => (
+                                <div key={`${hypothesis}-${index}`} className='mb-1'>
+                                  • {hypothesis}
+                                </div>
+                              ))}
                             </div>
-                          )}
+                          </div>
+                        )}
 
-                          {record.diagnosis && (
-                            <div>
-                              <p className='text-white font-medium text-sm mb-1'>
-                                Diagnóstico:
-                              </p>
-                              <p className='text-gray-300 text-sm'>
-                                {record.diagnosis}
-                              </p>
-                            </div>
-                          )}
+                        {/* Tratamento */}
+                        {record.treatment && (
+                          <div>
+                            <p className='text-white font-medium text-sm mb-2'>
+                              Tratamento:
+                            </p>
+                            <p className='text-gray-300 text-sm whitespace-pre-line'>
+                              {record.treatment}
+                            </p>
+                          </div>
+                        )}
 
-                          {record.treatment && (
-                            <div>
-                              <p className='text-white font-medium text-sm mb-1'>
-                                Tratamento:
-                              </p>
-                              <p className='text-gray-300 text-sm'>
-                                {record.treatment}
-                              </p>
-                            </div>
-                          )}
+                        {/* Prescrição */}
+                        {record.prescription && (
+                          <div>
+                            <p className='text-white font-medium text-sm mb-2'>
+                              Prescrição:
+                            </p>
+                            <p className='text-gray-300 text-sm whitespace-pre-line'>
+                              {record.prescription}
+                            </p>
+                          </div>
+                        )}
 
-                          {record.prescription && (
-                            <div>
-                              <p className='text-white font-medium text-sm mb-1'>
-                                Prescrição:
-                              </p>
-                              <p className='text-gray-300 text-sm whitespace-pre-line'>
-                                {record.prescription}
-                              </p>
-                            </div>
-                          )}
+                        {/* Observações */}
+                        {record.observations && (
+                          <div>
+                            <p className='text-white font-medium text-sm mb-2'>
+                              Observações:
+                            </p>
+                            <p className='text-gray-300 text-sm whitespace-pre-line'>
+                              {record.observations}
+                            </p>
+                          </div>
+                        )}
 
-                          {record.observations && (
-                            <div>
-                              <p className='text-white font-medium text-sm mb-1'>
-                                Observações:
-                              </p>
-                              <p className='text-gray-300 text-sm whitespace-pre-line'>
-                                {record.observations}
-                              </p>
-                            </div>
-                          )}
+                        {/* Calculadoras */}
+                        {record.calculatorResults && record.calculatorResults.length > 0 && (
+                          <div>
+                            <p className='text-white font-medium text-sm mb-2'>
+                              Calculadoras ({record.calculatorResults.length}):
+                            </p>
+                            <div className='text-gray-300 text-sm space-y-1'>
+                              {record.calculatorResults.map((result, index) => {
+                                const isWexner = (result.calculatorName || '').toLowerCase().includes('wexner')
 
-                          {/* Calculadoras */}
-                          {record.calculatorResults &&
-                            record.calculatorResults.length > 0 && (
-                              <div>
-                                <button
-                                  onClick={(e) => {
-                                    e.stopPropagation()
-                                    setShowCalculatorResults(!showCalculatorResults)
-                                  }}
-                                  className='text-white font-medium text-sm mb-1 flex items-center hover:text-blue-400 transition-colors'
-                                >
-                                  <span className={`mr-1 transition-transform ${showCalculatorResults ? 'rotate-90' : ''}`}>
-                                    ▶
-                                  </span>
-                                  Calculadoras ({record.calculatorResults.length})
-                                </button>
-                                {showCalculatorResults && (
-                                  <div className='text-gray-300 text-sm whitespace-pre-line'>
-                                  {record.calculatorResults.map((result, index) => {
-                                    const isWexner = (result.calculatorName || '').toLowerCase().includes('wexner')
-
-                                    const renderResult = () => {
-                                      if (typeof result.result === 'object' && result.result !== null) {
-                                        // Wexner: mostrar pontuação e interpretação uma vez
-                                        if (isWexner) {
-                                          const score = 
-                                            // Vários formatos possíveis (duas implementações de Wexner coexistem)
-                                            (result.result.totalScore ?? result.result.score ?? result.totalScore ?? result.score)
-                                          const interp = result.result.interpretation || result.interpretation || ''
-                                          if (score !== undefined) {
-                                            return `${score}/20${interp ? ' - ' + interp : ''}`
-                                          }
-                                        }
-
-                                        // Outros: extrair informações relevantes
-                                        if (result.result.bmi) {
-                                          return `IMC: ${result.result.bmi} (${result.result.category})`
-                                        }
-                                        if (result.result.score !== undefined) {
-                                          return `${result.result.score}`
-                                        }
-                                        if (result.result.interpretation) {
-                                          return result.result.interpretation
-                                        }
-                                        return JSON.stringify(result.result)
+                                const renderResult = () => {
+                                  if (typeof result.result === 'object' && result.result !== null) {
+                                    // Wexner: mostrar pontuação e interpretação uma vez
+                                    if (isWexner) {
+                                      const score = 
+                                        // Vários formatos possíveis (duas implementações de Wexner coexistem)
+                                        (result.result.totalScore ?? result.result.score ?? result.totalScore ?? result.score)
+                                      const interp = result.result.interpretation || result.interpretation || ''
+                                      if (score !== undefined) {
+                                        return `${score}/20${interp ? ' - ' + interp : ''}`
                                       }
-                                      return result.result
                                     }
 
-                                    // Evitar duplicação da interpretação
-                                    const interpretation = !isWexner
-                                      ? result.interpretation || (result.result && typeof result.result === 'object' ? result.result.interpretation : '')
-                                      : ''
+                                    // Outros: extrair informações relevantes
+                                    if (result.result.bmi) {
+                                      return `IMC: ${result.result.bmi} (${result.result.category})`
+                                    }
+                                    if (result.result.score !== undefined) {
+                                      return `${result.result.score}`
+                                    }
+                                    if (result.result.interpretation) {
+                                      return result.result.interpretation
+                                    }
+                                    return JSON.stringify(result.result)
+                                  }
+                                  return result.result
+                                }
 
-                                    return (
-                                      <div key={result.timestamp || `${result.calculatorName}-${index}`}>
-                                        - {result.calculatorName}: {renderResult()}
-                                        {interpretation && ` - ${interpretation}`}
-                                      </div>
-                                    )
-                                  })}
-                                </div>
-                                )}
-                              </div>
-                            )}
+                                // Evitar duplicação da interpretação
+                                const interpretation = !isWexner
+                                  ? result.interpretation || (result.result && typeof result.result === 'object' ? result.result.interpretation : '')
+                                  : ''
 
-                          {/* Hipóteses Diagnósticas */}
-                          {record.diagnosticHypotheses &&
-                            record.diagnosticHypotheses.length > 0 && (
-                              <div>
-                                <p className='text-white font-medium text-sm mb-1'>
-                                  Hipóteses Diagnósticas:
-                                </p>
-                                <div className='text-gray-300 text-sm whitespace-pre-line'>
-                                  {record.diagnosticHypotheses.map((hypothesis, index) => (
-                                    <div key={`${hypothesis}-${index}`}>
-                                      - {hypothesis}
-                                    </div>
-                                  ))}
-                                </div>
-                              </div>
-                            )}
-
-                          {/* Anexos Médicos */}
-                          {record.attachments &&
-                            record.attachments.length > 0 && (
-                              <div>
-                                <button
-                                  onClick={(e) => {
-                                    e.stopPropagation()
-                                    setShowAttachments(!showAttachments)
-                                  }}
-                                  className='text-white font-medium text-sm mb-2 flex items-center hover:text-blue-400 transition-colors'
-                                >
-                                  <span className={`mr-1 transition-transform ${showAttachments ? 'rotate-90' : ''}`}>
-                                    ▶
-                                  </span>
-                                  <PaperClipIcon className='h-4 w-4 mr-1' />
-                                  Anexos ({record.attachments.length})
-                                </button>
-                                {showAttachments && (
-                                  <div className='grid grid-cols-2 md:grid-cols-3 gap-3'>
-                                    {record.attachments.map(attachment => (
-                                      <div
-                                        key={attachment.id}
-                                        className='bg-gray-700 rounded-lg p-3 border border-gray-600 hover:border-blue-500 transition-colors cursor-pointer group'
-                                        onClick={(e) => {
-                                          e.stopPropagation()
-                                          handleAttachmentOpen(attachment)
-                                        }}
-                                      >
-                                        <div className='flex items-center justify-between mb-2'>
-                                          <div className='flex items-center'>
-                                            {attachment.fileType?.startsWith(
-                                              'image/'
-                                            ) ? (
-                                              <PhotoIcon className='h-5 w-5 text-blue-400' />
-                                            ) : (
-                                              <PaperClipIcon className='h-5 w-5 text-gray-400' />
-                                            )}
-                                          </div>
-                                          <EyeIcon className='h-4 w-4 text-gray-400 group-hover:text-blue-400 transition-colors' />
-                                        </div>
-
-                                        <div className='space-y-1'>
-                                          <p
-                                            className='text-xs text-white font-medium truncate'
-                                            title={attachment.originalName}
-                                          >
-                                            {attachment.originalName}
-                                          </p>
-                                          <p className='text-xs text-gray-400 capitalize'>
-                                            {attachment.category}
-                                          </p>
-                                          <p className='text-xs text-gray-500'>
-                                            {(attachment.fileSize / 1024).toFixed(
-                                              1
-                                            )}{' '}
-                                            KB
-                                          </p>
-                                          {attachment.description && (
-                                            <p
-                                              className='text-xs text-gray-400 truncate'
-                                              title={attachment.description}
-                                            >
-                                              {attachment.description}
-                                            </p>
-                                          )}
-                                        </div>
-                                      </div>
-                                    ))}
+                                return (
+                                  <div key={result.timestamp || `${result.calculatorName}-${index}`}>
+                                    • {result.calculatorName}: {renderResult()}
+                                    {interpretation && ` - ${interpretation}`}
                                   </div>
-                                )}
-                              </div>
-                            )}
-                        </div>
-                      )}
+                                )
+                              })}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Anexos Médicos */}
+                        {record.attachments && record.attachments.length > 0 && (
+                          <div>
+                            <p className='text-white font-medium text-sm mb-3 flex items-center'>
+                              <PaperClipIcon className='h-4 w-4 mr-1' />
+                              Anexos ({record.attachments.length}):
+                            </p>
+                            <div className='grid grid-cols-2 md:grid-cols-3 gap-3'>
+                              {record.attachments.map(attachment => (
+                                <div
+                                  key={attachment.id}
+                                  className='bg-gray-700 rounded-lg p-3 border border-gray-600 hover:border-blue-500 transition-colors cursor-pointer group'
+                                  onClick={() => handleAttachmentOpen(attachment)}
+                                >
+                                  <div className='flex items-center justify-between mb-2'>
+                                    <div className='flex items-center'>
+                                      {attachment.fileType?.startsWith('image/') ? (
+                                        <PhotoIcon className='h-5 w-5 text-blue-400' />
+                                      ) : (
+                                        <PaperClipIcon className='h-5 w-5 text-gray-400' />
+                                      )}
+                                    </div>
+                                    <EyeIcon className='h-4 w-4 text-gray-400 group-hover:text-blue-400 transition-colors' />
+                                  </div>
+
+                                  <div className='space-y-1'>
+                                    <p
+                                      className='text-xs text-white font-medium truncate'
+                                      title={attachment.originalName}
+                                    >
+                                      {attachment.originalName}
+                                    </p>
+                                    <p className='text-xs text-gray-400 capitalize'>
+                                      {attachment.category}
+                                    </p>
+                                    <p className='text-xs text-gray-500'>
+                                      {(attachment.fileSize / 1024).toFixed(1)} KB
+                                    </p>
+                                    {attachment.description && (
+                                      <p
+                                        className='text-xs text-gray-400 truncate'
+                                        title={attachment.description}
+                                      >
+                                        {attachment.description}
+                                      </p>
+                                    )}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   ))}
                 </div>
