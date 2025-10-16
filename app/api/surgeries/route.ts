@@ -1,220 +1,189 @@
 import { NextRequest, NextResponse } from 'next/server'
-import {
-  getAllSurgeries,
-  getSurgeriesByDate,
-  createSurgery,
-  updateSurgery,
-  deleteSurgery,
-  createOrUpdateCommunicationContact,
-  type Surgery,
-} from '@/lib/unified-patient-system-prisma'
+import { promises as fs } from 'fs'
+import path from 'path'
 
-// GET - Listar cirurgias
-export async function GET(request: NextRequest) {
+// Caminho para o arquivo JSON
+const SURGERIES_FILE = path.join(process.cwd(), 'data', 'surgeries.json')
+
+// Função para garantir que o diretório existe
+async function ensureDataDirectory() {
+  const dataDir = path.join(process.cwd(), 'data')
   try {
-    const { searchParams } = new URL(request.url)
-    const date = searchParams.get('date')
-    const status = searchParams.get('status')
-    const paymentType = searchParams.get('paymentType')
+    await fs.access(dataDir)
+  } catch {
+    await fs.mkdir(dataDir, { recursive: true })
+  }
+}
 
-    let surgeries = await getAllSurgeries()
+// Função para ler cirurgias do arquivo
+async function readSurgeries() {
+  try {
+    await ensureDataDirectory()
+    const data = await fs.readFile(SURGERIES_FILE, 'utf8')
+    return JSON.parse(data)
+  } catch (error) {
+    // Se o arquivo não existe, retorna array vazio
+    return []
+  }
+}
 
-    // Filtros
-    if (date) {
-      surgeries = await getSurgeriesByDate(date)
-    }
+// Função para salvar cirurgias no arquivo
+async function saveSurgeries(surgeries: any[]) {
+  await ensureDataDirectory()
+  await fs.writeFile(SURGERIES_FILE, JSON.stringify(surgeries, null, 2))
+}
 
-    if (status) {
-      surgeries = surgeries.filter(surgery => surgery.status === status)
-    }
-
-    // Remover filtro de paymentType pois não existe na interface Surgery
-    // if (paymentType) {
-    //   surgeries = surgeries.filter(
-    //     surgery => surgery.paymentType === paymentType
-    //   )
-    // }
-
-    // Ordenar por data e hora (mais recentes primeiro)
-    surgeries.sort((a, b) => {
-      const dateA = new Date(
-        `${a.surgeryDate}T${a.surgeryTime}`
-      )
-      const dateB = new Date(
-        `${b.surgeryDate}T${b.surgeryTime}`
-      )
-      return dateB.getTime() - dateA.getTime()
-    })
-
-    return NextResponse.json({
-      success: true,
-      surgeries,
-      total: surgeries.length,
-    })
+export async function GET() {
+  try {
+    console.log('=== GET SURGERIES ===')
+    const surgeries = await readSurgeries()
+    console.log('Cirurgias encontradas:', surgeries.length)
+    
+    return NextResponse.json(surgeries)
   } catch (error) {
     console.error('Erro ao buscar cirurgias:', error)
-    return NextResponse.json(
-      { success: false, error: 'Erro interno do servidor' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Erro interno do servidor' }, { status: 500 })
   }
 }
 
-// POST - Criar nova cirurgia
 export async function POST(request: NextRequest) {
   try {
+    console.log('=== POST SURGERY ===')
     const body = await request.json()
+    console.log('Dados recebidos:', body)
+    console.log('Tipo dos dados:', typeof body)
+    console.log('Keys:', Object.keys(body))
 
-    // Validação básica - campos da interface Surgery
-    if (
-      !body.patientName ||
-      !body.surgeryType ||
-      !body.surgeryDate ||
-      !body.surgeryTime
-    ) {
-      return NextResponse.json(
-        { success: false, error: 'Campos obrigatórios não preenchidos' },
-        { status: 400 }
-      )
+    // Validação básica
+    if (!body.patientName || !body.surgeryType || !body.hospital || !body.surgeryDate || !body.surgeryTime) {
+      console.log('Campos obrigatórios faltando')
+      return NextResponse.json({ error: 'Campos obrigatórios faltando' }, { status: 400 })
     }
 
-    // Criar ou atualizar contato de comunicação
-    const contactResult = await createOrUpdateCommunicationContact({
-      name: body.patientName,
-      email: body.patientEmail,
-      whatsapp: body.patientWhatsapp,
-      source: 'doctor_area',
-    })
+    // Ler cirurgias existentes
+    const surgeries = await readSurgeries()
 
-    if (!contactResult.success) {
-      return NextResponse.json(
-        { success: false, error: 'Erro ao criar contato de comunicação' },
-        { status: 500 }
-      )
+    // Criar nova cirurgia
+    const newSurgery = {
+      id: Date.now().toString(), // ID simples baseado em timestamp
+      patientName: body.patientName,
+      surgeryType: body.surgeryType,
+      hospital: body.hospital,
+      surgeryDate: body.surgeryDate,
+      surgeryTime: body.surgeryTime,
+      paymentType: body.paymentType || 'PARTICULAR',
+      insurancePlan: body.insurancePlan || '',
+      notes: body.notes || '',
+      totalAmount: body.totalAmount || 0,
+      hospitalAmount: body.hospitalAmount || 0,
+      anesthesiologistAmount: body.anesthesiologistAmount || 0,
+      instrumentalistAmount: body.instrumentalistAmount || 0,
+      assistantAmount: body.assistantAmount || 0,
+      surgeonAmount: body.surgeonAmount || 0,
+      procedures: body.procedures || [],
+      status: 'SCHEDULED',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
     }
 
-    // Criar cirurgia usando o sistema unificado - campos corretos da interface Surgery
-    const surgeryResult = await createSurgery({
-      communicationContactId: contactResult.contact.id,
-      medicalPatientId: body.medicalPatientId,
-      surgeryDate: body.surgeryDate || body.date,
-      surgeryTime: body.surgeryTime || body.time,
-      type: body.surgeryType,
-      description: body.description || '',
-      surgeon: body.surgeon || 'Dr. João Vitor Viana',
-      anesthesiologist: body.anesthesiologist,
-      duration: body.duration,
-      status: body.status || 'scheduled',
-      preOpNotes: body.preOpNotes,
-      postOpNotes: body.postOpNotes,
-      complications: body.complications,
-    })
+    console.log('Nova cirurgia criada:', newSurgery)
 
-    if (!surgeryResult.success) {
-      return NextResponse.json(
-        { success: false, error: surgeryResult.message },
-        { status: 500 }
-      )
-    }
+    // Adicionar à lista
+    surgeries.push(newSurgery)
 
-    return NextResponse.json(
-      {
-        success: true,
-        message: 'Cirurgia cadastrada com sucesso',
-      },
-      { status: 201 }
-    )
+    // Salvar no arquivo
+    await saveSurgeries(surgeries)
+
+    console.log('Cirurgia salva com sucesso!')
+    return NextResponse.json(newSurgery, { status: 201 })
+
   } catch (error) {
     console.error('Erro ao criar cirurgia:', error)
-    return NextResponse.json(
-      { success: false, error: 'Erro interno do servidor' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Erro interno do servidor' }, { status: 500 })
   }
 }
 
-// PUT - Atualizar cirurgia
 export async function PUT(request: NextRequest) {
   try {
+    console.log('=== PUT SURGERY ===')
     const body = await request.json()
+    console.log('Dados recebidos para atualização:', body)
 
     if (!body.id) {
-      return NextResponse.json(
-        { success: false, error: 'ID da cirurgia é obrigatório' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'ID da cirurgia é obrigatório' }, { status: 400 })
     }
 
-    // Atualizar cirurgia usando o sistema unificado - campos corretos da interface Surgery
-    const surgeryResult = await updateSurgery(body.id, {
-      surgeryDate: body.surgeryDate || body.date,
-      surgeryTime: body.surgeryTime || body.time,
-      type: body.surgeryType,
-      description: body.description,
-      surgeon: body.surgeon,
-      anesthesiologist: body.anesthesiologist,
-      duration: body.duration,
-      status: body.status,
-      preOpNotes: body.preOpNotes,
-      postOpNotes: body.postOpNotes,
-      complications: body.complications,
-    })
+    // Ler cirurgias existentes
+    const surgeries = await readSurgeries()
 
-    if (!surgeryResult.success) {
-      return NextResponse.json(
-        { success: false, error: surgeryResult.message },
-        {
-          status:
-            surgeryResult.message === 'Cirurgia não encontrada' ? 404 : 500,
-        }
-      )
+    // Encontrar a cirurgia para atualizar
+    const surgeryIndex = surgeries.findIndex((s: any) => s.id === body.id)
+    
+    if (surgeryIndex === -1) {
+      return NextResponse.json({ error: 'Cirurgia não encontrada' }, { status: 404 })
     }
 
-    return NextResponse.json({
-      success: true,
-      message: 'Cirurgia atualizada com sucesso',
-    })
+    // Atualizar a cirurgia
+    const updatedSurgery = {
+      ...surgeries[surgeryIndex],
+      patientName: body.patientName,
+      surgeryType: body.surgeryType,
+      hospital: body.hospital,
+      surgeryDate: body.surgeryDate,
+      surgeryTime: body.surgeryTime,
+      paymentType: body.paymentType || 'PARTICULAR',
+      insurancePlan: body.insurancePlan || '',
+      notes: body.notes || '',
+      totalAmount: body.totalAmount || 0,
+      hospitalAmount: body.hospitalAmount || 0,
+      anesthesiologistAmount: body.anesthesiologistAmount || 0,
+      instrumentalistAmount: body.instrumentalistAmount || 0,
+      assistantAmount: body.assistantAmount || 0,
+      surgeonAmount: body.surgeonAmount || 0,
+      procedures: body.procedures || [],
+      updatedAt: new Date().toISOString()
+    }
+
+    surgeries[surgeryIndex] = updatedSurgery
+
+    // Salvar no arquivo
+    await saveSurgeries(surgeries)
+
+    console.log('Cirurgia atualizada com sucesso!')
+    return NextResponse.json(updatedSurgery)
+
   } catch (error) {
     console.error('Erro ao atualizar cirurgia:', error)
-    return NextResponse.json(
-      { success: false, error: 'Erro interno do servidor' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Erro interno do servidor' }, { status: 500 })
   }
 }
 
-// DELETE - Deletar cirurgia
 export async function DELETE(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const id = searchParams.get('id')
 
     if (!id) {
-      return NextResponse.json(
-        { success: false, error: 'ID da cirurgia é obrigatório' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'ID da cirurgia é obrigatório' }, { status: 400 })
     }
 
-    // Deletar cirurgia usando o sistema unificado
-    const result = await deleteSurgery(id)
+    // Ler cirurgias existentes
+    const surgeries = await readSurgeries()
 
-    if (!result.success) {
-      return NextResponse.json(
-        { success: false, error: result.message },
-        { status: result.message === 'Cirurgia não encontrada' ? 404 : 500 }
-      )
+    // Filtrar removendo a cirurgia
+    const filteredSurgeries = surgeries.filter((s: any) => s.id !== id)
+
+    if (filteredSurgeries.length === surgeries.length) {
+      return NextResponse.json({ error: 'Cirurgia não encontrada' }, { status: 404 })
     }
 
-    return NextResponse.json({
-      success: true,
-      message: 'Cirurgia deletada com sucesso',
-    })
+    // Salvar no arquivo
+    await saveSurgeries(filteredSurgeries)
+
+    return NextResponse.json({ message: 'Cirurgia deletada com sucesso' })
+
   } catch (error) {
     console.error('Erro ao deletar cirurgia:', error)
-    return NextResponse.json(
-      { success: false, error: 'Erro interno do servidor' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Erro interno do servidor' }, { status: 500 })
   }
 }

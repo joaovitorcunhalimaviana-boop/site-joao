@@ -1,0 +1,118 @@
+[
+  {
+    "id": "1760586024527",
+    "patientName": "Edite Gonçalves do Nascimento ",
+    "surgeryType": "Fistulotomia",
+    "hospital": "HNE",
+    "surgeryDate": "2025-10-16",
+    "surgeryTime": "11:00",
+    "paymentType": "PARTICULAR",
+    "insurancePlan": "",
+    "notes": "",
+    "totalAmount": 6000,
+    "hospitalAmount": 1100,
+    "anesthesiologistAmount": 600,
+    "instrumentalistAmount": 0,
+    "assistantAmount": 0,
+    "surgeonAmount": 4300,
+    "procedures": [],
+    "status": "SCHEDULED",
+    "createdAt": "2025-10-16T03:40:24.527Z",
+    "updatedAt": "2025-10-16T03:40:24.527Z"
+  },
+  {
+    "id": "1760586279567",
+    "patientName": "Robson Arante da Silva",
+    "surgeryType": "Fistulotomia",
+    "hospital": "HNE",
+    "surgeryDate": "2025-10-16",
+    "surgeryTime": "12:00",
+    "paymentType": "PARTICULAR",
+    "insurancePlan": "",
+    "notes": "",
+    "totalAmount": 5900,
+    "hospitalAmount": 1100,
+    "anesthesiologistAmount": 600,
+    "instrumentalistAmount": 0,
+    "assistantAmount": 0,
+    "surgeonAmount": 4200,
+    "procedures": [],
+    "status": "SCHEDULED",
+    "createdAt": "2025-10-16T03:44:39.567Z",
+    "updatedAt": "2025-10-16T03:44:39.567Z"
+  },
+  {
+    "id": "1760586441432",
+    "patientName": "Elani da Conceição Coutinho",
+    "surgeryType": "Hemorroidectomia",
+    "hospital": "HJPII",
+    "surgeryDate": "2025-10-16",
+    "surgeryTime": "14:00",
+    "paymentType": "INSURANCE",
+    "insurancePlan": "Smile",
+    "notes": "",
+    "totalAmount": 5900,
+    "hospitalAmount": 1100,
+    "anesthesiologistAmount": 600,
+    "instrumentalistAmount": 0,
+    "assistantAmount": 0,
+    "surgeonAmount": 4200,
+    "procedures": [
+      {
+        "tussCode": "31003311",
+        "description": "Enteropexia",
+        "quantity": 1
+      },
+      {
+        "tussCode": "31004202",
+        "description": "Hemorroidectomia",
+        "quantity": 1
+      },
+      {
+        "tussCode": "31004091",
+        "description": "Excisão de plicomas",
+        "quantity": 1
+      }
+    ],
+    "status": "SCHEDULED",
+    "createdAt": "2025-10-16T03:47:21.432Z",
+    "updatedAt": "2025-10-16T03:47:21.432Z"
+  },
+  {
+    "id": "1760587377411",
+    "patientName": "Maria Risoneide da Silva",
+    "surgeryType": "Excisão de condilomas",
+    "hospital": "HJPII",
+    "surgeryDate": "2025-10-16",
+    "surgeryTime": "15:00",
+    "paymentType": "INSURANCE",
+    "insurancePlan": "Smile",
+    "notes": "",
+    "totalAmount": 0,
+    "hospitalAmount": 0,
+    "anesthesiologistAmount": 0,
+    "instrumentalistAmount": 0,
+    "assistantAmount": 0,
+    "surgeonAmount": 0,
+    "procedures": [
+      {
+        "tussCode": "31003567",
+        "description": "Tumor anorretal - ressecção",
+        "quantity": 1
+      },
+      {
+        "tussCode": "31004229",
+        "description": "Lesão anal - eletrocauterização",
+        "quantity": 1
+      },
+      {
+        "tussCode": "40201023",
+        "description": "Anuscopia ",
+        "quantity": 1
+      }
+    ],
+    "status": "SCHEDULED",
+    "createdAt": "2025-10-16T04:02:57.411Z",
+    "updatedAt": "2025-10-16T04:02:57.411Z"
+  }
+]

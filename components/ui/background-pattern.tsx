@@ -8,7 +8,7 @@ export function BackgroundPattern({ className = '' }: BackgroundPatternProps) {
   return (
     <div className={`relative isolate ${className}`}>
       <div
-        className='absolute inset-x-0 -top-40 -z-10 transform-gpu overflow-hidden blur-3xl sm:-top-80'
+        className='absolute inset-x-0 -top-40 -z-20 transform-gpu overflow-hidden blur-3xl sm:-top-80 pointer-events-none'
         aria-hidden='true'
       >
         <div

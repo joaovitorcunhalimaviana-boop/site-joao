@@ -22,9 +22,9 @@ const pillars: PillarItem[] = [
     icon: 'science',
   },
   {
-    title: 'Tecnologia de Ponta',
+    title: 'Uso de Tecnologias',
     description:
-      'Uso das mais avançadas tecnologias para diagnóstico e tratamento',
+      'Utilização das mais avançadas tecnologias para diagnóstico, tratamento e acompanhamento',
     icon: 'technology',
   },
   {

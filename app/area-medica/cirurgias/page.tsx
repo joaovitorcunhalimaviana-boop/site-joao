@@ -8,6 +8,7 @@ import BrazilianDatePicker from '../../../components/ui/brazilian-date-picker'
 import { TimePicker } from '../../../components/ui/time-picker'
 import { InteractiveCalendar } from '../../../components/ui/interactive-calendar'
 import MedicalAreaMenu from '../../../components/ui/medical-area-menu'
+import SurgeryForm from './components/SurgeryForm'
 import {
   ScissorsIcon,
   CalendarDaysIcon,
@@ -23,64 +24,81 @@ import {
   ClockIcon,
   ChartBarIcon,
   BuildingOffice2Icon,
+  MagnifyingGlassIcon,
+  CheckIcon,
 } from '@heroicons/react/24/outline'
+
+interface MedicalPatient {
+  id: string
+  fullName: string
+  cpf: string
+  recordNumber: number
+  communicationContact?: {
+    phone?: string
+    whatsapp?: string
+    email?: string
+  }
+}
+
+interface TussProcedure {
+  id: string
+  tussCode: string
+  cbhpmCode?: string
+  description: string
+  category: string
+  value?: number
+}
 
 interface Surgery {
   id: string
-  patientName: string
+  medicalPatient?: MedicalPatient
+  patientName?: string
   surgeryType: string
-  date: string
-  time: string
   hospital: string
-  paymentType: 'particular' | 'plano'
-  // Campos para particulares
-  totalValue?: number
-  hospitalValue?: number
-  anesthesiologistValue?: number
-  instrumentalistValue?: number
-  auxiliaryValue?: number
-  doctorValue?: number
-  // Campos para planos
-  procedureCodes?: string
+  surgeryDate: string
+  surgeryTime: string
+  paymentType: 'PARTICULAR' | 'INSURANCE'
   insurancePlan?: string
-  status: 'agendada' | 'confirmada' | 'concluida' | 'cancelada'
+  totalAmount?: number
+  hospitalAmount?: number
+  anesthesiologistAmount?: number
+  instrumentalistAmount?: number
+  assistantAmount?: number
+  surgeonAmount?: number
+  surgeryCategory?: 'HEMORRHOIDECTOMY' | 'FISTULOTOMY' | 'FISSURECTOMY' | 'PROLAPSE_CORRECTION' | 'RECTOCELE_CORRECTION' | 'HERNIOPLASTY' | 'CHOLECYSTECTOMY' | 'PILONIDAL' | 'COLECTOMY' | 'OTHER'
+  status: 'SCHEDULED' | 'CONFIRMED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED' | 'POSTPONED'
   notes?: string
+  procedures?: Array<{
+    tussCode: string
+    description: string
+    quantity: number
+  }>
+  createdAt: string
+  updatedAt: string
 }
 
 export default function CirurgiasPage() {
+  const router = useRouter()
+
+  // Estados
   const [surgeries, setSurgeries] = useState<Surgery[]>([])
+  const [patients, setPatients] = useState<MedicalPatient[]>([])
+  const [loading, setLoading] = useState(true)
+  const [isLoading, setIsLoading] = useState(false)
   const [showForm, setShowForm] = useState(false)
   const [editingSurgery, setEditingSurgery] = useState<Surgery | null>(null)
   const [selectedDate, setSelectedDate] = useState('')
-  const [selectedDayAppointments, setSelectedDayAppointments] = useState<
-    Surgery[]
-  >([])
+  const [daySurgeries, setDaySurgeries] = useState<Surgery[]>([])
+  const [showDayModal, setShowDayModal] = useState(false)
   const [showModal, setShowModal] = useState(false)
-  const [isLoading, setIsLoading] = useState(true)
+  const [selectedDayAppointments, setSelectedDayAppointments] = useState<Surgery[]>([])
+  const [filterDate, setFilterDate] = useState('')
+  const [searchTerm, setSearchTerm] = useState('')
   const [viewMode, setViewMode] = useState<'list' | 'calendar'>('list')
-  const router = useRouter()
-
-  // Estados do formulário
-  const [formData, setFormData] = useState({
-    patientName: '',
-    surgeryType: '',
-    date: '',
-    time: '',
-    hospital: '',
-    paymentType: 'particular' as 'particular' | 'plano',
-    totalValue: '',
-    hospitalValue: '',
-    anesthesiologistValue: '',
-    instrumentalistValue: '',
-    auxiliaryValue: '',
-    doctorValue: '',
-    insurancePlan: '',
-    procedureCodes: '',
-    notes: '',
-  })
 
   useEffect(() => {
     loadSurgeries()
+    loadPatients()
   }, [])
 
   useEffect(() => {
@@ -89,70 +107,74 @@ export default function CirurgiasPage() {
 
   const loadSurgeries = async () => {
     try {
-      setIsLoading(true)
+      console.log('=== CARREGANDO CIRURGIAS ===')
       const response = await fetch('/api/surgeries')
+      
       if (response.ok) {
         const data = await response.json()
-        setSurgeries(data.surgeries || [])
+        console.log('Cirurgias carregadas:', data)
+        setSurgeries(data) // A nova API retorna diretamente o array
+      } else {
+        console.error('Erro ao carregar cirurgias:', response.status)
+        setSurgeries([])
       }
     } catch (error) {
       console.error('Erro ao carregar cirurgias:', error)
+      setSurgeries([])
     } finally {
       setIsLoading(false)
     }
   }
 
-  const loadDaySurgeries = (date: string) => {
-    if (!date) {
-      setSelectedDayAppointments([])
-      return
-    }
-
-    const daySurgeries = surgeries.filter(surgery => surgery.date === date)
-    setSelectedDayAppointments(daySurgeries)
-  }
-
-  const handleDateSelect = (date: string) => {
-    setSelectedDate(date)
-    const daySurgeries = surgeries.filter(surgery => surgery.date === date)
-
-    if (daySurgeries.length > 0) {
-      setShowModal(true)
-    }
-  }
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-
+  const loadPatients = async () => {
     try {
-      const surgeryData: Omit<Surgery, 'id'> = {
-        patientName: formData.patientName,
-        surgeryType: formData.surgeryType,
-        date: formData.date,
-        time: formData.time,
-        hospital: formData.hospital || '',
-        paymentType: formData.paymentType,
-        status: 'agendada',
-        notes: formData.notes,
+      const response = await fetch('/api/unified-system/medical-patients', {
+        credentials: 'include'
+      })
+      if (response.ok) {
+        const data = await response.json()
+        const patientsData = data.patients || []
+        
+        // Mapear dados dos pacientes para o formato esperado
+        const mappedPatients = patientsData.map((patient: any) => ({
+          id: patient.id,
+          name: patient.fullName || patient.name || 'Nome não disponível',
+          email: patient.email || '',
+          phone: patient.phone || '',
+          cpf: patient.cpf || '',
+          birthDate: patient.birthDate || ''
+        }))
+        
+        setPatients(mappedPatients)
       }
+    } catch (error) {
+      console.error('Erro ao carregar pacientes:', error)
+    }
+  }
 
-      if (formData.paymentType === 'particular') {
-        surgeryData.totalValue = parseFloat(formData.totalValue) || 0
-        surgeryData.hospitalValue = parseFloat(formData.hospitalValue) || 0
-        surgeryData.anesthesiologistValue =
-          parseFloat(formData.anesthesiologistValue) || 0
-        surgeryData.instrumentalistValue =
-          parseFloat(formData.instrumentalistValue) || 0
-        surgeryData.auxiliaryValue = parseFloat(formData.auxiliaryValue) || 0
-        surgeryData.doctorValue = parseFloat(formData.doctorValue) || 0
-      } else {
-        surgeryData.insurancePlan = formData.insurancePlan
-        surgeryData.procedureCodes = formData.procedureCodes
-      }
+  const loadDaySurgeries = (date: Date) => {
+    const dayStart = new Date(date)
+    dayStart.setHours(0, 0, 0, 0)
+    const dayEnd = new Date(date)
+    dayEnd.setHours(23, 59, 59, 999)
 
+    const filtered = surgeries.filter(surgery => {
+      const surgeryDate = new Date(surgery.surgeryDate)
+      return surgeryDate >= dayStart && surgeryDate <= dayEnd
+    })
+    setDaySurgeries(filtered)
+  }
+
+  const handleSurgerySubmit = async (surgeryData: any) => {
+    console.log('=== RECEBENDO DADOS NO HANDLESUBMIT ===')
+    console.log('Dados recebidos:', surgeryData)
+    console.log('Tipo dos dados:', typeof surgeryData)
+    console.log('É objeto vazio?', Object.keys(surgeryData).length === 0)
+    
+    try {
       const method = editingSurgery ? 'PUT' : 'POST'
       const url = editingSurgery
-        ? `/api/surgeries/${editingSurgery.id}`
+        ? `/api/surgeries`
         : '/api/surgeries'
 
       const response = await fetch(url, {
@@ -168,56 +190,45 @@ export default function CirurgiasPage() {
       })
 
       if (response.ok) {
+        console.log('Cirurgia salva com sucesso!')
         await loadSurgeries()
-        resetForm()
         setShowForm(false)
+        setEditingSurgery(null)
       } else {
-        console.error('Erro ao salvar cirurgia')
+        const errorData = await response.text()
+        console.error('Erro ao salvar cirurgia:', response.status, errorData)
+        console.error('Dados que causaram o erro:', surgeryData)
       }
     } catch (error) {
       console.error('Erro ao salvar cirurgia:', error)
+      console.error('Dados que causaram o erro:', surgeryData)
     }
-  }
-
-  const resetForm = () => {
-    setFormData({
-      patientName: '',
-      surgeryType: '',
-      date: '',
-      time: '',
-      hospital: '',
-      paymentType: 'particular',
-      totalValue: '',
-      hospitalValue: '',
-      anesthesiologistValue: '',
-      instrumentalistValue: '',
-      auxiliaryValue: '',
-      doctorValue: '',
-      insurancePlan: '',
-      procedureCodes: '',
-      notes: '',
-    })
-    setEditingSurgery(null)
   }
 
   const handleEdit = (surgery: Surgery) => {
     setEditingSurgery(surgery)
-    setFormData({
-      patientName: surgery.patientName,
-      surgeryType: surgery.surgeryType,
-      date: surgery.date,
-      time: surgery.time,
-      hospital: surgery.hospital,
-      paymentType: surgery.paymentType,
-      totalValue: surgery.totalValue?.toString() || '',
-      hospitalValue: surgery.hospitalValue?.toString() || '',
-      anesthesiologistValue: surgery.anesthesiologistValue?.toString() || '',
-      instrumentalistValue: surgery.instrumentalistValue?.toString() || '',
-      auxiliaryValue: surgery.auxiliaryValue?.toString() || '',
-      doctorValue: surgery.doctorValue?.toString() || '',
-      insurancePlan: surgery.insurancePlan || '',
-      procedureCodes: surgery.procedureCodes || '',
-      notes: surgery.notes || '',
+    setShowForm(true)
+  }
+
+  const handleDateSelect = (date: string) => {
+    setSelectedDate(date)
+    const daySurgeries = surgeries.filter(surgery => 
+      new Date(surgery.surgeryDate).toISOString().split('T')[0] === date
+    )
+
+    if (daySurgeries.length > 0) {
+      setSelectedDayAppointments(daySurgeries)
+      setShowModal(true)
+    }
+  }
+
+  const handleReschedule = (surgery: Surgery) => {
+    // Preenche o formulário com os dados da cirurgia para reagendamento
+    setEditingSurgery({
+      ...surgery,
+      // Limpa a data e hora para permitir novo agendamento
+      surgeryDate: '',
+      surgeryTime: ''
     })
     setShowForm(true)
   }
@@ -225,35 +236,74 @@ export default function CirurgiasPage() {
   const handleDelete = async (surgeryId: string) => {
     if (confirm('Tem certeza que deseja excluir esta cirurgia?')) {
       try {
-        const response = await fetch(`/api/surgeries/${surgeryId}`, {
+        const response = await fetch(`/api/surgeries?id=${surgeryId}`, {
           method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
         })
 
         if (response.ok) {
           await loadSurgeries()
+          alert('Cirurgia excluída com sucesso!')
+        } else {
+          const errorText = await response.text()
+          console.error('Erro ao excluir cirurgia:', response.status, errorText)
+          alert(`Erro ao excluir cirurgia: ${response.status}`)
         }
       } catch (error) {
         console.error('Erro ao excluir cirurgia:', error)
+        alert('Erro ao excluir cirurgia')
       }
     }
   }
 
-  const filteredSurgeries = selectedDate
-    ? surgeries.filter(surgery => surgery.date === selectedDate)
-    : surgeries
+  const filteredSurgeries = surgeries.filter(surgery => {
+    const matchesDate = selectedDate ? 
+      new Date(surgery.surgeryDate).toISOString().split('T')[0] === selectedDate : true
+    const matchesSearch = searchTerm ? 
+      (surgery.patientName || surgery.medicalPatient?.fullName || surgery.medicalPatient?.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      surgery.surgeryType.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      surgery.hospital.toLowerCase().includes(searchTerm.toLowerCase()) : true
+    return matchesDate && matchesSearch
+  })
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'agendada':
+      case 'SCHEDULED':
         return 'bg-blue-100 text-blue-800'
-      case 'confirmada':
+      case 'CONFIRMED':
         return 'bg-yellow-100 text-yellow-800'
-      case 'concluida':
+      case 'IN_PROGRESS':
+        return 'bg-purple-100 text-purple-800'
+      case 'COMPLETED':
         return 'bg-green-100 text-green-800'
-      case 'cancelada':
+      case 'CANCELLED':
         return 'bg-red-100 text-red-800'
+      case 'POSTPONED':
+        return 'bg-orange-100 text-orange-800'
       default:
         return 'bg-gray-100 text-gray-800'
+    }
+  }
+
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case 'SCHEDULED':
+        return 'Agendada'
+      case 'CONFIRMED':
+        return 'Confirmada'
+      case 'IN_PROGRESS':
+        return 'Em Andamento'
+      case 'COMPLETED':
+        return 'Concluída'
+      case 'CANCELLED':
+        return 'Cancelada'
+      case 'POSTPONED':
+        return 'Adiada'
+      default:
+        return status
     }
   }
 
@@ -332,6 +382,16 @@ export default function CirurgiasPage() {
 
                 {viewMode === 'list' && (
                   <>
+                    <div className='flex items-center space-x-2'>
+                      <MagnifyingGlassIcon className='w-5 h-5 text-gray-400' />
+                      <input
+                        type='text'
+                        placeholder='Buscar por paciente, cirurgia ou hospital...'
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className='px-4 py-2 bg-gray-800/50 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-blue-400 focus:border-transparent backdrop-blur-sm w-64'
+                      />
+                    </div>
                     <label className='text-sm font-medium text-gray-300'>
                       Filtrar por data:
                     </label>
@@ -354,7 +414,6 @@ export default function CirurgiasPage() {
               </div>
               <button
                 onClick={() => {
-                  resetForm()
                   setShowForm(true)
                 }}
                 className='bg-blue-600/80 hover:bg-blue-600 text-white px-6 py-3 rounded-xl font-medium transition-all duration-200 border border-blue-500/50 backdrop-blur-sm flex items-center gap-2'
@@ -421,76 +480,94 @@ export default function CirurgiasPage() {
                             <td className='px-6 py-4 whitespace-nowrap'>
                               <div className='flex items-center'>
                                 <UserIcon className='h-5 w-5 text-gray-400 mr-2' />
-                                <div className='text-sm font-medium text-white'>
-                                  {surgery.patientName}
-                                </div>
-                              </div>
-                            </td>
-                            <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>
-                              {surgery.surgeryType}
-                            </td>
-                            <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>
-                              <div>
-                                <div>{surgery.date}</div>
-                                <div className='text-xs text-gray-400'>
-                                  {surgery.time}
+                                <div>
+                                  <div className='text-sm font-medium text-white'>
+                                    {surgery.patientName || surgery.medicalPatient?.fullName || surgery.medicalPatient?.name || 'Nome não disponível'}
+                                  </div>
+                                  <div className='text-xs text-gray-400'>
+                                    Prontuário: {surgery.medicalPatient?.recordNumber || 'N/A'}
+                                  </div>
                                 </div>
                               </div>
                             </td>
                             <td className='px-6 py-4 whitespace-nowrap'>
-                              <div className='flex items-center'>
-                                {surgery.paymentType === 'particular' ? (
-                                  <CurrencyDollarIcon className='h-4 w-4 text-green-400 mr-1' />
-                                ) : (
-                                  <BuildingOfficeIcon className='h-4 w-4 text-blue-400 mr-1' />
-                                )}
-                                <span className='text-sm text-gray-300 capitalize'>
-                                  {surgery.paymentType}
-                                </span>
+                              <div>
+                                <div className='text-sm font-medium text-white'>
+                                  {surgery.surgeryType || 'Tipo não informado'}
+                                </div>
+                                <div className='text-xs text-gray-400'>
+                                  {surgery.hospital || 'Hospital não informado'}
+                                </div>
                               </div>
                             </td>
                             <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>
-                              {surgery.paymentType === 'particular' ? (
+                              <div>
+                                <div>{new Date(surgery.surgeryDate + 'T00:00:00').toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' })}</div>
+                                <div className='text-xs text-gray-400'>
+                                  {surgery.surgeryTime || 'Horário não informado'}
+                                </div>
+                              </div>
+                            </td>
+                            <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>
+                              <span className='inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-700 text-gray-300'>
+                                {surgery.paymentType === 'PARTICULAR' ? 'Particular' : 'Plano'}
+                              </span>
+                            </td>
+                            <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>
+                              {surgery.paymentType === 'PARTICULAR' ? (
                                 <div>
-                                  <div className='font-medium'>
-                                    {formatCurrency(surgery.totalValue || 0)}
+                                  <div className='text-green-400 font-medium'>
+                                    Total: {formatCurrency(surgery.totalAmount || 0)}
                                   </div>
                                   <div className='text-xs text-gray-400'>
-                                    Dr:{' '}
-                                    {formatCurrency(surgery.doctorValue || 0)}
+                                    Médico: {formatCurrency(surgery.doctorValue || (surgery.totalAmount || 0) - (surgery.hospitalAmount || 0) - (surgery.anesthesiologistAmount || 0) - (surgery.instrumentalistAmount || 0) - (surgery.assistantAmount || 0))}
                                   </div>
                                 </div>
                               ) : (
                                 <div>
-                                  <div className='font-medium'>
-                                    {surgery.insurancePlan}
+                                  <div className='text-blue-400 font-medium'>
+                                    {surgery.insurancePlan || 'Plano de Saúde'}
                                   </div>
                                   <div className='text-xs text-gray-400'>
-                                    Códigos: {surgery.procedureCodes}
+                                    {surgery.procedures && surgery.procedures.length > 0 
+                                      ? `Códigos: ${surgery.procedures.map(p => p.tussProcedure?.tussCode || p.tussProcedure?.cbhpmCode).filter(Boolean).join(', ')}`
+                                      : 'Códigos não informados'
+                                    }
                                   </div>
                                 </div>
                               )}
                             </td>
                             <td className='px-6 py-4 whitespace-nowrap'>
                               <span
-                                className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(surgery.status)}`}
+                                className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(
+                                  surgery.status
+                                )}`}
                               >
-                                {surgery.status}
+                                {getStatusLabel(surgery.status)}
                               </span>
                             </td>
                             <td className='px-6 py-4 whitespace-nowrap text-sm font-medium'>
                               <div className='flex items-center space-x-2'>
                                 <button
                                   onClick={() => handleEdit(surgery)}
-                                  className='text-blue-400 hover:text-blue-300 transition-colors duration-200'
+                                  className='text-blue-400 hover:text-blue-300 transition-colors duration-200 p-1 rounded hover:bg-blue-400/10'
+                                  title='Editar cirurgia'
                                 >
                                   <PencilIcon className='h-4 w-4' />
                                 </button>
                                 <button
                                   onClick={() => handleDelete(surgery.id)}
-                                  className='text-red-400 hover:text-red-300 transition-colors duration-200'
+                                  className='text-red-400 hover:text-red-300 transition-colors duration-200 p-1 rounded hover:bg-red-400/10'
+                                  title='Excluir cirurgia'
                                 >
                                   <TrashIcon className='h-4 w-4' />
+                                </button>
+                                <button
+                                  onClick={() => handleReschedule(surgery)}
+                                  className='text-yellow-400 hover:text-yellow-300 transition-colors duration-200 p-1 rounded hover:bg-yellow-400/10'
+                                  title='Remarcar cirurgia'
+                                >
+                                  <CalendarDaysIcon className='h-4 w-4' />
                                 </button>
                               </div>
                             </td>
@@ -524,10 +601,10 @@ export default function CirurgiasPage() {
                     selectedDate={selectedDate}
                     appointments={surgeries.map(surgery => ({
                       id: surgery.id,
-                      date: surgery.date,
-                      patientName: surgery.patientName,
+                      date: new Date(surgery.surgeryDate).toISOString().split('T')[0],
+                      patientName: surgery.patientName || surgery.medicalPatient?.fullName || surgery.medicalPatient?.name || 'Nome não disponível',
                       status: surgery.status,
-                      time: surgery.time,
+                      time: surgery.surgeryTime,
                     }))}
                   />
                 </div>
@@ -552,41 +629,40 @@ export default function CirurgiasPage() {
                         >
                           <div className='flex items-start justify-between mb-3'>
                             <h3 className='font-medium text-white'>
-                              {surgery.patientName}
+                              {surgery.patientName || surgery.medicalPatient?.fullName || surgery.medicalPatient?.name || 'Nome não disponível'}
                             </h3>
                             <span
                               className={`text-xs px-3 py-1 rounded-full ${getStatusColor(surgery.status)}`}
                             >
-                              {surgery.status}
+                              {getStatusLabel(surgery.status)}
                             </span>
                           </div>
                           <div className='space-y-2 text-sm text-gray-300'>
                             <div className='flex items-center'>
                               <ClockIcon className='h-4 w-4 mr-2 text-blue-400' />
-                              <span>{surgery.time}</span>
+                              <span>{surgery.surgeryTime}</span>
                             </div>
                             <div className='flex items-center'>
                               <ScissorsIcon className='h-4 w-4 mr-2 text-blue-400' />
                               <span>{surgery.surgeryType}</span>
                             </div>
                             <div className='flex items-center'>
-                              {surgery.paymentType === 'particular' ? (
+                              {surgery.paymentType === 'PARTICULAR' ? (
                                 <CurrencyDollarIcon className='h-4 w-4 mr-2 text-green-400' />
                               ) : (
                                 <BuildingOfficeIcon className='h-4 w-4 mr-2 text-blue-400' />
                               )}
                               <span className='capitalize'>
-                                {surgery.paymentType}
+                                {surgery.paymentType === 'PARTICULAR' ? 'Particular' : 'Plano'}
                               </span>
                             </div>
-                            {surgery.paymentType === 'particular' ? (
+                            {surgery.paymentType === 'PARTICULAR' ? (
                               <div className='text-xs text-gray-400'>
-                                Total: {formatCurrency(surgery.totalValue || 0)}
+                                Total: {formatCurrency(surgery.totalAmount || 0)}
                               </div>
                             ) : (
                               <div className='text-xs text-gray-400'>
-                                {surgery.insurancePlan} - Códigos:{' '}
-                                {surgery.procedureCodes || 'N/A'}
+                                {surgery.insurancePlan || 'Plano de Saúde'}
                               </div>
                             )}
                           </div>
@@ -691,7 +767,7 @@ export default function CirurgiasPage() {
                                 <BuildingOfficeIcon className='h-4 w-4 mr-2 text-blue-400' />
                               )}
                               <span className='text-gray-300 capitalize'>
-                                {surgery.paymentType}
+                                {surgery.paymentType === 'PARTICULAR' ? 'Particular' : 'Plano de Saúde'}
                               </span>
                             </div>
                             {surgery.hospital && (
@@ -699,6 +775,14 @@ export default function CirurgiasPage() {
                                 <BuildingOffice2Icon className='h-4 w-4 mr-2 text-gray-400' />
                                 <span className='text-gray-300'>
                                   {surgery.hospital}
+                                </span>
+                              </div>
+                            )}
+                            {surgery.surgeryTime && (
+                              <div className='flex items-center text-sm'>
+                                <ClockIcon className='h-4 w-4 mr-2 text-gray-400' />
+                                <span className='text-gray-300'>
+                                  {surgery.surgeryTime}
                                 </span>
                               </div>
                             )}
@@ -710,22 +794,22 @@ export default function CirurgiasPage() {
                       <div className='space-y-4'>
                         <div>
                           <h4 className='text-sm font-medium text-gray-300 mb-2'>
-                            {surgery.paymentType === 'particular'
+                            {surgery.paymentType === 'PARTICULAR'
                               ? 'Valores Particulares'
                               : 'Informações do Plano'}
                           </h4>
-                          {surgery.paymentType === 'particular' ? (
+                          {surgery.paymentType === 'PARTICULAR' ? (
                             <div className='space-y-2 text-sm'>
                               <div className='flex justify-between'>
                                 <span className='text-gray-400'>Total:</span>
                                 <span className='text-white font-medium'>
-                                  {formatCurrency(surgery.totalValue || 0)}
+                                  {formatCurrency(surgery.totalAmount || 0)}
                                 </span>
                               </div>
                               <div className='flex justify-between'>
                                 <span className='text-gray-400'>Hospital:</span>
                                 <span className='text-white'>
-                                  {formatCurrency(surgery.hospitalValue || 0)}
+                                  {formatCurrency(surgery.hospitalAmount || 0)}
                                 </span>
                               </div>
                               <div className='flex justify-between'>
@@ -734,7 +818,7 @@ export default function CirurgiasPage() {
                                 </span>
                                 <span className='text-white'>
                                   {formatCurrency(
-                                    surgery.anesthesiologistValue || 0
+                                    surgery.anesthesiologistAmount || 0
                                   )}
                                 </span>
                               </div>
@@ -744,20 +828,20 @@ export default function CirurgiasPage() {
                                 </span>
                                 <span className='text-white'>
                                   {formatCurrency(
-                                    surgery.instrumentalistValue || 0
+                                    surgery.instrumentalistAmount || 0
                                   )}
                                 </span>
                               </div>
                               <div className='flex justify-between'>
                                 <span className='text-gray-400'>Auxiliar:</span>
                                 <span className='text-white'>
-                                  {formatCurrency(surgery.auxiliaryValue || 0)}
+                                  {formatCurrency(surgery.assistantAmount || 0)}
                                 </span>
                               </div>
                               <div className='flex justify-between border-t border-gray-600 pt-2'>
-                                <span className='text-gray-400'>Médico:</span>
+                                <span className='text-gray-400'>Cirurgião:</span>
                                 <span className='text-green-400 font-medium'>
-                                  {formatCurrency(surgery.doctorValue || 0)}
+                                  {formatCurrency(surgery.surgeonAmount || 0)}
                                 </span>
                               </div>
                             </div>
@@ -766,28 +850,31 @@ export default function CirurgiasPage() {
                               <div className='flex justify-between'>
                                 <span className='text-gray-400'>Plano:</span>
                                 <span className='text-white'>
-                                  {surgery.insurancePlan}
+                                  {surgery.insurancePlan || 'Não informado'}
                                 </span>
                               </div>
-                              {surgery.procedureCodes && (
-                                <div>
-                                  <span className='text-gray-400 block mb-1'>
-                                    Códigos:
-                                  </span>
+                              <div>
+                                <span className='text-gray-400 block mb-1'>
+                                  Códigos TUSS:
+                                </span>
+                                {surgery.procedures && surgery.procedures.length > 0 ? (
                                   <div className='flex flex-wrap gap-1'>
-                                    {surgery.procedureCodes
-                                      .split(',')
-                                      .map((code, idx) => (
-                                        <span
-                                          key={idx}
-                                          className='px-2 py-1 bg-blue-900/20 text-blue-300 rounded text-xs'
-                                        >
-                                          {code.trim()}
-                                        </span>
-                                      ))}
+                                    {surgery.procedures.map((procedure, idx) => (
+                                      <span
+                                        key={idx}
+                                        className='px-2 py-1 bg-blue-900/20 text-blue-300 rounded text-xs'
+                                        title={procedure.description}
+                                      >
+                                        {procedure.tussCode}
+                                      </span>
+                                    ))}
                                   </div>
-                                </div>
-                              )}
+                                ) : (
+                                  <span className='text-gray-500 text-xs'>
+                                    Nenhum código TUSS informado
+                                  </span>
+                                )}
+                              </div>
                             </div>
                           )}
                         </div>
@@ -811,362 +898,17 @@ export default function CirurgiasPage() {
       )}
 
       {/* Modal de formulário */}
-      {showForm && (
-        <div className='fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4'>
-          <div className='bg-gray-900/90 backdrop-blur-sm rounded-2xl p-6 w-full max-w-2xl mx-4 border border-gray-700 shadow-2xl max-h-[90vh] overflow-y-auto'>
-            <div className='flex justify-between items-center mb-6'>
-              <h3 className='text-xl font-semibold text-white'>
-                {editingSurgery ? 'Editar Cirurgia' : 'Nova Cirurgia'}
-              </h3>
-              <button
-                onClick={() => {
-                  setShowForm(false)
-                  resetForm()
-                }}
-                className='text-gray-400 hover:text-white transition-colors duration-200'
-              >
-                ✕
-              </button>
-            </div>
-
-            <form onSubmit={handleSubmit} className='space-y-6'>
-              {/* Informações básicas */}
-              <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-                <div>
-                  <label className='block text-sm font-medium text-gray-300 mb-2'>
-                    Nome do Paciente *
-                  </label>
-                  <input
-                    type='text'
-                    required
-                    value={formData.patientName}
-                    onChange={e =>
-                      setFormData({ ...formData, patientName: e.target.value })
-                    }
-                    className='w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-blue-400 focus:border-transparent backdrop-blur-sm'
-                    placeholder='Nome completo do paciente'
-                  />
-                </div>
-
-                <div>
-                  <label className='block text-sm font-medium text-gray-300 mb-2'>
-                    Tipo de Cirurgia *
-                  </label>
-                  <input
-                    type='text'
-                    required
-                    value={formData.surgeryType}
-                    onChange={e =>
-                      setFormData({ ...formData, surgeryType: e.target.value })
-                    }
-                    className='w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-blue-400 focus:border-transparent backdrop-blur-sm'
-                    placeholder='Ex: Hemorroidectomia, Fistulotomia...'
-                  />
-                </div>
-
-                <div>
-                  <label className='block text-sm font-medium text-gray-300 mb-2'>
-                    Hospital *
-                  </label>
-                  <input
-                    type='text'
-                    required
-                    value={formData.hospital}
-                    onChange={e =>
-                      setFormData({ ...formData, hospital: e.target.value })
-                    }
-                    className='w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-blue-400 focus:border-transparent backdrop-blur-sm'
-                    placeholder='Nome do hospital onde será realizada a cirurgia'
-                  />
-                </div>
-
-                <div>
-                  <label className='block text-sm font-medium text-gray-300 mb-2'>
-                    Data *
-                  </label>
-                  <BrazilianDatePicker
-                    value={formData.date}
-                    onChange={value =>
-                      setFormData({ ...formData, date: value })
-                    }
-                    className='w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-blue-400 focus:border-transparent backdrop-blur-sm'
-                    placeholder='DD/MM/AAAA'
-                  />
-                </div>
-
-                <div>
-                  <label className='block text-sm font-medium text-gray-300 mb-2'>
-                    Horário *
-                  </label>
-                  <TimePicker
-                    value={formData.time}
-                    onChange={value =>
-                      setFormData({ ...formData, time: value })
-                    }
-                    className='w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-blue-400 focus:border-transparent backdrop-blur-sm'
-                    placeholder='HH:MM'
-                  />
-                </div>
-              </div>
-
-              {/* Tipo de pagamento */}
-              <div>
-                <label className='block text-sm font-medium text-gray-300 mb-2'>
-                  Tipo de Pagamento *
-                </label>
-                <div className='flex space-x-4'>
-                  <label className='flex items-center'>
-                    <input
-                      type='radio'
-                      value='particular'
-                      checked={formData.paymentType === 'particular'}
-                      onChange={e =>
-                        setFormData({
-                          ...formData,
-                          paymentType: e.target.value as 'particular' | 'plano',
-                        })
-                      }
-                      className='mr-2'
-                    />
-                    <span className='text-gray-300'>Particular</span>
-                  </label>
-                  <label className='flex items-center'>
-                    <input
-                      type='radio'
-                      value='plano'
-                      checked={formData.paymentType === 'plano'}
-                      onChange={e =>
-                        setFormData({
-                          ...formData,
-                          paymentType: e.target.value as 'particular' | 'plano',
-                        })
-                      }
-                      className='mr-2'
-                    />
-                    <span className='text-gray-300'>Plano de Saúde</span>
-                  </label>
-                </div>
-              </div>
-
-              {/* Campos específicos para particular */}
-              {formData.paymentType === 'particular' && (
-                <div className='space-y-4'>
-                  <h4 className='text-lg font-medium text-white'>
-                    Divisão Financeira
-                  </h4>
-
-                  {/* Valor Total - Campo separado */}
-                  <div>
-                    <label className='block text-sm font-medium text-gray-300 mb-2'>
-                      Valor Total Pago
-                    </label>
-                    <input
-                      type='number'
-                      step='0.01'
-                      value={formData.totalValue}
-                      onChange={e =>
-                        setFormData({ ...formData, totalValue: e.target.value })
-                      }
-                      className='w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-blue-400 focus:border-transparent backdrop-blur-sm'
-                      placeholder='0,00'
-                    />
-                  </div>
-
-                  {/* Grid simétrico 2x3 para os 5 campos restantes */}
-                  <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-                    {/* Primeira linha - 2 campos */}
-                    <div>
-                      <label className='block text-sm font-medium text-gray-300 mb-2'>
-                        Valor para o Hospital
-                      </label>
-                      <input
-                        type='number'
-                        step='0.01'
-                        value={formData.hospitalValue}
-                        onChange={e =>
-                          setFormData({
-                            ...formData,
-                            hospitalValue: e.target.value,
-                          })
-                        }
-                        className='w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-blue-400 focus:border-transparent backdrop-blur-sm'
-                        placeholder='0,00'
-                      />
-                    </div>
-
-                    <div>
-                      <label className='block text-sm font-medium text-gray-300 mb-2'>
-                        Valor para o Anestesista
-                      </label>
-                      <input
-                        type='number'
-                        step='0.01'
-                        value={formData.anesthesiologistValue}
-                        onChange={e =>
-                          setFormData({
-                            ...formData,
-                            anesthesiologistValue: e.target.value,
-                          })
-                        }
-                        className='w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-blue-400 focus:border-transparent backdrop-blur-sm'
-                        placeholder='0,00'
-                      />
-                    </div>
-
-                    {/* Segunda linha - 2 campos */}
-                    <div>
-                      <label className='block text-sm font-medium text-gray-300 mb-2'>
-                        Valor para a Instrumentadora
-                      </label>
-                      <input
-                        type='number'
-                        step='0.01'
-                        value={formData.instrumentalistValue}
-                        onChange={e =>
-                          setFormData({
-                            ...formData,
-                            instrumentalistValue: e.target.value,
-                          })
-                        }
-                        className='w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-blue-400 focus:border-transparent backdrop-blur-sm'
-                        placeholder='0,00'
-                      />
-                    </div>
-
-                    <div>
-                      <label className='block text-sm font-medium text-gray-300 mb-2'>
-                        Valor para o Auxiliar
-                      </label>
-                      <input
-                        type='number'
-                        step='0.01'
-                        value={formData.auxiliaryValue}
-                        onChange={e =>
-                          setFormData({
-                            ...formData,
-                            auxiliaryValue: e.target.value,
-                          })
-                        }
-                        className='w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-blue-400 focus:border-transparent backdrop-blur-sm'
-                        placeholder='0,00'
-                      />
-                    </div>
-
-                    {/* Terceira linha - 1 campo centralizado */}
-                    <div className='md:col-span-2 flex justify-center'>
-                      <div className='w-full md:w-1/2'>
-                        <label className='block text-sm font-medium text-gray-300 mb-2'>
-                          Valor para o Médico
-                        </label>
-                        <input
-                          type='number'
-                          step='0.01'
-                          value={formData.doctorValue}
-                          onChange={e =>
-                            setFormData({
-                              ...formData,
-                              doctorValue: e.target.value,
-                            })
-                          }
-                          className='w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-blue-400 focus:border-transparent backdrop-blur-sm'
-                          placeholder='0,00'
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Campos específicos para plano */}
-              {formData.paymentType === 'plano' && (
-                <div className='space-y-4'>
-                  <h4 className='text-lg font-medium text-white'>
-                    Informações do Plano
-                  </h4>
-                  <div className='grid grid-cols-1 md:grid-cols-1 gap-4'>
-                    <div>
-                      <label className='block text-sm font-medium text-gray-300 mb-2'>
-                        Plano de Saúde
-                      </label>
-                      <select
-                        value={formData.insurancePlan}
-                        onChange={e =>
-                          setFormData({
-                            ...formData,
-                            insurancePlan: e.target.value,
-                          })
-                        }
-                        className='w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-blue-400 focus:border-transparent backdrop-blur-sm appearance-none'
-                      >
-                        <option value=''>Selecione o plano</option>
-                        <option value='UNIMED'>UNIMED</option>
-                        <option value='Bradesco Saúde'>Bradesco Saúde</option>
-                        <option value='SulAmérica'>SulAmérica</option>
-                        <option value='Amil'>Amil</option>
-                        <option value='Outro'>Outro</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className='block text-sm font-medium text-gray-300 mb-2'>
-                      Códigos dos Procedimentos
-                    </label>
-                    <input
-                      type='text'
-                      value={formData.procedureCodes}
-                      onChange={e =>
-                        setFormData({
-                          ...formData,
-                          procedureCodes: e.target.value,
-                        })
-                      }
-                      className='w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-blue-400 focus:border-transparent backdrop-blur-sm'
-                      placeholder='Ex: 31101012, 31101020 (separados por vírgula)'
-                    />
-                  </div>
-                </div>
-              )}
-
-              {/* Observações */}
-              <div>
-                <label className='block text-sm font-medium text-gray-300 mb-2'>
-                  Observações
-                </label>
-                <textarea
-                  value={formData.notes}
-                  onChange={e =>
-                    setFormData({ ...formData, notes: e.target.value })
-                  }
-                  rows={3}
-                  className='w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-blue-400 focus:border-transparent backdrop-blur-sm'
-                  placeholder='Observações adicionais sobre a cirurgia...'
-                />
-              </div>
-
-              {/* Botões */}
-              <div className='flex justify-end space-x-3 pt-4'>
-                <button
-                  type='button'
-                  onClick={() => {
-                    setShowForm(false)
-                    resetForm()
-                  }}
-                  className='px-6 py-3 text-gray-300 hover:text-white transition-colors duration-200'
-                >
-                  Cancelar
-                </button>
-                <button
-                  type='submit'
-                  className='px-6 py-3 bg-blue-600/80 hover:bg-blue-600 text-white rounded-lg transition-all duration-200 backdrop-blur-sm'
-                >
-                  {editingSurgery ? 'Atualizar' : 'Salvar'} Cirurgia
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      <SurgeryForm
+        isOpen={showForm}
+        onClose={() => {
+          setShowForm(false)
+          setEditingSurgery(null)
+        }}
+        onSubmit={handleSurgerySubmit}
+        editingSurgery={editingSurgery}
+        patients={patients}
+        key={editingSurgery?.id || 'new'} // Força re-render quando muda entre edição e novo
+      />
     </div>
   )
 }

@@ -37,6 +37,7 @@ model User {
   scheduleBlocks       ScheduleBlock[]
   scheduleSlots        ScheduleSlot[]       @relation("ScheduleSlotCreator")
   twoFactorSetup       TwoFactorSetup?
+  surgeries            Surgery[]            @relation("SurgeryCreator")
 
   @@map("users")
 }
@@ -412,6 +413,7 @@ model MedicalPatient {
   communicationContact        CommunicationContact @relation(fields: [communicationContactId], references: [id], onDelete: Cascade)
   creator                     User?                @relation("MedicalPatientCreator", fields: [createdBy], references: [id])
   medicalRecords              MedicalRecord[]
+  postOpFollowUps             PostOpFollowUp[]
 
   @@index([communicationContactId])
   @@index([cpf])
@@ -467,6 +469,96 @@ model AvailableTimeSlot {
 
   @@unique([date, startTime])
   @@index([date, available])
+}
+
+model Surgery {
+  id                    String            @id @default(cuid())
+  patientName           String
+  surgeryType           String
+  hospital              String
+  surgeryDate           DateTime
+  surgeryTime           String
+  paymentType           PaymentType       @default(PARTICULAR)
+  insurancePlan         String?
+  totalAmount           Decimal?          @db.Decimal(10, 2)
+  hospitalAmount        Decimal?          @db.Decimal(10, 2)
+  anesthesiologistAmount Decimal?         @db.Decimal(10, 2)
+  instrumentalistAmount Decimal?          @db.Decimal(10, 2)
+  assistantAmount       Decimal?          @db.Decimal(10, 2)
+  status                SurgeryStatus     @default(SCHEDULED)
+  preOpReminderSent     Boolean           @default(false)
+  postOpDay1Sent        Boolean           @default(false)
+  postOpDay4Sent        Boolean           @default(false)
+  postOpDay7Sent        Boolean           @default(false)
+  postOpDay14Sent       Boolean           @default(false)
+  notes                 String?
+  createdAt             DateTime          @default(now())
+  updatedAt             DateTime          @updatedAt
+  createdBy             String?
+  creator               User?             @relation("SurgeryCreator", fields: [createdBy], references: [id])
+  procedures            SurgeryProcedure[]
+
+  @@index([surgeryDate])
+  @@index([status])
+  @@index([createdBy])
+  @@map("surgeries")
+}
+
+model TussProcedure {
+  id                String             @id @default(cuid())
+  tussCode          String             @unique
+  cbhpmCode         String?
+  description       String
+  category          String?
+  value             Decimal?           @db.Decimal(10, 2)
+  isActive          Boolean            @default(true)
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+
+  @@index([tussCode])
+  @@index([cbhpmCode])
+  @@index([category])
+  @@index([isActive])
+  @@map("tuss_procedures")
+}
+
+model SurgeryProcedure {
+  id          String   @id @default(cuid())
+  surgeryId   String
+  tussCode    String
+  description String
+  quantity    Int      @default(1)
+  createdAt   DateTime @default(now())
+  surgery     Surgery  @relation(fields: [surgeryId], references: [id], onDelete: Cascade)
+
+  @@index([surgeryId])
+  @@map("surgery_procedures")
+}
+
+model PostOpFollowUp {
+  id               String          @id @default(cuid())
+  medicalPatientId String
+  surgeryId        String?
+  followUpDay      Int
+  scheduledDate    DateTime
+  completed        Boolean         @default(false)
+  patientResponse  String?
+  painScaleRest    Int?
+  painScaleMovement Int?
+  bowelFunction    String?
+  bleeding         Boolean?
+  constipation     Boolean?
+  notes            String?
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  medicalPatient   MedicalPatient  @relation(fields: [medicalPatientId], references: [id])
+
+  @@index([medicalPatientId])
+  @@index([surgeryId])
+  @@index([scheduledDate])
+  @@index([followUpDay])
+  @@index([completed])
+  @@map("postop_followups")
 }
 
 enum UserRole {
@@ -590,4 +682,31 @@ enum RegistrationSourceType {
   WHATSAPP
   PHONE
   REFERRAL
+}
+
+enum PaymentType {
+  PARTICULAR
+  INSURANCE
+}
+
+enum SurgeryCategory {
+  HEMORRHOIDECTOMY
+  FISTULOTOMY
+  FISSURECTOMY
+  PROLAPSE_CORRECTION
+  RECTOCELE_CORRECTION
+  HERNIOPLASTY
+  CHOLECYSTECTOMY
+  PILONIDAL
+  COLECTOMY
+  OTHER
+}
+
+enum SurgeryStatus {
+  SCHEDULED
+  CONFIRMED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+  POSTPONED
 }

@@ -25,7 +25,7 @@ export function BrazilianDatePicker({
 
   // Sincronizar com o valor externo
   useEffect(() => {
-    if (value) {
+    if (value && typeof value === 'string') {
       const parts = value.split('-')
       if (parts.length === 3) {
         setDisplayValue(`${parts[2]}/${parts[1]}/${parts[0]}`)

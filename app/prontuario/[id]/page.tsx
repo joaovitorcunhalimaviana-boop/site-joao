@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import Header from '../../../components/ui/header'
 import BackgroundPattern from '../../../components/ui/background-pattern'
 import {
@@ -87,6 +87,7 @@ export default function ProntuarioPage() {
   const [isLoading, setIsLoading] = useState(true)
 
   const params = useParams()
+  const router = useRouter()
   const patientId = params['id'] as string
 
   const calculateAge = (birthDate: string | null | undefined): number => {
@@ -369,13 +370,15 @@ export default function ProntuarioPage() {
       <BackgroundPattern />
 
       {/* Header da página */}
-      <div className='bg-gray-800 border-b border-gray-700'>
+      <div className='bg-gray-800 border-b border-gray-700 relative z-40'>
         <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
           <div className='py-6'>
             <div className='flex items-center space-x-4'>
               <button
-                onClick={() => window.history.back()}
-                className='p-2 rounded-lg bg-gray-700 hover:bg-gray-600 transition-colors'
+                onClick={() => router.push('/area-medica')}
+                className='p-2 rounded-lg bg-gray-700 hover:bg-gray-600 transition-colors cursor-pointer relative z-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-800'
+                type='button'
+                aria-label='Voltar para área médica'
               >
                 <ArrowLeftIcon className='h-6 w-6 text-white' />
               </button>

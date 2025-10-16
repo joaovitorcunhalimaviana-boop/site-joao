@@ -177,6 +177,59 @@ async function main() {
   })
   console.log('✅ Agendamento criado para Carlos Santos')
 
+  // Criar procedimentos TUSS de exemplo
+  const tussProcedures = [
+    {
+      tussCode: '31101015',
+      cbhpmCode: '31101015',
+      description: 'Hemorroidectomia',
+      category: 'ORIFICIAL',
+      value: 1200.00,
+      isActive: true
+    },
+    {
+      tussCode: '31101023',
+      cbhpmCode: '31101023', 
+      description: 'Fistulotomia anal',
+      category: 'ORIFICIAL',
+      value: 800.00,
+      isActive: true
+    },
+    {
+      tussCode: '31101031',
+      cbhpmCode: '31101031',
+      description: 'Ressecção de cisto pilonidal',
+      category: 'PILONIDAL',
+      value: 1500.00,
+      isActive: true
+    },
+    {
+      tussCode: '31301010',
+      cbhpmCode: '31301010',
+      description: 'Colectomia parcial',
+      category: 'COLECTOMY',
+      value: 3500.00,
+      isActive: true
+    },
+    {
+      tussCode: '31301028',
+      cbhpmCode: '31301028',
+      description: 'Colectomia total',
+      category: 'COLECTOMY',
+      value: 5000.00,
+      isActive: true
+    }
+  ]
+
+  for (const procedure of tussProcedures) {
+    const createdProcedure = await prisma.tussProcedure.upsert({
+      where: { tussCode: procedure.tussCode },
+      update: {},
+      create: procedure
+    })
+    console.log('✅ Procedimento TUSS criado:', createdProcedure.description)
+  }
+
   console.log('🎉 Seed concluído com sucesso!')
   console.log('\n📋 Credenciais de acesso:')
   console.log('Admin: admin@clinica.com / admin123')

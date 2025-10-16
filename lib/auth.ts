@@ -140,15 +140,21 @@ export class AuthManager {
     }
   }
 
-  // Extrair token do header Authorization
+  // Extrair token do header Authorization ou cookies
   static extractTokenFromRequest(request: NextRequest): string | null {
+    // Primeiro, tentar extrair do header Authorization
     const authHeader = request.headers.get('authorization')
-
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return null
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      return authHeader.substring(7) // Remove 'Bearer ' prefix
     }
 
-    return authHeader.substring(7) // Remove 'Bearer ' prefix
+    // Se não encontrar no header, tentar extrair dos cookies
+    const cookieToken = request.cookies.get('auth-token')?.value
+    if (cookieToken) {
+      return cookieToken
+    }
+
+    return null
   }
 
   // Middleware de autenticação

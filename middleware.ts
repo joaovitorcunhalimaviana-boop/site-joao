@@ -44,6 +44,7 @@ const publicRoutes = [
   '/api/newsletter',
   '/api/reviews',
   '/api/schedule-slots',
+  '/api/tuss-procedures',
   '/_next/*',
   '/@vite/*',
   '/favicon.ico',
