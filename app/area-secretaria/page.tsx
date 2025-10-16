@@ -697,16 +697,10 @@ export default function AreaSecretaria() {
                       Paciente
                     </th>
                     <th className='px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider'>
-                      CPF
-                    </th>
-                    <th className='px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider'>
-                      Telefone
-                    </th>
-                    <th className='px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider'>
                       WhatsApp
                     </th>
                     <th className='px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider'>
-                      Convênio
+                      Data Nascimento
                     </th>
                     <th className='px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider'>
                       Ações
@@ -716,7 +710,7 @@ export default function AreaSecretaria() {
                 <tbody className='divide-y divide-gray-700'>
                 {filteredPatients.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className='px-6 py-8 text-center text-gray-400'>
+                    <td colSpan={4} className='px-6 py-8 text-center text-gray-400'>
                       <div className='flex flex-col items-center'>
                         <svg className='w-12 h-12 text-gray-500 mb-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
                           <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z' />
@@ -729,29 +723,30 @@ export default function AreaSecretaria() {
                   filteredPatients.map((patient) => (
                     <tr key={patient.id} className='hover:bg-gray-800/30 transition-colors duration-200'>
                       <td className='px-6 py-4 whitespace-nowrap'>
-                        <div className='text-sm font-medium text-white'>{patient.name}</div>
-                        <div className='text-sm text-gray-400'>{patient.email}</div>
+                        <div>
+                          <div className='text-sm font-medium text-white flex items-center gap-2'>
+                            {patient.name}
+                            {/* Buscar número do prontuário se disponível */}
+                            {patient.medicalRecordNumber && (
+                              <span className='text-xs text-gray-400 bg-gray-700 px-2 py-1 rounded'>
+                                #{patient.medicalRecordNumber}
+                              </span>
+                            )}
+                          </div>
+                          <div className='text-sm text-gray-300'>
+                            {patient.email || 'Email não informado'}
+                          </div>
+                        </div>
                       </td>
                       <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>
-                        {patient.cpf}
+                        {patient.whatsapp || 'Não informado'}
                       </td>
                       <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>
-                        {patient.phone}
-                      </td>
-                      <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>
-                        {patient.whatsapp}
-                      </td>
-                      <td className='px-6 py-4 whitespace-nowrap'>
-                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                          patient.insurance?.type === 'particular'
-                            ? 'bg-blue-900/30 text-blue-400 border border-blue-500/30'
-                            : patient.insurance?.type === 'unimed'
-                            ? 'bg-green-900/30 text-green-400 border border-green-500/30'
-                            : 'bg-gray-900/30 text-gray-400 border border-gray-500/30'
-                        }`}>
-                          {patient.insurance?.type === 'particular' ? 'Particular' :
-                           patient.insurance?.type === 'unimed' ? 'Unimed' : 'Outro'}
-                        </span>
+                        {patient.birthDate ? (() => {
+                          // Evitar problemas de timezone fazendo parsing manual
+                          const [year, month, day] = patient.birthDate.split('-')
+                          return new Date(parseInt(year), parseInt(month) - 1, parseInt(day)).toLocaleDateString('pt-BR')
+                        })() : 'Não informado'}
                       </td>
                       <td className='px-6 py-4 whitespace-nowrap text-sm font-medium'>
                         <button

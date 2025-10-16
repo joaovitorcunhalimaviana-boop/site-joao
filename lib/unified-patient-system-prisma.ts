@@ -544,7 +544,10 @@ export async function getMedicalPatientById(id: string): Promise<MedicalPatient 
       fullName: patient.fullName,
       cpf: patient.cpf,
       rg: patient.rg || undefined,
-      birthDate: patient.communicationContact?.birthDate || (patient.birthDate ? patient.birthDate.toISOString().split('T')[0] : ''),
+      birthDate: patient.communicationContact?.birthDate || (patient.birthDate ? 
+        // Evitar problema de fuso horário usando toLocaleDateString
+        new Date(patient.birthDate.getTime() + patient.birthDate.getTimezoneOffset() * 60000)
+          .toISOString().split('T')[0] : ''),
       phone: patient.communicationContact?.phone,
       whatsapp: patient.communicationContact?.whatsapp,
       gender: patient.gender as 'M' | 'F' | 'Other' | undefined,
@@ -1727,26 +1730,8 @@ export async function createAppointment(appointmentData: any): Promise<{ success
       }
     })
 
-    // Enviar notificação Telegram
-    try {
-      const notificationData: AppointmentNotificationData = {
-        patientName: appointmentData.fullName || appointmentData.name || 'Paciente',
-        patientEmail: appointmentData.email,
-        patientPhone: appointmentData.phone || appointmentData.whatsapp,
-        patientWhatsapp: appointmentData.whatsapp || appointmentData.phone,
-        appointmentDate: appointmentData.appointmentDate || appointmentData.date,
-        appointmentTime: appointmentData.appointmentTime || appointmentData.time,
-        insuranceType: (appointmentData.insuranceType || 'particular') as 'unimed' | 'particular' | 'outro',
-        appointmentType: appointmentData.type || 'consultation',
-        source: appointmentData.source || 'website',
-      }
-
-      await sendTelegramAppointmentNotification(notificationData)
-      console.log('✅ [createAppointment] Notificação Telegram enviada')
-    } catch (notifError) {
-      console.error('⚠️ [createAppointment] Erro ao enviar notificação Telegram:', notifError)
-      // Não bloqueia criação do agendamento
-    }
+    // Notificação Telegram será enviada pela função chamadora para evitar duplicação
+    console.log('✅ [createAppointment] Agendamento criado - notificação será enviada pela função chamadora')
 
     return {
       success: true,

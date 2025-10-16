@@ -615,6 +615,15 @@ export default function ProntuarioPage() {
                                       }
                                     }
 
+                                    // Bristol: mostrar tipo e interpretação
+                                    if ((result.calculatorName || '').toLowerCase().includes('bristol')) {
+                                      const type = result.result.selectedType || result.result.type
+                                      const classification = result.result.classification || result.result.characteristics
+                                      if (type !== undefined) {
+                                        return `Bristol ${type}${classification ? ' - ' + classification : ''}`
+                                      }
+                                    }
+
                                     // Outros: extrair informações relevantes
                                     if (result.result.bmi) {
                                       return `IMC: ${result.result.bmi} (${result.result.category})`
@@ -631,7 +640,7 @@ export default function ProntuarioPage() {
                                 }
 
                                 // Evitar duplicação da interpretação
-                                const interpretation = !isWexner
+                                const interpretation = !isWexner && !(result.calculatorName || '').toLowerCase().includes('bristol')
                                   ? result.interpretation || (result.result && typeof result.result === 'object' ? result.result.interpretation : '')
                                   : ''
 
