@@ -30,6 +30,7 @@ const AgendamentoPage = () => {
   const [currentStep, setCurrentStep] = useState<Step>('date')
   const [selectedDate, setSelectedDate] = useState<Date | undefined>()
   const [selectedTime, setSelectedTime] = useState<string | undefined>()
+  const [showPricing, setShowPricing] = useState<boolean>(false)
   const [appointmentData, setAppointmentData] = useState<
     AppointmentData | undefined
   >()
@@ -274,15 +275,33 @@ const AgendamentoPage = () => {
                 {/* Seção de Preços - Abaixo do Calendário */}
                 <div className='mt-6 bg-gray-800 rounded-lg p-4 border border-gray-700 max-w-sm mx-auto'>
                   <div className='text-center'>
-                    <h3 className='text-lg font-semibold text-white mb-3'>
-                      Valor da Consulta
-                    </h3>
-                    <div className='text-xl font-bold text-white'>
-                      R$ 400,00
-                    </div>
-                    <p className='text-gray-400 text-sm mt-2'>
-                      Consulta Particular
-                    </p>
+                    <button 
+                      onClick={() => setShowPricing(!showPricing)}
+                      className='w-full text-lg font-semibold text-white mb-3 hover:text-blue-400 transition-colors duration-200 flex items-center justify-center gap-2'
+                    >
+                      Clique para saber as condições:
+                      <svg 
+                        className={`w-5 h-5 transform transition-transform duration-200 ${showPricing ? 'rotate-180' : ''}`}
+                        fill="none" 
+                        stroke="currentColor" 
+                        viewBox="0 0 24 24"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </button>
+                    
+                    {showPricing && (
+                      <div className='mt-4 space-y-3 animate-in slide-in-from-top-2 duration-300'>
+                        <div className='text-white'>
+                          <p className='font-medium'>Planos aceitos:</p>
+                          <p className='text-blue-400'>UNIMED</p>
+                        </div>
+                        <div className='text-white border-t border-gray-600 pt-3'>
+                          <p className='font-medium'>Consulta particular:</p>
+                          <p className='text-xl font-bold text-green-400'>R$ 400,00</p>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

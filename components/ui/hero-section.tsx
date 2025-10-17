@@ -38,9 +38,7 @@ const HeroSection = () => {
                   <p className='text-white text-base sm:text-lg leading-relaxed text-justify'>
                     Dr. João Vítor Viana é coloproctologista em João Pessoa/PB,
                     dedicando sua carreira ao tratamento especializado de
-                    doenças do aparelho digestivo baixo. Com formação sólida,
-                    oferece atendimento humanizado e tratamentos de ponta para
-                    seus pacientes.
+                    doenças do aparelho digestivo baixo.
                   </p>
                 </div>
               </div>
@@ -212,7 +210,7 @@ const HeroSection = () => {
                 </h2>
               </div>
               <p className='text-lg text-white leading-relaxed text-justify'>
-                Sou doutor João Vitor Viana, coloproctologista e cirurgião geral
+                Sou João Vitor Viana, coloproctologista e cirurgião geral
                 com formação técnica sólida, fundamentada nas mais recentes
                 evidências científicas. Utilizo tecnologias de ponta e técnicas
                 cirúrgicas minimamente invasivas para garantir os melhores
