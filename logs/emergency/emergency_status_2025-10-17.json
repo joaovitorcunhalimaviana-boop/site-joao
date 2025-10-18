@@ -1,15 +1,15 @@
 [
   {
-    "timestamp": "2025-10-17T07:08:11.584Z",
+    "timestamp": "2025-10-17T22:04:02.413Z",
     "overallStatus": "CRITICAL",
     "alerts": [
       {
-        "id": "db_offline_1760684891584",
+        "id": "db_offline_1760738642413",
         "type": "SYSTEM_ERROR",
         "severity": "CRITICAL",
         "title": "Banco de Dados Offline",
         "description": "O banco de dados não está respondendo",
-        "timestamp": "2025-10-17T07:08:11.584Z",
+        "timestamp": "2025-10-17T22:04:02.413Z",
         "resolved": false,
         "actions": [
           "Verificar conexão",
@@ -18,12 +18,12 @@
         ]
       },
       {
-        "id": "backup_critical_1760684891584",
+        "id": "backup_critical_1760738642413",
         "type": "BACKUP_FAILURE",
         "severity": "CRITICAL",
         "title": "Sistema de Backup Crítico",
         "description": "Backups não estão funcionando adequadamente",
-        "timestamp": "2025-10-17T07:08:11.584Z",
+        "timestamp": "2025-10-17T22:04:02.413Z",
         "resolved": false,
         "actions": [
           "Executar backup manual",
@@ -37,13 +37,13 @@
       "api": "DEGRADED",
       "backupSystem": "OFFLINE",
       "auditSystem": "OFFLINE",
-      "lastCheck": "2025-10-17T07:08:10.154Z",
+      "lastCheck": "2025-10-17T22:04:01.438Z",
       "uptime": 0,
-      "responseTime": 971
+      "responseTime": 644
     },
     "dataIntegrity": {
       "status": "HEALTHY",
-      "lastCheck": "2025-10-17T07:08:11.580Z",
+      "lastCheck": "2025-10-17T22:04:02.411Z",
       "issues": 0,
       "criticalIssues": 0,
       "recordCount": 0,
@@ -64,7 +64,7 @@
     },
     "securityStatus": {
       "status": "SECURE",
-      "lastSecurityCheck": "2025-10-17T07:08:11.584Z",
+      "lastSecurityCheck": "2025-10-17T22:04:02.413Z",
       "suspiciousActivity": 0,
       "failedLogins": 0,
       "dataAccess": 0,
@@ -78,16 +78,16 @@
     ]
   },
   {
-    "timestamp": "2025-10-17T07:13:13.203Z",
+    "timestamp": "2025-10-17T22:09:01.128Z",
     "overallStatus": "CRITICAL",
     "alerts": [
       {
-        "id": "db_offline_1760685193203",
+        "id": "db_offline_1760738941128",
         "type": "SYSTEM_ERROR",
         "severity": "CRITICAL",
         "title": "Banco de Dados Offline",
         "description": "O banco de dados não está respondendo",
-        "timestamp": "2025-10-17T07:13:13.203Z",
+        "timestamp": "2025-10-17T22:09:01.128Z",
         "resolved": false,
         "actions": [
           "Verificar conexão",
@@ -96,12 +96,12 @@
         ]
       },
       {
-        "id": "backup_critical_1760685193203",
+        "id": "backup_critical_1760738941128",
         "type": "BACKUP_FAILURE",
         "severity": "CRITICAL",
         "title": "Sistema de Backup Crítico",
         "description": "Backups não estão funcionando adequadamente",
-        "timestamp": "2025-10-17T07:13:13.203Z",
+        "timestamp": "2025-10-17T22:09:01.128Z",
         "resolved": false,
         "actions": [
           "Executar backup manual",
@@ -115,13 +115,13 @@
       "api": "DEGRADED",
       "backupSystem": "OFFLINE",
       "auditSystem": "OFFLINE",
-      "lastCheck": "2025-10-17T07:13:11.993Z",
+      "lastCheck": "2025-10-17T22:09:00.207Z",
       "uptime": 0,
-      "responseTime": 812
+      "responseTime": 656
     },
     "dataIntegrity": {
       "status": "HEALTHY",
-      "lastCheck": "2025-10-17T07:13:13.201Z",
+      "lastCheck": "2025-10-17T22:09:01.125Z",
       "issues": 0,
       "criticalIssues": 0,
       "recordCount": 0,
@@ -142,7 +142,7 @@
     },
     "securityStatus": {
       "status": "SECURE",
-      "lastSecurityCheck": "2025-10-17T07:13:13.203Z",
+      "lastSecurityCheck": "2025-10-17T22:09:01.128Z",
       "suspiciousActivity": 0,
       "failedLogins": 0,
       "dataAccess": 0,
@@ -156,16 +156,16 @@
     ]
   },
   {
-    "timestamp": "2025-10-17T08:09:00.376Z",
+    "timestamp": "2025-10-17T22:14:02.223Z",
     "overallStatus": "CRITICAL",
     "alerts": [
       {
-        "id": "db_offline_1760688540376",
+        "id": "db_offline_1760739242223",
         "type": "SYSTEM_ERROR",
         "severity": "CRITICAL",
         "title": "Banco de Dados Offline",
         "description": "O banco de dados não está respondendo",
-        "timestamp": "2025-10-17T08:09:00.376Z",
+        "timestamp": "2025-10-17T22:14:02.223Z",
         "resolved": false,
         "actions": [
           "Verificar conexão",
@@ -174,12 +174,12 @@
         ]
       },
       {
-        "id": "backup_critical_1760688540376",
+        "id": "backup_critical_1760739242223",
         "type": "BACKUP_FAILURE",
         "severity": "CRITICAL",
         "title": "Sistema de Backup Crítico",
         "description": "Backups não estão funcionando adequadamente",
-        "timestamp": "2025-10-17T08:09:00.376Z",
+        "timestamp": "2025-10-17T22:14:02.223Z",
         "resolved": false,
         "actions": [
           "Executar backup manual",
@@ -193,13 +193,13 @@
       "api": "DEGRADED",
       "backupSystem": "OFFLINE",
       "auditSystem": "OFFLINE",
-      "lastCheck": "2025-10-17T08:08:59.161Z",
+      "lastCheck": "2025-10-17T22:14:01.324Z",
       "uptime": 0,
-      "responseTime": 834
+      "responseTime": 577
     },
     "dataIntegrity": {
       "status": "HEALTHY",
-      "lastCheck": "2025-10-17T08:09:00.373Z",
+      "lastCheck": "2025-10-17T22:14:02.219Z",
       "issues": 0,
       "criticalIssues": 0,
       "recordCount": 0,
@@ -220,7 +220,7 @@
     },
     "securityStatus": {
       "status": "SECURE",
-      "lastSecurityCheck": "2025-10-17T08:09:00.376Z",
+      "lastSecurityCheck": "2025-10-17T22:14:02.222Z",
       "suspiciousActivity": 0,
       "failedLogins": 0,
       "dataAccess": 0,
@@ -234,16 +234,16 @@
     ]
   },
   {
-    "timestamp": "2025-10-17T18:09:33.739Z",
+    "timestamp": "2025-10-17T22:19:01.274Z",
     "overallStatus": "CRITICAL",
     "alerts": [
       {
-        "id": "db_offline_1760724573739",
+        "id": "db_offline_1760739541274",
         "type": "SYSTEM_ERROR",
         "severity": "CRITICAL",
         "title": "Banco de Dados Offline",
         "description": "O banco de dados não está respondendo",
-        "timestamp": "2025-10-17T18:09:33.739Z",
+        "timestamp": "2025-10-17T22:19:01.274Z",
         "resolved": false,
         "actions": [
           "Verificar conexão",
@@ -252,12 +252,12 @@
         ]
       },
       {
-        "id": "backup_critical_1760724573739",
+        "id": "backup_critical_1760739541274",
         "type": "BACKUP_FAILURE",
         "severity": "CRITICAL",
         "title": "Sistema de Backup Crítico",
         "description": "Backups não estão funcionando adequadamente",
-        "timestamp": "2025-10-17T18:09:33.739Z",
+        "timestamp": "2025-10-17T22:19:01.274Z",
         "resolved": false,
         "actions": [
           "Executar backup manual",
@@ -271,13 +271,13 @@
       "api": "DEGRADED",
       "backupSystem": "OFFLINE",
       "auditSystem": "OFFLINE",
-      "lastCheck": "2025-10-17T18:09:33.336Z",
+      "lastCheck": "2025-10-17T22:19:00.252Z",
       "uptime": 0,
-      "responseTime": 102
+      "responseTime": 649
     },
     "dataIntegrity": {
       "status": "HEALTHY",
-      "lastCheck": "2025-10-17T18:09:33.734Z",
+      "lastCheck": "2025-10-17T22:19:01.271Z",
       "issues": 0,
       "criticalIssues": 0,
       "recordCount": 0,
@@ -298,7 +298,7 @@
     },
     "securityStatus": {
       "status": "SECURE",
-      "lastSecurityCheck": "2025-10-17T18:09:33.739Z",
+      "lastSecurityCheck": "2025-10-17T22:19:01.274Z",
       "suspiciousActivity": 0,
       "failedLogins": 0,
       "dataAccess": 0,
@@ -312,16 +312,16 @@
     ]
   },
   {
-    "timestamp": "2025-10-17T18:13:10.950Z",
+    "timestamp": "2025-10-17T22:24:02.731Z",
     "overallStatus": "CRITICAL",
     "alerts": [
       {
-        "id": "db_offline_1760724790950",
+        "id": "db_offline_1760739842731",
         "type": "SYSTEM_ERROR",
         "severity": "CRITICAL",
         "title": "Banco de Dados Offline",
         "description": "O banco de dados não está respondendo",
-        "timestamp": "2025-10-17T18:13:10.950Z",
+        "timestamp": "2025-10-17T22:24:02.731Z",
         "resolved": false,
         "actions": [
           "Verificar conexão",
@@ -330,12 +330,12 @@
         ]
       },
       {
-        "id": "backup_critical_1760724790950",
+        "id": "backup_critical_1760739842731",
         "type": "BACKUP_FAILURE",
         "severity": "CRITICAL",
         "title": "Sistema de Backup Crítico",
         "description": "Backups não estão funcionando adequadamente",
-        "timestamp": "2025-10-17T18:13:10.950Z",
+        "timestamp": "2025-10-17T22:24:02.731Z",
         "resolved": false,
         "actions": [
           "Executar backup manual",
@@ -349,793 +349,13 @@
       "api": "DEGRADED",
       "backupSystem": "OFFLINE",
       "auditSystem": "OFFLINE",
-      "lastCheck": "2025-10-17T18:13:09.753Z",
-      "uptime": 0,
-      "responseTime": 780
-    },
-    "dataIntegrity": {
-      "status": "HEALTHY",
-      "lastCheck": "2025-10-17T18:13:10.947Z",
-      "issues": 0,
-      "criticalIssues": 0,
-      "recordCount": 0,
-      "orphanedRecords": 0
-    },
-    "backupStatus": {
-      "status": "CRITICAL",
-      "lastBackup": "2025-10-13T08:28:28.399Z",
-      "nextScheduled": "2025-10-18T05:00:00.000Z",
-      "successRate": 100,
-      "totalBackups": 336,
-      "failedBackups": 0,
-      "cloudProviders": {
-        "github": true,
-        "dropbox": false,
-        "googleDrive": false
-      }
-    },
-    "securityStatus": {
-      "status": "SECURE",
-      "lastSecurityCheck": "2025-10-17T18:13:10.950Z",
-      "suspiciousActivity": 0,
-      "failedLogins": 0,
-      "dataAccess": 0,
-      "encryptionStatus": true
-    },
-    "recommendations": [
-      "⚠️ SITUAÇÃO CRÍTICA: Resolva problemas urgentemente",
-      "🔧 Execute correções automáticas disponíveis",
-      "📋 Monitore o sistema continuamente",
-      "🔄 PRIORIDADE: Corrigir sistema de backup"
-    ]
-  },
-  {
-    "timestamp": "2025-10-17T19:42:43.819Z",
-    "overallStatus": "CRITICAL",
-    "alerts": [
-      {
-        "id": "db_offline_1760730163819",
-        "type": "SYSTEM_ERROR",
-        "severity": "CRITICAL",
-        "title": "Banco de Dados Offline",
-        "description": "O banco de dados não está respondendo",
-        "timestamp": "2025-10-17T19:42:43.819Z",
-        "resolved": false,
-        "actions": [
-          "Verificar conexão",
-          "Reiniciar banco de dados",
-          "Verificar logs"
-        ]
-      },
-      {
-        "id": "backup_critical_1760730163819",
-        "type": "BACKUP_FAILURE",
-        "severity": "CRITICAL",
-        "title": "Sistema de Backup Crítico",
-        "description": "Backups não estão funcionando adequadamente",
-        "timestamp": "2025-10-17T19:42:43.819Z",
-        "resolved": false,
-        "actions": [
-          "Executar backup manual",
-          "Verificar configuração",
-          "Testar restauração"
-        ]
-      }
-    ],
-    "systemHealth": {
-      "database": "OFFLINE",
-      "api": "DEGRADED",
-      "backupSystem": "OFFLINE",
-      "auditSystem": "OFFLINE",
-      "lastCheck": "2025-10-17T19:42:38.727Z",
-      "uptime": 0,
-      "responseTime": 856
-    },
-    "dataIntegrity": {
-      "status": "HEALTHY",
-      "lastCheck": "2025-10-17T19:42:43.810Z",
-      "issues": 0,
-      "criticalIssues": 0,
-      "recordCount": 0,
-      "orphanedRecords": 0
-    },
-    "backupStatus": {
-      "status": "CRITICAL",
-      "lastBackup": "2025-10-13T08:28:28.399Z",
-      "nextScheduled": "2025-10-18T05:00:00.000Z",
-      "successRate": 100,
-      "totalBackups": 336,
-      "failedBackups": 0,
-      "cloudProviders": {
-        "github": true,
-        "dropbox": false,
-        "googleDrive": false
-      }
-    },
-    "securityStatus": {
-      "status": "SECURE",
-      "lastSecurityCheck": "2025-10-17T19:42:43.819Z",
-      "suspiciousActivity": 0,
-      "failedLogins": 0,
-      "dataAccess": 0,
-      "encryptionStatus": true
-    },
-    "recommendations": [
-      "⚠️ SITUAÇÃO CRÍTICA: Resolva problemas urgentemente",
-      "🔧 Execute correções automáticas disponíveis",
-      "📋 Monitore o sistema continuamente",
-      "🔄 PRIORIDADE: Corrigir sistema de backup"
-    ]
-  },
-  {
-    "timestamp": "2025-10-17T19:48:12.561Z",
-    "overallStatus": "CRITICAL",
-    "alerts": [
-      {
-        "id": "db_offline_1760730492561",
-        "type": "SYSTEM_ERROR",
-        "severity": "CRITICAL",
-        "title": "Banco de Dados Offline",
-        "description": "O banco de dados não está respondendo",
-        "timestamp": "2025-10-17T19:48:12.561Z",
-        "resolved": false,
-        "actions": [
-          "Verificar conexão",
-          "Reiniciar banco de dados",
-          "Verificar logs"
-        ]
-      },
-      {
-        "id": "backup_critical_1760730492561",
-        "type": "BACKUP_FAILURE",
-        "severity": "CRITICAL",
-        "title": "Sistema de Backup Crítico",
-        "description": "Backups não estão funcionando adequadamente",
-        "timestamp": "2025-10-17T19:48:12.561Z",
-        "resolved": false,
-        "actions": [
-          "Executar backup manual",
-          "Verificar configuração",
-          "Testar restauração"
-        ]
-      }
-    ],
-    "systemHealth": {
-      "database": "OFFLINE",
-      "api": "DEGRADED",
-      "backupSystem": "OFFLINE",
-      "auditSystem": "OFFLINE",
-      "lastCheck": "2025-10-17T19:48:11.179Z",
-      "uptime": 0,
-      "responseTime": 647
-    },
-    "dataIntegrity": {
-      "status": "HEALTHY",
-      "lastCheck": "2025-10-17T19:48:12.557Z",
-      "issues": 0,
-      "criticalIssues": 0,
-      "recordCount": 0,
-      "orphanedRecords": 0
-    },
-    "backupStatus": {
-      "status": "CRITICAL",
-      "lastBackup": "2025-10-13T08:28:28.399Z",
-      "nextScheduled": "2025-10-18T05:00:00.000Z",
-      "successRate": 100,
-      "totalBackups": 336,
-      "failedBackups": 0,
-      "cloudProviders": {
-        "github": true,
-        "dropbox": false,
-        "googleDrive": false
-      }
-    },
-    "securityStatus": {
-      "status": "SECURE",
-      "lastSecurityCheck": "2025-10-17T19:48:12.561Z",
-      "suspiciousActivity": 0,
-      "failedLogins": 0,
-      "dataAccess": 0,
-      "encryptionStatus": true
-    },
-    "recommendations": [
-      "⚠️ SITUAÇÃO CRÍTICA: Resolva problemas urgentemente",
-      "🔧 Execute correções automáticas disponíveis",
-      "📋 Monitore o sistema continuamente",
-      "🔄 PRIORIDADE: Corrigir sistema de backup"
-    ]
-  },
-  {
-    "timestamp": "2025-10-17T19:53:10.569Z",
-    "overallStatus": "CRITICAL",
-    "alerts": [
-      {
-        "id": "db_offline_1760730790569",
-        "type": "SYSTEM_ERROR",
-        "severity": "CRITICAL",
-        "title": "Banco de Dados Offline",
-        "description": "O banco de dados não está respondendo",
-        "timestamp": "2025-10-17T19:53:10.569Z",
-        "resolved": false,
-        "actions": [
-          "Verificar conexão",
-          "Reiniciar banco de dados",
-          "Verificar logs"
-        ]
-      },
-      {
-        "id": "backup_critical_1760730790569",
-        "type": "BACKUP_FAILURE",
-        "severity": "CRITICAL",
-        "title": "Sistema de Backup Crítico",
-        "description": "Backups não estão funcionando adequadamente",
-        "timestamp": "2025-10-17T19:53:10.569Z",
-        "resolved": false,
-        "actions": [
-          "Executar backup manual",
-          "Verificar configuração",
-          "Testar restauração"
-        ]
-      }
-    ],
-    "systemHealth": {
-      "database": "OFFLINE",
-      "api": "DEGRADED",
-      "backupSystem": "OFFLINE",
-      "auditSystem": "OFFLINE",
-      "lastCheck": "2025-10-17T19:53:09.155Z",
-      "uptime": 0,
-      "responseTime": 700
-    },
-    "dataIntegrity": {
-      "status": "HEALTHY",
-      "lastCheck": "2025-10-17T19:53:10.566Z",
-      "issues": 0,
-      "criticalIssues": 0,
-      "recordCount": 0,
-      "orphanedRecords": 0
-    },
-    "backupStatus": {
-      "status": "CRITICAL",
-      "lastBackup": "2025-10-13T08:28:28.399Z",
-      "nextScheduled": "2025-10-18T05:00:00.000Z",
-      "successRate": 100,
-      "totalBackups": 336,
-      "failedBackups": 0,
-      "cloudProviders": {
-        "github": true,
-        "dropbox": false,
-        "googleDrive": false
-      }
-    },
-    "securityStatus": {
-      "status": "SECURE",
-      "lastSecurityCheck": "2025-10-17T19:53:10.569Z",
-      "suspiciousActivity": 0,
-      "failedLogins": 0,
-      "dataAccess": 0,
-      "encryptionStatus": true
-    },
-    "recommendations": [
-      "⚠️ SITUAÇÃO CRÍTICA: Resolva problemas urgentemente",
-      "🔧 Execute correções automáticas disponíveis",
-      "📋 Monitore o sistema continuamente",
-      "🔄 PRIORIDADE: Corrigir sistema de backup"
-    ]
-  },
-  {
-    "timestamp": "2025-10-17T19:58:12.247Z",
-    "overallStatus": "CRITICAL",
-    "alerts": [
-      {
-        "id": "db_offline_1760731092247",
-        "type": "SYSTEM_ERROR",
-        "severity": "CRITICAL",
-        "title": "Banco de Dados Offline",
-        "description": "O banco de dados não está respondendo",
-        "timestamp": "2025-10-17T19:58:12.247Z",
-        "resolved": false,
-        "actions": [
-          "Verificar conexão",
-          "Reiniciar banco de dados",
-          "Verificar logs"
-        ]
-      },
-      {
-        "id": "backup_critical_1760731092247",
-        "type": "BACKUP_FAILURE",
-        "severity": "CRITICAL",
-        "title": "Sistema de Backup Crítico",
-        "description": "Backups não estão funcionando adequadamente",
-        "timestamp": "2025-10-17T19:58:12.247Z",
-        "resolved": false,
-        "actions": [
-          "Executar backup manual",
-          "Verificar configuração",
-          "Testar restauração"
-        ]
-      }
-    ],
-    "systemHealth": {
-      "database": "OFFLINE",
-      "api": "DEGRADED",
-      "backupSystem": "OFFLINE",
-      "auditSystem": "OFFLINE",
-      "lastCheck": "2025-10-17T19:58:11.165Z",
-      "uptime": 0,
-      "responseTime": 920
-    },
-    "dataIntegrity": {
-      "status": "HEALTHY",
-      "lastCheck": "2025-10-17T19:58:12.244Z",
-      "issues": 0,
-      "criticalIssues": 0,
-      "recordCount": 0,
-      "orphanedRecords": 0
-    },
-    "backupStatus": {
-      "status": "CRITICAL",
-      "lastBackup": "2025-10-13T08:28:28.399Z",
-      "nextScheduled": "2025-10-18T05:00:00.000Z",
-      "successRate": 100,
-      "totalBackups": 336,
-      "failedBackups": 0,
-      "cloudProviders": {
-        "github": true,
-        "dropbox": false,
-        "googleDrive": false
-      }
-    },
-    "securityStatus": {
-      "status": "SECURE",
-      "lastSecurityCheck": "2025-10-17T19:58:12.247Z",
-      "suspiciousActivity": 0,
-      "failedLogins": 0,
-      "dataAccess": 0,
-      "encryptionStatus": true
-    },
-    "recommendations": [
-      "⚠️ SITUAÇÃO CRÍTICA: Resolva problemas urgentemente",
-      "🔧 Execute correções automáticas disponíveis",
-      "📋 Monitore o sistema continuamente",
-      "🔄 PRIORIDADE: Corrigir sistema de backup"
-    ]
-  },
-  {
-    "timestamp": "2025-10-17T20:03:10.449Z",
-    "overallStatus": "CRITICAL",
-    "alerts": [
-      {
-        "id": "db_offline_1760731390449",
-        "type": "SYSTEM_ERROR",
-        "severity": "CRITICAL",
-        "title": "Banco de Dados Offline",
-        "description": "O banco de dados não está respondendo",
-        "timestamp": "2025-10-17T20:03:10.449Z",
-        "resolved": false,
-        "actions": [
-          "Verificar conexão",
-          "Reiniciar banco de dados",
-          "Verificar logs"
-        ]
-      },
-      {
-        "id": "backup_critical_1760731390449",
-        "type": "BACKUP_FAILURE",
-        "severity": "CRITICAL",
-        "title": "Sistema de Backup Crítico",
-        "description": "Backups não estão funcionando adequadamente",
-        "timestamp": "2025-10-17T20:03:10.449Z",
-        "resolved": false,
-        "actions": [
-          "Executar backup manual",
-          "Verificar configuração",
-          "Testar restauração"
-        ]
-      }
-    ],
-    "systemHealth": {
-      "database": "OFFLINE",
-      "api": "DEGRADED",
-      "backupSystem": "OFFLINE",
-      "auditSystem": "OFFLINE",
-      "lastCheck": "2025-10-17T20:03:09.236Z",
-      "uptime": 0,
-      "responseTime": 819
-    },
-    "dataIntegrity": {
-      "status": "HEALTHY",
-      "lastCheck": "2025-10-17T20:03:10.446Z",
-      "issues": 0,
-      "criticalIssues": 0,
-      "recordCount": 0,
-      "orphanedRecords": 0
-    },
-    "backupStatus": {
-      "status": "CRITICAL",
-      "lastBackup": "2025-10-13T08:28:28.399Z",
-      "nextScheduled": "2025-10-18T05:00:00.000Z",
-      "successRate": 100,
-      "totalBackups": 336,
-      "failedBackups": 0,
-      "cloudProviders": {
-        "github": true,
-        "dropbox": false,
-        "googleDrive": false
-      }
-    },
-    "securityStatus": {
-      "status": "SECURE",
-      "lastSecurityCheck": "2025-10-17T20:03:10.449Z",
-      "suspiciousActivity": 0,
-      "failedLogins": 0,
-      "dataAccess": 0,
-      "encryptionStatus": true
-    },
-    "recommendations": [
-      "⚠️ SITUAÇÃO CRÍTICA: Resolva problemas urgentemente",
-      "🔧 Execute correções automáticas disponíveis",
-      "📋 Monitore o sistema continuamente",
-      "🔄 PRIORIDADE: Corrigir sistema de backup"
-    ]
-  },
-  {
-    "timestamp": "2025-10-17T20:08:12.005Z",
-    "overallStatus": "CRITICAL",
-    "alerts": [
-      {
-        "id": "db_offline_1760731692005",
-        "type": "SYSTEM_ERROR",
-        "severity": "CRITICAL",
-        "title": "Banco de Dados Offline",
-        "description": "O banco de dados não está respondendo",
-        "timestamp": "2025-10-17T20:08:12.005Z",
-        "resolved": false,
-        "actions": [
-          "Verificar conexão",
-          "Reiniciar banco de dados",
-          "Verificar logs"
-        ]
-      },
-      {
-        "id": "backup_critical_1760731692005",
-        "type": "BACKUP_FAILURE",
-        "severity": "CRITICAL",
-        "title": "Sistema de Backup Crítico",
-        "description": "Backups não estão funcionando adequadamente",
-        "timestamp": "2025-10-17T20:08:12.005Z",
-        "resolved": false,
-        "actions": [
-          "Executar backup manual",
-          "Verificar configuração",
-          "Testar restauração"
-        ]
-      }
-    ],
-    "systemHealth": {
-      "database": "OFFLINE",
-      "api": "DEGRADED",
-      "backupSystem": "OFFLINE",
-      "auditSystem": "OFFLINE",
-      "lastCheck": "2025-10-17T20:08:10.974Z",
-      "uptime": 0,
-      "responseTime": 772
-    },
-    "dataIntegrity": {
-      "status": "HEALTHY",
-      "lastCheck": "2025-10-17T20:08:12.002Z",
-      "issues": 0,
-      "criticalIssues": 0,
-      "recordCount": 0,
-      "orphanedRecords": 0
-    },
-    "backupStatus": {
-      "status": "CRITICAL",
-      "lastBackup": "2025-10-13T08:28:28.399Z",
-      "nextScheduled": "2025-10-18T05:00:00.000Z",
-      "successRate": 100,
-      "totalBackups": 336,
-      "failedBackups": 0,
-      "cloudProviders": {
-        "github": true,
-        "dropbox": false,
-        "googleDrive": false
-      }
-    },
-    "securityStatus": {
-      "status": "SECURE",
-      "lastSecurityCheck": "2025-10-17T20:08:12.005Z",
-      "suspiciousActivity": 0,
-      "failedLogins": 0,
-      "dataAccess": 0,
-      "encryptionStatus": true
-    },
-    "recommendations": [
-      "⚠️ SITUAÇÃO CRÍTICA: Resolva problemas urgentemente",
-      "🔧 Execute correções automáticas disponíveis",
-      "📋 Monitore o sistema continuamente",
-      "🔄 PRIORIDADE: Corrigir sistema de backup"
-    ]
-  },
-  {
-    "timestamp": "2025-10-17T20:13:10.348Z",
-    "overallStatus": "CRITICAL",
-    "alerts": [
-      {
-        "id": "db_offline_1760731990348",
-        "type": "SYSTEM_ERROR",
-        "severity": "CRITICAL",
-        "title": "Banco de Dados Offline",
-        "description": "O banco de dados não está respondendo",
-        "timestamp": "2025-10-17T20:13:10.348Z",
-        "resolved": false,
-        "actions": [
-          "Verificar conexão",
-          "Reiniciar banco de dados",
-          "Verificar logs"
-        ]
-      },
-      {
-        "id": "backup_critical_1760731990348",
-        "type": "BACKUP_FAILURE",
-        "severity": "CRITICAL",
-        "title": "Sistema de Backup Crítico",
-        "description": "Backups não estão funcionando adequadamente",
-        "timestamp": "2025-10-17T20:13:10.348Z",
-        "resolved": false,
-        "actions": [
-          "Executar backup manual",
-          "Verificar configuração",
-          "Testar restauração"
-        ]
-      }
-    ],
-    "systemHealth": {
-      "database": "OFFLINE",
-      "api": "DEGRADED",
-      "backupSystem": "OFFLINE",
-      "auditSystem": "OFFLINE",
-      "lastCheck": "2025-10-17T20:13:09.182Z",
-      "uptime": 0,
-      "responseTime": 733
-    },
-    "dataIntegrity": {
-      "status": "HEALTHY",
-      "lastCheck": "2025-10-17T20:13:10.345Z",
-      "issues": 0,
-      "criticalIssues": 0,
-      "recordCount": 0,
-      "orphanedRecords": 0
-    },
-    "backupStatus": {
-      "status": "CRITICAL",
-      "lastBackup": "2025-10-13T08:28:28.399Z",
-      "nextScheduled": "2025-10-18T05:00:00.000Z",
-      "successRate": 100,
-      "totalBackups": 336,
-      "failedBackups": 0,
-      "cloudProviders": {
-        "github": true,
-        "dropbox": false,
-        "googleDrive": false
-      }
-    },
-    "securityStatus": {
-      "status": "SECURE",
-      "lastSecurityCheck": "2025-10-17T20:13:10.348Z",
-      "suspiciousActivity": 0,
-      "failedLogins": 0,
-      "dataAccess": 0,
-      "encryptionStatus": true
-    },
-    "recommendations": [
-      "⚠️ SITUAÇÃO CRÍTICA: Resolva problemas urgentemente",
-      "🔧 Execute correções automáticas disponíveis",
-      "📋 Monitore o sistema continuamente",
-      "🔄 PRIORIDADE: Corrigir sistema de backup"
-    ]
-  },
-  {
-    "timestamp": "2025-10-17T20:53:03.848Z",
-    "overallStatus": "CRITICAL",
-    "alerts": [
-      {
-        "id": "db_offline_1760734383848",
-        "type": "SYSTEM_ERROR",
-        "severity": "CRITICAL",
-        "title": "Banco de Dados Offline",
-        "description": "O banco de dados não está respondendo",
-        "timestamp": "2025-10-17T20:53:03.848Z",
-        "resolved": false,
-        "actions": [
-          "Verificar conexão",
-          "Reiniciar banco de dados",
-          "Verificar logs"
-        ]
-      },
-      {
-        "id": "backup_critical_1760734383848",
-        "type": "BACKUP_FAILURE",
-        "severity": "CRITICAL",
-        "title": "Sistema de Backup Crítico",
-        "description": "Backups não estão funcionando adequadamente",
-        "timestamp": "2025-10-17T20:53:03.848Z",
-        "resolved": false,
-        "actions": [
-          "Executar backup manual",
-          "Verificar configuração",
-          "Testar restauração"
-        ]
-      }
-    ],
-    "systemHealth": {
-      "database": "OFFLINE",
-      "api": "DEGRADED",
-      "backupSystem": "OFFLINE",
-      "auditSystem": "OFFLINE",
-      "lastCheck": "2025-10-17T20:53:03.484Z",
-      "uptime": 0,
-      "responseTime": 308
-    },
-    "dataIntegrity": {
-      "status": "HEALTHY",
-      "lastCheck": "2025-10-17T20:53:03.847Z",
-      "issues": 0,
-      "criticalIssues": 0,
-      "recordCount": 0,
-      "orphanedRecords": 0
-    },
-    "backupStatus": {
-      "status": "CRITICAL",
-      "lastBackup": "2025-10-13T08:28:28.399Z",
-      "nextScheduled": "2025-10-18T05:00:00.000Z",
-      "successRate": 100,
-      "totalBackups": 336,
-      "failedBackups": 0,
-      "cloudProviders": {
-        "github": true,
-        "dropbox": false,
-        "googleDrive": false
-      }
-    },
-    "securityStatus": {
-      "status": "SECURE",
-      "lastSecurityCheck": "2025-10-17T20:53:03.848Z",
-      "suspiciousActivity": 0,
-      "failedLogins": 0,
-      "dataAccess": 0,
-      "encryptionStatus": true
-    },
-    "recommendations": [
-      "⚠️ SITUAÇÃO CRÍTICA: Resolva problemas urgentemente",
-      "🔧 Execute correções automáticas disponíveis",
-      "📋 Monitore o sistema continuamente",
-      "🔄 PRIORIDADE: Corrigir sistema de backup"
-    ]
-  },
-  {
-    "timestamp": "2025-10-17T20:58:04.942Z",
-    "overallStatus": "CRITICAL",
-    "alerts": [
-      {
-        "id": "db_offline_1760734684942",
-        "type": "SYSTEM_ERROR",
-        "severity": "CRITICAL",
-        "title": "Banco de Dados Offline",
-        "description": "O banco de dados não está respondendo",
-        "timestamp": "2025-10-17T20:58:04.942Z",
-        "resolved": false,
-        "actions": [
-          "Verificar conexão",
-          "Reiniciar banco de dados",
-          "Verificar logs"
-        ]
-      },
-      {
-        "id": "backup_critical_1760734684942",
-        "type": "BACKUP_FAILURE",
-        "severity": "CRITICAL",
-        "title": "Sistema de Backup Crítico",
-        "description": "Backups não estão funcionando adequadamente",
-        "timestamp": "2025-10-17T20:58:04.942Z",
-        "resolved": false,
-        "actions": [
-          "Executar backup manual",
-          "Verificar configuração",
-          "Testar restauração"
-        ]
-      }
-    ],
-    "systemHealth": {
-      "database": "OFFLINE",
-      "api": "DEGRADED",
-      "backupSystem": "OFFLINE",
-      "auditSystem": "OFFLINE",
-      "lastCheck": "2025-10-17T20:58:03.939Z",
-      "uptime": 0,
-      "responseTime": 669
-    },
-    "dataIntegrity": {
-      "status": "HEALTHY",
-      "lastCheck": "2025-10-17T20:58:04.939Z",
-      "issues": 0,
-      "criticalIssues": 0,
-      "recordCount": 0,
-      "orphanedRecords": 0
-    },
-    "backupStatus": {
-      "status": "CRITICAL",
-      "lastBackup": "2025-10-13T08:28:28.399Z",
-      "nextScheduled": "2025-10-18T05:00:00.000Z",
-      "successRate": 100,
-      "totalBackups": 336,
-      "failedBackups": 0,
-      "cloudProviders": {
-        "github": true,
-        "dropbox": false,
-        "googleDrive": false
-      }
-    },
-    "securityStatus": {
-      "status": "SECURE",
-      "lastSecurityCheck": "2025-10-17T20:58:04.942Z",
-      "suspiciousActivity": 0,
-      "failedLogins": 0,
-      "dataAccess": 0,
-      "encryptionStatus": true
-    },
-    "recommendations": [
-      "⚠️ SITUAÇÃO CRÍTICA: Resolva problemas urgentemente",
-      "🔧 Execute correções automáticas disponíveis",
-      "📋 Monitore o sistema continuamente",
-      "🔄 PRIORIDADE: Corrigir sistema de backup"
-    ]
-  },
-  {
-    "timestamp": "2025-10-17T21:03:05.094Z",
-    "overallStatus": "CRITICAL",
-    "alerts": [
-      {
-        "id": "db_offline_1760734985094",
-        "type": "SYSTEM_ERROR",
-        "severity": "CRITICAL",
-        "title": "Banco de Dados Offline",
-        "description": "O banco de dados não está respondendo",
-        "timestamp": "2025-10-17T21:03:05.094Z",
-        "resolved": false,
-        "actions": [
-          "Verificar conexão",
-          "Reiniciar banco de dados",
-          "Verificar logs"
-        ]
-      },
-      {
-        "id": "backup_critical_1760734985094",
-        "type": "BACKUP_FAILURE",
-        "severity": "CRITICAL",
-        "title": "Sistema de Backup Crítico",
-        "description": "Backups não estão funcionando adequadamente",
-        "timestamp": "2025-10-17T21:03:05.094Z",
-        "resolved": false,
-        "actions": [
-          "Executar backup manual",
-          "Verificar configuração",
-          "Testar restauração"
-        ]
-      }
-    ],
-    "systemHealth": {
-      "database": "OFFLINE",
-      "api": "DEGRADED",
-      "backupSystem": "OFFLINE",
-      "auditSystem": "OFFLINE",
-      "lastCheck": "2025-10-17T21:03:04.224Z",
+      "lastCheck": "2025-10-17T22:24:01.550Z",
       "uptime": 0,
       "responseTime": 529
     },
     "dataIntegrity": {
       "status": "HEALTHY",
-      "lastCheck": "2025-10-17T21:03:05.092Z",
+      "lastCheck": "2025-10-17T22:24:02.727Z",
       "issues": 0,
       "criticalIssues": 0,
       "recordCount": 0,
@@ -1156,7 +376,7 @@
     },
     "securityStatus": {
       "status": "SECURE",
-      "lastSecurityCheck": "2025-10-17T21:03:05.094Z",
+      "lastSecurityCheck": "2025-10-17T22:24:02.731Z",
       "suspiciousActivity": 0,
       "failedLogins": 0,
       "dataAccess": 0,
@@ -1170,16 +390,16 @@
     ]
   },
   {
-    "timestamp": "2025-10-17T21:08:21.406Z",
+    "timestamp": "2025-10-17T22:29:01.258Z",
     "overallStatus": "CRITICAL",
     "alerts": [
       {
-        "id": "db_offline_1760735301406",
+        "id": "db_offline_1760740141258",
         "type": "SYSTEM_ERROR",
         "severity": "CRITICAL",
         "title": "Banco de Dados Offline",
         "description": "O banco de dados não está respondendo",
-        "timestamp": "2025-10-17T21:08:21.406Z",
+        "timestamp": "2025-10-17T22:29:01.258Z",
         "resolved": false,
         "actions": [
           "Verificar conexão",
@@ -1188,12 +408,12 @@
         ]
       },
       {
-        "id": "backup_critical_1760735301406",
+        "id": "backup_critical_1760740141258",
         "type": "BACKUP_FAILURE",
         "severity": "CRITICAL",
         "title": "Sistema de Backup Crítico",
         "description": "Backups não estão funcionando adequadamente",
-        "timestamp": "2025-10-17T21:08:21.406Z",
+        "timestamp": "2025-10-17T22:29:01.258Z",
         "resolved": false,
         "actions": [
           "Executar backup manual",
@@ -1207,13 +427,13 @@
       "api": "DEGRADED",
       "backupSystem": "OFFLINE",
       "auditSystem": "OFFLINE",
-      "lastCheck": "2025-10-17T21:08:20.483Z",
+      "lastCheck": "2025-10-17T22:29:00.254Z",
       "uptime": 0,
-      "responseTime": 547
+      "responseTime": 549
     },
     "dataIntegrity": {
       "status": "HEALTHY",
-      "lastCheck": "2025-10-17T21:08:21.404Z",
+      "lastCheck": "2025-10-17T22:29:01.255Z",
       "issues": 0,
       "criticalIssues": 0,
       "recordCount": 0,
@@ -1234,7 +454,7 @@
     },
     "securityStatus": {
       "status": "SECURE",
-      "lastSecurityCheck": "2025-10-17T21:08:21.406Z",
+      "lastSecurityCheck": "2025-10-17T22:29:01.258Z",
       "suspiciousActivity": 0,
       "failedLogins": 0,
       "dataAccess": 0,
@@ -1248,16 +468,16 @@
     ]
   },
   {
-    "timestamp": "2025-10-17T21:13:20.167Z",
+    "timestamp": "2025-10-17T22:34:02.100Z",
     "overallStatus": "CRITICAL",
     "alerts": [
       {
-        "id": "db_offline_1760735600167",
+        "id": "db_offline_1760740442100",
         "type": "SYSTEM_ERROR",
         "severity": "CRITICAL",
         "title": "Banco de Dados Offline",
         "description": "O banco de dados não está respondendo",
-        "timestamp": "2025-10-17T21:13:20.167Z",
+        "timestamp": "2025-10-17T22:34:02.100Z",
         "resolved": false,
         "actions": [
           "Verificar conexão",
@@ -1266,12 +486,12 @@
         ]
       },
       {
-        "id": "backup_critical_1760735600167",
+        "id": "backup_critical_1760740442100",
         "type": "BACKUP_FAILURE",
         "severity": "CRITICAL",
         "title": "Sistema de Backup Crítico",
         "description": "Backups não estão funcionando adequadamente",
-        "timestamp": "2025-10-17T21:13:20.167Z",
+        "timestamp": "2025-10-17T22:34:02.100Z",
         "resolved": false,
         "actions": [
           "Executar backup manual",
@@ -1285,13 +505,13 @@
       "api": "DEGRADED",
       "backupSystem": "OFFLINE",
       "auditSystem": "OFFLINE",
-      "lastCheck": "2025-10-17T21:13:19.260Z",
+      "lastCheck": "2025-10-17T22:34:01.218Z",
       "uptime": 0,
-      "responseTime": 639
+      "responseTime": 534
     },
     "dataIntegrity": {
       "status": "HEALTHY",
-      "lastCheck": "2025-10-17T21:13:20.165Z",
+      "lastCheck": "2025-10-17T22:34:02.097Z",
       "issues": 0,
       "criticalIssues": 0,
       "recordCount": 0,
@@ -1312,7 +532,7 @@
     },
     "securityStatus": {
       "status": "SECURE",
-      "lastSecurityCheck": "2025-10-17T21:13:20.167Z",
+      "lastSecurityCheck": "2025-10-17T22:34:02.100Z",
       "suspiciousActivity": 0,
       "failedLogins": 0,
       "dataAccess": 0,
@@ -1326,16 +546,16 @@
     ]
   },
   {
-    "timestamp": "2025-10-17T21:18:21.736Z",
+    "timestamp": "2025-10-17T22:39:00.921Z",
     "overallStatus": "CRITICAL",
     "alerts": [
       {
-        "id": "db_offline_1760735901736",
+        "id": "db_offline_1760740740921",
         "type": "SYSTEM_ERROR",
         "severity": "CRITICAL",
         "title": "Banco de Dados Offline",
         "description": "O banco de dados não está respondendo",
-        "timestamp": "2025-10-17T21:18:21.736Z",
+        "timestamp": "2025-10-17T22:39:00.921Z",
         "resolved": false,
         "actions": [
           "Verificar conexão",
@@ -1344,12 +564,12 @@
         ]
       },
       {
-        "id": "backup_critical_1760735901736",
+        "id": "backup_critical_1760740740921",
         "type": "BACKUP_FAILURE",
         "severity": "CRITICAL",
         "title": "Sistema de Backup Crítico",
         "description": "Backups não estão funcionando adequadamente",
-        "timestamp": "2025-10-17T21:18:21.736Z",
+        "timestamp": "2025-10-17T22:39:00.921Z",
         "resolved": false,
         "actions": [
           "Executar backup manual",
@@ -1363,13 +583,13 @@
       "api": "DEGRADED",
       "backupSystem": "OFFLINE",
       "auditSystem": "OFFLINE",
-      "lastCheck": "2025-10-17T21:18:20.872Z",
+      "lastCheck": "2025-10-17T22:39:00.018Z",
       "uptime": 0,
-      "responseTime": 746
+      "responseTime": 530
     },
     "dataIntegrity": {
       "status": "HEALTHY",
-      "lastCheck": "2025-10-17T21:18:21.734Z",
+      "lastCheck": "2025-10-17T22:39:00.918Z",
       "issues": 0,
       "criticalIssues": 0,
       "recordCount": 0,
@@ -1390,7 +610,7 @@
     },
     "securityStatus": {
       "status": "SECURE",
-      "lastSecurityCheck": "2025-10-17T21:18:21.736Z",
+      "lastSecurityCheck": "2025-10-17T22:39:00.921Z",
       "suspiciousActivity": 0,
       "failedLogins": 0,
       "dataAccess": 0,
@@ -1404,16 +624,16 @@
     ]
   },
   {
-    "timestamp": "2025-10-17T21:23:20.030Z",
+    "timestamp": "2025-10-17T22:44:02.179Z",
     "overallStatus": "CRITICAL",
     "alerts": [
       {
-        "id": "db_offline_1760736200030",
+        "id": "db_offline_1760741042179",
         "type": "SYSTEM_ERROR",
         "severity": "CRITICAL",
         "title": "Banco de Dados Offline",
         "description": "O banco de dados não está respondendo",
-        "timestamp": "2025-10-17T21:23:20.030Z",
+        "timestamp": "2025-10-17T22:44:02.179Z",
         "resolved": false,
         "actions": [
           "Verificar conexão",
@@ -1422,12 +642,12 @@
         ]
       },
       {
-        "id": "backup_critical_1760736200030",
+        "id": "backup_critical_1760741042179",
         "type": "BACKUP_FAILURE",
         "severity": "CRITICAL",
         "title": "Sistema de Backup Crítico",
         "description": "Backups não estão funcionando adequadamente",
-        "timestamp": "2025-10-17T21:23:20.030Z",
+        "timestamp": "2025-10-17T22:44:02.179Z",
         "resolved": false,
         "actions": [
           "Executar backup manual",
@@ -1441,13 +661,13 @@
       "api": "DEGRADED",
       "backupSystem": "OFFLINE",
       "auditSystem": "OFFLINE",
-      "lastCheck": "2025-10-17T21:23:19.144Z",
+      "lastCheck": "2025-10-17T22:44:01.270Z",
       "uptime": 0,
-      "responseTime": 552
+      "responseTime": 538
     },
     "dataIntegrity": {
       "status": "HEALTHY",
-      "lastCheck": "2025-10-17T21:23:20.027Z",
+      "lastCheck": "2025-10-17T22:44:02.175Z",
       "issues": 0,
       "criticalIssues": 0,
       "recordCount": 0,
@@ -1468,7 +688,7 @@
     },
     "securityStatus": {
       "status": "SECURE",
-      "lastSecurityCheck": "2025-10-17T21:23:20.030Z",
+      "lastSecurityCheck": "2025-10-17T22:44:02.179Z",
       "suspiciousActivity": 0,
       "failedLogins": 0,
       "dataAccess": 0,
@@ -1482,16 +702,16 @@
     ]
   },
   {
-    "timestamp": "2025-10-17T21:28:21.434Z",
+    "timestamp": "2025-10-17T22:49:00.893Z",
     "overallStatus": "CRITICAL",
     "alerts": [
       {
-        "id": "db_offline_1760736501434",
+        "id": "db_offline_1760741340892",
         "type": "SYSTEM_ERROR",
         "severity": "CRITICAL",
         "title": "Banco de Dados Offline",
         "description": "O banco de dados não está respondendo",
-        "timestamp": "2025-10-17T21:28:21.434Z",
+        "timestamp": "2025-10-17T22:49:00.892Z",
         "resolved": false,
         "actions": [
           "Verificar conexão",
@@ -1500,12 +720,12 @@
         ]
       },
       {
-        "id": "backup_critical_1760736501434",
+        "id": "backup_critical_1760741340892",
         "type": "BACKUP_FAILURE",
         "severity": "CRITICAL",
         "title": "Sistema de Backup Crítico",
         "description": "Backups não estão funcionando adequadamente",
-        "timestamp": "2025-10-17T21:28:21.434Z",
+        "timestamp": "2025-10-17T22:49:00.892Z",
         "resolved": false,
         "actions": [
           "Executar backup manual",
@@ -1519,13 +739,715 @@
       "api": "DEGRADED",
       "backupSystem": "OFFLINE",
       "auditSystem": "OFFLINE",
-      "lastCheck": "2025-10-17T21:28:20.480Z",
+      "lastCheck": "2025-10-17T22:48:59.992Z",
+      "uptime": 0,
+      "responseTime": 532
+    },
+    "dataIntegrity": {
+      "status": "HEALTHY",
+      "lastCheck": "2025-10-17T22:49:00.890Z",
+      "issues": 0,
+      "criticalIssues": 0,
+      "recordCount": 0,
+      "orphanedRecords": 0
+    },
+    "backupStatus": {
+      "status": "CRITICAL",
+      "lastBackup": "2025-10-13T08:28:28.399Z",
+      "nextScheduled": "2025-10-18T05:00:00.000Z",
+      "successRate": 100,
+      "totalBackups": 336,
+      "failedBackups": 0,
+      "cloudProviders": {
+        "github": true,
+        "dropbox": false,
+        "googleDrive": false
+      }
+    },
+    "securityStatus": {
+      "status": "SECURE",
+      "lastSecurityCheck": "2025-10-17T22:49:00.892Z",
+      "suspiciousActivity": 0,
+      "failedLogins": 0,
+      "dataAccess": 0,
+      "encryptionStatus": true
+    },
+    "recommendations": [
+      "⚠️ SITUAÇÃO CRÍTICA: Resolva problemas urgentemente",
+      "🔧 Execute correções automáticas disponíveis",
+      "📋 Monitore o sistema continuamente",
+      "🔄 PRIORIDADE: Corrigir sistema de backup"
+    ]
+  },
+  {
+    "timestamp": "2025-10-17T22:54:02.520Z",
+    "overallStatus": "CRITICAL",
+    "alerts": [
+      {
+        "id": "db_offline_1760741642520",
+        "type": "SYSTEM_ERROR",
+        "severity": "CRITICAL",
+        "title": "Banco de Dados Offline",
+        "description": "O banco de dados não está respondendo",
+        "timestamp": "2025-10-17T22:54:02.520Z",
+        "resolved": false,
+        "actions": [
+          "Verificar conexão",
+          "Reiniciar banco de dados",
+          "Verificar logs"
+        ]
+      },
+      {
+        "id": "backup_critical_1760741642520",
+        "type": "BACKUP_FAILURE",
+        "severity": "CRITICAL",
+        "title": "Sistema de Backup Crítico",
+        "description": "Backups não estão funcionando adequadamente",
+        "timestamp": "2025-10-17T22:54:02.520Z",
+        "resolved": false,
+        "actions": [
+          "Executar backup manual",
+          "Verificar configuração",
+          "Testar restauração"
+        ]
+      }
+    ],
+    "systemHealth": {
+      "database": "OFFLINE",
+      "api": "DEGRADED",
+      "backupSystem": "OFFLINE",
+      "auditSystem": "OFFLINE",
+      "lastCheck": "2025-10-17T22:54:01.536Z",
+      "uptime": 0,
+      "responseTime": 748
+    },
+    "dataIntegrity": {
+      "status": "HEALTHY",
+      "lastCheck": "2025-10-17T22:54:02.518Z",
+      "issues": 0,
+      "criticalIssues": 0,
+      "recordCount": 0,
+      "orphanedRecords": 0
+    },
+    "backupStatus": {
+      "status": "CRITICAL",
+      "lastBackup": "2025-10-13T08:28:28.399Z",
+      "nextScheduled": "2025-10-18T05:00:00.000Z",
+      "successRate": 100,
+      "totalBackups": 336,
+      "failedBackups": 0,
+      "cloudProviders": {
+        "github": true,
+        "dropbox": false,
+        "googleDrive": false
+      }
+    },
+    "securityStatus": {
+      "status": "SECURE",
+      "lastSecurityCheck": "2025-10-17T22:54:02.520Z",
+      "suspiciousActivity": 0,
+      "failedLogins": 0,
+      "dataAccess": 0,
+      "encryptionStatus": true
+    },
+    "recommendations": [
+      "⚠️ SITUAÇÃO CRÍTICA: Resolva problemas urgentemente",
+      "🔧 Execute correções automáticas disponíveis",
+      "📋 Monitore o sistema continuamente",
+      "🔄 PRIORIDADE: Corrigir sistema de backup"
+    ]
+  },
+  {
+    "timestamp": "2025-10-17T22:59:00.941Z",
+    "overallStatus": "CRITICAL",
+    "alerts": [
+      {
+        "id": "db_offline_1760741940941",
+        "type": "SYSTEM_ERROR",
+        "severity": "CRITICAL",
+        "title": "Banco de Dados Offline",
+        "description": "O banco de dados não está respondendo",
+        "timestamp": "2025-10-17T22:59:00.941Z",
+        "resolved": false,
+        "actions": [
+          "Verificar conexão",
+          "Reiniciar banco de dados",
+          "Verificar logs"
+        ]
+      },
+      {
+        "id": "backup_critical_1760741940941",
+        "type": "BACKUP_FAILURE",
+        "severity": "CRITICAL",
+        "title": "Sistema de Backup Crítico",
+        "description": "Backups não estão funcionando adequadamente",
+        "timestamp": "2025-10-17T22:59:00.941Z",
+        "resolved": false,
+        "actions": [
+          "Executar backup manual",
+          "Verificar configuração",
+          "Testar restauração"
+        ]
+      }
+    ],
+    "systemHealth": {
+      "database": "OFFLINE",
+      "api": "DEGRADED",
+      "backupSystem": "OFFLINE",
+      "auditSystem": "OFFLINE",
+      "lastCheck": "2025-10-17T22:59:00.036Z",
+      "uptime": 0,
+      "responseTime": 558
+    },
+    "dataIntegrity": {
+      "status": "HEALTHY",
+      "lastCheck": "2025-10-17T22:59:00.938Z",
+      "issues": 0,
+      "criticalIssues": 0,
+      "recordCount": 0,
+      "orphanedRecords": 0
+    },
+    "backupStatus": {
+      "status": "CRITICAL",
+      "lastBackup": "2025-10-13T08:28:28.399Z",
+      "nextScheduled": "2025-10-18T05:00:00.000Z",
+      "successRate": 100,
+      "totalBackups": 336,
+      "failedBackups": 0,
+      "cloudProviders": {
+        "github": true,
+        "dropbox": false,
+        "googleDrive": false
+      }
+    },
+    "securityStatus": {
+      "status": "SECURE",
+      "lastSecurityCheck": "2025-10-17T22:59:00.941Z",
+      "suspiciousActivity": 0,
+      "failedLogins": 0,
+      "dataAccess": 0,
+      "encryptionStatus": true
+    },
+    "recommendations": [
+      "⚠️ SITUAÇÃO CRÍTICA: Resolva problemas urgentemente",
+      "🔧 Execute correções automáticas disponíveis",
+      "📋 Monitore o sistema continuamente",
+      "🔄 PRIORIDADE: Corrigir sistema de backup"
+    ]
+  },
+  {
+    "timestamp": "2025-10-17T23:04:02.185Z",
+    "overallStatus": "CRITICAL",
+    "alerts": [
+      {
+        "id": "db_offline_1760742242185",
+        "type": "SYSTEM_ERROR",
+        "severity": "CRITICAL",
+        "title": "Banco de Dados Offline",
+        "description": "O banco de dados não está respondendo",
+        "timestamp": "2025-10-17T23:04:02.185Z",
+        "resolved": false,
+        "actions": [
+          "Verificar conexão",
+          "Reiniciar banco de dados",
+          "Verificar logs"
+        ]
+      },
+      {
+        "id": "backup_critical_1760742242185",
+        "type": "BACKUP_FAILURE",
+        "severity": "CRITICAL",
+        "title": "Sistema de Backup Crítico",
+        "description": "Backups não estão funcionando adequadamente",
+        "timestamp": "2025-10-17T23:04:02.185Z",
+        "resolved": false,
+        "actions": [
+          "Executar backup manual",
+          "Verificar configuração",
+          "Testar restauração"
+        ]
+      }
+    ],
+    "systemHealth": {
+      "database": "OFFLINE",
+      "api": "DEGRADED",
+      "backupSystem": "OFFLINE",
+      "auditSystem": "OFFLINE",
+      "lastCheck": "2025-10-17T23:04:01.207Z",
+      "uptime": 0,
+      "responseTime": 546
+    },
+    "dataIntegrity": {
+      "status": "HEALTHY",
+      "lastCheck": "2025-10-17T23:04:02.179Z",
+      "issues": 0,
+      "criticalIssues": 0,
+      "recordCount": 0,
+      "orphanedRecords": 0
+    },
+    "backupStatus": {
+      "status": "CRITICAL",
+      "lastBackup": "2025-10-13T08:28:28.399Z",
+      "nextScheduled": "2025-10-18T05:00:00.000Z",
+      "successRate": 100,
+      "totalBackups": 336,
+      "failedBackups": 0,
+      "cloudProviders": {
+        "github": true,
+        "dropbox": false,
+        "googleDrive": false
+      }
+    },
+    "securityStatus": {
+      "status": "SECURE",
+      "lastSecurityCheck": "2025-10-17T23:04:02.185Z",
+      "suspiciousActivity": 0,
+      "failedLogins": 0,
+      "dataAccess": 0,
+      "encryptionStatus": true
+    },
+    "recommendations": [
+      "⚠️ SITUAÇÃO CRÍTICA: Resolva problemas urgentemente",
+      "🔧 Execute correções automáticas disponíveis",
+      "📋 Monitore o sistema continuamente",
+      "🔄 PRIORIDADE: Corrigir sistema de backup"
+    ]
+  },
+  {
+    "timestamp": "2025-10-17T23:09:00.933Z",
+    "overallStatus": "CRITICAL",
+    "alerts": [
+      {
+        "id": "db_offline_1760742540933",
+        "type": "SYSTEM_ERROR",
+        "severity": "CRITICAL",
+        "title": "Banco de Dados Offline",
+        "description": "O banco de dados não está respondendo",
+        "timestamp": "2025-10-17T23:09:00.933Z",
+        "resolved": false,
+        "actions": [
+          "Verificar conexão",
+          "Reiniciar banco de dados",
+          "Verificar logs"
+        ]
+      },
+      {
+        "id": "backup_critical_1760742540933",
+        "type": "BACKUP_FAILURE",
+        "severity": "CRITICAL",
+        "title": "Sistema de Backup Crítico",
+        "description": "Backups não estão funcionando adequadamente",
+        "timestamp": "2025-10-17T23:09:00.933Z",
+        "resolved": false,
+        "actions": [
+          "Executar backup manual",
+          "Verificar configuração",
+          "Testar restauração"
+        ]
+      }
+    ],
+    "systemHealth": {
+      "database": "OFFLINE",
+      "api": "DEGRADED",
+      "backupSystem": "OFFLINE",
+      "auditSystem": "OFFLINE",
+      "lastCheck": "2025-10-17T23:09:00.039Z",
+      "uptime": 0,
+      "responseTime": 556
+    },
+    "dataIntegrity": {
+      "status": "HEALTHY",
+      "lastCheck": "2025-10-17T23:09:00.929Z",
+      "issues": 0,
+      "criticalIssues": 0,
+      "recordCount": 0,
+      "orphanedRecords": 0
+    },
+    "backupStatus": {
+      "status": "CRITICAL",
+      "lastBackup": "2025-10-13T08:28:28.399Z",
+      "nextScheduled": "2025-10-18T05:00:00.000Z",
+      "successRate": 100,
+      "totalBackups": 336,
+      "failedBackups": 0,
+      "cloudProviders": {
+        "github": true,
+        "dropbox": false,
+        "googleDrive": false
+      }
+    },
+    "securityStatus": {
+      "status": "SECURE",
+      "lastSecurityCheck": "2025-10-17T23:09:00.932Z",
+      "suspiciousActivity": 0,
+      "failedLogins": 0,
+      "dataAccess": 0,
+      "encryptionStatus": true
+    },
+    "recommendations": [
+      "⚠️ SITUAÇÃO CRÍTICA: Resolva problemas urgentemente",
+      "🔧 Execute correções automáticas disponíveis",
+      "📋 Monitore o sistema continuamente",
+      "🔄 PRIORIDADE: Corrigir sistema de backup"
+    ]
+  },
+  {
+    "timestamp": "2025-10-17T23:14:02.072Z",
+    "overallStatus": "CRITICAL",
+    "alerts": [
+      {
+        "id": "db_offline_1760742842072",
+        "type": "SYSTEM_ERROR",
+        "severity": "CRITICAL",
+        "title": "Banco de Dados Offline",
+        "description": "O banco de dados não está respondendo",
+        "timestamp": "2025-10-17T23:14:02.072Z",
+        "resolved": false,
+        "actions": [
+          "Verificar conexão",
+          "Reiniciar banco de dados",
+          "Verificar logs"
+        ]
+      },
+      {
+        "id": "backup_critical_1760742842072",
+        "type": "BACKUP_FAILURE",
+        "severity": "CRITICAL",
+        "title": "Sistema de Backup Crítico",
+        "description": "Backups não estão funcionando adequadamente",
+        "timestamp": "2025-10-17T23:14:02.072Z",
+        "resolved": false,
+        "actions": [
+          "Executar backup manual",
+          "Verificar configuração",
+          "Testar restauração"
+        ]
+      }
+    ],
+    "systemHealth": {
+      "database": "OFFLINE",
+      "api": "DEGRADED",
+      "backupSystem": "OFFLINE",
+      "auditSystem": "OFFLINE",
+      "lastCheck": "2025-10-17T23:14:01.153Z",
+      "uptime": 0,
+      "responseTime": 528
+    },
+    "dataIntegrity": {
+      "status": "HEALTHY",
+      "lastCheck": "2025-10-17T23:14:02.070Z",
+      "issues": 0,
+      "criticalIssues": 0,
+      "recordCount": 0,
+      "orphanedRecords": 0
+    },
+    "backupStatus": {
+      "status": "CRITICAL",
+      "lastBackup": "2025-10-13T08:28:28.399Z",
+      "nextScheduled": "2025-10-18T05:00:00.000Z",
+      "successRate": 100,
+      "totalBackups": 336,
+      "failedBackups": 0,
+      "cloudProviders": {
+        "github": true,
+        "dropbox": false,
+        "googleDrive": false
+      }
+    },
+    "securityStatus": {
+      "status": "SECURE",
+      "lastSecurityCheck": "2025-10-17T23:14:02.072Z",
+      "suspiciousActivity": 0,
+      "failedLogins": 0,
+      "dataAccess": 0,
+      "encryptionStatus": true
+    },
+    "recommendations": [
+      "⚠️ SITUAÇÃO CRÍTICA: Resolva problemas urgentemente",
+      "🔧 Execute correções automáticas disponíveis",
+      "📋 Monitore o sistema continuamente",
+      "🔄 PRIORIDADE: Corrigir sistema de backup"
+    ]
+  },
+  {
+    "timestamp": "2025-10-17T23:19:00.805Z",
+    "overallStatus": "CRITICAL",
+    "alerts": [
+      {
+        "id": "db_offline_1760743140805",
+        "type": "SYSTEM_ERROR",
+        "severity": "CRITICAL",
+        "title": "Banco de Dados Offline",
+        "description": "O banco de dados não está respondendo",
+        "timestamp": "2025-10-17T23:19:00.805Z",
+        "resolved": false,
+        "actions": [
+          "Verificar conexão",
+          "Reiniciar banco de dados",
+          "Verificar logs"
+        ]
+      },
+      {
+        "id": "backup_critical_1760743140805",
+        "type": "BACKUP_FAILURE",
+        "severity": "CRITICAL",
+        "title": "Sistema de Backup Crítico",
+        "description": "Backups não estão funcionando adequadamente",
+        "timestamp": "2025-10-17T23:19:00.805Z",
+        "resolved": false,
+        "actions": [
+          "Executar backup manual",
+          "Verificar configuração",
+          "Testar restauração"
+        ]
+      }
+    ],
+    "systemHealth": {
+      "database": "OFFLINE",
+      "api": "DEGRADED",
+      "backupSystem": "OFFLINE",
+      "auditSystem": "OFFLINE",
+      "lastCheck": "2025-10-17T23:18:59.930Z",
+      "uptime": 0,
+      "responseTime": 543
+    },
+    "dataIntegrity": {
+      "status": "HEALTHY",
+      "lastCheck": "2025-10-17T23:19:00.803Z",
+      "issues": 0,
+      "criticalIssues": 0,
+      "recordCount": 0,
+      "orphanedRecords": 0
+    },
+    "backupStatus": {
+      "status": "CRITICAL",
+      "lastBackup": "2025-10-13T08:28:28.399Z",
+      "nextScheduled": "2025-10-18T05:00:00.000Z",
+      "successRate": 100,
+      "totalBackups": 336,
+      "failedBackups": 0,
+      "cloudProviders": {
+        "github": true,
+        "dropbox": false,
+        "googleDrive": false
+      }
+    },
+    "securityStatus": {
+      "status": "SECURE",
+      "lastSecurityCheck": "2025-10-17T23:19:00.805Z",
+      "suspiciousActivity": 0,
+      "failedLogins": 0,
+      "dataAccess": 0,
+      "encryptionStatus": true
+    },
+    "recommendations": [
+      "⚠️ SITUAÇÃO CRÍTICA: Resolva problemas urgentemente",
+      "🔧 Execute correções automáticas disponíveis",
+      "📋 Monitore o sistema continuamente",
+      "🔄 PRIORIDADE: Corrigir sistema de backup"
+    ]
+  },
+  {
+    "timestamp": "2025-10-17T23:24:02.352Z",
+    "overallStatus": "CRITICAL",
+    "alerts": [
+      {
+        "id": "db_offline_1760743442352",
+        "type": "SYSTEM_ERROR",
+        "severity": "CRITICAL",
+        "title": "Banco de Dados Offline",
+        "description": "O banco de dados não está respondendo",
+        "timestamp": "2025-10-17T23:24:02.352Z",
+        "resolved": false,
+        "actions": [
+          "Verificar conexão",
+          "Reiniciar banco de dados",
+          "Verificar logs"
+        ]
+      },
+      {
+        "id": "backup_critical_1760743442352",
+        "type": "BACKUP_FAILURE",
+        "severity": "CRITICAL",
+        "title": "Sistema de Backup Crítico",
+        "description": "Backups não estão funcionando adequadamente",
+        "timestamp": "2025-10-17T23:24:02.352Z",
+        "resolved": false,
+        "actions": [
+          "Executar backup manual",
+          "Verificar configuração",
+          "Testar restauração"
+        ]
+      }
+    ],
+    "systemHealth": {
+      "database": "OFFLINE",
+      "api": "DEGRADED",
+      "backupSystem": "OFFLINE",
+      "auditSystem": "OFFLINE",
+      "lastCheck": "2025-10-17T23:24:01.390Z",
+      "uptime": 0,
+      "responseTime": 533
+    },
+    "dataIntegrity": {
+      "status": "HEALTHY",
+      "lastCheck": "2025-10-17T23:24:02.346Z",
+      "issues": 0,
+      "criticalIssues": 0,
+      "recordCount": 0,
+      "orphanedRecords": 0
+    },
+    "backupStatus": {
+      "status": "CRITICAL",
+      "lastBackup": "2025-10-13T08:28:28.399Z",
+      "nextScheduled": "2025-10-18T05:00:00.000Z",
+      "successRate": 100,
+      "totalBackups": 336,
+      "failedBackups": 0,
+      "cloudProviders": {
+        "github": true,
+        "dropbox": false,
+        "googleDrive": false
+      }
+    },
+    "securityStatus": {
+      "status": "SECURE",
+      "lastSecurityCheck": "2025-10-17T23:24:02.352Z",
+      "suspiciousActivity": 0,
+      "failedLogins": 0,
+      "dataAccess": 0,
+      "encryptionStatus": true
+    },
+    "recommendations": [
+      "⚠️ SITUAÇÃO CRÍTICA: Resolva problemas urgentemente",
+      "🔧 Execute correções automáticas disponíveis",
+      "📋 Monitore o sistema continuamente",
+      "🔄 PRIORIDADE: Corrigir sistema de backup"
+    ]
+  },
+  {
+    "timestamp": "2025-10-17T23:29:01.039Z",
+    "overallStatus": "CRITICAL",
+    "alerts": [
+      {
+        "id": "db_offline_1760743741039",
+        "type": "SYSTEM_ERROR",
+        "severity": "CRITICAL",
+        "title": "Banco de Dados Offline",
+        "description": "O banco de dados não está respondendo",
+        "timestamp": "2025-10-17T23:29:01.039Z",
+        "resolved": false,
+        "actions": [
+          "Verificar conexão",
+          "Reiniciar banco de dados",
+          "Verificar logs"
+        ]
+      },
+      {
+        "id": "backup_critical_1760743741039",
+        "type": "BACKUP_FAILURE",
+        "severity": "CRITICAL",
+        "title": "Sistema de Backup Crítico",
+        "description": "Backups não estão funcionando adequadamente",
+        "timestamp": "2025-10-17T23:29:01.039Z",
+        "resolved": false,
+        "actions": [
+          "Executar backup manual",
+          "Verificar configuração",
+          "Testar restauração"
+        ]
+      }
+    ],
+    "systemHealth": {
+      "database": "OFFLINE",
+      "api": "DEGRADED",
+      "backupSystem": "OFFLINE",
+      "auditSystem": "OFFLINE",
+      "lastCheck": "2025-10-17T23:29:00.007Z",
+      "uptime": 0,
+      "responseTime": 540
+    },
+    "dataIntegrity": {
+      "status": "HEALTHY",
+      "lastCheck": "2025-10-17T23:29:01.036Z",
+      "issues": 0,
+      "criticalIssues": 0,
+      "recordCount": 0,
+      "orphanedRecords": 0
+    },
+    "backupStatus": {
+      "status": "CRITICAL",
+      "lastBackup": "2025-10-13T08:28:28.399Z",
+      "nextScheduled": "2025-10-18T05:00:00.000Z",
+      "successRate": 100,
+      "totalBackups": 336,
+      "failedBackups": 0,
+      "cloudProviders": {
+        "github": true,
+        "dropbox": false,
+        "googleDrive": false
+      }
+    },
+    "securityStatus": {
+      "status": "SECURE",
+      "lastSecurityCheck": "2025-10-17T23:29:01.039Z",
+      "suspiciousActivity": 0,
+      "failedLogins": 0,
+      "dataAccess": 0,
+      "encryptionStatus": true
+    },
+    "recommendations": [
+      "⚠️ SITUAÇÃO CRÍTICA: Resolva problemas urgentemente",
+      "🔧 Execute correções automáticas disponíveis",
+      "📋 Monitore o sistema continuamente",
+      "🔄 PRIORIDADE: Corrigir sistema de backup"
+    ]
+  },
+  {
+    "timestamp": "2025-10-17T23:34:02.300Z",
+    "overallStatus": "CRITICAL",
+    "alerts": [
+      {
+        "id": "db_offline_1760744042300",
+        "type": "SYSTEM_ERROR",
+        "severity": "CRITICAL",
+        "title": "Banco de Dados Offline",
+        "description": "O banco de dados não está respondendo",
+        "timestamp": "2025-10-17T23:34:02.300Z",
+        "resolved": false,
+        "actions": [
+          "Verificar conexão",
+          "Reiniciar banco de dados",
+          "Verificar logs"
+        ]
+      },
+      {
+        "id": "backup_critical_1760744042300",
+        "type": "BACKUP_FAILURE",
+        "severity": "CRITICAL",
+        "title": "Sistema de Backup Crítico",
+        "description": "Backups não estão funcionando adequadamente",
+        "timestamp": "2025-10-17T23:34:02.300Z",
+        "resolved": false,
+        "actions": [
+          "Executar backup manual",
+          "Verificar configuração",
+          "Testar restauração"
+        ]
+      }
+    ],
+    "systemHealth": {
+      "database": "OFFLINE",
+      "api": "DEGRADED",
+      "backupSystem": "OFFLINE",
+      "auditSystem": "OFFLINE",
+      "lastCheck": "2025-10-17T23:34:01.277Z",
       "uptime": 0,
       "responseTime": 526
     },
     "dataIntegrity": {
       "status": "HEALTHY",
-      "lastCheck": "2025-10-17T21:28:21.431Z",
+      "lastCheck": "2025-10-17T23:34:02.297Z",
       "issues": 0,
       "criticalIssues": 0,
       "recordCount": 0,
@@ -1546,7 +1468,7 @@
     },
     "securityStatus": {
       "status": "SECURE",
-      "lastSecurityCheck": "2025-10-17T21:28:21.434Z",
+      "lastSecurityCheck": "2025-10-17T23:34:02.300Z",
       "suspiciousActivity": 0,
       "failedLogins": 0,
       "dataAccess": 0,
@@ -1560,16 +1482,16 @@
     ]
   },
   {
-    "timestamp": "2025-10-17T21:33:20.088Z",
+    "timestamp": "2025-10-17T23:39:00.785Z",
     "overallStatus": "CRITICAL",
     "alerts": [
       {
-        "id": "db_offline_1760736800088",
+        "id": "db_offline_1760744340785",
         "type": "SYSTEM_ERROR",
         "severity": "CRITICAL",
         "title": "Banco de Dados Offline",
         "description": "O banco de dados não está respondendo",
-        "timestamp": "2025-10-17T21:33:20.088Z",
+        "timestamp": "2025-10-17T23:39:00.785Z",
         "resolved": false,
         "actions": [
           "Verificar conexão",
@@ -1578,12 +1500,12 @@
         ]
       },
       {
-        "id": "backup_critical_1760736800088",
+        "id": "backup_critical_1760744340785",
         "type": "BACKUP_FAILURE",
         "severity": "CRITICAL",
         "title": "Sistema de Backup Crítico",
         "description": "Backups não estão funcionando adequadamente",
-        "timestamp": "2025-10-17T21:33:20.088Z",
+        "timestamp": "2025-10-17T23:39:00.785Z",
         "resolved": false,
         "actions": [
           "Executar backup manual",
@@ -1597,13 +1519,13 @@
       "api": "DEGRADED",
       "backupSystem": "OFFLINE",
       "auditSystem": "OFFLINE",
-      "lastCheck": "2025-10-17T21:33:19.174Z",
+      "lastCheck": "2025-10-17T23:38:59.984Z",
       "uptime": 0,
-      "responseTime": 548
+      "responseTime": 536
     },
     "dataIntegrity": {
       "status": "HEALTHY",
-      "lastCheck": "2025-10-17T21:33:20.085Z",
+      "lastCheck": "2025-10-17T23:39:00.783Z",
       "issues": 0,
       "criticalIssues": 0,
       "recordCount": 0,
@@ -1624,7 +1546,7 @@
     },
     "securityStatus": {
       "status": "SECURE",
-      "lastSecurityCheck": "2025-10-17T21:33:20.088Z",
+      "lastSecurityCheck": "2025-10-17T23:39:00.785Z",
       "suspiciousActivity": 0,
       "failedLogins": 0,
       "dataAccess": 0,
@@ -1638,16 +1560,16 @@
     ]
   },
   {
-    "timestamp": "2025-10-17T21:38:09.319Z",
+    "timestamp": "2025-10-17T23:44:02.057Z",
     "overallStatus": "CRITICAL",
     "alerts": [
       {
-        "id": "db_offline_1760737089319",
+        "id": "db_offline_1760744642057",
         "type": "SYSTEM_ERROR",
         "severity": "CRITICAL",
         "title": "Banco de Dados Offline",
         "description": "O banco de dados não está respondendo",
-        "timestamp": "2025-10-17T21:38:09.319Z",
+        "timestamp": "2025-10-17T23:44:02.057Z",
         "resolved": false,
         "actions": [
           "Verificar conexão",
@@ -1656,12 +1578,12 @@
         ]
       },
       {
-        "id": "backup_critical_1760737089319",
+        "id": "backup_critical_1760744642057",
         "type": "BACKUP_FAILURE",
         "severity": "CRITICAL",
         "title": "Sistema de Backup Crítico",
         "description": "Backups não estão funcionando adequadamente",
-        "timestamp": "2025-10-17T21:38:09.319Z",
+        "timestamp": "2025-10-17T23:44:02.057Z",
         "resolved": false,
         "actions": [
           "Executar backup manual",
@@ -1675,13 +1597,13 @@
       "api": "DEGRADED",
       "backupSystem": "OFFLINE",
       "auditSystem": "OFFLINE",
-      "lastCheck": "2025-10-17T21:38:04.291Z",
+      "lastCheck": "2025-10-17T23:44:01.206Z",
       "uptime": 0,
-      "responseTime": 574
+      "responseTime": 569
     },
     "dataIntegrity": {
       "status": "HEALTHY",
-      "lastCheck": "2025-10-17T21:38:09.310Z",
+      "lastCheck": "2025-10-17T23:44:02.055Z",
       "issues": 0,
       "criticalIssues": 0,
       "recordCount": 0,
@@ -1702,7 +1624,7 @@
     },
     "securityStatus": {
       "status": "SECURE",
-      "lastSecurityCheck": "2025-10-17T21:38:09.319Z",
+      "lastSecurityCheck": "2025-10-17T23:44:02.057Z",
       "suspiciousActivity": 0,
       "failedLogins": 0,
       "dataAccess": 0,
@@ -1716,16 +1638,16 @@
     ]
   },
   {
-    "timestamp": "2025-10-17T21:43:13.782Z",
+    "timestamp": "2025-10-17T23:49:00.962Z",
     "overallStatus": "CRITICAL",
     "alerts": [
       {
-        "id": "db_offline_1760737393782",
+        "id": "db_offline_1760744940962",
         "type": "SYSTEM_ERROR",
         "severity": "CRITICAL",
         "title": "Banco de Dados Offline",
         "description": "O banco de dados não está respondendo",
-        "timestamp": "2025-10-17T21:43:13.782Z",
+        "timestamp": "2025-10-17T23:49:00.962Z",
         "resolved": false,
         "actions": [
           "Verificar conexão",
@@ -1734,12 +1656,12 @@
         ]
       },
       {
-        "id": "backup_critical_1760737393782",
+        "id": "backup_critical_1760744940962",
         "type": "BACKUP_FAILURE",
         "severity": "CRITICAL",
         "title": "Sistema de Backup Crítico",
         "description": "Backups não estão funcionando adequadamente",
-        "timestamp": "2025-10-17T21:43:13.782Z",
+        "timestamp": "2025-10-17T23:49:00.962Z",
         "resolved": false,
         "actions": [
           "Executar backup manual",
@@ -1753,13 +1675,13 @@
       "api": "DEGRADED",
       "backupSystem": "OFFLINE",
       "auditSystem": "OFFLINE",
-      "lastCheck": "2025-10-17T21:43:12.860Z",
+      "lastCheck": "2025-10-17T23:49:00.103Z",
       "uptime": 0,
-      "responseTime": 701
+      "responseTime": 554
     },
     "dataIntegrity": {
       "status": "HEALTHY",
-      "lastCheck": "2025-10-17T21:43:13.779Z",
+      "lastCheck": "2025-10-17T23:49:00.959Z",
       "issues": 0,
       "criticalIssues": 0,
       "recordCount": 0,
@@ -1780,7 +1702,7 @@
     },
     "securityStatus": {
       "status": "SECURE",
-      "lastSecurityCheck": "2025-10-17T21:43:13.781Z",
+      "lastSecurityCheck": "2025-10-17T23:49:00.962Z",
       "suspiciousActivity": 0,
       "failedLogins": 0,
       "dataAccess": 0,
@@ -1794,16 +1716,16 @@
     ]
   },
   {
-    "timestamp": "2025-10-17T21:54:20.247Z",
+    "timestamp": "2025-10-17T23:54:02.574Z",
     "overallStatus": "CRITICAL",
     "alerts": [
       {
-        "id": "db_offline_1760738060247",
+        "id": "db_offline_1760745242574",
         "type": "SYSTEM_ERROR",
         "severity": "CRITICAL",
         "title": "Banco de Dados Offline",
         "description": "O banco de dados não está respondendo",
-        "timestamp": "2025-10-17T21:54:20.247Z",
+        "timestamp": "2025-10-17T23:54:02.574Z",
         "resolved": false,
         "actions": [
           "Verificar conexão",
@@ -1812,12 +1734,12 @@
         ]
       },
       {
-        "id": "backup_critical_1760738060247",
+        "id": "backup_critical_1760745242574",
         "type": "BACKUP_FAILURE",
         "severity": "CRITICAL",
         "title": "Sistema de Backup Crítico",
         "description": "Backups não estão funcionando adequadamente",
-        "timestamp": "2025-10-17T21:54:20.247Z",
+        "timestamp": "2025-10-17T23:54:02.574Z",
         "resolved": false,
         "actions": [
           "Executar backup manual",
@@ -1831,13 +1753,13 @@
       "api": "DEGRADED",
       "backupSystem": "OFFLINE",
       "auditSystem": "OFFLINE",
-      "lastCheck": "2025-10-17T21:54:19.395Z",
+      "lastCheck": "2025-10-17T23:54:01.513Z",
       "uptime": 0,
-      "responseTime": 682
+      "responseTime": 538
     },
     "dataIntegrity": {
       "status": "HEALTHY",
-      "lastCheck": "2025-10-17T21:54:20.244Z",
+      "lastCheck": "2025-10-17T23:54:02.570Z",
       "issues": 0,
       "criticalIssues": 0,
       "recordCount": 0,
@@ -1858,7 +1780,85 @@
     },
     "securityStatus": {
       "status": "SECURE",
-      "lastSecurityCheck": "2025-10-17T21:54:20.246Z",
+      "lastSecurityCheck": "2025-10-17T23:54:02.574Z",
+      "suspiciousActivity": 0,
+      "failedLogins": 0,
+      "dataAccess": 0,
+      "encryptionStatus": true
+    },
+    "recommendations": [
+      "⚠️ SITUAÇÃO CRÍTICA: Resolva problemas urgentemente",
+      "🔧 Execute correções automáticas disponíveis",
+      "📋 Monitore o sistema continuamente",
+      "🔄 PRIORIDADE: Corrigir sistema de backup"
+    ]
+  },
+  {
+    "timestamp": "2025-10-17T23:59:01.287Z",
+    "overallStatus": "CRITICAL",
+    "alerts": [
+      {
+        "id": "db_offline_1760745541287",
+        "type": "SYSTEM_ERROR",
+        "severity": "CRITICAL",
+        "title": "Banco de Dados Offline",
+        "description": "O banco de dados não está respondendo",
+        "timestamp": "2025-10-17T23:59:01.287Z",
+        "resolved": false,
+        "actions": [
+          "Verificar conexão",
+          "Reiniciar banco de dados",
+          "Verificar logs"
+        ]
+      },
+      {
+        "id": "backup_critical_1760745541287",
+        "type": "BACKUP_FAILURE",
+        "severity": "CRITICAL",
+        "title": "Sistema de Backup Crítico",
+        "description": "Backups não estão funcionando adequadamente",
+        "timestamp": "2025-10-17T23:59:01.287Z",
+        "resolved": false,
+        "actions": [
+          "Executar backup manual",
+          "Verificar configuração",
+          "Testar restauração"
+        ]
+      }
+    ],
+    "systemHealth": {
+      "database": "OFFLINE",
+      "api": "DEGRADED",
+      "backupSystem": "OFFLINE",
+      "auditSystem": "OFFLINE",
+      "lastCheck": "2025-10-17T23:59:00.273Z",
+      "uptime": 0,
+      "responseTime": 570
+    },
+    "dataIntegrity": {
+      "status": "HEALTHY",
+      "lastCheck": "2025-10-17T23:59:01.284Z",
+      "issues": 0,
+      "criticalIssues": 0,
+      "recordCount": 0,
+      "orphanedRecords": 0
+    },
+    "backupStatus": {
+      "status": "CRITICAL",
+      "lastBackup": "2025-10-13T08:28:28.399Z",
+      "nextScheduled": "2025-10-18T05:00:00.000Z",
+      "successRate": 100,
+      "totalBackups": 336,
+      "failedBackups": 0,
+      "cloudProviders": {
+        "github": true,
+        "dropbox": false,
+        "googleDrive": false
+      }
+    },
+    "securityStatus": {
+      "status": "SECURE",
+      "lastSecurityCheck": "2025-10-17T23:59:01.287Z",
       "suspiciousActivity": 0,
       "failedLogins": 0,
       "dataAccess": 0,
